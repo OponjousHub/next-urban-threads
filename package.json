@@ -3,21 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "tailwind": "npx @tailwindcss/cli -i ./app/globals.css -o ./app/tailwind-output.css --watch"
   },
   "dependencies": {
+    "next": "15.5.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.5"
+    "react-icons": "^5.5.0",
+    "tailwindcss": "^4.1.14"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/cli": "^4.1.14",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
+    "typescript": "^5"
   }
 }
