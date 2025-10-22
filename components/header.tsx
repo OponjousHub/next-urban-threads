@@ -24,18 +24,24 @@ const Header = () => {
             menuOpen ? "flex" : "hidden"
           } absolute md:static top-[60px] left-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row md:flex gap-6 text-[1.8rem] px-4 py-4 md:py-0 border-t md:border-none border-[#eee]`}
         >
-          <Link className="hover:text-[var(--color-primary)]" href="/home">
+          <Link className="hover:text-[var(--color-primary)]" href="/">
             Home
           </Link>
-          <Link className="hover:text-[var(--color-primary)]" href="/men">
+          <Link
+            className="hover:text-[var(--color-primary)]"
+            href="/products/men"
+          >
             Men
           </Link>
-          <Link className="hover:text-[var(--color-primary)]" href="/women">
+          <Link
+            className="hover:text-[var(--color-primary)]"
+            href="/products/women"
+          >
             Women
           </Link>
           <Link
             className="hover:text-[var(--color-primary)]"
-            href="/accessories"
+            href="/products/accessories"
           >
             Accessories
           </Link>

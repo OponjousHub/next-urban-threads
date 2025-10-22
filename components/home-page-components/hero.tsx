@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 function Hero() {
   return (
@@ -14,12 +15,14 @@ function Hero() {
         <p className="text-[2rem] text-center">
           Trendy streetwear & accessories for your everyday style.
         </p>
-        <button
-          type="button"
-          className="flex items-center font-bold px-[32px] py-[14px] text-[2rem] cursor-pointer bg-[var(--color-primary)] rounded-[6px] hover:bg-[#3730a3]"
-        >
-          Shop Now
-        </button>
+        <Link href={"/products"}>
+          <button
+            type="button"
+            className="flex items-center font-bold px-[32px] py-[14px] text-[2rem] cursor-pointer bg-[var(--color-primary)] rounded-[6px] hover:bg-[#3730a3]"
+          >
+            Shop Now
+          </button>
+        </Link>
       </div>
     </>
   );

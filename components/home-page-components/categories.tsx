@@ -1,4 +1,5 @@
 import "@/app/globals.css";
+import Link from "next/link";
 
 function Categories() {
   return (
@@ -22,12 +23,12 @@ function Categories() {
 
       {/* Shop All Button */}
       <div className="mt-[4rem]">
-        <a
+        <Link
           href="/products"
           className="inline-block bg-[#4f46e5] text-white text-2xl font-lg px-8 py-3 rounded-lg shadow-lg hover:bg-[#4338ca] transition"
         >
           Shop All Products
-        </a>
+        </Link>
       </div>
     </section>
   );
