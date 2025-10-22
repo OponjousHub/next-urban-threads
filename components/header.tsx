@@ -15,7 +15,7 @@ const Header = () => {
           href="/"
           className="text-[#222] text-[2.4rem] font-bold no-underline"
         >
-          Urban<span className="text-[#0070f3]">Threads</span>
+          Urban<span className="text-[var(--color-primary)]">Threads</span>
         </Link>
 
         {/* Navigation */}
@@ -24,19 +24,22 @@ const Header = () => {
             menuOpen ? "flex" : "hidden"
           } absolute md:static top-[60px] left-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row md:flex gap-6 text-[1.8rem] px-4 py-4 md:py-0 border-t md:border-none border-[#eee]`}
         >
-          <Link className="hover:text-[#0070f3]" href="/home">
+          <Link className="hover:text-[var(--color-primary)]" href="/home">
             Home
           </Link>
-          <Link className="hover:text-[#0070f3]" href="/men">
+          <Link className="hover:text-[var(--color-primary)]" href="/men">
             Men
           </Link>
-          <Link className="hover:text-[#0070f3]" href="/women">
+          <Link className="hover:text-[var(--color-primary)]" href="/women">
             Women
           </Link>
-          <Link className="hover:text-[#0070f3]" href="/accessories">
+          <Link
+            className="hover:text-[var(--color-primary)]"
+            href="/accessories"
+          >
             Accessories
           </Link>
-          <Link className="hover:text-[#0070f3]" href="/sales">
+          <Link className="hover:text-[var(--color-primary)]" href="/sales">
             Sales
           </Link>
         </nav>
@@ -48,33 +51,36 @@ const Header = () => {
             placeholder="Search product..."
             className="focus:bg-white border-0 outline-0 py-2 px-3 text-[1.6rem] bg-transparent"
           />
-          <button className="bg-[#0070f3] px-4 py-2 border-0 text-amber-50 font-medium transition-colors duration-200 hover:bg-[#005ac1] cursor-pointer text-[1.6rem]">
+          <button className="bg-[var(--color-primary)] px-4 py-2 border-0 text-amber-50 font-medium transition-colors duration-200 hover:bg-[#005ac1] cursor-pointer text-[1.6rem]">
             Search
           </button>
         </div>
 
         {/* Auth + Cart */}
         <div className=" flex items-center gap-2">
-          <Link className="text-[1.6rem] hover:text-[#0070f3]" href="/login">
+          <Link
+            className="text-[1.6rem] hover:text-[var(--color-primary)]"
+            href="/login"
+          >
             Login
           </Link>
           <span className="text-[#666]">|</span>
           <Link
-            className="hidden sm:block text-[1.6rem] hover:text-[#0070f3]"
+            className="hidden sm:block text-[1.6rem] hover:text-[var(--color-primary)]"
             href="/signup"
           >
             Signup
           </Link>
           <Link
             href="/cart"
-            className="ml-4 text-[#333] transition-colors duration-200 hover:text-[#0070f3]"
+            className="ml-4 text-[#333] transition-colors duration-200 hover:text-[var(--color-primary)]"
           >
             <FiShoppingBag size={22} />
           </Link>
         </div>
         {/* Menu Button (mobile only) */}
         <button
-          className="block md:hidden text-[#0070f3]"
+          className="block md:hidden text-[var(--color-primary)]"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {menuOpen ? <FiX size={24} /> : <FiMenu size={24} />}

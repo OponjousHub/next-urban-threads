@@ -1,4 +1,5 @@
 "use client";
+import "@/app/globals.css";
 
 // import { FiMenu, FiX } from "react-icons/fi";
 import { useState } from "react";
@@ -8,7 +9,7 @@ const BuyButton = () => {
 
   return (
     <button
-      className=" border-0 cursor-pointer bg-[#4f46e5] my-7 text-white font-bold py-6 px-12 rounded-[0.8rem]"
+      className=" border-0 cursor-pointer bg-[var(--color-primary)] my-7 text-white font-bold py-6 px-12 rounded-[0.8rem]"
       onClick={() => setMenuOpen(!menuOpen)}
     >
       Add to Cart

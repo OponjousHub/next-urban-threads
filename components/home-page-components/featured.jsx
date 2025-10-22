@@ -20,7 +20,7 @@ function Featured() {
               />
             </div>
             <h3 className="font-bold mb-2">Classic Cap</h3>
-            <p className="text-[#4f46e5] font-bold">$24.99</p>
+            <p className="text-[var(--color-primary)] font-bold">$24.99</p>
             <BuyButton />
           </div>
           <div className="featured-card-style">
@@ -33,7 +33,7 @@ function Featured() {
               />
             </div>
             <h3 className="font-bold mb-2">Street Sneekers</h3>
-            <p className="text-[#4f46e5] font-bold">$89.99</p>
+            <p className="text-[var(--color-primary)] font-bold">$89.99</p>
             <BuyButton />
           </div>
           <div className="featured-card-style">
@@ -46,7 +46,7 @@ function Featured() {
               />
             </div>
             <h3 className="font-bold mb-2">Urban Hoodie</h3>
-            <p className="text-[#4f46e5] font-bold">$59.99</p>
+            <p className="text-[var(--color-primary)] font-bold">$59.99</p>
             <BuyButton />
           </div>
         </div>

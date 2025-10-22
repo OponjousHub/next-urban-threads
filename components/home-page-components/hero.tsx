@@ -16,7 +16,7 @@ function Hero() {
         </p>
         <button
           type="button"
-          className="flex items-center font-bold px-[32px] py-[14px] text-[2rem] cursor-pointer bg-[#4f46e5] rounded-[6px] hover:bg-[#3730a3]"
+          className="flex items-center font-bold px-[32px] py-[14px] text-[2rem] cursor-pointer bg-[var(--color-primary)] rounded-[6px] hover:bg-[#3730a3]"
         >
           Shop Now
         </button>

@@ -5,7 +5,7 @@ import "@/app/globals.css";
 function Newsletter() {
   return (
     <>
-      <section className="px-[4rem] py-[6rem] text-center text-[#fafafa] bg-[#4f46e5]">
+      <section className="px-[4rem] py-[6rem] text-center text-[#fafafa] bg-[var(--color-primary)]">
         <h2 className="text-[#fff] text-4xl mt-[4rem] mb-[2rem] font-bold">
           Stay in the Loop
         </h2>
@@ -18,7 +18,7 @@ function Newsletter() {
             className="newsletter-input"
             placeholder="Enter your email"
           />
-          <button className="border-0 bg-white font-[600] text-[#4f46e5] text-3xl py-6 px-10 rounded-[6px]">
+          <button className="border-0 bg-white font-[600] text-[var(--color-primary)] text-3xl py-6 px-10 rounded-[6px]">
             Subscribe
           </button>
         </form>
