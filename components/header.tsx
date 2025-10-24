@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FiShoppingBag, FiMenu, FiX } from "react-icons/fi";
+import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -81,7 +81,10 @@ const Header = () => {
             href="/cart"
             className="ml-4 text-[#333] transition-colors duration-200 hover:text-[var(--color-primary)]"
           >
-            <FiShoppingBag size={22} />
+            {/* <FiShoppingBag size={22} /> */}
+            <p className="flex items-center text-xl font-semibold gap-2">
+              <FiShoppingCart size={20} /> <span>Cart</span>
+            </p>
           </Link>
         </div>
         {/* Menu Button (mobile only) */}

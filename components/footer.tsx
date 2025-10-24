@@ -7,6 +7,9 @@ import {
   FaLinkedinIn,
 } from "react-icons/fa";
 
+// import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn } from "react-icons/fa";
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300 py-12 px-6">
@@ -27,24 +30,36 @@ export default function Footer() {
           <h3 className="text-white font-semibold text-lg mb-4">Shop</h3>
           <ul className="space-y-2 text-md">
             <li>
-              <a href="#" className="hover:text-white transition-colors">
+              <Link
+                href="/products/men"
+                className="hover:text-white transition-colors"
+              >
                 Men
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-white transition-colors">
+              <Link
+                href="/products/women"
+                className="hover:text-white transition-colors"
+              >
                 Women
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-white transition-colors">
+              <Link
+                href="/products/kids"
+                className="hover:text-white transition-colors"
+              >
                 Kids
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-white transition-colors">
+              <Link
+                href="/products/accessories"
+                className="hover:text-white transition-colors"
+              >
                 Accessories
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
@@ -56,24 +71,33 @@ export default function Footer() {
           </h3>
           <ul className="space-y-2 text-md">
             <li>
-              <a href="#" className="hover:text-white transition-colors">
+              <Link
+                href="/contact"
+                className="hover:text-white transition-colors"
+              >
                 Contact Us
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-white transition-colors">
+              <Link
+                href="/shipping"
+                className="hover:text-white transition-colors"
+              >
                 Shipping & Returns
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-white transition-colors">
+              <Link href="/faqs" className="hover:text-white transition-colors">
                 FAQs
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-white transition-colors">
+              <Link
+                href="/privacy"
+                className="hover:text-white transition-colors"
+              >
                 Privacy Policy
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
@@ -84,23 +108,18 @@ export default function Footer() {
             Stay Updated
           </h3>
           <p className="text-md mb-4">
-            Subscribe to get the latest deals and updates straight to your
-            inbox.
+            Get exclusive deals, new arrivals, and style inspiration.
           </p>
-          <form className="flex">
-            <input
-              type="email"
-              placeholder="Your email"
-              className="w-full px-3 py-2 rounded-l-md focus:outline-none text-white"
-            />
-            <button
-              type="submit"
-              className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-r-md hover:bg-[var(--color-primary)] transition-colors"
-            >
-              Subscribe
-            </button>
-          </form>
 
+          {/* ✅ Newsletter Link (replaces form) */}
+          <Link
+            href="/newsletter"
+            className="inline-block bg-[var(--color-primary)] text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors font-medium"
+          >
+            Join Our Newsletter
+          </Link>
+
+          {/* Social Links */}
           <div className="flex space-x-4 mt-5">
             <a href="#" className="hover:text-white">
               <FaFacebookF />
@@ -120,7 +139,7 @@ export default function Footer() {
 
       {/* Divider */}
       <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-400">
-        © {new Date().getFullYear()} ShopMate. All rights reserved.
+        © {new Date().getFullYear()} Urban Threads. All rights reserved.
       </div>
     </footer>
   );

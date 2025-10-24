@@ -125,9 +125,11 @@ function WomenPage() {
                 <p className="font-bold text-[var(--color-primary)] my-2 text-xl">
                   {product.price}
                 </p>
-                <button className="add-to-cart-btn">
-                  <FiShoppingCart size={12} /> Add to Cart
-                </button>
+                <Link href={"/products/product-id"}>
+                  <button className="add-to-cart-btn">
+                    <FiShoppingCart size={12} /> Add to Cart
+                  </button>
+                </Link>
               </div>
             </div>
           ))}
