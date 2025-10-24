@@ -69,7 +69,7 @@ export default function SignupPage() {
                 name="name"
                 placeholder="John Doe"
                 className="w-full outline-none text-gray-700"
-                value={form.name}
+                // value={form.name}
                 // onChange={handleChange}
                 autoComplete="new-name"
               />
