@@ -1,5 +1,7 @@
 import Header from "../components/header";
 import Footer from "@/components/footer";
+import { CartContextProvider } from "@/store/cart-context";
+import { ProductContextProvider } from "@/store/products-context";
 import "./tailwind-output.css";
 
 export const metadata = {
@@ -15,9 +17,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
-        {children}
-        <Footer />
+        <ProductContextProvider>
+          <CartContextProvider>
+            <Header />
+            {children}
+            <Footer />
+          </CartContextProvider>
+        </ProductContextProvider>
       </body>
     </html>
   );

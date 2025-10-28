@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FiStar } from "react-icons/fi";
 import Image from "next/image";
+import { useCart } from "@/store/cart-context";
 
 export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
@@ -22,9 +23,9 @@ export default function ProductDetailPage() {
     sizes: ["S", "M", "L", "XL"],
   };
 
-  //   const handleAddToCart = () => {
-  //     alert(`Added ${quantity} × ${product.name} to cart!`);
-  //   };
+  const handleAddToCart = () => {
+    alert(`Added ${quantity} × ${product.name} to cart!`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-6">
@@ -93,7 +94,7 @@ export default function ProductDetailPage() {
 
           {/* Add to Cart Button */}
           <button
-            // onClick={handleAddToCart}
+            onClick={handleAddToCart}
             className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition w-full md:w-auto"
           >
             Add to Cart
