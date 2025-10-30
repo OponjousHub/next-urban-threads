@@ -3,5 +3,5 @@ export interface Product {
   name: string;
   price: number;
   image: string;
-  category: "men" | "women" | "all product";
+  category: "men" | "women" | "accessory";
 }

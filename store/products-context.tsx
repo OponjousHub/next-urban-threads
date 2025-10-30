@@ -3,15 +3,16 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { menProducts as menData } from "@/data/products";
 import { womenProducts as womenData } from "@/data/products";
+import { AccessoryItems as accessoryData } from "@/data/products";
 import { Product } from "@/types/product";
 
 interface ProductContextType {
   menProducts: Product[];
   womenProducts: Product[];
-  allProducts: Product[];
+  otherProducts: Product[];
   setMenProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setWomenProducts: React.Dispatch<React.SetStateAction<Product[]>>;
-  setAllProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  setOtherProducts: React.Dispatch<React.SetStateAction<Product[]>>;
 }
 
 export const ProductContext = createContext<ProductContextType | undefined>(
@@ -25,22 +26,23 @@ export function ProductContextProvider({
 }) {
   const [menProducts, setMenProducts] = useState<Product[]>([]);
   const [womenProducts, setWomenProducts] = useState<Product[]>([]);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [otherProducts, setOtherProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     setMenProducts(menData);
-    setWomenProducts(womenData)
-  },[]);
+    setWomenProducts(womenData);
+    setOtherProducts(accessoryData);
+  }, []);
 
   return (
     <ProductContext.Provider
       value={{
         menProducts,
         womenProducts,
-        allProducts,
+        otherProducts,
         setMenProducts,
         setWomenProducts,
-        setAllProducts,
+        setOtherProducts,
       }}
     >
       {children}
