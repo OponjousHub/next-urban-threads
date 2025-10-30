@@ -4,4 +4,8 @@ export interface Product {
   price: number;
   image: string;
   category: "men" | "women" | "accessory";
+  rating: number;
+  reviews: number;
+  description: string;
+  sizes: string[];
 }

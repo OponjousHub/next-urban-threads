@@ -76,7 +76,7 @@ function Accessory() {
               <p className="font-bold text-[var(--color-primary)] my-2 text-xl">
                 {product.price}
               </p>
-              <Link href={"/products/product-id"}>
+              <Link href={`/products/${product.id}`}>
                 <button className="add-to-cart-btn">
                   <FiShoppingCart size={12} /> Add to Cart
                 </button>
