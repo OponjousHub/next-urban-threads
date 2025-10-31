@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useCart } from "@/store/cart-context";
 import Image from "next/image";
 import Link from "next/link";
 import { FiPlus, FiMinus } from "react-icons/fi";
@@ -14,35 +15,14 @@ interface CartItem {
 }
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      name: "Classic Sneakers",
-      image: "/img/t-shirt.png",
-      price: 65,
-      quantity: 1,
-    },
-    {
-      id: 2,
-      name: "Leather Backpack",
-      image: "/img/hoodie.png",
-      price: 90,
-      quantity: 2,
-    },
-  ]);
+  const { cartItems, removeFromCart, updateQuantity } = useCart();
 
-  const updateQuantity = (id: number, delta: number) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    );
+  const updateProductQuantity = (id: number, delta: number) => {
+    updateQuantity(id, delta);
   };
 
   const removeItem = (id: number) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
+    removeFromCart(id);
   };
 
   const subtotal = cartItems.reduce(
@@ -63,59 +43,60 @@ export default function CartPage() {
         {cartItems.length === 0 ? (
           <p className="text-gray-600">Your cart is empty.</p>
         ) : (
-          cartItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex flex-col sm:flex-row items-center justify-between bg-white rounded-2xl shadow-sm p-4 border border-gray-100"
-            >
-              <div className="flex items-center space-x-4">
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  width={80}
-                  height={80}
-                  className="rounded-lg object-cover"
-                />
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800">
-                    {item.name}
-                  </h3>
-                  <p className="text-gray-500">${item.price}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center mt-4 sm:mt-0 space-x-4">
-                <div className="flex items-center border rounded-lg">
-                  <button
-                    onClick={() => updateQuantity(item.id, -1)}
-                    className="px-3 py-1 text-gray-700 hover:text-indigo-600"
-                  >
-                    <FiMinus />
-                  </button>
-                  <span className="px-4 py-1 text-gray-800 font-medium">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => updateQuantity(item.id, 1)}
-                    className="px-3 py-1 text-gray-700 hover:text-indigo-600"
-                  >
-                    <FiPlus />
-                  </button>
+          cartItems.map((item) => {
+            return (
+              <div
+                key={item.id}
+                className="flex flex-col sm:flex-row items-center justify-between bg-white rounded-2xl shadow-sm p-4 border mb-4xl border-gray-100"
+              >
+                <div className="relative flex flex-shrink-0 h-24 w-32 items-center space-x-4">
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    className="rounded-lg object-cover"
+                  />
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-800">
+                      {item.name}
+                    </h3>
+                    <p className="text-gray-500">${item.price}</p>
+                  </div>
                 </div>
 
-                <p className="text-gray-800 font-semibold">
-                  ${(item.price * item.quantity).toFixed(2)}
-                </p>
+                <div className="flex items-center mt-4 sm:mt-0 space-x-4">
+                  <div className="flex items-center border rounded-lg">
+                    <button
+                      onClick={() => updateProductQuantity(item.id, -1)}
+                      className="px-3 py-1 text-gray-700 hover:text-indigo-600"
+                    >
+                      <FiMinus />
+                    </button>
+                    <span className="px-4 py-1 text-gray-800 font-medium">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => updateProductQuantity(item.id, 1)}
+                      className="px-3 py-1 text-gray-700 hover:text-indigo-600"
+                    >
+                      <FiPlus />
+                    </button>
+                  </div>
 
-                <button
-                  onClick={() => removeItem(item.id)}
-                  className="text-red-500 hover:text-red-700 text-sm font-medium"
-                >
-                  Remove
-                </button>
+                  <p className="text-gray-800 font-semibold">
+                    ${(item.price * item.quantity).toFixed(2)}
+                  </p>
+
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="text-red-500 hover:text-red-700 text-sm font-medium"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

@@ -9,6 +9,7 @@ export const menProducts: Product[] = [
     category: "men",
     rating: 4.5,
     reviews: 123,
+    quantity: 1,
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
@@ -24,6 +25,7 @@ export const menProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 3,
@@ -36,6 +38,7 @@ export const menProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 4,
@@ -48,6 +51,7 @@ export const menProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 5,
@@ -60,6 +64,7 @@ export const menProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 6,
@@ -72,6 +77,7 @@ export const menProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   // Add more products as needed
 ];
@@ -88,6 +94,7 @@ export const womenProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 12,
@@ -100,6 +107,7 @@ export const womenProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 13,
@@ -112,6 +120,7 @@ export const womenProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 14,
@@ -124,6 +133,7 @@ export const womenProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 15,
@@ -136,6 +146,7 @@ export const womenProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 16,
@@ -148,6 +159,7 @@ export const womenProducts: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   // Add more products as needed
 ];
@@ -163,6 +175,7 @@ export const AccessoryItems: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 22,
@@ -175,6 +188,7 @@ export const AccessoryItems: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 23,
@@ -187,6 +201,7 @@ export const AccessoryItems: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 24,
@@ -199,6 +214,7 @@ export const AccessoryItems: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 25,
@@ -211,6 +227,7 @@ export const AccessoryItems: Product[] = [
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   {
     id: 26,
@@ -219,10 +236,11 @@ export const AccessoryItems: Product[] = [
     image: "/img/watch glass.jpg",
     category: "accessory",
     rating: 4.8,
-    reviews: 173,
+    reviews: 13,
     description:
       "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
     sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
   },
   // Add more products as needed
 ];

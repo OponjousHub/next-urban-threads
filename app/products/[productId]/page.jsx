@@ -1,5 +1,5 @@
-import { CartUI } from "@/components/productDetailsUI";
+import { ProductDetailUI } from "@/components/productDetailsUI";
 
 export default function ProductDetailPage() {
-  return <CartUI />;
+  return <ProductDetailUI />;
 }

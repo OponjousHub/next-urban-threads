@@ -5,28 +5,15 @@ import { useParams } from "next/navigation";
 import { FiStar } from "react-icons/fi";
 import Image from "next/image";
 import { useCart } from "@/store/cart-context";
+import { Product } from "@/types/product";
 import { useState } from "react";
 
-// Example static product data — replace with API data
-// const product = {
-//   id: 1,
-//   name: "Classic Cotton T-Shirt",
-//   price: 39.99,
-//   rating: 4.5,
-//   reviews: 123,
-//   image: "/img/t-shirt.png",
-//   description:
-//     "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
-//   category: "Men",
-//   sizes: ["S", "M", "L", "XL"],
-// };
-
-export function CartUI() {
+export function ProductDetailUI() {
   const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
   const { menProducts, womenProducts, otherProducts } = useProducts();
   const allProducts = [...menProducts, ...womenProducts, ...otherProducts];
   const params = useParams();
-  console.log(params.productId);
 
   const product = allProducts.find(
     (pro) => pro.id === Number(params.productId)
@@ -34,7 +21,11 @@ export function CartUI() {
 
   if (!product)
     return <p className="text-center text-gray-500">Product Not Found!</p>;
-  console.log(product);
+
+  const handleAddToCart = (prod: Product) => {
+    addToCart(prod);
+    console.log(prod);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-6">
@@ -103,7 +94,7 @@ export function CartUI() {
 
           {/* Add to Cart Button */}
           <button
-            // onClick={handleAddToCart}
+            onClick={() => handleAddToCart(product)}
             className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition w-full md:w-auto"
           >
             Add to Cart

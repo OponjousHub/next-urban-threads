@@ -8,4 +8,5 @@ export interface Product {
   reviews: number;
   description: string;
   sizes: string[];
+  quantity: number;
 }

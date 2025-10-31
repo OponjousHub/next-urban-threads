@@ -1,5 +1,11 @@
 "use client";
-import React, { useState, useContext, createContext, ReactNode } from "react";
+import React, {
+  useState,
+  useContext,
+  createContext,
+  ReactNode,
+  useEffect,
+} from "react";
 
 export interface cartItem {
   id: number;
@@ -22,6 +28,23 @@ const CartContext = createContext<cartContextType | undefined>(undefined);
 
 export function CartContextProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<cartItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // LOad Cart from localstorage
+  useEffect(() => {
+    const stored = localStorage.getItem("cart");
+    if (stored) {
+      setCartItems(JSON.parse(stored));
+    }
+    setIsLoading(false);
+  }, []);
+
+  //Save cart to localstorage
+  useEffect(() => {
+    if (!isLoading) {
+      localStorage.setItem("cart", JSON.stringify(cartItems));
+    }
+  });
 
   // Add items to Cart
   const addToCart = (item: cartItem) => {
@@ -31,17 +54,20 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
       // Increase the quantity if existing
       if (existing) {
         return prevItems.map((p) =>
-          p.id === item.id ? { ...p, quantity: p.quantity + item.quantity } : p
+          p.id === item.id
+            ? { ...p, quantity: p.quantity + item.quantity + 1 }
+            : p
         );
       }
 
       // Add item to cart if not existing
-      return [...prevItems, item];
+      return [...prevItems, { ...item, quantity: 1 }];
     });
   };
 
   // Clear cart
   const clearCart = () => {
+    localStorage.removeItem("cart");
     setCartItems([]);
   };
 
@@ -63,8 +89,18 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  console.log(cartItems);
   // Calculate sub Total
   const subTotal = cartItems.reduce((sum, cur) => sum + cur.price, 0);
+
+  // Render Loading spinner during reload
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-gray-500 text-2xl">
+        Loading cart...
+      </div>
+    );
+  }
 
   return (
     <CartContext.Provider
@@ -82,11 +118,10 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   );
 }
 
-
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error("useCart must be used within a CartProvider")
+    throw new Error("useCart must be used within a CartProvider");
   }
-  return context
+  return context;
 }
