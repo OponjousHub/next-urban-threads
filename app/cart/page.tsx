@@ -1,18 +1,18 @@
 "use client";
 
-import { useState } from "react";
+// import { useState } from "react";
 import { useCart } from "@/store/cart-context";
 import Image from "next/image";
 import Link from "next/link";
 import { FiPlus, FiMinus } from "react-icons/fi";
 
-interface CartItem {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  quantity: number;
-}
+// interface CartItem {
+//   id: number;
+//   name: string;
+//   image: string;
+//   price: number;
+//   quantity: number;
+// }
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity } = useCart();

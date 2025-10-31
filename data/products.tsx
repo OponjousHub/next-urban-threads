@@ -1,5 +1,47 @@
 import { Product } from "@/types/product";
 
+export const featuredProducts: Product[] = [
+  {
+    id: 3,
+    name: "Immaculate Cap",
+    price: 59.99,
+    image: "/img/cap.png",
+    category: "men",
+    rating: 4.8,
+    reviews: 675,
+    description:
+      "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
+    sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
+  },
+  {
+    id: 22,
+    name: "Obligado Sneekers",
+    price: 89.99,
+    image: "/img/sneekers.jpg",
+    category: "accessory",
+    rating: 4.6,
+    reviews: 176,
+    description:
+      "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
+    sizes: ["S", "M", "L", "XL"],
+    quantity: 1,
+  },
+  {
+    id: 1,
+    name: "Urban Hoodie",
+    price: 49.99,
+    image: "/img/hoodie.png",
+    category: "men",
+    rating: 4.5,
+    reviews: 123,
+    quantity: 1,
+    description:
+      "Experience comfort and quality with our Classic Cotton T-Shirt, made from 100% organic cotton. Perfect for everyday wear — soft, breathable, and durable.",
+    sizes: ["S", "M", "L", "XL"],
+  },
+];
+
 export const menProducts: Product[] = [
   {
     id: 1,
@@ -16,7 +58,7 @@ export const menProducts: Product[] = [
   },
   {
     id: 2,
-    name: "Denim Jacket",
+    name: "Obligado Sneekers",
     price: 89.99,
     image: "/img/sneekers.jpg",
     category: "men",
@@ -29,7 +71,7 @@ export const menProducts: Product[] = [
   },
   {
     id: 3,
-    name: "Canvas Sneakers",
+    name: "Immaculate Cap",
     price: 59.99,
     image: "/img/cap.png",
     category: "men",
@@ -98,7 +140,7 @@ export const womenProducts: Product[] = [
   },
   {
     id: 12,
-    name: "Denim Jacket",
+    name: "Obligado Sneekers",
     price: 89.99,
     image: "/img/sneekers.jpg",
     category: "women",
@@ -111,7 +153,7 @@ export const womenProducts: Product[] = [
   },
   {
     id: 13,
-    name: "Canvas Sneakers",
+    name: "Immaculate Cap",
     price: 59.99,
     image: "/img/cap.png",
     category: "women",
@@ -179,7 +221,7 @@ export const AccessoryItems: Product[] = [
   },
   {
     id: 22,
-    name: "Denim Jacket",
+    name: "Obligado Sneekers",
     price: 89.99,
     image: "/img/sneekers.jpg",
     category: "accessory",
@@ -192,7 +234,7 @@ export const AccessoryItems: Product[] = [
   },
   {
     id: 23,
-    name: "Canvas Sneakers",
+    name: "Immaculate Cap",
     price: 59.99,
     image: "/img/cap.png",
     category: "accessory",

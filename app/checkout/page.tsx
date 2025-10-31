@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useCart } from "@/store/cart-context";
 
 interface CartItem {
   id: number;
@@ -10,18 +11,7 @@ interface CartItem {
 }
 
 export default function CheckoutPage() {
-  // Example cart items (replace with your actual cart data)
-  const [cartItems] = useState<CartItem[]>([
-    { id: 1, name: "Classic Sneakers", price: 65, quantity: 1 },
-    { id: 2, name: "Leather Backpack", price: 90, quantity: 2 },
-  ]);
-
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const shipping = subtotal > 0 ? 10 : 0;
-  const total = subtotal + shipping;
+  const { cartItems } = useCart();
 
   // Form data
   const [formData, setFormData] = useState({
@@ -33,6 +23,12 @@ export default function CheckoutPage() {
     country: "",
     paymentMethod: "credit-card",
   });
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const shipping = subtotal > 0 ? 10 : 0;
+  const total = subtotal + shipping;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>

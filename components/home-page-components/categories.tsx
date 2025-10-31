@@ -10,15 +10,15 @@ function Categories() {
 
       {/* Category Grid */}
       <div className="text-[#555] grid grid-cols-[repeat(auto-fit,_minmax(180px,_1fr))] gap-8 mt-[2rem]">
-        <a href="/products/men" className="category-style">
+        <Link href="/products/men" className="category-style">
           Men
-        </a>
-        <a href="/products/women" className="category-style">
+        </Link>
+        <Link href="/products/women" className="category-style">
           Women
-        </a>
-        <a href="/products/accessories" className="category-style">
+        </Link>
+        <Link href="/products/accessories" className="category-style">
           Accessories
-        </a>
+        </Link>
       </div>
 
       {/* Shop All Button */}
