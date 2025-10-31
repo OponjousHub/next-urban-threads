@@ -3,9 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi";
+import { useCart } from "@/store/cart-context";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { cartItems } = useCart();
+
+  const cartCount = cartItems.reduce((sum, cur) => sum + cur.quantity, 0);
 
   return (
     <header className="bg-white border-b-2 border-[#eee] sticky top-0 z-[1000]">
@@ -82,8 +86,14 @@ const Header = () => {
             className="ml-4 text-[#333] transition-colors duration-200 hover:text-[var(--color-primary)]"
           >
             {/* <FiShoppingBag size={22} /> */}
-            <p className="flex items-center text-xl font-semibold gap-2">
+            <p className="flex items-center text-xl font-semibold gap-2 relative">
               <FiShoppingCart size={20} /> <span>Cart</span>
+              {/* Show count only when there is something in the cart*/}
+              {cartCount > 0 && (
+                <span className="absolute -top-3 -right-7 w-5 h-5 text-[10px] bg-indigo-600 text-white rounded-full p-4 flex items-center justify-center font-semibold ">
+                  {cartCount}
+                </span>
+              )}
             </p>
           </Link>
         </div>
