@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useCart } from "@/store/cart-context";
 import { Product } from "@/types/product";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export function ProductDetailUI() {
   const [quantity, setQuantity] = useState(1);
@@ -24,7 +25,20 @@ export function ProductDetailUI() {
 
   const handleAddToCart = (prod: Product) => {
     addToCart(prod);
-    console.log(prod);
+
+    // ✅ Show toast notification
+    toast.success(`${product.name} has been added to your cart!`, {
+      duration: 4000,
+      style: {
+        border: "1px solid #4f46e5",
+        padding: "12px",
+        color: "#333",
+      },
+      iconTheme: {
+        primary: "#4f46e5",
+        secondary: "#fff",
+      },
+    });
   };
 
   return (

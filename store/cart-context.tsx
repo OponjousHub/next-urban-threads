@@ -88,8 +88,9 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
         .filter((item) => item.quantity > 0)
     );
   };
+  console.log("addToCart called for", new Date().toISOString());
 
-  console.log(cartItems);
+  // console.log(cartItems);
   // Calculate sub Total
   const subTotal = cartItems.reduce((sum, cur) => sum + cur.price, 0);
 
