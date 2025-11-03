@@ -1,5 +1,6 @@
 import BuyButton from "@/utils/buy-button";
 import Image from "next/image";
+import Link from "next/link";
 import "@/app/globals.css";
 import { featuredProducts } from "@/data/products";
 
@@ -23,7 +24,9 @@ function Featured() {
               </div>
               <h3 className="font-bold mb-2">{f.name}</h3>
               <p className="text-[var(--color-primary)] font-bold">{`$${f.price}`}</p>
-              <BuyButton />
+              <Link href={`/products/${f.id}`}>
+                <BuyButton />
+              </Link>
             </div>
           ))}
         </div>
