@@ -25,6 +25,17 @@ It features dynamic product listings, filtering, authentication, and a clean mod
 ---
 
 ## 🖼️ Screenshots
+
+### 🏠 Homepage
+![Homepage Screenshot](./public/img/homepage.png)
+
+### 🏠 Product Listing page
+![Product page Screenshot](./public/img/product-page.png)
+
+### 🏠 Product Detail page
+![Product Detail page Screenshot](./public/img/detail-page.png)
+
+
 _Add 2–3 nice screenshots or GIFs here — home page, product page, cart page._
 
 ---
