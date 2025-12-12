@@ -36,24 +36,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
-// export async function POST(req: Request) {
-//   const body = await req.json();
-//   const parsed = RegisterSchema.safeParse(body);
-
-//   if (!parsed.success) {
-//     const zodError = parsed.error;
-//     return NextResponse.json(
-//       { errors: zodError.flatten().fieldErrors },
-//       { status: 400 }
-//     );
-//   }
-
-//   if (!parsed) {
-//     return NextResponse.json(
-//       { errors: parsed.error.flatten().fieldErrors },
-//       { status: 400 }
-//     );
-//   }
-//   return AuthController.register(parsed.data);
-// }

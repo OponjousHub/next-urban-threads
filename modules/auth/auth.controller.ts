@@ -53,12 +53,10 @@ class AuthController {
    */
   static async login(data: { email: string; password: string }) {
     const { email, password } = data;
-
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },
     });
-
     if (!user) {
       return { error: "Invalid email or password" };
     }

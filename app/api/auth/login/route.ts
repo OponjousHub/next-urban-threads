@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import AuthController from "@/modules/auth/auth.controller";
 import { LoginSchema } from "@/modules/auth/auth.schema";
-import { formatError } from "zod";
+// import { formatError } from "zod";
 
 export async function POST(req: Request) {
   try {
@@ -17,7 +17,8 @@ export async function POST(req: Request) {
       );
     }
     const data = parsed.data;
-    const result = AuthController.login(data);
+    const result = await AuthController.login(data);
+    console.log(result);
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error("LOGIN ERROR:", error);
