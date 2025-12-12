@@ -9,7 +9,7 @@ class AuthController {
    * Receives Zod-validated data from /api/auth/register
    */
   static async register(data: RegisterInput) {
-    const { name, email, password } = data;
+    const { name, email, password, phone, address, city, country } = data;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -31,6 +31,10 @@ class AuthController {
         name,
         email,
         password: hashedPassword,
+        phone,
+        address,
+        city,
+        country,
       },
     });
 
