@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { prisma } from "@/utils/prisma";
-import { RegisterInput } from "./auth.schema";
+import { RegisterInput, UpdateUserInput } from "./auth.schema";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 class AuthController {
   /**
@@ -84,15 +84,27 @@ class AuthController {
     };
   }
 
-  /**
-   * VERIFY TOKEN
-   */
-  static verifyToken(token: string) {
+  // VERIFY TOKEN
+  static verifyToken(token: string): JwtPayload & { id: string } {
+    return jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload & {
+      id: string;
+    };
+  }
+
+  // UPDATE USER
+  static async updateUser(userId: string, data: any) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-      return { decoded };
+      const { name, phone, address, city, country } = data;
+
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data,
+      });
+
+      return { user: updatedUser, success: true };
     } catch (error) {
-      return { error: "Invalid or expired token" };
+      console.error("UPDATE USER ERROR:", error);
+      throw new Error("Fail to update user");
     }
   }
 }

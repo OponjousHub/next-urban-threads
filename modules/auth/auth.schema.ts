@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { optional, z } from "zod";
 
 export const RegisterSchema = z.object({
   name: z.string().min(2),
@@ -15,5 +15,14 @@ export const LoginSchema = z.object({
   password: z.string().min(6),
 });
 
+export const UpdateUserSchema = z.object({
+  name: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+});
+
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
+export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
