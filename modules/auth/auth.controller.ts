@@ -91,6 +91,20 @@ class AuthController {
     };
   }
 
+  // GET USER ID FROM TOKEN
+  static getUserIdFromToken(token: string): string {
+    if (!token) {
+      throw new Error("Unautorized!");
+    }
+
+    const payload = this.verifyToken(token);
+    if (!payload.id) {
+      throw new Error("Invalid token!");
+    }
+
+    return payload.id;
+  }
+
   // UPDATE USER
   static async updateUser(userId: string, data: any) {
     try {
@@ -106,6 +120,41 @@ class AuthController {
       console.error("UPDATE USER ERROR:", error);
       throw new Error("Fail to update user");
     }
+  }
+
+  static async getMe(token: string, data: any) {
+    const userId = this.getUserIdFromToken(token);
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        city: true,
+        address: true,
+        country: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found!");
+    }
+
+    return user;
+  }
+
+  //DELETE USER ACCOUNT
+  static async deleteUserAccount(token: string) {
+    const userId = this.getUserIdFromToken(token);
+
+    await prisma.user.delete({ where: { id: userId } });
+
+    return "User account deleted successfully.";
   }
 }
 
