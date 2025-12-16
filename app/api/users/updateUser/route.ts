@@ -1,5 +1,5 @@
 import AuthController from "@/modules/auth/auth.controller";
-import { UpdateUserSchema } from "@/modules/auth/auth.schema";
+import { UpdateUserSchema } from "@/modules/users/user.schema";
 import UserController from "@/modules/users/user.controller";
 import { NextResponse } from "next/server";
 // import verifyToken  from "@/modules/auth/auth.controller";

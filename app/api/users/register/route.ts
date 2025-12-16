@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import AuthController from "@/modules/auth/auth.controller";
-import { RegisterSchema } from "@/modules/auth/auth.schema";
+import { RegisterSchema } from "@/modules/users/user.schema";
 import UserController from "@/modules/users/user.controller";
 
 export async function POST(req: Request) {
