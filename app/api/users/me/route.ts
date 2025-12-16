@@ -39,13 +39,29 @@ export async function GET() {
 
 export async function DELETE() {
   try {
-    const userId = await getUserIdFromToken();
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
 
-    const user = await prisma.user.delete({ where: { id: userId } });
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    NextResponse.json({ message: "Account deleted successfully!" });
+    const result = await AuthController.deleteUserAccount(token);
+
+    // ✅ Clear auth cookie AFTER deletion
+    cookieStore.set("token", "", {
+      httpOnly: true,
+      expires: new Date(0),
+      path: "/",
+    });
+
+    return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    console.error("DELETE ACCOUNT ERROR:", error);
-    NextResponse.json({ error: "Unauthorized!" }, { status: 401 });
+    console.error("DELETE USER ERROR:", error);
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

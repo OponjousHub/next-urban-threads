@@ -91,6 +91,19 @@ class AuthController {
     };
   }
 
+  //ONLY ADMIN
+  static async restrictToAdmin(token: string) {
+    const userId = this.getUserIdFromToken(token);
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (!user || user.role !== "ADMIN") {
+      throw new Error("Forbidden");
+    }
+  }
+
   // GET USER ID FROM TOKEN
   static getUserIdFromToken(token: string): string {
     if (!token) {
