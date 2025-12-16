@@ -1,52 +1,8 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/utils/prisma";
-import { RegisterInput, UpdateUserInput } from "./auth.schema";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 class AuthController {
-  /**
-   * REGISTER USER
-   * Receives Zod-validated data from /api/auth/register
-   */
-  static async register(data: RegisterInput) {
-    const { name, email, password, phone, address, city, country } = data;
-
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return {
-        error: "Email already exists",
-      };
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        phone,
-        address,
-        city,
-        country,
-      },
-    });
-
-    // Remove password before returning
-    const { password: _, ...userWithoutPassword } = user;
-
-    return {
-      message: "User registered successfully",
-      user: userWithoutPassword,
-    };
-  }
-
   /**
    * LOGIN USER
    * Receives { email, password } from Zod-validated login route
@@ -116,58 +72,6 @@ class AuthController {
     }
 
     return payload.id;
-  }
-
-  // UPDATE USER
-  static async updateUser(userId: string, data: any) {
-    try {
-      const { name, phone, address, city, country } = data;
-
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data,
-      });
-
-      return { user: updatedUser, success: true };
-    } catch (error) {
-      console.error("UPDATE USER ERROR:", error);
-      throw new Error("Fail to update user");
-    }
-  }
-
-  static async getMe(token: string, data: any) {
-    const userId = this.getUserIdFromToken(token);
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        city: true,
-        address: true,
-        country: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    if (!user) {
-      throw new Error("User not found!");
-    }
-
-    return user;
-  }
-
-  //DELETE USER ACCOUNT
-  static async deleteUserAccount(token: string) {
-    const userId = this.getUserIdFromToken(token);
-
-    await prisma.user.delete({ where: { id: userId } });
-
-    return "User account deleted successfully.";
   }
 }
 

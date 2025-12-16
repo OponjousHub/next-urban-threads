@@ -1,4 +1,5 @@
 import AuthController from "@/modules/auth/auth.controller";
+import UserController from "@/modules/users/user.controller";
 import { prisma } from "@/utils/prisma";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
@@ -46,7 +47,7 @@ export async function DELETE() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const result = await AuthController.deleteUserAccount(token);
+    const result = await UserController.deleteUserAccount(token);
 
     // ✅ Clear auth cookie AFTER deletion
     cookieStore.set("token", "", {

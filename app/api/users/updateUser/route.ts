@@ -1,5 +1,6 @@
 import AuthController from "@/modules/auth/auth.controller";
 import { UpdateUserSchema } from "@/modules/auth/auth.schema";
+import UserController from "@/modules/users/user.controller";
 import { NextResponse } from "next/server";
 // import verifyToken  from "@/modules/auth/auth.controller";
 
@@ -35,7 +36,14 @@ export async function PATCH(req: Request) {
     }
 
     const data = parsed.data;
-    const result = await AuthController.updateUser(userId, data);
+    const result = await UserController.updateUser(userId, data);
+
+    if (!result.success || !result.user) {
+      return NextResponse.json(
+        { error: "Failed to update user" },
+        { status: 400 }
+      );
+    }
 
     return NextResponse.json(
       { message: "User updated successfully", user: result.user },

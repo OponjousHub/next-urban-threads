@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import AuthController from "@/modules/auth/auth.controller";
 import { RegisterSchema } from "@/modules/auth/auth.schema";
+import UserController from "@/modules/users/user.controller";
 
 export async function POST(req: Request) {
   try {
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
     const data = parsed.data;
 
     // 4️⃣ Pass validated data to controller
-    const result = await AuthController.register(data);
+    const result = await UserController.register(data);
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
