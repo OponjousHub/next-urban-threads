@@ -50,7 +50,7 @@ export class UserService {
 
   static async deleteAccount(token: string) {
     const userId = AuthController.getUserIdFromToken(token);
-    await UserRepository.delete(userId);
+    await UserRepository.softDelete(userId);
     return "User account deleted successfully.";
   }
 }

@@ -18,8 +18,18 @@ export async function POST(req: Request) {
     }
     const data = parsed.data;
     const result = await AuthController.login(data);
-    console.log(result);
-    return NextResponse.json(result, { status: 201 });
+    const response = NextResponse.json(result, { status: 201 });
+
+    // ✅ SET TOKEN IN COOKIE
+    response.cookies.set("token", result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return response;
   } catch (error) {
     console.error("LOGIN ERROR:", error);
 

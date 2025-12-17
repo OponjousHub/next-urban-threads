@@ -15,6 +15,7 @@ export const UserRepository = {
 
   findAll() {
     return prisma.user.findMany({
+      where: { isDeleted: false },
       select: {
         id: true,
         name: true,
@@ -43,6 +44,7 @@ export const UserRepository = {
         role: true,
         createdAt: true,
         updatedAt: true,
+        isDeleted: false,
       },
     });
   },
@@ -54,9 +56,13 @@ export const UserRepository = {
     });
   },
 
-  delete(id: string) {
-    return prisma.user.delete({
+  softDelete(id: string) {
+    return prisma.user.update({
       where: { id },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
     });
   },
 };

@@ -18,6 +18,10 @@ model User {
   password     String
   phone        String?
   role         Role           @default(USER)
+
+  isDeleted    Boolean        @default(false)
+  deletedAt    DateTime?
+
   updatedAt    DateTime       @updatedAt
   cartItems    CartItem[]
   orders       Order[]
