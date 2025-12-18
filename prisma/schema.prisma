@@ -47,6 +47,10 @@ model Product {
   updatedAt       DateTime       @updatedAt
   category        Category
   subCategory     String
+
+  // isDeleted       Boolean        @default(false)
+  deletedAt       DateTime?
+
   seoTitle        String?
   seoDescription  String?
   createdBy       String?
