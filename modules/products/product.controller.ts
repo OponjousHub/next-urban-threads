@@ -2,11 +2,26 @@ import { NextResponse } from "next/server";
 import ProductService from "./product.service";
 import { CreateProductSchema, UpdateProductSchema } from "./product.schema";
 import { Category } from "@prisma/client";
+import { cookies } from "next/headers";
+import AuthController from "@/modules/auth/auth.controller";
+import { prisma } from "@/utils/prisma";
 
 export default class ProductController {
   static async create(req: Request) {
-    const body = await req.json();
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
 
+    if (!token) {
+      throw new Error("Unauthorized: token missing");
+    }
+
+    const result = AuthController.verifyToken(token);
+    const user = await prisma.user.findUnique({
+      where: { id: result.id },
+      select: { id: true, name: true },
+    });
+
+    const body = await req.json();
     const parsed = CreateProductSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
@@ -15,7 +30,27 @@ export default class ProductController {
       );
     }
 
-    const product = await ProductService.createProduct(parsed.data);
+    const {
+      name,
+      category,
+      subCategory, // ✅ REQUIRED
+      price,
+      images,
+      description,
+    } = parsed.data;
+
+    const product = await ProductService.createProduct({
+      name,
+      category,
+      subCategory,
+      price,
+      images,
+      description,
+      createdBy: user?.id,
+      createdByName: user?.name,
+    });
+
+    // const product = await ProductService.createProduct(parsed.data);
     return NextResponse.json(product, { status: 201 });
   }
 

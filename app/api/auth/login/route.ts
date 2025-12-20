@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import AuthController from "@/modules/auth/auth.controller";
 import { LoginSchema } from "@/modules/auth/auth.schema";
-// import { formatError } from "zod";
 
 export async function POST(req: Request) {
   try {

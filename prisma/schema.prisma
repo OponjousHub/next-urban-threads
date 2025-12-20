@@ -37,7 +37,7 @@ model Product {
   name            String
   slug            String         @unique
   description     String?
-  images          Json
+  images          String[]
   thumbnail       String
   sizes           String[]
   colours         String[]
@@ -54,6 +54,7 @@ model Product {
   seoTitle        String?
   seoDescription  String?
   createdBy       String?
+  createdByName   String?
   cartItems       CartItem[]
   orderItems      OrderItem[]
   user            User?          @relation("UserProduct", fields: [createdBy], references: [id])
@@ -117,9 +118,9 @@ enum Role {
 }
 
 enum Category {
-  Men
-  Women
-  Asseccories
+  MEN
+  WOMEN
+  ASSECCORIES
 }
 
 enum OrderStatus {
