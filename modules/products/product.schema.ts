@@ -8,6 +8,11 @@ export const CreateProductSchema = z.object({
   subCategory: z.string().min(1),
   stock: z.number().int().nonnegative(),
   images: z.array(z.string().url()).optional(),
+  discountedPrice: z.number().optional(),
+  seoTitle: z.number().optional(),
+  seoDescription: z.number().optional(),
+  colours: z.array(z.string()).optional(),
+  size: z.array(z.string()).optional(),
 });
 
 export const UpdateProductSchema = CreateProductSchema.partial();

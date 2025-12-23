@@ -65,7 +65,10 @@ export default class ProductController {
     }
 
     const products = await ProductService.getProducts(parsedCategory);
-    return NextResponse.json(products);
+    return NextResponse.json(
+      { result: products.length, products },
+      { status: 200 }
+    );
   }
 
   static async getOne(id: string) {
