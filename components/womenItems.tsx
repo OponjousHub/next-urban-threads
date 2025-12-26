@@ -1,12 +1,24 @@
 "use client";
 
 import { FiShoppingCart, FiSearch } from "react-icons/fi";
-import { useProducts } from "@/store/products-context";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import type { Product } from "@/types/product";
 
 function WomenItems() {
-  const { womenProducts } = useProducts();
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("FROM THE FRONTEND:", data.products);
+        const prodData = data.products;
+        setProducts(prodData);
+      });
+  }, []);
+  console.log("FROM THE FRONTEND:", products);
   return (
     <div className="bg-gray-50 py-10 px-6 min-h-screen max-w-7xl my-0 mx-auto">
       <div className="flex justify-between mt-6 mb-12">
@@ -60,32 +72,46 @@ function WomenItems() {
           </p>
         ) : ( */}
         {/*filteredProducts.map((product) => (*/}
-        {womenProducts.map((product) => (
-          <div
-            key={product.id}
-            className="rounded-2xl overflow-hidden shadow-md hover:shadow-xl"
-          >
-            <div className="relative w-full h-52">
-              <Image
-                src={product.image}
+        {products.map((product) => {
+          const imageUrl =
+            product.images?.length > 0 ? product.images[0] : "/placeholder.png";
+          console.log("*******", imageUrl);
+          return (
+            <div
+              key={product.id}
+              className="rounded-2xl overflow-hidden shadow-md hover:shadow-xl"
+            >
+              <div className="relative w-full h-52">
+                {/* <Image
+                src={product.image[0] || "/placeholder.png"}
                 alt={product.name}
                 className="object-cover"
                 fill
-              />
+              /> */}
+                <Image
+                  src={imageUrl.replace(
+                    "/upload/",
+                    "/upload/c_fill,w_800,h_600,q_auto,f_auto/"
+                  )}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-medium text-[1.2rem]">{product.name}</h3>
+                <p className="font-bold text-[var(--color-primary)] my-2 text-xl">
+                  ₦{product.price.toLocaleString()}
+                </p>
+                <Link href={`/products/${product.id}`}>
+                  <button className="add-to-cart-btn">
+                    <FiShoppingCart size={12} /> Add to Cart
+                  </button>
+                </Link>
+              </div>
             </div>
-            <div className="p-4">
-              <h3 className="font-medium text-[1.2rem]">{product.name}</h3>
-              <p className="font-bold text-[var(--color-primary)] my-2 text-xl">
-                {product.price}
-              </p>
-              <Link href={`/products/${product.id}`}>
-                <button className="add-to-cart-btn">
-                  <FiShoppingCart size={12} /> Add to Cart
-                </button>
-              </Link>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="mt-10 flex justify-center gap-4">
         <button className="px-4 py-2 border rounded">Previous</button>
