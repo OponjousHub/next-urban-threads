@@ -6,14 +6,7 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-
-export interface CartItem {
-  id: number;
-  name: string;
-  image: string;
-  quantity: number;
-  price: number;
-}
+import { CartItem } from "@/types/cart";
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -51,6 +44,7 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
 
   // ✅ Add to Cart
   const addToCart = (item: CartItem) => {
+    console.log(item);
     setCartItems((prevItems) => {
       const existing = prevItems.find((p) => p.id === item.id);
       if (existing) {

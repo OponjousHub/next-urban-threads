@@ -1,0 +1,44 @@
+import { ProductDetailUI } from "@/components/productDetailsUI";
+import { notFound } from "next/navigation";
+
+// export default function ProductDetailPage() {
+//   return <ProductDetailUI />;
+// }
+
+import { Suspense } from "react";
+// import { ProductDetailUI } from "./ProductDetailUI";
+import { ProductDetailSkeleton } from "@/components/products/productDetailSkeleton";
+
+async function getProduct(id: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${id}`,
+    {
+      cache: "no-store", // or 'force-cache' if products are static
+    }
+  );
+  // throw new Error("Test error");
+  if (res.status === 404) {
+    notFound();
+  }
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch product");
+  }
+
+  return res.json();
+}
+
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: { productId: string };
+}) {
+  console.log(params.productId);
+  const product = await getProduct(params.productId);
+
+  return (
+    <Suspense fallback={<ProductDetailSkeleton />}>
+      <ProductDetailUI product={product} />
+    </Suspense>
+  );
+}

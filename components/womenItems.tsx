@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
+import { cloudinaryImage } from "@/utils/cloudinary-url";
 
 function WomenItems() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -73,29 +74,24 @@ function WomenItems() {
         ) : ( */}
         {/*filteredProducts.map((product) => (*/}
         {products.map((product) => {
+          // const imageUrl =
+          //   product.images?.length > 0 ? product.images[0] : "/placeholder.png";
           const imageUrl =
-            product.images?.length > 0 ? product.images[0] : "/placeholder.png";
-          console.log("*******", imageUrl);
+            product.images?.length > 0
+              ? cloudinaryImage(product.images[0], "card")
+              : "/placeholder.png";
           return (
             <div
               key={product.id}
               className="rounded-2xl overflow-hidden shadow-md hover:shadow-xl"
             >
               <div className="relative w-full h-52">
-                {/* <Image
-                src={product.image[0] || "/placeholder.png"}
-                alt={product.name}
-                className="object-cover"
-                fill
-              /> */}
                 <Image
-                  src={imageUrl.replace(
-                    "/upload/",
-                    "/upload/c_fill,w_800,h_600,q_auto,f_auto/"
-                  )}
+                  src={imageUrl}
                   alt={product.name}
                   fill
                   className="object-cover"
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                 />
               </div>
               <div className="p-4">
