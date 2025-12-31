@@ -1,12 +1,7 @@
 import { ProductDetailUI } from "@/components/productDetailsUI";
 import { notFound } from "next/navigation";
 
-// export default function ProductDetailPage() {
-//   return <ProductDetailUI />;
-// }
-
 import { Suspense } from "react";
-// import { ProductDetailUI } from "./ProductDetailUI";
 import { ProductDetailSkeleton } from "@/components/products/productDetailSkeleton";
 
 async function getProduct(id: string) {
@@ -16,7 +11,6 @@ async function getProduct(id: string) {
       cache: "no-store", // or 'force-cache' if products are static
     }
   );
-  // throw new Error("Test error");
   if (res.status === 404) {
     notFound();
   }

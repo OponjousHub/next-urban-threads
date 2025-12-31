@@ -31,6 +31,7 @@ export function ProductImageUploader({
       });
 
       const data = await res.json();
+      console.log(data);
       uploadedImages.push(data.publicId);
     }
 

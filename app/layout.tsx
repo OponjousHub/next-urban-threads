@@ -3,7 +3,7 @@ import Footer from "@/components/footer";
 import { CartContextProvider } from "@/store/cart-context";
 import { ProductContextProvider } from "@/store/products-context";
 import { Toaster } from "react-hot-toast";
-import "./tailwind-output.css";
+import "./globals.css";
 
 export const metadata = {
   title: "Urban Threads store",
@@ -15,6 +15,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  <div className="bg-red-500 text-white p-10 text-3xl">
+    Tailwind v3 works 🎉
+  </div>;
+
   return (
     <html lang="en">
       <body>

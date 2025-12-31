@@ -1,7 +1,7 @@
 /* @tailwind base;
 @tailwind components;
 @tailwind utilities; */
-@import "tailwindcss";
+/* @import "tailwindcss";
 
 html {
   font-size: 62.5%;
@@ -13,22 +13,98 @@ html {
   .newsletter-input {
     @apply border border-[#9e9ccf] focus:outline-none rounded-[6px] p-6 text-[1.2rem] w-[25rem] bg-[var(--color-primary)] text-white placeholder:text-2xl;
   }
-}
+} */
 
-.category-style {
+/* .category-style {
   @apply text-2xl bg-white rounded-[8px] py-14 border border-[var(--color-primary)];
 }
 .featured-card-style {
   @apply text-2xl rounded-[8px] pb-[1.2rem] overflow-hidden bg-white hover:scale-105 transition-transform duration-300;
 }
 
-.add-to-cart-btn{
-  @apply w-full rounded-lg font-medium flex gap-2 justify-center bg-[var(--color-primary)] py-2 px-4 text-white cursor-pointer hover:bg-[#3730a3] transition-all duration-300
+.add-to-cart-btn {
+  @apply w-full rounded-lg font-medium flex gap-2 justify-center bg-[var(--color-primary)] py-2 px-4 text-white cursor-pointer hover:bg-[#3730a3] transition-all duration-300;
+}
+
+:root {
+  --color-primary: #4f46e5;
+}  */
+/* :root {
+  --color-primary: #da1515;
+}
+*/
+
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-size: 62.5%;
+  box-sizing: border-box;
 }
 
 :root {
   --color-primary: #4f46e5;
 }
-/* :root {
-  --color-primary: #da1515;
+
+@layer components {
+  .newsletter-input {
+    @apply border border-[#9e9ccf] focus:outline-none rounded-[6px]
+      p-6 text-[1.2rem] w-[25rem]
+      bg-[var(--color-primary)] text-white;
+  }
+
+  .category-style {
+    @apply text-2xl bg-white rounded-[8px] py-14
+      border border-[var(--color-primary)];
+  }
+
+  .featured-card-style {
+    @apply text-2xl rounded-[8px] pb-[1.2rem]
+      overflow-hidden bg-white hover:scale-105
+      transition-transform duration-300;
+  }
+
+  .add-to-cart-btn {
+    @apply w-full rounded-lg font-medium flex gap-2
+      justify-center bg-[var(--color-primary)]
+      py-2 px-4 text-white hover:bg-[#3730a3];
+  }
 } */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-size: 62.5%;
+  box-sizing: border-box;
+}
+
+:root {
+  --color-primary: #4f46e5;
+}
+
+@layer components {
+  .newsletter-input {
+    @apply border border-[#9e9ccf] focus:outline-none rounded-[6px] p-6 text-[1.2rem] w-[25rem] bg-[var(--color-primary)] text-white placeholder:text-2xl;
+  }
+
+  .category-style {
+    @apply text-2xl bg-white rounded-[8px] py-14 border border-[var(--color-primary)];
+  }
+
+  .featured-card-style {
+    @apply text-2xl rounded-[8px] pb-[1.2rem] overflow-hidden bg-white hover:scale-105 transition-transform duration-300;
+  }
+
+  .add-to-cart-btn {
+    @apply w-full rounded-lg font-medium flex gap-2 justify-center bg-[var(--color-primary)] py-2 px-4 text-white cursor-pointer hover:bg-[#3730a3] transition-all duration-300;
+  }
+
+  .input {
+    @apply w-full rounded-md border border-gray-300 px-4 py-2 text-sm 
+           focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200
+           outline-none transition;
+  }
+}
