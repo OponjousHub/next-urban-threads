@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ProductImageUploader } from "./productImageUploader";
 import toast from "react-hot-toast";
+import { AdminToast } from "@/components/ui/adminToast";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 const CATEGORIES = ["MEN", "WOMEN", "ASSECCORIES"];
@@ -104,7 +105,17 @@ export function ProductForm() {
       }
 
       // ✅ SUCCESS
-      toast.success("Product created successfully 🎉");
+      // toast.success("Product created successfully 🎉");
+      toast.custom(
+        <AdminToast
+          title="Product created"
+          description="Your product is now live in the store"
+        />,
+        {
+          duration: 6000, // ⏱️ 8 seconds
+        }
+      );
+
       console.log("Created Product:", data);
 
       // Optional: reset form
@@ -116,13 +127,23 @@ export function ProductForm() {
         category: "MEN",
         subCategory: "",
         sizes: [],
-
+        colours: [],
         featured: false,
       });
       setImages([]);
     } catch (err) {
       console.error("FETCH ERROR:", err);
       toast.error("Something went wrong. Please try again.");
+      toast.custom(
+        <AdminToast
+          type="error"
+          title="Upload failed!"
+          description="Something went wrong. Please try again."
+        />,
+        {
+          duration: 6000, // ⏱️ 8 seconds
+        }
+      );
     } finally {
       setLoading(false);
     }

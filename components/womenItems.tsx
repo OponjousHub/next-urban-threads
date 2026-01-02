@@ -11,7 +11,7 @@ function WomenItems() {
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    fetch("/api/products")
+    fetch("/api/products?category=WOMEN")
       .then((res) => res.json())
       .then((data) => {
         console.log("FROM THE FRONTEND:", data.products);

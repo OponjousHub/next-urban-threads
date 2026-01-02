@@ -11,10 +11,6 @@ export default class ProductController {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
-    // if (!token) {
-    //   throw new Error("Unauthorized: token missing");
-    // }
-
     if (!token) {
       return NextResponse.json(
         {
@@ -75,7 +71,7 @@ export default class ProductController {
   static async getAll(req: Request) {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category") ?? undefined;
-
+    console.log(category);
     let parsedCategory: Category | undefined = undefined;
 
     if (category && Object.values(Category).includes(category as Category)) {
