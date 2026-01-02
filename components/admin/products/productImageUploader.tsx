@@ -23,16 +23,16 @@ export function ProductImageUploader({
 
     for (const file of files) {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("image", file);
 
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/upload/image-upload", {
         method: "POST",
         body: formData,
       });
 
       const data = await res.json();
       console.log(data);
-      uploadedImages.push(data.publicId);
+      uploadedImages.push(data.url);
     }
 
     onUploadComplete(uploadedImages);

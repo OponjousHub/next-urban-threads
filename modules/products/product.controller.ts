@@ -11,8 +11,17 @@ export default class ProductController {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
+    // if (!token) {
+    //   throw new Error("Unauthorized: token missing");
+    // }
+
     if (!token) {
-      throw new Error("Unauthorized: token missing");
+      return NextResponse.json(
+        {
+          message: "Unauthorized: token missing",
+        },
+        { status: 401 }
+      );
     }
 
     const result = AuthController.verifyToken(token);
@@ -37,6 +46,10 @@ export default class ProductController {
       price,
       images,
       description,
+      sizes,
+      colours,
+      stock,
+      featured,
     } = parsed.data;
 
     const product = await ProductService.createProduct({
@@ -44,8 +57,13 @@ export default class ProductController {
       category,
       subCategory,
       price,
+      stock,
+      instock: stock > 0,
+      featured,
       images,
       description,
+      sizes,
+      colours,
       createdBy: user?.id,
       createdByName: user?.name,
     });

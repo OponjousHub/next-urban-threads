@@ -3,10 +3,12 @@ export interface Product {
   name: string;
   price: number;
   images: string[];
-  category: "men" | "women" | "accessory";
+  category: "MEN" | "WOMEN" | "ACCESSORIES";
   rating: number;
   reviews: number;
   description: string;
   sizes: string[];
+  colours: string[];
   quantity: number;
+  featured: boolean;
 }

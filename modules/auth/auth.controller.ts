@@ -20,6 +20,7 @@ class AuthController {
     const user = await prisma.user.findUnique({
       where: { email },
     });
+    console.log(user);
 
     if (!user || user.isDeleted) {
       throw new Error("Invalid email or password");

@@ -8,20 +8,46 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showError, setShowError] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  //   const handleSubmit = (e: React.FormEvent) => {
-  //     e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  //     // Mock validation for demo purposes
-  //     if (email === "" || password === "") {
-  //       setShowError(true);
-  //       return;
-  //     }
+    // Mock validation for demo purposes
+    if (email === "" || password === "") {
+      setShowError(true);
+      return;
+    }
 
-  //     setShowError(false);
-  //     console.log("Logging in with:", { email, password });
-  //     // TODO: handle real authentication (API call)
-  //   };
+    setShowError(false);
+    setApiError(null);
+    setLoading(true);
+    console.log("Logging in with:", { email, password });
+    // TODO: handle real authentication (API call)
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      console.log(data);
+      if (!response.ok) {
+        throw new Error(data?.message || "Invalid email or password!");
+      }
+      window.location.href = "/admin/products/new";
+    } catch (err: any) {
+      console.error("LOGIN ERROR:", err);
+      setApiError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6">
@@ -42,10 +68,7 @@ export default function LoginPage() {
         )}
 
         {/* Login Form */}
-        <form
-          /*onSubmit={handleSubmit}*/ autoComplete="off"
-          className="space-y-5"
-        >
+        <form onSubmit={handleSubmit} autoComplete="off" className="space-y-5">
           <div>
             <label className="block text-gray-700 font-medium mb-1">
               Email Address
@@ -89,14 +112,14 @@ export default function LoginPage() {
           </div>
 
           {/* Submit Button */}
-          <Link href={"/signup"}>
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition"
-            >
-              Log In
-            </button>
-          </Link>
+          {/* <Link href={"/signup"}> */}
+          <button
+            type="submit"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition"
+          >
+            Log In
+          </button>
+          {/* </Link> */}
         </form>
 
         {/* Signup Link */}

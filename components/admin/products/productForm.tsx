@@ -2,9 +2,25 @@
 
 import { useState } from "react";
 import { ProductImageUploader } from "./productImageUploader";
+import toast from "react-hot-toast";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
-const CATEGORIES = ["MEN", "WOMEN", "OTHER"];
+const CATEGORIES = ["MEN", "WOMEN", "ASSECCORIES"];
+const COLOURS = [
+  "Black",
+  "White",
+  "Red",
+  "Blue",
+  "Green",
+  "Yellow",
+  "Brown",
+  "Grey",
+  "Pink",
+  "Purple",
+];
+type ZodFieldErrors = {
+  fieldErrors?: Record<string, string[]>;
+};
 
 export function ProductForm() {
   const [images, setImages] = useState<string[]>([]);
@@ -14,10 +30,11 @@ export function ProductForm() {
     name: "",
     description: "",
     price: "",
+    stock: "",
     category: "MEN",
     subCategory: "",
     sizes: [] as string[],
-    inStock: true,
+    colours: [] as string[],
     featured: false,
   });
 
@@ -30,6 +47,15 @@ export function ProductForm() {
     }));
   }
 
+  function toggleColour(colour: string) {
+    setForm((prev) => ({
+      ...prev,
+      colours: prev.colours.includes(colour)
+        ? prev.colours.filter((c) => c !== colour)
+        : [...prev.colours, colour],
+    }));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
@@ -37,19 +63,69 @@ export function ProductForm() {
       alert("Please upload at least one image");
       return;
     }
+    try {
+      setLoading(true);
 
-    setLoading(true);
+      const payload = {
+        ...form,
+        price: Number(form.price),
+        stock: Number(form.stock),
+        images, // array of cloudinary URLs
+      };
 
-    const payload = {
-      ...form,
-      price: Number(form.price),
-      images,
-    };
+      console.log("SUBMIT PRODUCT:", payload);
 
-    console.log("SUBMIT PRODUCT:", payload);
+      const response = await fetch("/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+      // console.log("STATUS:", response.status);
+      // console.log("HEADERS:", response.headers.get("content-type"));
 
-    // TODO: POST to /api/admin/products
-    setLoading(false);
+      const data = await response.json();
+      if (!response.ok) {
+        console.error("Backend Error:", data);
+        // Zod validation errors
+        if (data?.errors?.fieldErrors) {
+          const fieldErrors = (data.errors as ZodFieldErrors)?.fieldErrors;
+          const firstError = fieldErrors
+            ? Object.values(fieldErrors)[0]?.[0]
+            : undefined;
+          toast.error(firstError || "Invalid product data");
+        } else {
+          toast.error(data?.message || "Failed to create product");
+        }
+
+        return;
+      }
+
+      // ✅ SUCCESS
+      toast.success("Product created successfully 🎉");
+      console.log("Created Product:", data);
+
+      // Optional: reset form
+      setForm({
+        name: "",
+        description: "",
+        price: "",
+        stock: "",
+        category: "MEN",
+        subCategory: "",
+        sizes: [],
+
+        featured: false,
+      });
+      setImages([]);
+    } catch (err) {
+      console.error("FETCH ERROR:", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -65,9 +141,9 @@ export function ProductForm() {
           </div>
 
           {/* FORM */}
-          <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
-            {/* PRODUCT NAME + PRICE */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
+            {/* PRODUCT NAME*/}
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Product Name
@@ -79,7 +155,9 @@ export function ProductForm() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
               </div>
-
+            </div>
+            {/* STOCK + PRICE */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium mb-1">Price</label>
                 <input
@@ -89,6 +167,19 @@ export function ProductForm() {
                   className="input"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Stock Quantity
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  required
+                  className="input"
+                  value={form.stock}
+                  onChange={(e) => setForm({ ...form, stock: e.target.value })}
                 />
               </div>
             </div>
@@ -170,6 +261,39 @@ export function ProductForm() {
               </div>
             </div>
 
+            {/* COLOURS */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Available Colours
+              </label>
+
+              <div className="flex gap-3 flex-wrap">
+                {COLOURS.map((colour) => {
+                  const active = form.colours.includes(colour);
+
+                  return (
+                    <button
+                      type="button"
+                      key={colour}
+                      onClick={() => toggleColour(colour)}
+                      className={`px-4 py-2 rounded-md border text-sm transition
+            ${
+              active
+                ? "bg-indigo-600 text-white border-indigo-600"
+                : "border-gray-300 hover:border-indigo-400"
+            }`}
+                    >
+                      {colour}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <p className="text-xs text-gray-500 mt-1">
+                Select all available colour options
+              </p>
+            </div>
+
             {/* IMAGES */}
             <ProductImageUploader
               onUploadComplete={(uploadedImages) => setImages(uploadedImages)}
@@ -177,17 +301,6 @@ export function ProductForm() {
 
             {/* FLAGS */}
             <div className="flex gap-6">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.inStock}
-                  onChange={(e) =>
-                    setForm({ ...form, inStock: e.target.checked })
-                  }
-                />
-                In Stock
-              </label>
-
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -203,6 +316,7 @@ export function ProductForm() {
             {/* SUBMIT */}
             <div className="pt-6 border-t">
               <button
+                type="submit"
                 disabled={loading}
                 className="bg-indigo-600 text-white px-6 py-3 rounded-md
                hover:bg-indigo-700 transition disabled:opacity-60"

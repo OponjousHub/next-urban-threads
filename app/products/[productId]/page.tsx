@@ -1,6 +1,5 @@
 import { ProductDetailUI } from "@/components/productDetailsUI";
 import { notFound } from "next/navigation";
-
 import { Suspense } from "react";
 import { ProductDetailSkeleton } from "@/components/products/productDetailSkeleton";
 

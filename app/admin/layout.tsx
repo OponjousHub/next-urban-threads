@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import "@/app/globals.css";
-// import "@/app/tailwind-output.css";
 import { redirect } from "next/navigation";
+import { prisma } from "@/utils/prisma";
 import AuthController from "@/modules/auth/auth.controller";
 
 export default async function AdminLayout({
@@ -11,16 +11,19 @@ export default async function AdminLayout({
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
+  console.log(token);
+  if (!token) redirect("/login");
 
-  // if (!token) redirect("/login");
+  const payload = AuthController.verifyToken(token);
 
-  // const user = AuthController.verifyToken(token);
-
-  // if (!user || user.role !== "ADMIN") {
-  //   redirect("/");
-  // }
-
-  // return <>{children}</>;
+  // Get the user
+  const user = await prisma.user.findUnique({
+    where: { id: payload.id },
+    select: { id: true, role: true },
+  });
+  if (!user || user.role !== "ADMIN") {
+    redirect("/");
+  }
 
   return <div className="min-h-screen bg-gray-50">{children}</div>;
 }
