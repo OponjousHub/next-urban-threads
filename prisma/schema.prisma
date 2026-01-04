@@ -64,13 +64,15 @@ model Product {
 }
 
 model Order {
-  id         String      @id @default(cuid())
-  userId     String
-  total      Decimal     @db.Decimal(10, 2)
-  createdAt  DateTime    @default(now())
-  status     OrderStatus @default(PENDING)
-  user       User        @relation(fields: [userId], references: [id])
-  orderItems OrderItem[]
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  totalAmount     Float
+  status          OrderStatus @default(PENDING)
+  paymentMethod   String
+  shippingAddress String
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
 }
 
 model OrderItem {
@@ -131,3 +133,4 @@ enum OrderStatus {
   DELIVERED
   CANCELLED
 }
+

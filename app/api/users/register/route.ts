@@ -28,11 +28,15 @@ export async function POST(req: Request) {
     const result = await UserController.register(data);
 
     return NextResponse.json(result, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("REGISTER ERROR:", error);
 
+    if (error.message === "Email already exists") {
+      return NextResponse.json({ message: error.message }, { status: 409 });
+    }
+
     return NextResponse.json(
-      { error: "Internal server error" },
+      { message: "Internal server error" },
       { status: 500 }
     );
   }

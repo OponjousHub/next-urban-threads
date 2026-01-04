@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { RegisterInput } from "@/modules/users/user.schema";
 import { UserRepository } from "./user.repository";
 import AuthController from "../auth/auth.controller";
+import { NextResponse } from "next/server";
 
 export class UserService {
   static async register(data: RegisterInput) {
