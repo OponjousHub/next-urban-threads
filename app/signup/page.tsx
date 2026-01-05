@@ -27,7 +27,6 @@ const initialState = {
 };
 export default function SignupPage() {
   const [form, setForm] = useState(initialState);
-  // const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +50,6 @@ export default function SignupPage() {
       !form.phone ||
       !form.confirmPassword
     ) {
-      // setError("All fields are required");
       toast.dismiss(toastId);
       toast.custom(
         <AdminToast

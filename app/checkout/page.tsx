@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useCart } from "@/store/cart-context";
+import { AdminToast } from "@/components/ui/adminToast";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface CartItem {
   id: number;
@@ -11,7 +14,9 @@ interface CartItem {
 }
 
 export default function CheckoutPage() {
-  const { cartItems } = useCart();
+  const { cartItems, clearCart } = useCart();
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   // Form data
   const [formData, setFormData] = useState({
@@ -45,6 +50,15 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (cartItems.length === 0) {
+      router.push("/cart");
+      return;
+    }
+
+    // 🔄 Loading toast
+    const toastId = toast.loading("Placing your order...");
+    setIsLoading(true);
+
     try {
       const address = `${formData.address}, ${formData.city}, ${formData.country}`;
       const res = await fetch("/api/orders", {
@@ -58,13 +72,43 @@ export default function CheckoutPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to place order");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Order failed");
       }
 
       const order = await res.json();
       console.log("Order created:", order);
-    } catch (err) {
+
+      //SHOW TOAST NOTIFICATION
+      toast.dismiss(toastId);
+      toast.custom(
+        <AdminToast
+          title="Order Created"
+          description="Your order has been placed successfully."
+        />,
+        {
+          duration: 6000, // ⏱️ 8 seconds
+        }
+      );
+
+      clearCart();
+      router.push(`/orders/${order.id}`);
+    } catch (err: any) {
       console.error(err);
+
+      toast.dismiss(toastId);
+      toast.custom(
+        <AdminToast
+          type="error"
+          title="Order failed"
+          description={err.message || "Something went wrong"}
+        />,
+        {
+          duration: 6000, // ⏱️ 8 seconds
+        }
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -181,6 +225,7 @@ export default function CheckoutPage() {
 
           <button
             type="submit"
+            disabled={isLoading}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition"
           >
             Place Order

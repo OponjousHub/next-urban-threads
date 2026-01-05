@@ -64,7 +64,7 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
 
   // ✅ Remove item
   const removeFromCart = (id: number) => {
-    setCartItems((prev) => prev.filter((p) => p.id !== id));
+    setCartItems((prev) => prev.filter((p) => +p.id !== id));
   };
 
   // ✅ Update quantity
@@ -72,7 +72,7 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
     setCartItems((prev) =>
       prev
         .map((item) =>
-          item.id === id
+          +item.id === id
             ? { ...item, quantity: Math.max(1, item.quantity + delta) }
             : item
         )
