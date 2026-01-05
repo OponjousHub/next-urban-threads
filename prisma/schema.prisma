@@ -67,7 +67,7 @@ model Order {
   id              String      @id @default(cuid())
   userId          String
   user            User        @relation(fields: [userId], references: [id])
-  totalAmount     Float
+  totalAmount     Decimal
   status          OrderStatus @default(PENDING)
   paymentMethod   String
   shippingAddress String

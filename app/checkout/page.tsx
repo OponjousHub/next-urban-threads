@@ -37,9 +37,35 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const orderItems = cartItems.map((item) => ({
+    productId: String(item.id), // must match Product.id in DB
+    quantity: item.quantity,
+  }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("✅ Order placed successfully!");
+
+    try {
+      const address = `${formData.address}, ${formData.city}, ${formData.country}`;
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: orderItems,
+          shippingAddress: address,
+          paymentMethod: formData.paymentMethod,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to place order");
+      }
+
+      const order = await res.json();
+      console.log("Order created:", order);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
