@@ -54,8 +54,25 @@ class AuthController {
   }
 
   //ONLY ADMIN
+  // static async restrictToAdmin(token: string) {
+  //   const userId = this.getUserIdFromToken(token);
+  //   const user = await prisma.user.findUnique({
+  //     where: { id: userId },
+  //     select: { role: true },
+  //   });
+
+  //   if (!user || user.role !== "ADMIN") {
+  //     throw new Error("Forbidden");
+  //   }
+  // }
+
   static async restrictToAdmin(token: string) {
     const userId = this.getUserIdFromToken(token);
+
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
@@ -67,17 +84,25 @@ class AuthController {
   }
 
   // GET USER ID FROM TOKEN
-  static getUserIdFromToken(token: string): string {
-    if (!token) {
-      throw new Error("Unautorized!");
-    }
+  // static getUserIdFromToken(token: string): string {
+  //   if (!token) {
+  //     throw new Error("Unautorized!");
+  //   }
 
-    const payload = this.verifyToken(token);
-    if (!payload.id) {
-      throw new Error("Invalid token!");
-    }
+  //   const payload = this.verifyToken(token);
+  //   if (!payload.id) {
+  //     throw new Error("Invalid token!");
+  //   }
 
-    return payload.id;
+  //   return payload.id;
+  // }
+  static getUserIdFromToken(token: string): string | null {
+    try {
+      const payload = this.verifyToken(token);
+      return payload?.id ?? null;
+    } catch {
+      return null;
+    }
   }
 }
 

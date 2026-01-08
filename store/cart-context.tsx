@@ -11,8 +11,8 @@ import { CartItem } from "@/types/cart";
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (id: number) => void;
-  updateQuantity: (id: number, delta: number) => void;
+  removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, delta: number) => void;
   subTotal: number;
   clearCart: () => void;
 }
@@ -63,16 +63,16 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   };
 
   // ✅ Remove item
-  const removeFromCart = (id: number) => {
-    setCartItems((prev) => prev.filter((p) => +p.id !== id));
+  const removeFromCart = (id: string) => {
+    setCartItems((prev) => prev.filter((p) => p.id !== id));
   };
 
   // ✅ Update quantity
-  const updateQuantity = (id: number, delta: number) => {
+  const updateQuantity = (id: string, delta: number) => {
     setCartItems((prev) =>
       prev
         .map((item) =>
-          +item.id === id
+          item.id === id
             ? { ...item, quantity: Math.max(1, item.quantity + delta) }
             : item
         )

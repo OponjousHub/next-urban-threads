@@ -43,21 +43,8 @@ function WomenItems() {
         {["Men", "Women", "Accessories"].map((cat) => (
           <Link key={cat} href={`/products/${cat.toLowerCase()}`}>
             <button
-              // onClick={() => setCategory(cat)}
-              // className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200
-              //   ${
-              //     category === cat
-              //       ? "bg-indigo-600 text-white"
-              //       : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-100"
-              //   }
-              // `}
               className={
                 "bg-[var(--color-primary)] px-5 py-2 rounded-full text-white transition-all duration-200 font-medium cursor-pointer"
-                // ${
-                //   category === cat
-                //     ? "bg-indigo-600 text-white"
-                //     : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-100"
-                // }
               }
             >
               {cat}
@@ -66,16 +53,7 @@ function WomenItems() {
         ))}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 ">
-        {/* {filteredProducts.length === 0 ? ( */}
-        {/* {products.length === 0 ? (
-          <p className="text-gray-500 text-center col-span-full">
-            No products found.
-          </p>
-        ) : ( */}
-        {/*filteredProducts.map((product) => (*/}
         {products.map((product) => {
-          // const imageUrl =
-          //   product.images?.length > 0 ? product.images[0] : "/placeholder.png";
           const imageUrl =
             product.images?.length > 0
               ? cloudinaryImage(product.images[0], "card")

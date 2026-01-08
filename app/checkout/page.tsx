@@ -6,13 +6,6 @@ import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
@@ -60,6 +53,7 @@ export default function CheckoutPage() {
     setIsLoading(true);
 
     try {
+      console.log(formData);
       const address = `${formData.address}, ${formData.city}, ${formData.country}`;
       const res = await fetch("/api/orders", {
         method: "POST",
@@ -78,6 +72,9 @@ export default function CheckoutPage() {
 
       const order = await res.json();
       console.log("Order created:", order);
+      // const raw = await res.text();
+      // console.log("STATUS:", res.status);
+      // console.log("RAW RESPONSE:", raw);
 
       //SHOW TOAST NOTIFICATION
       toast.dismiss(toastId);
@@ -92,7 +89,7 @@ export default function CheckoutPage() {
       );
 
       clearCart();
-      router.push(`/orders/${order.id}`);
+      // router.push(`/orders/${order.id}`);
     } catch (err: any) {
       console.error(err);
 

@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
   try {
+    console.log("I am now at the checkout api route");
     // const session = await getServerSession();
 
     // if (!session?.user?.id) {
@@ -28,8 +29,15 @@ export async function POST(req: Request) {
 
     // const result = AuthController.verifyToken(token);
     const userId = AuthController.getUserIdFromToken(token);
+    // if (!userId) {
+    //   return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    // }
+
     if (!userId) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Unauthorized: invalid token" },
+        { status: 401 }
+      );
     }
 
     const { items, shippingAddress, paymentMethod } = await req.json();
@@ -41,24 +49,9 @@ export async function POST(req: Request) {
     // Fetch products from DB
     const products = await prisma.product.findMany({
       where: {
-        id: { in: items.map((i: any) => i.productId) },
+        id: { in: items.map((item: any) => item.productId) },
       },
     });
-
-    // let totalAmount = 0;
-
-    // const orderItems = items.map((item: any) => {
-    //   const product = products.find((p) => p.id === item.productId);
-    //   if (!product) throw new Error("Product not found");
-
-    //   totalAmount += product.price.toNumber() * item.quantity;
-
-    //   return {
-    //     productId: product.id,
-    //     quantity: item.quantity,
-    //     price: product.price,
-    //   };
-    // });
 
     let totalAmount = new Prisma.Decimal(0);
 
@@ -90,7 +83,7 @@ export async function POST(req: Request) {
         items: true,
       },
     });
-
+    console.log(order);
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
     console.error(error);
