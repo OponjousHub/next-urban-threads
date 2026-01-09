@@ -71,6 +71,9 @@ model Order {
   status          OrderStatus @default(PENDING)
   paymentMethod   String
   shippingAddress String
+  currency       String
+  paymentProvider PaymentProvider
+  paymentReference String
   items           OrderItem[]
   createdAt       DateTime    @default(now())
 }
@@ -134,3 +137,13 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum PaymentProvider {
+  PAYSTACK
+  FLUTTERWAVE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
