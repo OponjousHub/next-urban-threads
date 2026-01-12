@@ -5,6 +5,7 @@ import { useCart } from "@/store/cart-context";
 import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { email } from "zod";
 
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
@@ -55,13 +56,14 @@ export default function CheckoutPage() {
     try {
       console.log(formData);
       const address = `${formData.address}, ${formData.city}, ${formData.country}`;
-      const res = await fetch("/api/orders", {
+      const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: orderItems,
           shippingAddress: address,
           paymentMethod: formData.paymentMethod,
+          email: formData.email,
         }),
       });
 
@@ -69,12 +71,6 @@ export default function CheckoutPage() {
         const errorData = await res.json();
         throw new Error(errorData.message || "Order failed");
       }
-
-      const order = await res.json();
-      console.log("Order created:", order);
-      // const raw = await res.text();
-      // console.log("STATUS:", res.status);
-      // console.log("RAW RESPONSE:", raw);
 
       //SHOW TOAST NOTIFICATION
       toast.dismiss(toastId);
@@ -87,6 +83,13 @@ export default function CheckoutPage() {
           duration: 6000, // ⏱️ 8 seconds
         }
       );
+      const data = await res.json();
+
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        throw new Error("Payment URL missing");
+      }
 
       clearCart();
       // router.push(`/orders/${order.id}`);

@@ -73,7 +73,7 @@ model Order {
   shippingAddress String
   currency       String
   paymentProvider PaymentProvider
-  paymentReference String
+  paymentReference String?
   items           OrderItem[]
   createdAt       DateTime    @default(now())
 }
