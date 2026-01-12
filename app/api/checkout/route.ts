@@ -85,7 +85,6 @@ export async function POST(req: Request) {
       currency: order.currency,
       orderId: order.id,
     });
-    console.log(payment);
 
     // 3. Save reference
     await prisma.order.update({

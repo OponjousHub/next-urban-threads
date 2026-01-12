@@ -74,15 +74,16 @@ export default function CheckoutPage() {
 
       //SHOW TOAST NOTIFICATION
       toast.dismiss(toastId);
-      toast.custom(
-        <AdminToast
-          title="Order Created"
-          description="Your order has been placed successfully."
-        />,
-        {
-          duration: 6000, // ⏱️ 8 seconds
-        }
-      );
+      toast.loading("Redirecting to secure payment...");
+      // toast.custom(
+      //   <AdminToast
+      //     title="Order Created"
+      //     description="Your order has been placed successfully."
+      //   />,
+      //   {
+      //     duration: 6000, // ⏱️ 8 seconds
+      //   }
+      // );
       const data = await res.json();
 
       if (data.paymentUrl) {
