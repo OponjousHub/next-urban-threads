@@ -24,7 +24,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "script/backfill-order.js"
+    "script/backfill-order.js",
+    "app/dashboard/order"
   ],
   "exclude": ["node_modules"]
 }
