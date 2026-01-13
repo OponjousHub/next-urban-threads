@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi";
 import { useCart } from "@/store/cart-context";
+import UserMenu from "./header-userMenu";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -96,6 +97,8 @@ const Header = () => {
               )}
             </p>
           </Link>
+
+          <UserMenu />
         </div>
         {/* Menu Button (mobile only) */}
         <button

@@ -18,7 +18,7 @@ model User {
   password     String
   phone        String?
   role         Role           @default(USER)
-
+  avatarUrl    String?  // 👈 optional
   isDeleted    Boolean        @default(false)
   deletedAt    DateTime?
 
