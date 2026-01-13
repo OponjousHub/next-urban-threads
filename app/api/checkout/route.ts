@@ -81,8 +81,7 @@ export async function POST(req: Request) {
     const provider = getPaymentProvider(order.currency);
     const payment = await provider.initializePayment({
       email: email,
-      amount: order.totalAmount,
-      currency: order.currency,
+      amount: order.totalAmount.toNumber(),
       orderId: order.id,
     });
 
