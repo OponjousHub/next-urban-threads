@@ -3,15 +3,40 @@
 import { useState } from "react";
 import Link from "next/link";
 import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi";
+import { useEffect } from "react";
 import { useCart } from "@/store/cart-context";
 import UserMenu from "./header-userMenu";
+
+type User = {
+  id: string;
+  name: string;
+  role: "ADMIN" | "USER";
+};
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { cartItems } = useCart();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await fetch("/api/users/me");
+        if (!res.ok) {
+          setUser(null);
+        } else {
+          setUser(await res.json());
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadUser();
+  }, []);
   const cartCount = cartItems.reduce((sum, cur) => sum + cur.quantity, 0);
-
+  console.log(user);
   return (
     <header className="bg-white border-b-2 border-[#eee] sticky top-0 z-[1000]">
       <div className="flex items-center justify-between max-w-[1200px] mx-auto px-4 py-4">
@@ -69,19 +94,25 @@ const Header = () => {
 
         {/* Auth + Cart */}
         <div className=" flex items-center gap-2">
-          <Link
-            className="text-[1.6rem] hover:text-[var(--color-primary)]"
-            href="/login"
-          >
-            Login
-          </Link>
-          <span className="text-[#666]">|</span>
-          <Link
-            className="hidden sm:block text-[1.6rem] hover:text-[var(--color-primary)]"
-            href="/signup"
-          >
-            Signup
-          </Link>
+          {loading
+            ? null
+            : !user && (
+                <>
+                  <Link
+                    className="text-[1.6rem] hover:text-[var(--color-primary)]"
+                    href="/login"
+                  >
+                    Login
+                  </Link>
+                  <span className="text-[#666]">|</span>
+                  <Link
+                    className="hidden sm:block text-[1.6rem] hover:text-[var(--color-primary)]"
+                    href="/signup"
+                  >
+                    Signup
+                  </Link>
+                </>
+              )}
           <Link
             href="/cart"
             className="ml-4 text-[#333] transition-colors duration-200 hover:text-[var(--color-primary)]"
@@ -98,7 +129,7 @@ const Header = () => {
             </p>
           </Link>
 
-          <UserMenu />
+          {user ? <UserMenu user={user} /> : null}
         </div>
         {/* Menu Button (mobile only) */}
         <button

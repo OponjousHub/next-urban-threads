@@ -1,24 +1,29 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
 
-export default function UserMenu() {
-  const user = {
-    name: "Joseph",
-    role: "ADMIN",
-  };
+type User = {
+  id: string;
+  name: string;
+  role: "ADMIN" | "USER";
+};
 
+type Props = {
+  user: User;
+};
+
+export default function UserMenu({ user }: Props) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  useClickOutside(dropdownRef, () => setOpen(false));
 
-  // const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`;
+  console.log(user);
+
   const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
     user.name
   )}&backgroundColor=000000&textColor=ffffff`;
-
-  useClickOutside(dropdownRef, () => setOpen(false));
 
   return (
     <div ref={dropdownRef} className="relative left-5">
