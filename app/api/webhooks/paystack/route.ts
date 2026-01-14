@@ -48,7 +48,7 @@ export async function POST(req: Request) {
 
       // 6. Update order
       await prisma.order.update({
-        where: { id: reference },
+        where: { paymentReference: reference },
         data: {
           status: "PAID",
         },

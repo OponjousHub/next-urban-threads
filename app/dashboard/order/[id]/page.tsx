@@ -91,10 +91,13 @@ export default async function OrderPage({ params }: OrderPageProps) {
 
   useEffect(() => {
     async function loadOrder() {
-      const res = await fetch(`/api/orders/${orderId}/verify`, {
-        method: "POST",
-        body: JSON.stringify({ reference }),
-      });
+      const res = await fetch(
+        `/api/orders/me/${orderId ? orderId : params}/verify`,
+        {
+          method: "POST",
+          body: JSON.stringify({ reference }),
+        }
+      );
 
       const data = await res.json();
       setOrder(data);
