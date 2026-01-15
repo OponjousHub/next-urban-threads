@@ -36,7 +36,6 @@ const Header = () => {
     loadUser();
   }, []);
   const cartCount = cartItems.reduce((sum, cur) => sum + cur.quantity, 0);
-  console.log(user);
   return (
     <header className="bg-white border-b-2 border-[#eee] sticky top-0 z-[1000]">
       <div className="flex items-center justify-between max-w-[1200px] mx-auto px-4 py-4">

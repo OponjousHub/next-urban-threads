@@ -14,12 +14,10 @@ function WomenItems() {
     fetch("/api/products?category=WOMEN")
       .then((res) => res.json())
       .then((data) => {
-        console.log("FROM THE FRONTEND:", data.products);
         const prodData = data.products;
         setProducts(prodData);
       });
   }, []);
-  console.log("FROM THE FRONTEND:", products);
   return (
     <div className="bg-gray-50 py-10 px-6 min-h-screen max-w-7xl my-0 mx-auto">
       <div className="flex justify-between mt-6 mb-12">

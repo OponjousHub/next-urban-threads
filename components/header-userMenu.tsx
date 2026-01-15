@@ -19,8 +19,6 @@ export default function UserMenu({ user }: Props) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setOpen(false));
 
-  console.log(user);
-
   const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
     user.name
   )}&backgroundColor=000000&textColor=ffffff`;
