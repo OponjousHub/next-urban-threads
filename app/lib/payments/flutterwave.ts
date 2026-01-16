@@ -3,39 +3,53 @@ import { PaymentProvider } from "@/types/payment";
 
 export class FlutterwaveProvider implements PaymentProvider {
   private baseUrl = "https://api.flutterwave.com/v3";
-  private secret = process.env.FLUTTERWAVE_SECRET_KEY!;
 
-  async initializePayment(payload: any) {
+  async initializePayment({
+    email,
+    amount,
+    reference,
+    callbackUrl,
+  }: {
+    email: string;
+    amount: number;
+    reference: string;
+    callbackUrl: string;
+  }) {
     const res = await axios.post(
       `${this.baseUrl}/payments`,
       {
-        tx_ref: payload.orderId,
-        amount: payload.amount,
-        currency: payload.currency,
-        redirect_url: `${process.env.APP_URL}/payment/verify`,
+        tx_ref: reference,
+        amount,
+        currency: "NGN", // change dynamically if needed
+        redirect_url: callbackUrl,
         customer: {
-          email: payload.email,
+          email,
+        },
+        customizations: {
+          title: "Urban Threads",
+          description: "Order payment",
         },
       },
       {
         headers: {
-          Authorization: `Bearer ${this.secret}`,
+          Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+          "Content-Type": "application/json",
         },
       }
     );
 
     return {
       authorizationUrl: res.data.data.link,
-      reference: payload.orderId,
+      reference,
     };
   }
 
-  async verifyPayment(reference: string) {
+  async verifyPayment(reference: string): Promise<boolean> {
     const res = await axios.get(
       `${this.baseUrl}/transactions/verify_by_reference?tx_ref=${reference}`,
       {
         headers: {
-          Authorization: `Bearer ${this.secret}`,
+          Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
         },
       }
     );

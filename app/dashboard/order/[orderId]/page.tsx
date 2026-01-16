@@ -276,7 +276,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
         <h2 className="text-2xl font-semibold mb-3">Items</h2>
 
         <ul className="border rounded-lg p-4 space-y-4">
-          {order.items.map((item) => {
+          {order?.items?.map((item) => {
             console.log(item.product);
             return (
               <li key={item.id} className="flex items-center gap-4">

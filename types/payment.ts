@@ -10,10 +10,23 @@ export interface PaymentInitResponse {
   reference: string;
 }
 
+// export interface PaymentProvider {
+//   initializePayment(
+//     payload: InitializePaymentPayload
+//   ): Promise<PaymentInitResponse>;
+
+//   verifyPayment(reference: string): Promise<boolean>;
+// }
 export interface PaymentProvider {
-  initializePayment(
-    payload: InitializePaymentPayload
-  ): Promise<PaymentInitResponse>;
+  initializePayment(input: {
+    email: string;
+    amount: number;
+    reference: string;
+    callbackUrl: string;
+  }): Promise<{
+    authorizationUrl: string;
+    reference: string;
+  }>;
 
   verifyPayment(reference: string): Promise<boolean>;
 }
