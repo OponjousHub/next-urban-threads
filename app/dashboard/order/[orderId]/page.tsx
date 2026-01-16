@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import { AdminToast } from "@/components/ui/adminToast";
 
 type OrderItem = {
   id: string;
   product: {
     name: string;
     price: number;
-    image: string;
+    images: string;
   };
   quantity: number;
 };
@@ -24,7 +25,7 @@ type Order = {
 };
 
 export default function OrderPage({ params }: { params: { orderId: string } }) {
-  const { orderId } = params;
+  const { orderId } = useParams<{ orderId: string }>();
   const searchParams = useSearchParams();
   const reference = searchParams.get("reference") || undefined;
 
@@ -32,12 +33,13 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
 
-  console.log(`MY ODER ID............`, orderId);
-  console.log(`My Reference..........`, reference);
-
   useEffect(() => {
     async function verifyOrder() {
       if (!orderId) return;
+
+      const toastId = "verifying";
+      // 🔄 Loading toast
+      // const toastId = toast.loading("Signing up user...");
 
       try {
         setVerifying(true);
@@ -53,58 +55,63 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
         });
 
         const data = await res.json();
-        console.log(data);
         setOrder(data);
 
         if (data.status === "PAID") {
-          toast.success("Payment verified!", { id: "verifying" });
+          toast.dismiss(toastId);
+          toast.custom(
+            <AdminToast
+              title="Payment verified!"
+              description={`Status: Paid.`}
+            />,
+            {
+              duration: 3000, // ⏱️ 8 seconds
+            }
+          );
+
+          // toast.success("Payment verified!", { id: "verifying" });
         } else if (data.status === "FAILED") {
-          toast.error("Payment failed", { id: "verifying" });
-        } else {
-          toast("Payment still pending", { id: "verifying" });
+          toast.dismiss(toastId);
+          toast.custom(
+            <AdminToast
+              title="Payment failed!"
+              description={`Status: Failed.`}
+            />,
+            {
+              duration: 3000, // ⏱️ 8 seconds
+            }
+          );
+        } else if (data.status === "PENDING") {
+          toast.dismiss(toastId);
+          toast.custom(
+            <AdminToast
+              title="Payment Pending!"
+              description={`Status: Pending.`}
+            />,
+            {
+              duration: 3000, // ⏱️ 8 seconds
+            }
+          );
         }
       } catch (error) {
         console.error(error);
-        toast.error("Error verifying payment", { id: "verifying" });
+        toast.dismiss(toastId);
+        toast.custom(
+          <AdminToast
+            type="error"
+            title="Verification failed!"
+            description={"Error verifying payment"}
+          />,
+          {
+            duration: 3000, // ⏱️ 8 seconds
+          }
+        );
       } finally {
         setVerifying(false);
         setLoading(false);
       }
     }
     verifyOrder();
-
-    // async function getOrder() {
-    //   // if (!orderId) return;
-
-    //   try {
-    //     // setVerifying(true);
-    //     // toast.loading("Verifying payment...", { id: "verifying" });
-
-    //     const res = await fetch(`/api/orders/me/${orderId}`, {
-    //       credentials: "include",
-    //     });
-
-    //     const data = await res.json();
-    //     console.log(data);
-    //     setOrder(data);
-    //     setLoading(false);
-
-    //     if (data.status === "PAID") {
-    //       toast.success("Payment verified!", { id: "verifying" });
-    //     } else if (data.status === "FAILED") {
-    //       toast.error("Payment failed", { id: "verifying" });
-    //     } else {
-    //       toast("Payment still pending", { id: "verifying" });
-    //     }
-    //   } catch (error) {
-    //     console.error(error);
-    //     toast.error("Error verifying payment", { id: "verifying" });
-    //   } finally {
-    //     setVerifying(false);
-    //     setLoading(false);
-    //   }
-    // }
-    // getOrder();
 
     const interval = setInterval(async () => {
       if (order?.status === "PENDING") {
@@ -116,6 +123,11 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
         if (!res.ok) return;
         const data = await res.json();
         setOrder(data);
+
+        if (data.status === "PAID") {
+          toast.success("Payment confirmed 🎉");
+          clearInterval(interval);
+        }
       }
     }, 5000);
 
@@ -152,7 +164,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   ------------------------------------- */
   return (
     <main className="px-4 py-10">
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
 
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Order Details</h1>
@@ -192,25 +204,30 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
         <h2 className="text-2xl font-semibold mb-3">Items</h2>
 
         <ul className="border rounded-lg p-4 space-y-4">
-          {order.items.map((item) => (
-            <li key={item.id} className="flex items-center gap-4">
-              <img
-                src={item.product.image}
-                alt={item.product.name}
-                className="w-16 h-16 rounded-md object-cover"
-              />
-              <div className="flex-1">
-                <p className="font-semibold">{item.product.name}</p>
-                <p className="text-sm text-gray-600">
-                  Quantity: {item.quantity}
+          {order.items.map((item) => {
+            console.log(item.product);
+            return (
+              <li key={item.id} className="flex items-center gap-4">
+                <img
+                  src={item.product.images[0]}
+                  alt={item.product.name}
+                  className="w-16 h-16 rounded-md object-cover"
+                />
+                <div className="flex-1">
+                  <p className="font-semibold">{item.product.name}</p>
+                  <p className="text-sm text-gray-600">
+                    Quantity: {item.quantity}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Price: ${item.product.price}
+                  </p>
+                </div>
+                <p className="font-bold">
+                  ${item.product.price * item.quantity}
                 </p>
-                <p className="text-sm text-gray-600">
-                  Price: ${item.product.price}
-                </p>
-              </div>
-              <p className="font-bold">${item.product.price * item.quantity}</p>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
 
         {verifying && (

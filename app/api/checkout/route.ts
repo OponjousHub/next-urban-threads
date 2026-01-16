@@ -5,8 +5,10 @@ import { getPaymentProvider } from "@/app/lib/payments/factory";
 import { Prisma } from "@prisma/client";
 import AuthController from "@/modules/auth/auth.controller";
 import { cookies } from "next/headers";
+import crypto from "crypto";
 
 export async function POST(req: Request) {
+  const paymentReference = crypto.randomUUID();
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
@@ -66,6 +68,7 @@ export async function POST(req: Request) {
         currency: "NGN",
         paymentProvider: "PAYSTACK", // or FLUTTERWAVE"
         shippingAddress,
+        paymentReference,
         paymentMethod,
         items: {
           create: orderItems,
@@ -77,23 +80,16 @@ export async function POST(req: Request) {
     });
     console.log(order);
 
-    // 2. Initialize payment
+    // Initialize payment
     const provider = getPaymentProvider(order.currency);
     const payment = await provider.initializePayment({
-      email: email,
+      email,
       amount: order.totalAmount.toNumber(),
-      orderId: order.id,
+      reference: paymentReference, // ✅ UUID
+      callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/order/${order.id}`,
     });
 
-    // 3. Save reference
-    await prisma.order.update({
-      where: { id: order.id },
-      data: {
-        paymentReference: payment.reference,
-      },
-    });
-
-    // 4. Return payment URL
+    // Return payment URL
     return NextResponse.json(
       {
         orderId: order.id,
