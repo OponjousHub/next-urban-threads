@@ -13,9 +13,10 @@ type User = {
 
 type Props = {
   user: User | null;
+  onRemoveAvater: () => void;
 };
 
-export default function UserMenu({ user }: Props) {
+export default function UserMenu({ user, onRemoveAvater }: Props) {
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
@@ -75,6 +76,7 @@ export default function UserMenu({ user }: Props) {
               });
               router.refresh();
               router.replace("/");
+              onRemoveAvater();
             }}
           >
             Logout

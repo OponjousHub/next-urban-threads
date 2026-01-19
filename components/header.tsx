@@ -35,6 +35,10 @@ const Header = () => {
 
     loadUser();
   }, []);
+
+  const handleReloadHeader = () => {
+    setUser(null);
+  };
   const cartCount = cartItems.reduce((sum, cur) => sum + cur.quantity, 0);
   return (
     <header className="bg-white border-b-2 border-[#eee] sticky top-0 z-[1000]">
@@ -92,26 +96,7 @@ const Header = () => {
         </div>
 
         {/* Auth + Cart */}
-        <div className=" flex items-center gap-2">
-          {loading
-            ? null
-            : !user && (
-                <>
-                  <Link
-                    className="text-[1.6rem] hover:text-[var(--color-primary)]"
-                    href="/login"
-                  >
-                    Login
-                  </Link>
-                  <span className="text-[#666]">|</span>
-                  <Link
-                    className="hidden sm:block text-[1.6rem] hover:text-[var(--color-primary)]"
-                    href="/signup"
-                  >
-                    Signup
-                  </Link>
-                </>
-              )}
+        <div className=" flex items-center gap-10">
           <Link
             href="/cart"
             className="ml-4 text-[#333] transition-colors duration-200 hover:text-[var(--color-primary)]"
@@ -129,11 +114,22 @@ const Header = () => {
           </Link>
 
           {user ? (
-            <UserMenu user={user} />
+            <UserMenu user={user} onRemoveAvater={handleReloadHeader} />
           ) : (
-            <div className="flex gap-4">
-              <Link href="/login">Login</Link>
-              <Link href="/signup">Signup</Link>
+            <div className="flex gap-4 ml-8">
+              <Link
+                className="text-[1.6rem] hover:text-[var(--color-primary)]"
+                href="/login"
+              >
+                Login
+              </Link>
+              <span className="text-[#666]">|</span>
+              <Link
+                className="hidden sm:block text-[1.6rem] hover:text-[var(--color-primary)]"
+                href="/signup"
+              >
+                Signup
+              </Link>
             </div>
           )}
         </div>
