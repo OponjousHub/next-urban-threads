@@ -49,7 +49,6 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         },
       },
     });
-    console.log(order);
     /* --------------------------------------------------
         Validate order ownership
     -------------------------------------------------- */

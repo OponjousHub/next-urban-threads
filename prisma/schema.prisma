@@ -73,7 +73,7 @@ model Order {
   shippingAddress String
   currency       String
   paymentProvider PaymentProvider
-  paymentReference String?    @unique
+  paymentReference String    @unique
   items           OrderItem[]
   createdAt       DateTime    @default(now())
 }
@@ -146,4 +146,9 @@ enum PaymentStatus {
   PENDING
   PAID
   FAILED
+}
+
+enum Currency {
+  NGN
+  USD
 }

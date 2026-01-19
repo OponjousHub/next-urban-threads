@@ -128,7 +128,14 @@ const Header = () => {
             </p>
           </Link>
 
-          {user ? <UserMenu user={user} /> : null}
+          {user ? (
+            <UserMenu user={user} />
+          ) : (
+            <div className="flex gap-4">
+              <Link href="/login">Login</Link>
+              <Link href="/signup">Signup</Link>
+            </div>
+          )}
         </div>
         {/* Menu Button (mobile only) */}
         <button

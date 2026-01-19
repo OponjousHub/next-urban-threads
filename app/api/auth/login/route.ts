@@ -30,13 +30,6 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    // if (error.message === "INVALID_CREDENTIALS") {
-    //       return NextResponse.json(
-    //         { message: "Invalid email or password" },
-    //         { status: 401 }
-    //       );
-    //     }
-
     console.error("LOGIN ERROR:", error);
 
     NextResponse.json({ error: "Internal server error" }, { status: 500 });

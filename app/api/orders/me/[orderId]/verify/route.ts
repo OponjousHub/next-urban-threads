@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/utils/prisma";
 import AuthController from "@/modules/auth/auth.controller";
 import { PaystackProvider } from "@/app/lib/payments/paystack";
+import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
 
 type RouteParams = {
   params: {
@@ -10,12 +11,17 @@ type RouteParams = {
   };
 };
 
-export async function GET(req: NextRequest, { params }: RouteParams) {
-  console.log("backend verify GET hit");
-  return NextResponse.json({ ok: true });
-}
+// export async function GET(req: NextRequest, { params }: RouteParams) {
+//   console.log("backend verify GET hit");
+//   return NextResponse.json({ ok: true });
+// }
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
+  console.log("backend verify GET hit");
+
+  const body = await req.json().catch(() => ({}));
+  const referenceFromClient = body.reference;
+
   try {
     // ---------------------------
     // 1️⃣ Authenticate user
@@ -34,7 +40,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     const { orderId } = params;
 
-    // ---------------------------
+    // ---------------------------;
     // 2️⃣ Fetch order + items
     // ---------------------------
     const order = await prisma.order.findFirst({
@@ -50,9 +56,19 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         },
       },
     });
+    // console.log("ORDERSSS", order);
 
     if (!order) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    }
+
+    if (!order.paymentReference && referenceFromClient) {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { paymentReference: referenceFromClient },
+      });
+
+      order.paymentReference = referenceFromClient;
     }
 
     // ---------------------------
@@ -72,7 +88,16 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // ---------------------------
     // 5️⃣ Verify with Paystack
     // ---------------------------
-    const provider = new PaystackProvider();
+    // const provider = new PaystackProvider();
+    let provider;
+
+    if (order.paymentProvider === "PAYSTACK") {
+      provider = new PaystackProvider();
+    } else {
+      provider = new FlutterwaveProvider();
+    }
+    console.log("This is the service provider:", provider);
+    console.log("This is the ORDER.payment provider:", order.paymentProvider);
     const isPaid = await provider.verifyPayment(order.paymentReference);
 
     if (!isPaid) {
@@ -94,7 +119,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         },
       },
     });
-
+    console.log("UPDATED ORDERSSSSSS:", updatedOrder);
     return NextResponse.json(updatedOrder);
   } catch (error) {
     console.error("Verify order error:", error);

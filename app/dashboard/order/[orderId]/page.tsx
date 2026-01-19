@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useParams } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { GetToast } from "@/components/ui/adminToast";
+import { NextRequest } from "next/server";
 
 type OrderItem = {
   id: string;
@@ -27,13 +28,19 @@ type Order = {
 export default function OrderPage({ params }: { params: { orderId: string } }) {
   const { orderId } = useParams<{ orderId: string }>();
   const searchParams = useSearchParams();
-  const reference = searchParams.get("reference") || undefined;
+  const reference =
+    searchParams.get("reference") ?? // Paystack
+    searchParams.get("tx_ref") ?? // Flutterwave
+    undefined;
+
+  console.log("orderId:", orderId);
+  console.log("reference:", reference);
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
-
   const hasVerified = useRef(false);
+
   // useEffect(() => {
   //   async function verifyOrder() {
   //     if (!orderId) return;
@@ -141,12 +148,15 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
     const toastId = "verifying";
 
     async function verifyOrder() {
+      console.log(orderId);
+      console.log(reference);
       try {
         toast.loading("Verifying payment...", { id: toastId });
 
         const res = await fetch(`/api/orders/me/${orderId}/verify`, {
           method: "POST",
           credentials: "include",
+          body: JSON.stringify({ reference }),
           headers: { "Content-Type": "application/json" },
         });
 
@@ -205,7 +215,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
     return () => clearInterval(interval);
   }, [order, orderId]);
-
+  console.log(order);
   /* ------------------------------------
      ✅ CENTERED LOADING STATE
   ------------------------------------- */
@@ -228,6 +238,20 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
       <main className="flex min-h-[70vh] items-center justify-center px-4">
         <p className="text-lg text-red-500">Order not found</p>
       </main>
+    );
+  }
+
+  /* ------------------------------------
+     ORDER IS PENDING
+  ------------------------------------- */
+  if (order.status === "PENDING") {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-lg font-semibold">Confirming payment…</h2>
+        <p className="text-sm text-gray-500">
+          Please wait while we verify your payment.
+        </p>
+      </div>
     );
   }
 
