@@ -4,7 +4,7 @@ import { ShoppingBag, Package, CreditCard, User, MapPin } from "lucide-react";
 
 export default function UserDashboard() {
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6 mx-24">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
