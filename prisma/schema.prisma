@@ -135,6 +135,7 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+  PROCESSING
 }
 
 enum PaymentProvider {

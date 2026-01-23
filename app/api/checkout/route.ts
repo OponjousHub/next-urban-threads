@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { message: "Unauthorized: missing token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { message: "Unauthorized: invalid token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
         totalAmount,
         currency,
         paymentProvider: providerKey,
-        shippingAddress,
+        shippingAddress: JSON.stringify(shippingAddress),
         paymentReference,
         paymentMethod,
         items: {
@@ -103,13 +103,13 @@ export async function POST(req: NextRequest) {
         orderId: order.id,
         paymentUrl: payment.authorizationUrl,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("[CHECKOUT_ERROR]", error);
     return NextResponse.json(
       { message: "Failed to create order" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

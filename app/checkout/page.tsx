@@ -6,6 +6,7 @@ import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { email } from "zod";
+import { Phone } from "lucide-react";
 
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
@@ -16,21 +17,23 @@ export default function CheckoutPage() {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
-    address: "",
+    street: "",
     city: "",
     postalCode: "",
+    phone: "",
+    state: "",
     country: "",
     paymentMethod: "credit-card",
   });
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
   const shipping = subtotal > 0 ? 10 : 0;
   const total = subtotal + shipping;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -53,9 +56,18 @@ export default function CheckoutPage() {
     const toastId = toast.loading("Placing your order...");
     setIsLoading(true);
 
+    console.log(formData);
     try {
-      console.log(formData);
-      const address = `${formData.address}, ${formData.city}, ${formData.country}`;
+      // const address = `${formData.address}, ${formData.city}, ${formData.country}`;
+      const address = {
+        fullName: formData.fullName,
+        street: formData.street,
+        postCode: formData.postalCode,
+        state: formData.state,
+        city: formData.city,
+        country: formData.country,
+        phone: formData.phone,
+      };
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -98,7 +110,7 @@ export default function CheckoutPage() {
         />,
         {
           duration: 6000, // ⏱️ 8 seconds
-        }
+        },
       );
     } finally {
       setIsLoading(false);
@@ -142,21 +154,37 @@ export default function CheckoutPage() {
             </div>
           </div>
 
+          {/* ✅ Phone Number */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              placeholder="+234 801 234 5678"
+              className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Street Address
             </label>
             <input
               type="text"
-              name="address"
-              value={formData.address}
+              name="street"
+              value={formData.street}
               onChange={handleChange}
               required
               className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 City
@@ -167,6 +195,21 @@ export default function CheckoutPage() {
                 value={formData.city}
                 onChange={handleChange}
                 required
+                className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            {/* ✅ State (optional) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                State
+              </label>
+              <input
+                type="text"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                placeholder="Lagos"
                 className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
