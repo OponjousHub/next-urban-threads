@@ -7,14 +7,14 @@ import { getUserDashboardStats } from "@/app/lib/dashboard";
 import Link from "next/link";
 
 type DashboardStats = Awaited<ReturnType<typeof getUserDashboardStats>>;
-type ShippingAddress = {
-  fullName: string;
-  street: string;
-  city: string;
-  state?: string;
-  country: string;
-  phone?: string;
-};
+// type ShippingAddress = {
+//   fullName: string;
+//   street: string;
+//   city: string;
+//   state?: string;
+//   country: string;
+//   phone?: string;
+// };
 
 function DashboardClient({ stats }: { stats: DashboardStats }) {
   const shippingAddress = JSON.parse(stats.recentOrders[0].shippingAddress);
