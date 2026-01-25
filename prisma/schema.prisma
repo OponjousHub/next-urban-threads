@@ -25,6 +25,7 @@ model User {
   updatedAt    DateTime       @updatedAt
   cartItems    CartItem[]
   orders       Order[]
+  Address      Address[]
   products     Product[]      @relation("UserProduct")
   reviews      Review[]
   wishlistItem WishlistItem[]
@@ -70,7 +71,7 @@ model Order {
   totalAmount     Decimal
   status          OrderStatus @default(PENDING)
   paymentMethod   String
-  shippingAddress String
+  shippingAddress Json
   currency       String
   paymentProvider PaymentProvider
   paymentReference String    @unique
@@ -86,6 +87,25 @@ model OrderItem {
   price     Decimal @db.Decimal(10, 2)
   order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
+}
+
+model Address {
+id String @id @default(cuid())
+userId String
+user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+fullName String
+phone String
+street String
+city String
+state String?
+postalCode String?
+country String
+
+isDefault Boolean @default(false)
+
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
 }
 
 model Review {

@@ -201,9 +201,11 @@ function DashboardClient({ stats }: { stats: DashboardStats }) {
               </div>
               <p className="text-sm text-gray-600">{streetAddress}</p>
               <p className="text-sm text-gray-600">{`${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.country}`}</p>
-              <Button className="mt-4 w-full" variant="outline">
-                Manage Address
-              </Button>
+              <Link href={"/dashboard/addresses"}>
+                <Button className="mt-4 w-full" variant="outline">
+                  Manage Address
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
