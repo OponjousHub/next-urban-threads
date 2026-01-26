@@ -23,9 +23,10 @@ model User {
   deletedAt    DateTime?
 
   updatedAt    DateTime       @updatedAt
+  status       AccountStatus  @default(ACTIVE)
   cartItems    CartItem[]
   orders       Order[]
-  Address      Address[]
+  addresses      Address[]
   products     Product[]      @relation("UserProduct")
   reviews      Review[]
   wishlistItem WishlistItem[]
@@ -172,4 +173,10 @@ enum PaymentStatus {
 enum Currency {
   NGN
   USD
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
 }

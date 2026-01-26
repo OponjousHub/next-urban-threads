@@ -1,4 +1,8 @@
 import { prisma } from "@/utils/prisma";
+import { Phone } from "lucide-react";
+import { email } from "zod";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export const UserRepository = {
   findByEmail(email: string) {
@@ -9,7 +13,27 @@ export const UserRepository = {
 
   create(data: any) {
     return prisma.user.create({
-      data,
+      data: {
+        name: data.fullName,
+        email: data.email,
+        address: data.address,
+        city: data.city,
+        country: data.country,
+        phone: data.phone,
+        password: data.password,
+        addresses: {
+          create: {
+            fullName: data.fullName,
+            street: data.street,
+            city: data.city,
+            state: data.state,
+            postalCode: data.postalCode,
+            country: data.country,
+            phone: data.phone,
+            isDefault: true,
+          },
+        },
+      },
     });
   },
 

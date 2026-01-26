@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   FiUser,
   FiMail,
@@ -24,10 +25,13 @@ const initialState = {
   city: "",
   country: "",
   address: "",
+  state: "",
+  postalCode: "",
 };
 export default function SignupPage() {
   const [form, setForm] = useState(initialState);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -54,12 +58,12 @@ export default function SignupPage() {
       toast.custom(
         <AdminToast
           type="error"
-          title="All fields are required"
-          description="Please fill in all the fields."
+          title="Some fields are required"
+          description="Please fill in all the required fields."
         />,
         {
           duration: 6000, // ⏱️ 8 seconds
-        }
+        },
       );
       return;
     }
@@ -75,12 +79,10 @@ export default function SignupPage() {
         />,
         {
           duration: 6000, // ⏱️ 8 seconds
-        }
+        },
       );
       return;
     }
-
-    console.log("Signing up:", form);
 
     try {
       // TODO: send signup data to your backend or API
@@ -90,24 +92,24 @@ export default function SignupPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: form.name,
+          fullName: form.name,
           email: form.email,
           phone: form.phone,
           password: form.password,
           city: form.city,
           country: form.country,
-          address: form.address,
+          street: form.address,
+          address: `${form.address}, ${form.city}, ${form.state ?? null}, ${form.country}`,
+          state: form.state,
+          postalCode: form.postalCode,
         }),
       });
 
       const data = await response.json();
       if (!response.ok) {
-        console.log(data);
         throw new Error(data.message || "Signup failed");
       }
 
-      // const data = await response.json();
-      console.log(data.user);
       toast.dismiss(toastId);
       toast.custom(
         <AdminToast
@@ -116,9 +118,10 @@ export default function SignupPage() {
         />,
         {
           duration: 6000, // ⏱️ 8 seconds
-        }
+        },
       );
       setForm(initialState);
+      router.replace("/dashboard");
     } catch (err: any) {
       console.error("SIGN UP ERROR:", err);
 
@@ -131,7 +134,7 @@ export default function SignupPage() {
         />,
         {
           duration: 6000, // ⏱️ 8 seconds
-        }
+        },
       );
     } finally {
       setIsLoading(false);
@@ -208,6 +211,25 @@ export default function SignupPage() {
             </div>
           </div>
 
+          {/* Address */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">
+              Street Address
+            </label>
+            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
+              <FiHome className="text-gray-400 mr-2" />
+              <input
+                type="text"
+                name="address"
+                placeholder="N0 43, Orga Wuse Street, Wuse"
+                className="w-full outline-none text-gray-700"
+                autoComplete="new-address"
+                value={form.address}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
           {/* City */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">City</label>
@@ -220,6 +242,24 @@ export default function SignupPage() {
                 className="w-full outline-none text-gray-700"
                 autoComplete="new-city"
                 value={form.city}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          {/* State */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">
+              State
+            </label>
+            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
+              <FiMapPin className="text-gray-400 mr-2" />
+              <input
+                type="text"
+                name="state"
+                placeholder="Delta"
+                className="w-full outline-none text-gray-700"
+                autoComplete="new-state"
+                value={form.state}
                 onChange={handleChange}
               />
             </div>
@@ -244,20 +284,20 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* Address */}
+          {/* PostalCode */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">
-              Address
+              PostalCode
             </label>
             <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiHome className="text-gray-400 mr-2" />
+              <FiGlobe className="text-gray-400 mr-2" />
               <input
                 type="text"
-                name="address"
-                placeholder="N0 43, Orga Wuse Street, Wuse"
+                name="postalCode"
+                placeholder=""
                 className="w-full outline-none text-gray-700"
-                autoComplete="new-address"
-                value={form.address}
+                autoComplete="new-postalCode"
+                value={form.postalCode}
                 onChange={handleChange}
               />
             </div>

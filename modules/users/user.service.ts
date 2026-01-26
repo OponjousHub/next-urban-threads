@@ -3,10 +3,21 @@ import { RegisterInput } from "@/modules/users/user.schema";
 import { UserRepository } from "./user.repository";
 import AuthController from "../auth/auth.controller";
 import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
 export class UserService {
   static async register(data: RegisterInput) {
-    const { name, email, password, phone, address, city, country } = data;
+    const {
+      fullName,
+      email,
+      password,
+      phone,
+      street,
+      city,
+      state,
+      postalCode,
+      country,
+    } = data;
 
     const existingUser = await UserRepository.findByEmail(email);
     if (existingUser) {
@@ -16,18 +27,20 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await UserRepository.create({
-      name,
+      fullName,
       email,
       password: hashedPassword,
       phone,
-      address,
+      street,
+      postalCode,
+      state,
       city,
       country,
     });
 
     const { password: _, ...userWithoutPassword } = user;
 
-    return userWithoutPassword;
+    return { userWithoutPassword };
   }
 
   static async getAllUsers() {
@@ -36,6 +49,10 @@ export class UserService {
 
   static async getMe(token: string) {
     const userId = AuthController.getUserIdFromToken(token);
+
+    if (!userId) {
+      return "User not found!";
+    }
 
     const user = await UserRepository.findById(userId);
     if (!user) {
@@ -51,6 +68,11 @@ export class UserService {
 
   static async deleteAccount(token: string) {
     const userId = AuthController.getUserIdFromToken(token);
+
+    if (!userId) {
+      return "User not found!";
+    }
+
     await UserRepository.softDelete(userId);
     return "User account deleted successfully.";
   }

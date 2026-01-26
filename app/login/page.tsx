@@ -40,7 +40,7 @@ export default function LoginPage() {
       if (!response.ok) {
         throw new Error(data?.message || "Invalid email or password!");
       }
-      window.location.href = "/admin/products/new";
+      window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("LOGIN ERROR:", err);
       setApiError(err.message);

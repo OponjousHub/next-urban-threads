@@ -2,50 +2,71 @@ import { prisma } from "@/utils/prisma";
 import { Prisma, OrderStatus } from "@prisma/client";
 
 export async function getUserDashboardStats(userId: string) {
-  const [totalOrders, pendingOrders, totalSpentAgg, recentOrders] =
-    await Promise.all([
-      prisma.order.count({
-        where: { userId },
-      }),
+  const [
+    totalOrders,
+    pendingOrders,
+    totalSpentAgg,
+    recentOrders,
+    defaultAddress,
+    user,
+  ] = await Promise.all([
+    prisma.order.count({
+      where: { userId },
+    }),
 
-      prisma.order.count({
-        where: {
-          userId,
-          status: {
-            in: [OrderStatus.PENDING, OrderStatus.PROCESSING],
-          },
+    prisma.order.count({
+      where: {
+        userId,
+        status: {
+          in: [OrderStatus.PENDING, OrderStatus.PROCESSING],
         },
-      }),
+      },
+    }),
 
-      prisma.order.aggregate({
-        where: {
-          userId,
-          status: OrderStatus.PAID,
-        },
-        _sum: {
-          totalAmount: true,
-        },
-      }),
+    prisma.order.aggregate({
+      where: {
+        userId,
+        status: OrderStatus.PAID,
+      },
+      _sum: {
+        totalAmount: true,
+      },
+    }),
 
-      prisma.order.findMany({
-        where: { userId },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-        include: {
-          items: {
-            include: {
-              product: {
-                select: {
-                  name: true,
-                  images: true,
-                },
+    prisma.order.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                images: true,
               },
             },
           },
         },
-      }),
-    ]);
-  console.dir(recentOrders[0].items[0], { depth: null });
+      },
+    }),
+
+    prisma.address.findFirst({
+      where: { userId, isDefault: true },
+    }),
+
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        createdAt: true,
+      },
+    }),
+  ]);
+  console.dir(recentOrders[0]?.items[0], { depth: null });
   const serializedRecentOrders = recentOrders.map((order) => ({
     id: order.id,
     userId: order.userId,
@@ -82,5 +103,7 @@ export async function getUserDashboardStats(userId: string) {
     pendingOrders,
     totalSpent: totalSpentAgg._sum.totalAmount?.toNumber() ?? 0,
     recentOrders: serializedRecentOrders,
+    defaultAddress,
+    user,
   };
 }

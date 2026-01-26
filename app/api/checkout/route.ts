@@ -3,26 +3,17 @@ import { prisma } from "@/utils/prisma";
 import { Prisma } from "@prisma/client";
 import { cookies, headers } from "next/headers";
 import crypto from "crypto";
-
 import AuthController from "@/modules/auth/auth.controller";
 import { detectCountryFromHeaders } from "@/app/lib/payments/geo";
 import { resolvePaymentConfig } from "@/app/lib/payments/payment";
 import { getPaymentProvider } from "@/app/lib/payments/factory";
+import { getLoggedInUser } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
     // 1️⃣ Auth
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const userId = await getLoggedInUser();
 
-    if (!token) {
-      return NextResponse.json(
-        { message: "Unauthorized: missing token" },
-        { status: 401 },
-      );
-    }
-
-    const userId = AuthController.getUserIdFromToken(token);
     if (!userId) {
       return NextResponse.json(
         { message: "Unauthorized: invalid token" },
