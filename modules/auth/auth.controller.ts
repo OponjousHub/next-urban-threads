@@ -1,7 +1,7 @@
-import bcrypt from "bcryptjs";
 import { prisma } from "@/utils/prisma";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { User } from "@prisma/client";
+import { AuthService } from "./auth.service";
 
 type SafeUser = Omit<User, "password">;
 
@@ -10,40 +10,11 @@ class AuthController {
    * LOGIN USER
    * Receives { email, password } from Zod-validated login route
    */
-  static async login(data: { email: string; password: string }): Promise<{
-    message: string;
-    user: SafeUser;
-    token: string;
-  }> {
+  static async login(data: { email: string; password: string }) {
     const { email, password } = data;
+    const result = AuthService.login(email, password);
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-    console.log(user);
-
-    if (!user || user.isDeleted) {
-      throw new Error("Invalid email or password");
-    }
-
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) {
-      throw new Error("Invalid email or password");
-    }
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "7d" }
-    );
-
-    const { password: _, ...userWithoutPassword } = user;
-
-    return {
-      message: "Login successful",
-      user: userWithoutPassword,
-      token,
-    };
+    return result;
   }
 
   // VERIFY TOKEN

@@ -98,7 +98,7 @@ function DashboardClient({ stats }: { stats: DashboardStats }) {
             <User className="h-8 w-8 text-black" />
             <div>
               <p className="text-sm text-gray-500">Account</p>
-              <p className="text-2xl font-bold">Active</p>
+              <p className="text-2xl font-bold">{user?.status}</p>
             </div>
           </CardContent>
         </Card>

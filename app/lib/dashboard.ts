@@ -63,6 +63,7 @@ export async function getUserDashboardStats(userId: string) {
         email: true,
         phone: true,
         createdAt: true,
+        status: true,
       },
     }),
   ]);
