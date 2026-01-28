@@ -17,6 +17,11 @@ async function getUserIdFromToken() {
 export async function GET() {
   try {
     const userId = await getUserIdFromToken();
+
+    if (!userId) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -34,7 +39,10 @@ export async function GET() {
   } catch (error) {
     console.error("USER PROFILE ERROR:", error);
 
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 401 },
+    );
   }
 }
 
@@ -62,7 +70,7 @@ export async function DELETE() {
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

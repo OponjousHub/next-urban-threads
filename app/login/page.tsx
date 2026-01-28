@@ -23,7 +23,6 @@ export default function LoginPage() {
     setShowError(false);
     setApiError(null);
     setLoading(true);
-    console.log("Logging in with:", { email, password });
     // TODO: handle real authentication (API call)
     try {
       const response = await fetch("/api/auth/login", {
@@ -36,13 +35,12 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
-      console.log(data);
       if (!response.ok) {
         throw new Error(data?.message || "Invalid email or password!");
       }
       window.location.href = "/dashboard";
     } catch (err: any) {
-      console.error("LOGIN ERROR:", err);
+      // console.error("LOGIN ERROR:", err);
       setApiError(err.message);
     } finally {
       setLoading(false);

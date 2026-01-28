@@ -21,8 +21,11 @@ const Header = () => {
 
   useEffect(() => {
     async function loadUser() {
+      console.log("I RRRuuuunnnnnnn");
       try {
-        const res = await fetch("/api/users/me");
+        const res = await fetch("/api/users/me", {
+          cache: "no-store",
+        });
         if (!res.ok) {
           setUser(null);
         } else {
@@ -35,11 +38,16 @@ const Header = () => {
 
     loadUser();
   }, []);
-
+  console.log("USER FETCHED", user);
   const handleReloadHeader = () => {
     setUser(null);
   };
   const cartCount = cartItems.reduce((sum, cur) => sum + cur.quantity, 0);
+
+  if (loading) {
+    return <header className="bg-white border-b-2 border-[#eee] h-[72px]" />;
+  }
+
   return (
     <header className="bg-white border-b-2 border-[#eee] sticky top-0 z-[1000]">
       <div className="flex items-center justify-between max-w-[1200px] mx-auto px-4 py-4">

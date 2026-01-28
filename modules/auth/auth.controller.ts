@@ -12,7 +12,7 @@ class AuthController {
    */
   static async login(data: { email: string; password: string }) {
     const { email, password } = data;
-    const result = AuthService.login(email, password);
+    const result = await AuthService.login(email, password);
 
     return result;
   }

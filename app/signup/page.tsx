@@ -14,7 +14,8 @@ import {
   FiGlobe,
   FiHome,
 } from "react-icons/fi";
-import { initialize } from "next/dist/server/lib/render-server";
+// import { initialize } from "next/dist/server/lib/render-server";
+// import { getLoggedInUser } from "@/lib/auth";
 
 const initialState = {
   name: "",
@@ -31,11 +32,18 @@ const initialState = {
 export default function SignupPage() {
   const [form, setForm] = useState(initialState);
   const [isLoading, setIsLoading] = useState(false);
+  // const [isRegistered, setIsRegistered] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  // if(isRegistered){
+  //   const loginRegistered = async () => {
+  //     const response = await fetch
+  //   }
+  // }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,19 +117,21 @@ export default function SignupPage() {
       if (!response.ok) {
         throw new Error(data.message || "Signup failed");
       }
-
+      // setIsRegistered(true)
       toast.dismiss(toastId);
       toast.custom(
         <AdminToast
           title="Signup sucessfull"
-          description={`${data.user.name} your registration was successful.`}
+          description={`${data?.name} your registration was successful.`}
         />,
         {
-          duration: 6000, // ⏱️ 8 seconds
+          duration: 6000, // ⏱️ 6 seconds
         },
       );
       setForm(initialState);
-      router.replace("/dashboard");
+      // router.replace("/dashboard");
+      // router.refresh();
+      window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("SIGN UP ERROR:", err);
 

@@ -4,10 +4,7 @@ import { UserService } from "./user.service";
 class UserController {
   static async register(data: RegisterInput) {
     const user = await UserService.register(data);
-    return {
-      message: "User registered successfully",
-      user,
-    };
+    return user;
   }
 
   static async getAllUsers() {
