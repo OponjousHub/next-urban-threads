@@ -1,9 +1,9 @@
-import { AddressSchema } from "@/modules/address/address.schema";
+import { AddressInput } from "@/modules/address/address.schema";
 import AddressRepository from "./address.repository";
 
 class AddressService {
-  static async addAddress(data: AddressSchema) {
-    return AddressRepository.create(data);
+  static async addAddress(userId: string, data: AddressInput) {
+    return AddressRepository.create(userId, data);
   }
 }
 

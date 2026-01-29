@@ -95,8 +95,8 @@ id String @id @default(cuid())
 userId String
 user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-fullName String
-phone String
+fullName String?
+phone String?
 street String
 city String
 state String?

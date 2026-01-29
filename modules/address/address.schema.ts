@@ -10,4 +10,4 @@ export const AddressSchema = z.object({
   isDefault: z.boolean().optional(),
 });
 
-export type AddressSchema = z.infer<typeof AddressSchema>;
+export type AddressInput = z.infer<typeof AddressSchema>;

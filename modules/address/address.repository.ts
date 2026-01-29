@@ -1,14 +1,16 @@
 import { prisma } from "@/utils/prisma";
-import { getLoggedInUserId } from "@/lib/auth";
+import { AddressInput } from "@/modules/address/address.schema";
 
 const AddressRepository = {
-  async create(data: any) {
-    const userId = await getLoggedInUserId();
+  async create(userId: string, data: AddressInput) {
+    const count = await prisma.address.count({
+      where: { userId },
+    });
 
-    if (!userId) return null;
+    const shouldBeDefault = data.isDefault === true || count === 0;
 
-    if (data.isDefault) {
-      prisma.address.updateMany({
+    if (shouldBeDefault) {
+      await prisma.address.updateMany({
         where: { userId },
         data: { isDefault: false },
       });
@@ -16,8 +18,14 @@ const AddressRepository = {
 
     return prisma.address.create({
       data: {
-        ...data,
         userId,
+        street: data.street,
+        city: data.city,
+        country: data.country,
+        fullName: data.fullName ?? "",
+        state: data.state ?? null,
+        phone: data.phone ?? null,
+        isDefault: shouldBeDefault,
       },
     });
   },
