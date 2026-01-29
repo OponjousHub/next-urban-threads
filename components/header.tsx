@@ -21,7 +21,6 @@ const Header = () => {
 
   useEffect(() => {
     async function loadUser() {
-      console.log("I RRRuuuunnnnnnn");
       try {
         const res = await fetch("/api/users/me", {
           cache: "no-store",
@@ -38,8 +37,6 @@ const Header = () => {
 
     loadUser();
   }, []);
-
-  console.log("USER FETCHED", user);
 
   const handleReloadHeader = () => {
     setUser(null);

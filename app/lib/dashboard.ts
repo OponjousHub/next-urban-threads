@@ -1,5 +1,5 @@
 import { prisma } from "@/utils/prisma";
-import { Prisma, OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 
 export async function getUserDashboardStats(userId: string) {
   const [
@@ -9,6 +9,7 @@ export async function getUserDashboardStats(userId: string) {
     recentOrders,
     defaultAddress,
     user,
+    addresses,
   ] = await Promise.all([
     prisma.order.count({
       where: { userId },
@@ -66,6 +67,11 @@ export async function getUserDashboardStats(userId: string) {
         status: true,
       },
     }),
+
+    prisma.address.findMany({
+      where: { id: userId },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
   console.dir(recentOrders[0]?.items[0], { depth: null });
   const serializedRecentOrders = recentOrders.map((order) => ({
@@ -106,5 +112,6 @@ export async function getUserDashboardStats(userId: string) {
     recentOrders: serializedRecentOrders,
     defaultAddress,
     user,
+    addresses,
   };
 }
