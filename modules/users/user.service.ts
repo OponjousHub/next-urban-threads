@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import { RegisterInput } from "@/modules/users/user.schema";
 import { UserRepository } from "./user.repository";
-import AuthController from "../auth/auth.controller";
+import { getLoggedInUserId } from "@/lib/auth";
+
 // import { NextResponse } from "next/server";
 // import jwt from "jsonwebtoken";
 
@@ -48,7 +49,7 @@ export class UserService {
   }
 
   static async getMe(token: string) {
-    const userId = AuthController.getUserIdFromToken(token);
+    const userId = await getLoggedInUserId();
 
     if (!userId) {
       return "User not found!";
@@ -67,7 +68,7 @@ export class UserService {
   }
 
   static async deleteAccount(token: string) {
-    const userId = AuthController.getUserIdFromToken(token);
+    const userId = await getLoggedInUserId();
 
     if (!userId) {
       return "User not found!";

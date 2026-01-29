@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import AuthController from "@/modules/auth/auth.controller";
+// import AuthController from "@/modules/auth/auth.controller";
 import { RegisterSchema } from "@/modules/users/user.schema";
 import UserController from "@/modules/users/user.controller";
 import { AuthService } from "@/modules/auth/auth.service";
-import { getLoggedInUser } from "@/lib/auth";
+// import { getLoggedInUserId } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {

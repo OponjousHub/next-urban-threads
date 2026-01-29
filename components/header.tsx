@@ -38,7 +38,9 @@ const Header = () => {
 
     loadUser();
   }, []);
+
   console.log("USER FETCHED", user);
+
   const handleReloadHeader = () => {
     setUser(null);
   };

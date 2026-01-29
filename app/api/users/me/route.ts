@@ -3,6 +3,7 @@ import UserController from "@/modules/users/user.controller";
 import { prisma } from "@/utils/prisma";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { getLoggedInUserId } from "@/lib/auth";
 
 async function getUserIdFromToken() {
   const cookieStore = await cookies();
@@ -16,8 +17,8 @@ async function getUserIdFromToken() {
 // Get User profile
 export async function GET() {
   try {
-    const userId = await getUserIdFromToken();
-
+    // const userId = await getUserIdFromToken();
+    const userId = await getLoggedInUserId();
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }

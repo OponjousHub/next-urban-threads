@@ -1,9 +1,9 @@
 import { prisma } from "@/utils/prisma";
 import CheckoutClient from "./checkoutClient";
-import { getLoggedInUser } from "@/lib/auth";
+import { getLoggedInUserId } from "@/lib/auth";
 
 export default async function CheckoutPage() {
-  const userId = await getLoggedInUser();
+  const userId = await getLoggedInUserId();
 
   if (!userId) return null;
 

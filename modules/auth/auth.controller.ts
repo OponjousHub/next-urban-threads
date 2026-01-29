@@ -2,6 +2,7 @@ import { prisma } from "@/utils/prisma";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { User } from "@prisma/client";
 import { AuthService } from "./auth.service";
+import { getLoggedInUserId } from "@/lib/auth";
 
 type SafeUser = Omit<User, "password">;
 
@@ -38,7 +39,8 @@ class AuthController {
   // }
 
   static async restrictToAdmin(token: string) {
-    const userId = this.getUserIdFromToken(token);
+    const userId = await getLoggedInUserId();
+    // const userId = this.getUserIdFromToken(token);
 
     if (!userId) {
       throw new Error("Unauthorized");
@@ -67,14 +69,14 @@ class AuthController {
 
   //   return payload.id;
   // }
-  static getUserIdFromToken(token: string): string | null {
-    try {
-      const payload = this.verifyToken(token);
-      return payload?.id ?? null;
-    } catch {
-      return null;
-    }
-  }
+  // static getUserIdFromToken(token: string): string | null {
+  //   try {
+  //     const payload = this.verifyToken(token);
+  //     return payload?.id ?? null;
+  //   } catch {
+  //     return null;
+  //   }
+  // }
 }
 
 export default AuthController;

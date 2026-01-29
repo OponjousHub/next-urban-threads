@@ -49,7 +49,7 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
       const existing = prevItems.find((p) => p.id === item.id);
       if (existing) {
         return prevItems.map((p) =>
-          p.id === item.id ? { ...p, quantity: p.quantity + 1 } : p
+          p.id === item.id ? { ...p, quantity: p.quantity + 1 } : p,
         );
       }
       return [...prevItems, { ...item, quantity: 1 }];
@@ -74,16 +74,16 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
         .map((item) =>
           item.id === id
             ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-            : item
+            : item,
         )
-        .filter((item) => item.quantity > 0)
+        .filter((item) => item.quantity > 0),
     );
   };
 
   // ✅ Calculate subtotal correctly
   const subTotal = cartItems.reduce(
     (sum, cur) => sum + cur.price * cur.quantity,
-    0
+    0,
   );
 
   if (isLoading) return null; // Return nothing during load to avoid Hook mismatch

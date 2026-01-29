@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import AuthController from "@/modules/auth/auth.controller";
 import { LoginSchema } from "@/modules/auth/auth.schema";
+import { AuthService } from "@/modules/auth/auth.service";
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -14,11 +16,13 @@ export async function POST(req: Request) {
     }
 
     const result = await AuthController.login(parsed.data);
+    const token = AuthService.generateToken(result.user.id);
+    console.log("THIS IS LOG RESULT!!!!!!", result);
 
     const response = NextResponse.json(result, { status: 200 });
 
     // ✅ SET COOKIE HERE
-    response.cookies.set("token", result.token, {
+    response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
