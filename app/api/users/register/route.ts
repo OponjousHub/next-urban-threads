@@ -26,7 +26,6 @@ export async function POST(req: Request) {
 
     // Pass validated data to controller
     const result = await UserController.register(data);
-    console.log("RETURDED USER", result);
 
     // 5 Generate token
     const token = AuthService.generateToken(result.id);
@@ -41,7 +40,6 @@ export async function POST(req: Request) {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
-    console.log("I HAVE REGISTERED OOOO!", res);
     return res;
   } catch (error: any) {
     console.error("REGISTER ERROR:", error);

@@ -69,7 +69,7 @@ export async function getUserDashboardStats(userId: string) {
     }),
 
     prisma.address.findMany({
-      where: { id: userId },
+      where: { userId: userId },
       orderBy: { createdAt: "desc" },
     }),
   ]);

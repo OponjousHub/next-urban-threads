@@ -1,9 +1,11 @@
 import { prisma } from "@/utils/prisma";
 import { NextResponse } from "next/server";
-import { getLoggedInUser } from "@/lib/auth";
+import { getLoggedInUserId } from "@/lib/auth";
+import { AddressSchema } from "@/modules/address/address.schema";
+import AddressController from "@/modules/address/address.controller";
 
 export async function GET() {
-  const userId = await getLoggedInUser();
+  const userId = await getLoggedInUserId();
 
   if (!userId) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -18,26 +20,24 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const userId = await getLoggedInUser();
+  const userId = await getLoggedInUserId();
   if (!userId) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const data = await req.json();
+  const body = await req.json();
 
-  if (data.isDefault) {
-    await prisma.address.updateMany({
-      where: { userId },
-      data: { isDefault: false },
-    });
+  const parsed = AddressSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.flatten().fieldErrors },
+      { status: 400 },
+    );
   }
 
-  const address = await prisma.address.create({
-    data: {
-      ...data,
-      userId,
-    },
-  });
+  const data = parsed.data;
+  const result = AddressController.addAddress(data);
 
-  return NextResponse.json(address);
+  return NextResponse.json(result, { status: 201 });
 }
