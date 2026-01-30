@@ -5,6 +5,14 @@ class AddressService {
   static async addAddress(userId: string, data: AddressInput) {
     return AddressRepository.create(userId, data);
   }
+
+  static async updateAddress(
+    userId: string,
+    addressId: string,
+    data: AddressInput,
+  ) {
+    return AddressRepository.update(userId, addressId, data);
+  }
 }
 
 export default AddressService;

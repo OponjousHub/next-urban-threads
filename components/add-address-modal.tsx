@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -12,6 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  address?: any; // present = edit mode
+};
+
 export default function AddAddressModal({
   open,
   onClose,
@@ -21,6 +27,8 @@ export default function AddAddressModal({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [address, setAddress] = useState();
 
   const [form, setForm] = useState({
     street: "",
@@ -31,6 +39,19 @@ export default function AddAddressModal({
     isDefault: false,
   });
 
+  useEffect(() => {
+    if (address) {
+      setForm({
+        street: address.street,
+        city: address.city,
+        state: address.state ?? "",
+        country: address.country,
+        phone: address.phone ?? "",
+        isDefault: address.isDefault,
+      });
+    }
+  }, [address]);
+
   const handleChange = (key: string, value: any) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -38,8 +59,12 @@ export default function AddAddressModal({
   const handleSubmit = async () => {
     setLoading(true);
 
-    const res = await fetch("/api/addresses", {
-      method: "POST",
+    const url = address ? `/api/addresses/${address.id}` : "/api/addresses";
+
+    const method = address ? "PATCH" : "POST";
+
+    const res = await fetch(url, {
+      method: method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
@@ -59,7 +84,11 @@ export default function AddAddressModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add Address</DialogTitle>
+          <DialogTitle>
+            <h2 className="text-lg font-semibold">
+              {address ? "Edit Address" : "Add Address"}
+            </h2>
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -107,8 +136,23 @@ export default function AddAddressModal({
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSelectedAddress(address);
+                setOpen(true);
+              }}
+            >
+              Edit
+            </Button>
+
             <Button onClick={handleSubmit} disabled={loading}>
-              {loading ? "Saving..." : "Save Address"}
+              {loading
+                ? "Saving..."
+                : address
+                  ? "Update Address"
+                  : "Save Address"}
             </Button>
           </div>
         </div>

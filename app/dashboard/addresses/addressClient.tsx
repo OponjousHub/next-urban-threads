@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getUserDashboardStats } from "@/app/lib/dashboard";
-import { AddAddressModal } from "../../../components/add-address-modal";
+// import { getUserDashboardStats } from "@/app/lib/dashboard";
+import AddAddressModal from "../../../components/add-address-modal";
 
-type DashboardAddress = Awaited<ReturnType<typeof getUserDashboardStats>>;
+// type DashboardAddress = Awaited<ReturnType<typeof getUserDashboardStats>>;
 
 type Address = {
   id: string;
@@ -117,7 +117,7 @@ export default function AddressClient({ addresses }: { addresses: Address[] }) {
         ))}
       </div>
 
-      {/* <AddAddressModal open={open} onClose={() => setOpen(false)} /> */}
+      <AddAddressModal open={open} onClose={() => setOpen(false)} />
     </div>
   );
 }

@@ -29,6 +29,33 @@ const AddressRepository = {
       },
     });
   },
+
+  async update(userId: string, addressId: string, data: AddressInput) {
+    const shouldBeDefault = data.isDefault === true;
+
+    if (shouldBeDefault) {
+      await prisma.address.updateMany({
+        where: { userId },
+        data: { isDefault: false },
+      });
+    }
+
+    return prisma.address.update({
+      where: {
+        id: addressId,
+        userId, // 👈 prevents editing other users’ addresses
+      },
+      data: {
+        street: data.street,
+        city: data.city,
+        country: data.country,
+        fullName: data.fullName ?? "",
+        state: data.state ?? null,
+        phone: data.phone ?? null,
+        isDefault: shouldBeDefault,
+      },
+    });
+  },
 };
 
 export default AddressRepository;

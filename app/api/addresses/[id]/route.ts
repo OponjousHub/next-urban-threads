@@ -1,31 +1,43 @@
 import { prisma } from "@/utils/prisma";
-import { getLoggedInUser } from "@/lib/auth";
+import { getLoggedInUserId } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import AddressController from "@/modules/address/address.controller";
+import { AddressInput, AddressSchema } from "@/modules/address/address.schema";
+import AddressService from "@/modules/address/address.service";
 
 export async function PATCH(
   req: Request,
   { params }: { params: { id: string } },
 ) {
-  const userId = await getLoggedInUser();
+  const userId = await getLoggedInUserId();
   if (!userId) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   const data = await req.json();
+  const parsed = AddressSchema.safeParse(data);
 
-  if (data.isDefault) {
-    await prisma.address.updateMany({
-      where: { userId },
-      data: { isDefault: false },
-    });
+  // if (data.isDefault) {
+  //   await prisma.address.updateMany({
+  //     where: { userId },
+  //     data: { isDefault: false },
+  //   });
+  // }
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.flatten().fieldErrors },
+      { status: 400 },
+    );
   }
 
-  const address = await prisma.address.update({
-    where: { id: params.id },
-    data,
-  });
+  const result = await AddressController.updateAddress(
+    userId,
+    params.id,
+    parsed.data,
+  );
 
-  return NextResponse.json(address);
+  return NextResponse.json(result);
 }
 
 export async function DELETE(
