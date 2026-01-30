@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import toast from "react-hot-toast";
 
 type Props = {
   open: boolean;
@@ -18,17 +19,9 @@ type Props = {
   address?: any; // present = edit mode
 };
 
-export default function AddAddressModal({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export default function AddAddressModal({ open, onClose, address }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState<any>(null);
-  const [address, setAddress] = useState();
 
   const [form, setForm] = useState({
     street: "",
@@ -72,10 +65,10 @@ export default function AddAddressModal({
     setLoading(false);
 
     if (!res.ok) {
-      alert("Failed to add address");
+      toast.error(`Failed to ${address ? "update" : "add"} address ❌`);
       return;
     }
-
+    toast.success(`Address ${address ? "update" : "add"} successfully`);
     onClose();
     router.refresh();
   };
@@ -84,10 +77,8 @@ export default function AddAddressModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>
-            <h2 className="text-lg font-semibold">
-              {address ? "Edit Address" : "Add Address"}
-            </h2>
+          <DialogTitle className="text-lg font-semibold">
+            {address ? "Edit Address" : "Add Address"}
           </DialogTitle>
         </DialogHeader>
 
@@ -135,16 +126,6 @@ export default function AddAddressModal({
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={onClose}>
               Cancel
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setSelectedAddress(address);
-                setOpen(true);
-              }}
-            >
-              Edit
             </Button>
 
             <Button onClick={handleSubmit} disabled={loading}>

@@ -6,8 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 // import { getUserDashboardStats } from "@/app/lib/dashboard";
 import AddAddressModal from "../../../components/add-address-modal";
 
-// type DashboardAddress = Awaited<ReturnType<typeof getUserDashboardStats>>;
-
 type Address = {
   id: string;
   fullName: string;
@@ -23,6 +21,8 @@ type Address = {
 // export function AddressClient({ addresses }: { addresses: DashboardAddress }) {
 export default function AddressClient({ addresses }: { addresses: Address[] }) {
   const [open, setOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<any>(null);
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
       {/* Header */}
@@ -105,9 +105,17 @@ export default function AddressClient({ addresses }: { addresses: Address[] }) {
 
               {/* Actions */}
               <div className="flex justify-end gap-2">
-                <Button size="sm" variant="outline">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedAddress(address);
+                    setOpen(true);
+                  }}
+                >
                   Edit
                 </Button>
+
                 <Button size="sm" variant="destructive">
                   Delete
                 </Button>
@@ -117,7 +125,14 @@ export default function AddressClient({ addresses }: { addresses: Address[] }) {
         ))}
       </div>
 
-      <AddAddressModal open={open} onClose={() => setOpen(false)} />
+      <AddAddressModal
+        open={open}
+        onClose={() => {
+          setOpen(false);
+          setSelectedAddress(null);
+        }}
+        address={selectedAddress}
+      />
     </div>
   );
 }
