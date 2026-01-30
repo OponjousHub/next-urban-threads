@@ -56,6 +56,43 @@ const AddressRepository = {
       },
     });
   },
+
+  async delete(userId: string, addressId: string) {
+    const address = await prisma.address.findFirst({
+      where: {
+        id: addressId,
+        userId,
+      },
+    });
+
+    if (!address) {
+      throw new Error("Address not found");
+    }
+
+    const isDefault = address.isDefault;
+
+    // Delete address
+    await prisma.address.delete({
+      where: { id: addressId },
+    });
+
+    // If deleted address was default, promote another one
+    if (isDefault) {
+      const nextAddress = await prisma.address.findFirst({
+        where: { userId },
+        orderBy: { createdAt: "asc" },
+      });
+
+      if (nextAddress) {
+        await prisma.address.update({
+          where: { id: nextAddress.id },
+          data: { isDefault: true },
+        });
+      }
+    }
+
+    return true;
+  },
 };
 
 export default AddressRepository;

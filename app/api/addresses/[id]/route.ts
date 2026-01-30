@@ -44,6 +44,12 @@ export async function DELETE(
   _: Request,
   { params }: { params: { id: string } },
 ) {
-  await prisma.address.delete({ where: { id: params.id } });
+  const userId = await getLoggedInUserId();
+  if (!userId) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  await AddressController.deleteAddress(userId, params.id);
+
   return NextResponse.json({ success: true });
 }

@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-// import { getUserDashboardStats } from "@/app/lib/dashboard";
 import AddAddressModal from "../../../components/add-address-modal";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 type Address = {
   id: string;
@@ -18,10 +19,10 @@ type Address = {
   isDefault: boolean;
 };
 
-// export function AddressClient({ addresses }: { addresses: DashboardAddress }) {
 export default function AddressClient({ addresses }: { addresses: Address[] }) {
   const [open, setOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const router = useRouter();
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
@@ -49,34 +50,6 @@ export default function AddressClient({ addresses }: { addresses: Address[] }) {
         </div>
       )}
 
-      {/* Address list */}
-      {/* <div className="grid gap-4 sm:grid-cols-2">
-        {addresses.map((address) => (
-          <Card key={address.id}>
-            <CardContent className="p-4 flex justify-between items-start">
-          
-              <p className="font-medium">{address.street}</p>
-              <p className="text-sm text-gray-600">
-                {address.city}, {address.state ?? null}, {address.country}
-              </p>
-
-              {address.isDefault && (
-                <span className="inline-block mt-2 rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">
-                  Default
-                </span>
-              )}
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline">
-                  Edit
-                </Button>
-                <Button size="sm" variant="destructive">
-                  Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div> */}
       <div className="grid gap-6 sm:grid-cols-2">
         {addresses.map((address) => (
           <Card key={address.id} className="relative">
@@ -116,7 +89,35 @@ export default function AddressClient({ addresses }: { addresses: Address[] }) {
                   Edit
                 </Button>
 
-                <Button size="sm" variant="destructive">
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={async () => {
+                    const ok = confirm("Delete this address?");
+                    if (!ok) return;
+                    const toastId = toast.loading("Deleting...");
+
+                    try {
+                      const res = await fetch(`/api/addresses/${address.id}`, {
+                        method: "DELETE",
+                      });
+
+                      if (!res.ok) throw new Error("Failed");
+
+                      toast.success("Address deleted successfully", {
+                        id: toastId,
+                        duration: 5000, // 5 seconds
+                      });
+
+                      router.refresh();
+                    } catch (err) {
+                      toast.error("Failed to delete address", {
+                        id: toastId,
+                        duration: 5000, // 5 seconds
+                      });
+                    }
+                  }}
+                >
                   Delete
                 </Button>
               </div>

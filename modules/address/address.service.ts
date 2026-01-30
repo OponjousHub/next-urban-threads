@@ -13,6 +13,9 @@ class AddressService {
   ) {
     return AddressRepository.update(userId, addressId, data);
   }
+  static async deleteAddress(userId: string, id: string) {
+    return AddressRepository.delete(userId, id);
+  }
 }
 
 export default AddressService;

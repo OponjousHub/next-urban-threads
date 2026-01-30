@@ -85,12 +85,7 @@ export async function getUserDashboardStats(userId: string) {
     shippingAddress: order.shippingAddress,
     createdAt: order.createdAt.toISOString(), // ✅ Date → string
     totalAmount: order.totalAmount.toNumber(), // ✅ Decimal → number
-    // items: order.items.map((item) => ({
-    //   id: item.id,
-    //   productId: item.productId,
-    //   quantity: item.quantity,
-    //   price: item.price.toNumber(), // ✅ Decimal → number
-    // })),
+
     items: order.items.map((item) => ({
       id: item.id,
       productId: item.productId,

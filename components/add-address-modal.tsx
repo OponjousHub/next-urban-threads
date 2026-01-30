@@ -65,10 +65,23 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
     setLoading(false);
 
     if (!res.ok) {
-      toast.error(`Failed to ${address ? "update" : "add"} address ❌`);
+      toast.error(`Failed to ${address ? "update" : "add"} address ❌`, {
+        duration: 5000, // 5 seconds
+      });
       return;
     }
-    toast.success(`Address ${address ? "update" : "add"} successfully`);
+
+    setForm({
+      street: "",
+      city: "",
+      state: "",
+      country: "",
+      phone: "",
+      isDefault: false,
+    });
+    toast.success(`Address ${address ? "update" : "add"} successfully`, {
+      duration: 5000, // 5 seconds
+    });
     onClose();
     router.refresh();
   };

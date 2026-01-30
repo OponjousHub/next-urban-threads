@@ -18,6 +18,10 @@ class AddressController {
     );
     return updatedAddress;
   }
+  static async deleteAddress(userId: string, id: string) {
+    const address = await AddressService.deleteAddress(userId, id);
+    return address;
+  }
 }
 
 export default AddressController;

@@ -1,5 +1,5 @@
 import { prisma } from "@/utils/prisma";
-import AuthController from "@/modules/auth/auth.controller";
+import { getLoggedInUserId } from "@/lib/auth";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,7 +12,7 @@ export default async function OrdersPage() {
     return <p>Please log in to view your orders.</p>;
   }
 
-  const userId = AuthController.getUserIdFromToken(token);
+  const userId = await getLoggedInUserId();
   if (!userId) {
     return <p>Session expired. Please log in again.</p>;
   }
