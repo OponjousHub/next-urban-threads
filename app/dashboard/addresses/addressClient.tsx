@@ -4,12 +4,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import AddAddressModal from "../../../components/add-address-modal";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 type Address = {
   id: string;
-  fullName: string;
+  fullName: string | null;
   street: string;
   city: string;
   state?: string | null;
@@ -19,10 +20,42 @@ type Address = {
   isDefault: boolean;
 };
 
-export default function AddressClient({ addresses }: { addresses: Address[] }) {
+type Props = {
+  initialAddresses: Address[];
+};
+
+export default function AddressClient({ initialAddresses }: Props) {
   const [open, setOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+
+  const addresses = initialAddresses;
+
+  async function handleDelete() {
+    if (!deleteId) return;
+
+    setIsDeleting(true);
+
+    try {
+      await toast.promise(
+        fetch(`/api/addresses/${deleteId}`, {
+          method: "DELETE",
+        }),
+        {
+          loading: "Deleting address...",
+          success: "Address deleted successfully",
+          error: "Failed to delete address",
+        },
+      );
+
+      router.refresh();
+      setDeleteId(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
@@ -92,31 +125,7 @@ export default function AddressClient({ addresses }: { addresses: Address[] }) {
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={async () => {
-                    const ok = confirm("Delete this address?");
-                    if (!ok) return;
-                    const toastId = toast.loading("Deleting...");
-
-                    try {
-                      const res = await fetch(`/api/addresses/${address.id}`, {
-                        method: "DELETE",
-                      });
-
-                      if (!res.ok) throw new Error("Failed");
-
-                      toast.success("Address deleted successfully", {
-                        id: toastId,
-                        duration: 5000, // 5 seconds
-                      });
-
-                      router.refresh();
-                    } catch (err) {
-                      toast.error("Failed to delete address", {
-                        id: toastId,
-                        duration: 5000, // 5 seconds
-                      });
-                    }
-                  }}
+                  onClick={() => setDeleteId(address.id)}
                 >
                   Delete
                 </Button>
@@ -133,6 +142,15 @@ export default function AddressClient({ addresses }: { addresses: Address[] }) {
           setSelectedAddress(null);
         }}
         address={selectedAddress}
+      />
+
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete address"
+        description="Are you sure you want to delete this address? This action cannot be undone."
+        loading={isDeleting}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
       />
     </div>
   );

@@ -17,7 +17,6 @@ export async function POST(req: Request) {
 
     const result = await AuthController.login(parsed.data);
     const token = AuthService.generateToken(result.user.id);
-    console.log("THIS IS LOG RESULT!!!!!!", result);
 
     const response = NextResponse.json(result, { status: 200 });
 

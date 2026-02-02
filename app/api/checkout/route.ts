@@ -7,12 +7,11 @@ import AuthController from "@/modules/auth/auth.controller";
 import { detectCountryFromHeaders } from "@/app/lib/payments/geo";
 import { resolvePaymentConfig } from "@/app/lib/payments/payment";
 import { getPaymentProvider } from "@/app/lib/payments/factory";
-import { getLoggedInUser } from "@/lib/auth";
+import { getLoggedInUserId } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
-    // 1️⃣ Auth
-    const userId = await getLoggedInUser();
+    const userId = await getLoggedInUserId();
 
     if (!userId) {
       return NextResponse.json(
@@ -22,11 +21,47 @@ export async function POST(req: NextRequest) {
     }
 
     // 2️⃣ Request body
-    const { items, shippingAddress, paymentMethod, email } = await req.json();
-
+    const { items, shippingAddress, addressId, paymentMethod, email } =
+      await req.json();
     if (!items || items.length === 0) {
       return NextResponse.json({ message: "Cart is empty" }, { status: 400 });
     }
+
+    let shippingAddressId: string;
+
+    if (addressId) {
+      const userAddress = await prisma.address.findFirst({
+        where: { id: addressId, userId },
+      });
+
+      if (!userAddress) {
+        return NextResponse.json(
+          { message: "Address not found" },
+          { status: 400 },
+        );
+      }
+      console.log("USER ADDRESS", userAddress);
+      shippingAddressId = userAddress.id;
+    } else {
+      if (!shippingAddress) {
+        return NextResponse.json(
+          { message: "Shipping address required" },
+          { status: 400 },
+        );
+      }
+
+      const newAddress = await prisma.address.create({
+        data: {
+          ...shippingAddress,
+          userId,
+          isDefault: false,
+        },
+      });
+
+      shippingAddressId = newAddress.id;
+    }
+
+    console.log("FINAL ADDRESS NEW", shippingAddressId);
 
     // 3️⃣ Geo → payment config
     const country = await detectCountryFromHeaders();
@@ -55,31 +90,29 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    // 5️⃣ Create order
-    const paymentReference = crypto.randomUUID();
-
     const order = await prisma.order.create({
       data: {
         userId,
+        shippingAddressId,
         totalAmount,
         currency,
         paymentProvider: providerKey,
-        shippingAddress: JSON.stringify(shippingAddress),
-        paymentReference,
         paymentMethod,
+        paymentReference: "", // set later
         items: {
           create: orderItems,
         },
       },
-      include: {
-        items: true,
-      },
+    });
+    const paymentReference = order.id;
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { paymentReference },
     });
 
     // 6️⃣ Initialize payment (factory → provider instance)
     const provider = getPaymentProvider(order.paymentProvider);
-    console.log("Detected country:", country);
-    console.log("Select Provider:", provider);
 
     const payment = await provider.initializePayment({
       email,

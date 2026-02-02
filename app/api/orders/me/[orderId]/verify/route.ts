@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { prisma } from "@/utils/prisma";
-import AuthController from "@/modules/auth/auth.controller";
+import { getLoggedInUserId } from "@/lib/auth";
 import { PaystackProvider } from "@/app/lib/payments/paystack";
 import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
 
@@ -10,11 +9,6 @@ type RouteParams = {
     orderId: string;
   };
 };
-
-// export async function GET(req: NextRequest, { params }: RouteParams) {
-//   console.log("backend verify GET hit");
-//   return NextResponse.json({ ok: true });
-// }
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
   console.log("backend verify GET hit");
@@ -26,14 +20,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // ---------------------------
     // 1️⃣ Authenticate user
     // ---------------------------
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-
-    if (!token) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = AuthController.getUserIdFromToken(token);
+    const userId = await getLoggedInUserId();
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
@@ -125,7 +112,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     console.error("Verify order error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -72,13 +72,28 @@ model Order {
   totalAmount     Decimal
   status          OrderStatus @default(PENDING)
   paymentMethod   String
-  shippingAddress Json
+  shippingAddressId  String
+  shippingAddress    Address  @relation(fields: [shippingAddressId], references: [id])
   currency       String
   paymentProvider PaymentProvider
   paymentReference String    @unique
   items           OrderItem[]
   createdAt       DateTime    @default(now())
 }
+// model Order {
+//   id              String      @id @default(cuid())
+//   userId          String
+//   user            User        @relation(fields: [userId], references: [id])
+//   totalAmount     Decimal
+//   status          OrderStatus @default(PENDING)
+//   paymentMethod   String
+//   shippingAddress Json
+//   currency       String
+//   paymentProvider PaymentProvider
+//   paymentReference String    @unique
+//   items           OrderItem[]
+//   createdAt       DateTime    @default(now())
+// }
 
 model OrderItem {
   id        String  @id @default(cuid())
@@ -102,6 +117,7 @@ city String
 state String?
 postalCode String?
 country String
+address Order[]
 
 isDefault Boolean @default(false)
 

@@ -5,12 +5,12 @@ import { useCart } from "@/store/cart-context";
 import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { email } from "zod";
-import { Phone } from "lucide-react";
+// import { email } from "zod";
+// import { Phone } from "lucide-react";
 
 type ShippingAddress = {
   id: string;
-  fullName: string;
+  fullName: string | null;
   street: string;
   city: string;
   state?: string | null;
@@ -82,28 +82,35 @@ export default function CheckoutClient({
       return;
     }
 
+    // if(selectedAddressId){
+
+    // }
+
     // 🔄 Loading toast
     const toastId = toast.loading("Placing your order...");
     setIsLoading(true);
 
-    console.log(formData);
+    let shippingAddress: any = null;
+    let addressId: string | null = null;
+
     try {
-      // const address = `${formData.address}, ${formData.city}, ${formData.country}`;
       const address = {
         fullName: formData.fullName,
         street: formData.street,
-        postCode: formData.postalCode,
+        postalCode: formData.postalCode,
         state: formData.state,
         city: formData.city,
         country: formData.country,
         phone: formData.phone,
       };
+
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: orderItems,
-          shippingAddress: address,
+          shippingAddress: selectedAddressId ? null : address,
+          addressId: selectedAddressId,
           paymentMethod: formData.paymentMethod,
           email: formData.email,
         }),
@@ -114,7 +121,7 @@ export default function CheckoutClient({
         throw new Error(errorData.message || "Order failed");
       }
 
-      //SHOW TOAST NOTIFICATION
+      // //SHOW TOAST NOTIFICATION
       toast.dismiss(toastId);
       toast.loading("Redirecting to secure payment...");
 
@@ -146,7 +153,7 @@ export default function CheckoutClient({
       setIsLoading(false);
     }
   };
-  console.log(addresses);
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
       {/* BILLING DETAILS */}
@@ -157,6 +164,12 @@ export default function CheckoutClient({
           {/* ================= SHIPPING ADDRESS ================= */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Shipping Address</h3>
+
+            {addresses.length === 0 && (
+              <div className="rounded-md border p-4 text-sm text-gray-500">
+                No address found. Please add one in your dashboard.
+              </div>
+            )}
 
             {addresses.length > 0 && (
               <div className="space-y-3">
@@ -174,6 +187,17 @@ export default function CheckoutClient({
                       name="shippingAddress"
                       checked={selectedAddressId === address.id}
                       onChange={() => {
+                        setFormData({
+                          fullName: "",
+                          email: "",
+                          street: "",
+                          city: "",
+                          postalCode: "",
+                          phone: "",
+                          state: "",
+                          country: "",
+                          paymentMethod: "credit-card",
+                        });
                         setSelectedAddressId(address.id);
                         setShowNewAddressForm(false);
                       }}
@@ -187,6 +211,12 @@ export default function CheckoutClient({
                         {address.country}
                       </p>
                       <p className="text-sm text-gray-600">{address.phone}</p>
+
+                      {address.isDefault && (
+                        <span className="mt-2 inline-block text-sm font-bold text-green-600 ">
+                          Default
+                        </span>
+                      )}
                     </div>
                   </label>
                 ))}

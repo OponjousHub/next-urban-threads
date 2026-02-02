@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import AuthController from "@/modules/auth/auth.controller";
+import { getLoggedInUserId } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { prisma } from "@/utils/prisma";
 
@@ -10,17 +10,19 @@ type RouteParams = {
 };
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  // const cookieStore = await cookies();
+  // const token = cookieStore.get("token")?.value;
 
-  if (!token) {
-    return NextResponse.json(
-      { message: "Unauthorized: missing token!" },
-      { status: 401 }
-    );
-  }
+  // if (!token) {
+  //   return NextResponse.json(
+  //     { message: "Unauthorized: missing token!" },
+  //     { status: 401 },
+  //   );
+  // }
 
-  const userId = AuthController.getUserIdFromToken(token);
+  // const userId = AuthController.getUserIdFromToken(token);
+  const userId = await getLoggedInUserId();
+
   if (!userId) {
     return NextResponse.json({ message: "Unauthorized!" }, { status: 401 });
   }
@@ -30,7 +32,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     if (!orderId) {
       return NextResponse.json(
         { message: "Order ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -65,7 +67,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

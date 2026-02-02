@@ -2,6 +2,8 @@ import { prisma } from "@/utils/prisma";
 import CheckoutClient from "./checkoutClient";
 import { getLoggedInUserId } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export default async function CheckoutPage() {
   const userId = await getLoggedInUserId();
 
@@ -9,7 +11,7 @@ export default async function CheckoutPage() {
 
   const addresses = await prisma.address.findMany({
     where: { userId },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
   });
 
   return <CheckoutClient addresses={addresses} />;

@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useParams } from "next/navigation";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { GetToast } from "@/components/ui/adminToast";
-import { NextRequest } from "next/server";
 
 type OrderItem = {
   id: string;
@@ -168,12 +167,12 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
         if (data.status === "PAID") {
           toast.custom(
             <GetToast title="Payment verified!" description="Status: Paid" />,
-            { duration: 4000 }
+            { duration: 4000 },
           );
         } else if (data.status === "FAILED") {
           toast.custom(
             <GetToast title="Payment failed!" description="Status: Failed" />,
-            { duration: 4000 }
+            { duration: 4000 },
           );
         }
       } catch (err) {
@@ -184,7 +183,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
             title="Verification failed"
             description="Could not verify payment"
           />,
-          { duration: 4000 }
+          { duration: 4000 },
         );
       } finally {
         setLoading(false);
@@ -276,8 +275,8 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                 order.status === "PAID"
                   ? "text-green-600"
                   : order.status === "FAILED"
-                  ? "text-red-600"
-                  : "text-yellow-600"
+                    ? "text-red-600"
+                    : "text-yellow-600"
               }`}
             >
               {order.status}

@@ -38,7 +38,9 @@ export async function getUserDashboardStats(userId: string) {
       where: { userId },
       orderBy: { createdAt: "desc" },
       take: 5,
+
       include: {
+        shippingAddress: true,
         items: {
           include: {
             product: {
@@ -74,31 +76,35 @@ export async function getUserDashboardStats(userId: string) {
     }),
   ]);
   console.dir(recentOrders[0]?.items[0], { depth: null });
-  const serializedRecentOrders = recentOrders.map((order) => ({
-    id: order.id,
-    userId: order.userId,
-    status: order.status,
-    paymentMethod: order.paymentMethod,
-    paymentProvider: order.paymentProvider,
-    paymentReference: order.paymentReference,
-    currency: order.currency,
-    shippingAddress: order.shippingAddress,
-    createdAt: order.createdAt.toISOString(), // ✅ Date → string
-    totalAmount: order.totalAmount.toNumber(), // ✅ Decimal → number
+  const serializedRecentOrders = recentOrders.map((order) => {
+    console.log("MY ADDRESS ----------------", order.shippingAddress);
 
-    items: order.items.map((item) => ({
-      id: item.id,
-      productId: item.productId,
-      quantity: item.quantity,
-      price: item.price.toNumber(),
-      product: item.product
-        ? {
-            name: item.product.name,
-            images: item.product.images,
-          }
-        : null,
-    })),
-  }));
+    return {
+      id: order.id,
+      userId: order.userId,
+      status: order.status,
+      paymentMethod: order.paymentMethod,
+      paymentProvider: order.paymentProvider,
+      paymentReference: order.paymentReference,
+      currency: order.currency,
+      shippingAddress: order.shippingAddress,
+      createdAt: order.createdAt.toISOString(), // ✅ Date → string
+      totalAmount: order.totalAmount.toNumber(), // ✅ Decimal → number
+
+      items: order.items.map((item) => ({
+        id: item.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price.toNumber(),
+        product: item.product
+          ? {
+              name: item.product.name,
+              images: item.product.images,
+            }
+          : null,
+      })),
+    };
+  });
 
   return {
     totalOrders,
