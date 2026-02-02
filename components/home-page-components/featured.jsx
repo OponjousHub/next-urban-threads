@@ -12,7 +12,7 @@ function Featured() {
           Featured Products
         </h1>
         <div className=" text-[#333] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-          {featuredProducts.map((f) => (
+          {featuredProducts?.map((f) => (
             <div key={f.id} className="featured-card-style">
               <div className="relative w-full h-[22rem] mb-7">
                 <Image

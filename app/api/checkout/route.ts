@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       shippingAddressId = newAddress.id;
     }
 
-    console.log("FINAL ADDRESS NEW", shippingAddressId);
+    // console.log("FINAL ADDRESS NEW", shippingAddressId);
 
     // 3️⃣ Geo → payment config
     const country = await detectCountryFromHeaders();
@@ -90,6 +90,8 @@ export async function POST(req: NextRequest) {
       };
     });
 
+    const paymentReference = crypto.randomUUID();
+
     const order = await prisma.order.create({
       data: {
         userId,
@@ -98,13 +100,12 @@ export async function POST(req: NextRequest) {
         currency,
         paymentProvider: providerKey,
         paymentMethod,
-        paymentReference: "", // set later
+        paymentReference, // set later
         items: {
           create: orderItems,
         },
       },
     });
-    const paymentReference = order.id;
 
     await prisma.order.update({
       where: { id: order.id },
@@ -113,6 +114,13 @@ export async function POST(req: NextRequest) {
 
     // 6️⃣ Initialize payment (factory → provider instance)
     const provider = getPaymentProvider(order.paymentProvider);
+
+    console.log("FLW PAYLOAD", {
+      reference: order.paymentReference,
+      amount: order.totalAmount.toNumber(),
+      currency,
+      email,
+    });
 
     const payment = await provider.initializePayment({
       email,

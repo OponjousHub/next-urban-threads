@@ -15,16 +15,21 @@ export class FlutterwaveProvider implements PaymentProvider {
     reference: string;
     callbackUrl: string;
   }) {
+    if (!email) {
+      throw new Error("Customer email is required for payment");
+    }
+
     const res = await axios.post(
       `${this.baseUrl}/payments`,
       {
         tx_ref: reference,
-        amount,
+        amount: Math.round(amount),
         currency: "NGN", // change dynamically if needed
         redirect_url: callbackUrl,
         customer: {
           email,
         },
+        payment_options: "card,banktransfer",
         customizations: {
           title: "Urban Threads",
           description: "Order payment",
@@ -35,7 +40,7 @@ export class FlutterwaveProvider implements PaymentProvider {
           Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     return {
@@ -51,7 +56,7 @@ export class FlutterwaveProvider implements PaymentProvider {
         headers: {
           Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
         },
-      }
+      },
     );
 
     return res.data.data.status === "successful";
