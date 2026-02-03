@@ -120,6 +120,7 @@ country String
 address Order[]
 
 isDefault Boolean @default(false)
+isTemporary  Boolean  @default(false)
 
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt

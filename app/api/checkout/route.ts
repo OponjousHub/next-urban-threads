@@ -21,8 +21,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 2️⃣ Request body
-    const { items, shippingAddress, addressId, paymentMethod, email } =
-      await req.json();
+    const {
+      items,
+      shippingAddress,
+      addressId,
+      paymentMethod,
+      email,
+      saveAddress,
+    } = await req.json();
     if (!items || items.length === 0) {
       return NextResponse.json({ message: "Cart is empty" }, { status: 400 });
     }
@@ -40,7 +46,6 @@ export async function POST(req: NextRequest) {
           { status: 400 },
         );
       }
-      console.log("USER ADDRESS", userAddress);
       shippingAddressId = userAddress.id;
     } else {
       if (!shippingAddress) {
@@ -50,18 +55,29 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const newAddress = await prisma.address.create({
-        data: {
-          ...shippingAddress,
-          userId,
-          isDefault: false,
-        },
-      });
+      if (saveAddress) {
+        const newAddress = await prisma.address.create({
+          data: {
+            ...shippingAddress,
+            userId,
+            isDefault: false,
+          },
+        });
 
-      shippingAddressId = newAddress.id;
+        shippingAddressId = newAddress.id;
+      } else {
+        // ❗ Create a TEMP address (not saved)
+        const tempAddress = await prisma.address.create({
+          data: {
+            ...shippingAddress,
+            userId,
+            isTemporary: true, // optional but recommended
+          },
+        });
+
+        shippingAddressId = tempAddress.id;
+      }
     }
-
-    // console.log("FINAL ADDRESS NEW", shippingAddressId);
 
     // 3️⃣ Geo → payment config
     const country = await detectCountryFromHeaders();

@@ -5,8 +5,6 @@ import { useCart } from "@/store/cart-context";
 import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-// import { email } from "zod";
-// import { Phone } from "lucide-react";
 
 type ShippingAddress = {
   id: string;
@@ -28,7 +26,9 @@ export default function CheckoutClient({
     useState<ShippingAddress[]>(initialAddresses);
   const { cartItems, clearCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string }>({});
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const [saveAddress, setSaveAddress] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null,
   );
@@ -62,12 +62,45 @@ export default function CheckoutClient({
   const shipping = subtotal > 0 ? 10 : 0;
   const total = subtotal + shipping;
 
+  const validateEmail = (email: string) => {
+    if (!email.trim()) return "Email is required";
+    if (!email.includes("@")) return "Enter a valid email address";
+    return null;
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (name === "email") {
+      const error = validateEmail(value);
+      setErrors((prev) => ({
+        ...prev,
+        email: error || undefined,
+      }));
+    }
   };
+
+  // const handleChange = (
+  //   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  // ) => {
+  //   const { name, value } = e.target;
+
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+
+  //   if (name === "email") {
+  //     setErrors((prev) => ({ ...prev, email: undefined }));
+  //   }
+  // };
 
   const orderItems = cartItems.map((item) => ({
     productId: String(item.id), // must match Product.id in DB
@@ -77,21 +110,21 @@ export default function CheckoutClient({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const emailError = validateEmail(formData.email);
+
+    if (emailError) {
+      setErrors({ email: emailError });
+      return;
+    }
+
     if (cartItems.length === 0) {
       router.push("/cart");
       return;
     }
 
-    // if(selectedAddressId){
-
-    // }
-
     // 🔄 Loading toast
     const toastId = toast.loading("Placing your order...");
     setIsLoading(true);
-
-    let shippingAddress: any = null;
-    let addressId: string | null = null;
 
     try {
       const address = {
@@ -104,6 +137,14 @@ export default function CheckoutClient({
         phone: formData.phone,
       };
 
+      console.log("SHOW SAVED EMAIL", {
+        items: orderItems,
+        shippingAddress: selectedAddressId ? null : address,
+        addressId: selectedAddressId,
+        paymentMethod: formData.paymentMethod,
+        email: formData.email,
+      });
+
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -113,6 +154,7 @@ export default function CheckoutClient({
           addressId: selectedAddressId,
           paymentMethod: formData.paymentMethod,
           email: formData.email,
+          saveAddress,
         }),
       });
 
@@ -160,7 +202,7 @@ export default function CheckoutClient({
       <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h1 className="text-3xl font-semibold text-gray-800 mb-6">Checkout</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form noValidate onSubmit={handleSubmit} className="space-y-6">
           {/* ================= SHIPPING ADDRESS ================= */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Shipping Address</h3>
@@ -220,6 +262,29 @@ export default function CheckoutClient({
                     </div>
                   </label>
                 ))}
+              </div>
+            )}
+            {!showNewAddressForm && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address{" "}
+                  <span className="text-red-500 mt-1 text-lg">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2
+        ${
+          errors.email
+            ? "border-red-500 focus:ring-red-500"
+            : "focus:ring-indigo-500"
+        }`}
+                />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                )}
               </div>
             )}
 
@@ -372,6 +437,17 @@ export default function CheckoutClient({
               <option value="bank-transfer">Bank Transfer</option>
             </select>
           </div>
+          {!selectedAddressId && (
+            <label className="flex items-center gap-2 mt-3 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={saveAddress}
+                onChange={(e) => setSaveAddress(e.target.checked)}
+                className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              />
+              Save this address for future checkouts
+            </label>
+          )}
 
           <button
             type="submit"
