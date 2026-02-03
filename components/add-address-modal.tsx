@@ -24,22 +24,26 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
+    fullName: "",
     street: "",
     city: "",
     state: "",
     country: "",
     phone: "",
+    postalCode: "",
     isDefault: false,
   });
 
   useEffect(() => {
     if (address) {
       setForm({
+        fullName: address.fullName,
         street: address.street,
         city: address.city,
         state: address.state ?? "",
         country: address.country,
         phone: address.phone ?? "",
+        postalCode: address.postalCode,
         isDefault: address.isDefault,
       });
     }
@@ -72,11 +76,13 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
     }
 
     setForm({
+      fullName: "",
       street: "",
       city: "",
       state: "",
       country: "",
       phone: "",
+      postalCode: "",
       isDefault: false,
     });
     toast.success(`Address ${address ? "update" : "add"} successfully`, {
@@ -97,34 +103,46 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
 
         <div className="space-y-4">
           <Input
-            placeholder="Street address"
-            value={form.street}
-            onChange={(e) => handleChange("street", e.target.value)}
+            placeholder="Full Name"
+            value={form.fullName}
+            onChange={(e) => handleChange("fullName", e.target.value)}
           />
 
           <div className="grid grid-cols-2 gap-3">
             <Input
-              placeholder="City"
+              placeholder="Street Address"
+              value={form.street}
+              onChange={(e) => handleChange("street", e.target.value)}
+            />
+            <Input
+              placeholder="City (optional)"
               value={form.city}
               onChange={(e) => handleChange("city", e.target.value)}
             />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <Input
               placeholder="State (optional)"
               value={form.state}
               onChange={(e) => handleChange("state", e.target.value)}
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
             <Input
               placeholder="Country"
               value={form.country}
               onChange={(e) => handleChange("country", e.target.value)}
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
             <Input
               placeholder="Phone (optional)"
               value={form.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
+            />
+            <Input
+              placeholder="postalCode"
+              value={form.postalCode}
+              onChange={(e) => handleChange("postalCode", e.target.value)}
             />
           </div>
 
