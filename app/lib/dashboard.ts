@@ -71,14 +71,12 @@ export async function getUserDashboardStats(userId: string) {
     }),
 
     prisma.address.findMany({
-      where: { userId: userId },
+      where: { userId: userId, isTemporary: false },
       orderBy: { createdAt: "desc" },
     }),
   ]);
   console.dir(recentOrders[0]?.items[0], { depth: null });
   const serializedRecentOrders = recentOrders.map((order) => {
-    console.log("MY ADDRESS ----------------", order.shippingAddress);
-
     return {
       id: order.id,
       userId: order.userId,
