@@ -37,6 +37,7 @@ export async function POST(req: Request) {
   }
 
   const data = parsed.data;
+  console.log("BACKEND FORM", data);
   const result = await AddressController.addAddress(userId, data);
 
   return NextResponse.json(result, { status: 201 });

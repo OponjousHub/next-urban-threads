@@ -43,7 +43,7 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
         state: address.state ?? "",
         country: address.country,
         phone: address.phone ?? "",
-        postalCode: address.postalCode,
+        postalCode: address.postalCode ?? "",
         isDefault: address.isDefault,
       });
     }
@@ -55,7 +55,7 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
 
   const handleSubmit = async () => {
     setLoading(true);
-
+    console.log("FRONTEND FORM", form);
     const url = address ? `/api/addresses/${address.id}` : "/api/addresses";
 
     const method = address ? "PATCH" : "POST";

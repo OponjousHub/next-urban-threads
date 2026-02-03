@@ -87,21 +87,6 @@ export default function CheckoutClient({
     }
   };
 
-  // const handleChange = (
-  //   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  // ) => {
-  //   const { name, value } = e.target;
-
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-
-  //   if (name === "email") {
-  //     setErrors((prev) => ({ ...prev, email: undefined }));
-  //   }
-  // };
-
   const orderItems = cartItems.map((item) => ({
     productId: String(item.id), // must match Product.id in DB
     quantity: item.quantity,
@@ -136,6 +121,7 @@ export default function CheckoutClient({
         country: formData.country,
         phone: formData.phone,
       };
+      // console.log(address)
 
       console.log("SHOW SAVED EMAIL", {
         items: orderItems,
@@ -315,7 +301,7 @@ export default function CheckoutClient({
                     value={formData.fullName}
                     onChange={handleChange}
                     required
-                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
 
@@ -329,7 +315,7 @@ export default function CheckoutClient({
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
@@ -345,7 +331,7 @@ export default function CheckoutClient({
                   onChange={handleChange}
                   required
                   placeholder="+234 801 234 5678"
-                  className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div>
@@ -358,7 +344,7 @@ export default function CheckoutClient({
                   value={formData.street}
                   onChange={handleChange}
                   required
-                  className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">

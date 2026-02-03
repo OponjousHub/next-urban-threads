@@ -7,6 +7,7 @@ export const AddressSchema = z.object({
   state: z.string().optional(),
   country: z.string().min(2),
   phone: z.string().optional(),
+  postalCode: z.string().optional(),
   isDefault: z.boolean().optional(),
 });
 

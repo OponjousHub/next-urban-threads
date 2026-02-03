@@ -25,6 +25,7 @@ const AddressRepository = {
         fullName: data.fullName ?? "",
         state: data.state ?? null,
         phone: data.phone ?? null,
+        postalCode: data.postalCode ?? null,
         isDefault: shouldBeDefault,
       },
     });
@@ -71,9 +72,10 @@ const AddressRepository = {
 
     const isDefault = address.isDefault;
 
-    // Delete address
-    await prisma.address.delete({
+    // Delete address (SOFT DELETE)
+    await prisma.address.update({
       where: { id: addressId },
+      data: { isDeleted: true },
     });
 
     // If deleted address was default, promote another one

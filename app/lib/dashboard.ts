@@ -71,7 +71,7 @@ export async function getUserDashboardStats(userId: string) {
     }),
 
     prisma.address.findMany({
-      where: { userId: userId, isTemporary: false },
+      where: { userId: userId, isTemporary: false, isDeleted: false },
       orderBy: { createdAt: "desc" },
     }),
   ]);

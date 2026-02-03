@@ -10,7 +10,7 @@ export default async function CheckoutPage() {
   if (!userId) return null;
 
   const addresses = await prisma.address.findMany({
-    where: { userId, isTemporary: false },
+    where: { userId, isTemporary: false, isDeleted: false },
     orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
   });
 

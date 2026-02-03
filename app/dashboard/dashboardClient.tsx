@@ -219,10 +219,11 @@ function DashboardClient({ stats }: { stats: DashboardStats }) {
                   Unable to load profile information.
                 </p>
               )}
-
-              <Button className="mt-4 w-full" variant="outline">
-                Edit Profile
-              </Button>
+              <Link href="/dashboard/profile">
+                <Button className="mt-4 w-full" variant="outline">
+                  Edit Profile
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 

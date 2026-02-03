@@ -80,20 +80,7 @@ model Order {
   items           OrderItem[]
   createdAt       DateTime    @default(now())
 }
-// model Order {
-//   id              String      @id @default(cuid())
-//   userId          String
-//   user            User        @relation(fields: [userId], references: [id])
-//   totalAmount     Decimal
-//   status          OrderStatus @default(PENDING)
-//   paymentMethod   String
-//   shippingAddress Json
-//   currency       String
-//   paymentProvider PaymentProvider
-//   paymentReference String    @unique
-//   items           OrderItem[]
-//   createdAt       DateTime    @default(now())
-// }
+
 
 model OrderItem {
   id        String  @id @default(cuid())
@@ -119,6 +106,7 @@ postalCode String?
 country String
 address Order[]
 
+isDeleted Boolean  @default(false)
 isDefault Boolean @default(false)
 isTemporary  Boolean  @default(false)
 
