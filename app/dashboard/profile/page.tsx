@@ -4,12 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import Image from "next/image";
-import { v2 as cloudinary } from "cloudinary";
-import { uploadImageToCloudinary } from "@/app/lib/uploadToCloudinary";
-
-cloudinary.config({
-  secure: true,
-});
 
 export default function EditProfilePage() {
   const [image, setImage] = useState<string | null>(null);
@@ -20,6 +14,7 @@ export default function EditProfilePage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const initials = form.name
@@ -88,7 +83,7 @@ export default function EditProfilePage() {
 
   const handleUpload = async (file: File) => {
     try {
-      setLoading(true);
+      setUploading(true);
 
       const formData = new FormData();
       formData.append("file", file);
@@ -113,11 +108,34 @@ export default function EditProfilePage() {
 
       setImage(cloudData.url);
 
-      toast.success("Profile photo updated");
+      // ✅ Show toast notification
+      toast.success(`Profile photo updated successfully`, {
+        duration: 6000,
+        style: {
+          border: "1px solid #4f46e5",
+          padding: "12px",
+          color: "#333",
+        },
+        iconTheme: {
+          primary: "#4f46e5",
+          secondary: "#fff",
+        },
+      });
     } catch (error) {
-      toast.error("Photo upload failed");
+      toast.error(`Failed to upload profile photo!!`, {
+        duration: 6000,
+        style: {
+          border: "1px solid #4f46e5",
+          padding: "12px",
+          color: "#333",
+        },
+        iconTheme: {
+          primary: "#4f46e5",
+          secondary: "#fff",
+        },
+      });
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   };
 
@@ -157,9 +175,10 @@ export default function EditProfilePage() {
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
-                className="mt-4 rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+                disabled={uploading}
+                className="mt-4 rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50 disabled:bg-gray-200"
               >
-                Change photo
+                {uploading ? "Uploading..." : "Change photo"}
               </button>
 
               <input

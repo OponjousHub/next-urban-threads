@@ -10,6 +10,10 @@ datasource db {
 model User {
   id           String         @id @default(cuid())
   email        String         @unique
+  pendingEmail      String?
+  emailVerifyToken  String?
+  emailTokenExpiry  DateTime?
+  
   name         String?
   createdAt    DateTime       @default(now())
   address      String?
