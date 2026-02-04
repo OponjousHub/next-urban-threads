@@ -6,28 +6,17 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
 
-export async function POST(req: Request) {
-  const formData = await req.formData();
-  const file = formData.get("image") as File | null;
-
-  if (!file) {
-    return Response.json({ error: "No file uploaded" }, { status: 400 });
-  }
-
+export async function uploadImageToCloudinary(file: File, folder: string) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  const uploadResult = await new Promise<any>((resolve, reject) => {
+  const result = await new Promise<any>((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
         {
-          folder: "urban-threads/products",
-
-          // Safety
+          folder,
           resource_type: "image",
           allowed_formats: ["jpg", "jpeg", "png", "webp"],
-
-          // Do NOT resize permanently
           transformation: [{ quality: "auto", fetch_format: "auto" }],
         },
         (error, result) => {
@@ -38,7 +27,5 @@ export async function POST(req: Request) {
       .end(buffer);
   });
 
-  return Response.json({
-    url: uploadResult.secure_url,
-  });
+  return result;
 }

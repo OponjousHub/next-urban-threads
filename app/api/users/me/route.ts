@@ -29,6 +29,7 @@ export async function GET() {
         id: true,
         name: true,
         email: true,
+        avatarUrl: true,
         phone: true,
         city: true,
         country: true,
