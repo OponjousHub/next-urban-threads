@@ -6,6 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { AdminToast } from "@/components/ui/adminToast";
+
 import { email } from "zod";
 
 type Props = {
@@ -23,7 +25,7 @@ export default function ChangEmailModal({ open, onClose, address }: Props) {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/profile/change-email", {
+      const res = await fetch("/api/profile/change-emails", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -38,10 +40,21 @@ export default function ChangEmailModal({ open, onClose, address }: Props) {
         throw new Error(data.error || "Failed");
       }
 
-      toast.success(
-        `Token sent to ${newEmail}. please check your email to verify.`,
+      //   toast.success(
+      //     `Token sent to ${newEmail}. please check your email to verify.`,
+      //     {
+      //       duration: 8000, // 5 seconds
+      //     },
+      //   );
+
+      // toast.dismiss(toastId);
+      toast.custom(
+        <AdminToast
+          title="Check your Email"
+          description={`We just sent a token to ${newEmail}`}
+        />,
         {
-          duration: 8000, // 5 seconds
+          duration: 6000, // ⏱️ 6 seconds
         },
       );
       onClose();
@@ -49,7 +62,20 @@ export default function ChangEmailModal({ open, onClose, address }: Props) {
       setNewEmail("");
       setPassword("");
     } catch (err: any) {
-      toast.error(err.message);
+      //   toast.error(err.message);
+      //   toast.dismiss(toastId);
+      toast.custom(
+        <AdminToast
+          type="error"
+          title="Failed!"
+          description={
+            err.message || "Could not change email! Please try again."
+          }
+        />,
+        {
+          duration: 6000, // ⏱️ 8 seconds
+        },
+      );
     } finally {
       setLoading(false);
     }

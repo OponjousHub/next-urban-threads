@@ -77,7 +77,6 @@ export default function SignupPage() {
     }
 
     if (form.password !== form.confirmPassword) {
-      // setError("Passwords do not match");
       toast.dismiss(toastId);
       toast.custom(
         <AdminToast
@@ -117,7 +116,6 @@ export default function SignupPage() {
       if (!response.ok) {
         throw new Error(data.message || "Signup failed");
       }
-      // setIsRegistered(true)
       toast.dismiss(toastId);
       toast.custom(
         <AdminToast

@@ -40,10 +40,10 @@ export function AdminToast({
       }}
       className="w-[420px] p-5 rounded-xl shadow-lg"
     >
-      <h4 className="text-lg font-semibold">{title}</h4>
+      <h4 className="text-2xl font-semibold">{title}</h4>
 
       {description && (
-        <p className="mt-1 text-sm leading-relaxed opacity-90">{description}</p>
+        <p className="mt-1 text-lg leading-relaxed opacity-90">{description}</p>
       )}
     </div>
   );
