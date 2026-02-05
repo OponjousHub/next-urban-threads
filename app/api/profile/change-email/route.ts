@@ -10,6 +10,18 @@ export async function PATCH(req: Request) {
 
   const { newEmail } = await req.json();
 
+  // CHECK IF EMAIL ALREADY EXIST
+  const existing = await prisma.user.findUnique({
+    where: { email: newEmail },
+  });
+
+  if (existing) {
+    return Response.json(
+      { error: "Duplicate email not allowed!" },
+      { status: 400 },
+    );
+  }
+
   const token = crypto.randomBytes(32).toString("hex");
 
   await prisma.user.update({

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import ChangEmailModal from "@/components/change-email-modal";
 
 export default function EditProfilePage() {
   const [image, setImage] = useState<string | null>(null);
@@ -12,9 +13,9 @@ export default function EditProfilePage() {
     phone: "",
     email: "",
   });
-
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const initials = form.name
@@ -139,14 +140,27 @@ export default function EditProfilePage() {
     }
   };
 
+  // CHANGE USER EMAIL
+  // const changeEmail = async () => {
+  //   await fetch("/api/profile/change-email", {
+  //     method: "PATCH",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ newEmail }),
+  //   });
+
+  //   toast.success("Check your email to verify change");
+  // };
+
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10">
       <div className="mx-auto max-w-5xl">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {/* Page title */}
-          <h1 className="mb-6 text-2xl font-semibold text-gray-800">
-            Account Settings
-          </h1>
+          <div>
+            <h1 className="mb-6 text-2xl font-semibold text-gray-800">
+              Account Settings
+            </h1>
+          </div>
           {/* Avatar Panel */}
           <div className="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
             <div className="flex flex-col items-center text-center">
@@ -232,9 +246,16 @@ export default function EditProfilePage() {
                     disabled
                     className="mt-1 w-full cursor-not-allowed rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-500"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  {/* <p className="mt-1 text-xs text-gray-500">
                     Email cannot be changed
-                  </p>
+                  </p> */}
+                  <button
+                    type="button"
+                    onClick={() => setOpen(true)}
+                    className="text-sm font-medium text-blue-600 hover:underline"
+                  >
+                    Change Email
+                  </button>
                 </div>
 
                 {/* Phone */}
@@ -275,6 +296,8 @@ export default function EditProfilePage() {
             </div>
           </div>
         </div>
+
+        <ChangEmailModal open={open} onClose={() => setOpen(false)} />
       </div>
     </div>
   );
