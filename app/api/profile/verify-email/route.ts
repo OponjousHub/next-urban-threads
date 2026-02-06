@@ -13,6 +13,8 @@ export async function GET(req: Request) {
       pendingEmail: { not: null },
     },
   });
+  console.log("TOOOOkkkun", token);
+  console.log("UUUUUsssser", user);
 
   if (!user || !user.pendingEmail) {
     return Response.json({ error: "Token expired" });
