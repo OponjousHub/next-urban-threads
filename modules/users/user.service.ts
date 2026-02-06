@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import { RegisterInput } from "@/modules/users/user.schema";
 import { UserRepository } from "./user.repository";
 import { getLoggedInUserId } from "@/lib/auth";
+import welcomeEmail from "@/app/lib/email/template/welcome";
+import { sendEmail } from "@/app/lib/email/sendEmail";
 
 // import { NextResponse } from "next/server";
 // import jwt from "jsonwebtoken";
@@ -37,6 +39,15 @@ export class UserService {
       state,
       city,
       country,
+    });
+
+    //  Send welcome email
+    const template = welcomeEmail(user.name || "Customer");
+
+    await sendEmail({
+      to: user.email,
+      subject: template.subject,
+      html: template.html,
     });
 
     const { password: _, ...userWithoutPassword } = user;
