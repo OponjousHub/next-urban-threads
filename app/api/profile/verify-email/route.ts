@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     },
   });
 
-  if (!user) {
+  if (!user || !user.pendingEmail) {
     return Response.json({ error: "Token expired" });
   }
 

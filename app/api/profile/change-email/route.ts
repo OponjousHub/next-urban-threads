@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
+import changeEmailVerification from "../../../lib/email/template/changeEmailVerification";
+import { sendEmail } from "../../../lib/email/sendEmail";
 
 export async function PATCH(req: Request) {
   const userId = await getLoggedInUserId();
@@ -8,12 +10,16 @@ export async function PATCH(req: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { newEmail } = await req.json();
+  const { newEmail, password } = await req.json();
+  console.log(newEmail);
+  // CHECK IF EMAILL ADDRESS IS VALID
 
   // CHECK IF EMAIL ALREADY EXIST
   const existing = await prisma.user.findUnique({
     where: { email: newEmail },
   });
+
+  // VERIFY PASSWORD
 
   if (existing) {
     return Response.json(
@@ -23,7 +29,6 @@ export async function PATCH(req: Request) {
   }
 
   const token = crypto.randomBytes(32).toString("hex");
-
   await prisma.user.update({
     where: { id: userId },
     data: {
@@ -33,7 +38,23 @@ export async function PATCH(req: Request) {
     },
   });
 
+  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
+  console.log(token);
+  console.log(verifyUrl);
+
+  const template = changeEmailVerification(verifyUrl);
+  console.log(template);
+
   // TODO: send email with verification link
+  // await sendEmailVerification({
+  //   to: newEmail,
+  //   token,
+  // });
+  await sendEmail({
+    to: newEmail,
+    subject: template.subject,
+    html: template.html,
+  });
 
   return Response.json({
     message: "Verification email sent",

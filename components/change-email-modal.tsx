@@ -24,8 +24,7 @@ export default function ChangEmailModal({ open, onClose, address }: Props) {
   const handleChangeEmail = async () => {
     try {
       setLoading(true);
-
-      const res = await fetch("/api/profile/change-emails", {
+      const res = await fetch("/api/profile/change-email", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -40,14 +39,6 @@ export default function ChangEmailModal({ open, onClose, address }: Props) {
         throw new Error(data.error || "Failed");
       }
 
-      //   toast.success(
-      //     `Token sent to ${newEmail}. please check your email to verify.`,
-      //     {
-      //       duration: 8000, // 5 seconds
-      //     },
-      //   );
-
-      // toast.dismiss(toastId);
       toast.custom(
         <AdminToast
           title="Check your Email"
@@ -62,8 +53,6 @@ export default function ChangEmailModal({ open, onClose, address }: Props) {
       setNewEmail("");
       setPassword("");
     } catch (err: any) {
-      //   toast.error(err.message);
-      //   toast.dismiss(toastId);
       toast.custom(
         <AdminToast
           type="error"
