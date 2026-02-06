@@ -11,7 +11,6 @@ export async function PATCH(req: Request) {
   }
 
   const { newEmail, password } = await req.json();
-  console.log(newEmail);
   // CHECK IF EMAILL ADDRESS IS VALID
 
   // CHECK IF EMAIL ALREADY EXIST
@@ -39,17 +38,9 @@ export async function PATCH(req: Request) {
   });
 
   const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
-  console.log(token);
-  console.log(verifyUrl);
 
   const template = changeEmailVerification(verifyUrl);
-  console.log(template);
 
-  // TODO: send email with verification link
-  // await sendEmailVerification({
-  //   to: newEmail,
-  //   token,
-  // });
   await sendEmail({
     to: newEmail,
     subject: template.subject,
