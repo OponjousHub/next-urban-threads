@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { orderId } = params;
+    const { orderId } = await params;
 
     // ---------------------------;
     // 2️⃣ Fetch order + items

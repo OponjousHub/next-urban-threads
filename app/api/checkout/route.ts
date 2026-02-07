@@ -1,9 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { Prisma } from "@prisma/client";
-import { cookies, headers } from "next/headers";
 import crypto from "crypto";
-import AuthController from "@/modules/auth/auth.controller";
 import { detectCountryFromHeaders } from "@/app/lib/payments/geo";
 import { resolvePaymentConfig } from "@/app/lib/payments/payment";
 import { getPaymentProvider } from "@/app/lib/payments/factory";
@@ -130,13 +128,6 @@ export async function POST(req: NextRequest) {
 
     // 6️⃣ Initialize payment (factory → provider instance)
     const provider = getPaymentProvider(order.paymentProvider);
-
-    console.log("FLW PAYLOAD", {
-      reference: order.paymentReference,
-      amount: order.totalAmount.toNumber(),
-      currency,
-      email,
-    });
 
     const payment = await provider.initializePayment({
       email,

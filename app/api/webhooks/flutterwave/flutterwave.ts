@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/utils/prisma";
 import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
+import orderConfirmationEmail from "@/app/lib/email/template/orderConfirmation";
+import { sendEmail } from "@/app/lib/email/sendEmail";
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +13,7 @@ export async function POST(req: Request) {
     if (!signature || signature !== process.env.FLUTTERWAVE_WEBHOOK_SECRET) {
       return NextResponse.json(
         { message: "Invalid signature" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -27,9 +29,25 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: "Payment not verified" });
       }
 
-      await prisma.order.update({
+      const order = await prisma.order.update({
         where: { paymentReference: reference },
         data: { status: "PAID" },
+        include: {
+          user: true,
+          items: {
+            include: { product: true },
+          },
+          shippingAddress: true,
+        },
+      });
+
+      //SEND EMAIL
+      const template = orderConfirmationEmail(order);
+
+      await sendEmail({
+        to: order.user.email,
+        subject: template.subject,
+        html: template.html,
       });
     }
 

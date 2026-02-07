@@ -8,7 +8,7 @@ async function getProduct(id: string) {
     `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${id}`,
     {
       cache: "no-store", // or 'force-cache' if products are static
-    }
+    },
   );
   if (res.status === 404) {
     notFound();
@@ -26,7 +26,6 @@ export default async function ProductDetailPage({
 }: {
   params: { productId: string };
 }) {
-  console.log(params.productId);
   const product = await getProduct(params.productId);
 
   return (
