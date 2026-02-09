@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useRouter } from "next/navigation";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type User = {
   id: string;
@@ -19,13 +20,14 @@ type Props = {
 export default function UserMenu({ user, onRemoveAvater }: Props) {
   const [open, setOpen] = useState(false);
 
+  const { tenant } = useTenant();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setOpen(false));
   if (!user) return null; // ✅ guard
 
   const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
-    user.name
+    user.name,
   )}&backgroundColor=000000&textColor=ffffff`;
 
   return (

@@ -1,8 +1,10 @@
 import BuyButton from "@/utils/buy-button";
 import Image from "next/image";
 import "@/app/globals.css";
+import { useTenant } from "@/store/tenant-provider-context";
 
 function Newsletter() {
+  const { tenant } = useTenant();
   return (
     <>
       <section className="px-[4rem] py-[6rem] text-center text-[#fafafa] bg-[var(--color-primary)]">

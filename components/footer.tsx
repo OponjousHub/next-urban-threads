@@ -6,11 +6,13 @@ import {
   FaTwitter,
   FaLinkedinIn,
 } from "react-icons/fa";
+import { useTenant } from "@/store/tenant-provider-context";
 
 // import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 import Link from "next/link";
 
 export default function Footer() {
+  const { tenant } = useTenant();
   return (
     <footer className="bg-gray-900 text-gray-300 py-12 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">

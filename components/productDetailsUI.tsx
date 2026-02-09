@@ -9,6 +9,7 @@ import { CartItem } from "@/types/cart";
 import toast from "react-hot-toast";
 import { cloudinaryDetailImage } from "@/utils/cloudinary-url";
 import { ProductDetailSkeleton } from "./products/productDetailSkeleton";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export function ProductDetailUI({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);

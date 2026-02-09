@@ -7,8 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AdminToast } from "@/components/ui/adminToast";
-
-import { email } from "zod";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   open: boolean;
@@ -20,6 +19,7 @@ export default function ChangEmailModal({ open, onClose, address }: Props) {
   const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { tenant } = useTenant();
 
   const handleChangeEmail = async () => {
     try {

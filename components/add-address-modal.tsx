@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import toast from "react-hot-toast";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   open: boolean;
@@ -22,6 +23,7 @@ type Props = {
 export default function AddAddressModal({ open, onClose, address }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { tenant } = useTenant();
 
   const [form, setForm] = useState({
     fullName: "",

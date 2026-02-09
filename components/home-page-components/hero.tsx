@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useTenant } from "@/store/tenant-provider-context";
 
 function Hero() {
+  const { tenant } = useTenant();
   return (
     <>
       <Image

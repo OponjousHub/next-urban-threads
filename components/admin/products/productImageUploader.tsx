@@ -3,6 +3,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export function ProductImageUploader({
   onUploadComplete,
@@ -12,6 +13,7 @@ export function ProductImageUploader({
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const { tenant } = useTenant();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -31,7 +33,7 @@ export function ProductImageUploader({
         />,
         {
           duration: 6000, // ⏱️ 8 seconds
-        }
+        },
       );
       return;
     }
@@ -70,7 +72,7 @@ export function ProductImageUploader({
         />,
         {
           duration: 6000, // ⏱️ 8 seconds
-        }
+        },
       );
     } catch (error) {
       console.error(error);
@@ -84,7 +86,7 @@ export function ProductImageUploader({
         />,
         {
           duration: 6000, // ⏱️ 8 seconds
-        }
+        },
       );
     } finally {
       toast.dismiss(toastId);

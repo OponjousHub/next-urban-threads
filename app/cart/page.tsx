@@ -4,10 +4,11 @@ import { useCart } from "@/store/cart-context";
 import Image from "next/image";
 import Link from "next/link";
 import { FiPlus, FiMinus } from "react-icons/fi";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
-
+  const { tenant } = useTenant();
   const updateProductQuantity = (id: string, delta: number) => {
     updateQuantity(id, delta);
   };
@@ -18,7 +19,7 @@ export default function CartPage() {
 
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
   const shipping = subtotal > 0 ? 10 : 0;
   const total = subtotal + shipping;
@@ -35,7 +36,6 @@ export default function CartPage() {
           <p className="text-gray-600">Your cart is empty.</p>
         ) : (
           cartItems.map((item) => {
-            
             return (
               <div
                 key={item.id}

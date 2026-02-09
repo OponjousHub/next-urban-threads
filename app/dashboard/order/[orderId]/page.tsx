@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { GetToast } from "@/components/ui/adminToast";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type OrderItem = {
   id: string;
@@ -40,105 +41,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   const [verifying, setVerifying] = useState(false);
   const hasVerified = useRef(false);
 
-  // useEffect(() => {
-  //   async function verifyOrder() {
-  //     if (!orderId) return;
-
-  //     // ADDING TOAST
-  //     hasVerified.current = true;
-  //     const toastId = "verifying";
-  //     try {
-  //       setVerifying(true);
-  //       toast.loading("Verifying payment...", { id: "verifying" });
-
-  //       const res = await fetch(`/api/orders/me/${orderId}/verify`, {
-  //         method: "POST",
-  //         credentials: "include",
-  //         body: JSON.stringify({ reference }),
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //       });
-
-  //       const data = await res.json();
-  //       setOrder(data);
-
-  //       if (data.status === "PAID") {
-  //         toast.dismiss(toastId);
-  //         toast.custom(
-  //           <GetToast
-  //             title="Payment verified!"
-  //             description={`Status: Paid.`}
-  //           />,
-  //           {
-  //             duration: 4000, // ⏱️ 8 seconds
-  //           }
-  //         );
-
-  //         // toast.success("Payment verified!", { id: "verifying" });
-  //       } else if (data.status === "FAILED") {
-  //         toast.dismiss(toastId);
-  //         toast.custom(
-  //           <GetToast
-  //             title="Payment failed!"
-  //             description={`Status: Failed.`}
-  //           />,
-  //           {
-  //             duration: 4000, // ⏱️ 8 seconds
-  //           }
-  //         );
-  //       } else if (data.status === "PENDING") {
-  //         toast.dismiss(toastId);
-  //         toast.custom(
-  //           <GetToast
-  //             title="Payment Pending!"
-  //             description={`Status: Pending.`}
-  //           />,
-  //           {
-  //             duration: 4000, // ⏱️ 8 seconds
-  //           }
-  //         );
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //       toast.dismiss(toastId);
-  //       toast.custom(
-  //         <GetToast
-  //           type="error"
-  //           title="Verification failed!"
-  //           description={"Error verifying payment"}
-  //         />,
-  //         {
-  //           duration: 4000, // ⏱️ 8 seconds
-  //         }
-  //       );
-  //     } finally {
-  //       setVerifying(false);
-  //       setLoading(false);
-  //     }
-  //   }
-  //   verifyOrder();
-
-  //   const interval = setInterval(async () => {
-  //     if (order?.status === "PENDING") {
-  //       const res = await fetch(`/api/orders/me/${orderId}/verify`, {
-  //         method: "POST",
-  //         credentials: "include",
-  //       });
-
-  //       if (!res.ok) return;
-  //       const data = await res.json();
-  //       setOrder(data);
-
-  //       if (data.status === "PAID") {
-  //         toast.success("Payment confirmed 🎉");
-  //         clearInterval(interval);
-  //       }
-  //     }
-  //   }, 5000);
-
-  //   return () => clearInterval(interval);
-  // }, [orderId, reference]);
+  const { tenant } = useTenant();
 
   useEffect(() => {
     if (!orderId || hasVerified.current) return;

@@ -64,14 +64,15 @@ model Product {
 
   seoTitle        String?
   seoDescription  String?
-  createdBy       String?
+  createdById       String?
   createdByName   String?
   cartItems       CartItem[]
   orderItems      OrderItem[]
   tenant          Tenant @relation(fields: [tenantId], references: [id])
-  user            User?          @relation("UserProduct", fields: [createdBy], references: [id])
+  user            User?          @relation("UserProduct", fields: [createdById], references: [id])
   reviews         Review[]
   wishlistItem    WishlistItem[]
+  @@index([tenantId])
 }
 
 model Order {
@@ -82,6 +83,7 @@ model Order {
   tenantId        String
   totalAmount     Decimal
   status          OrderStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
   paymentMethod   String
   shippingAddressId  String
   shippingAddress    Address  @relation(fields: [shippingAddressId], references: [id])
@@ -90,12 +92,14 @@ model Order {
   paymentReference String    @unique
   items           OrderItem[]
   createdAt       DateTime    @default(now())
+  @@index([tenantId])
 }
 
 
 model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
+  tenantId  String
   productId String
   quantity  Int
   price     Decimal @db.Decimal(10, 2)
@@ -106,7 +110,7 @@ model OrderItem {
 model Address {
 id String @id @default(cuid())
 userId String
-user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+tenantId  String
 
 fullName String?
 phone String?
@@ -115,7 +119,7 @@ city String
 state String?
 postalCode String?
 country String
-address Order[]
+orders Order[]
 
 isDeleted Boolean  @default(false)
 isDefault Boolean @default(false)
@@ -123,6 +127,8 @@ isTemporary  Boolean  @default(false)
 
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
+user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+tenant   Tenant @relation(fields: [tenantId], references: [id])
 }
 
 model Tenant {
@@ -135,6 +141,10 @@ model Tenant {
   users     User[]
   orders    Order[]
   products  Product[]
+  address   Address[]
+  WishlistItem WishlistItem[]
+  cartItem  CartItem[]
+  review    Review[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -143,31 +153,40 @@ model Tenant {
 model Review {
   id        String   @id @default(cuid())
   userId    String
+  tenantId  String
   rating    Int
   comment   String
   createdAt DateTime @default(now())
   productId String
   product   Product  @relation(fields: [productId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
 
   @@unique([userId, productId])
+  @@index([tenantId])
 }
 
 model CartItem {
   id        String  @id @default(cuid())
   userId    String
+  tenantId  String
   productId String
   quantity  Int
   product   Product @relation(fields: [productId], references: [id])
   user      User    @relation(fields: [userId], references: [id])
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
 }
 
 model WishlistItem {
   id        String  @id @default(cuid())
   userId    String
+  tenantId  String
   productId String
   product   Product @relation(fields: [productId], references: [id])
   user      User    @relation(fields: [userId], references: [id])
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
 }
 
 enum Role {

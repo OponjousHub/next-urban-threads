@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 import Link from "next/link";
+import { useTenant } from "@/store/tenant-provider-context";
 
 function Categories() {
   return (

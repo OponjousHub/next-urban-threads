@@ -2,10 +2,11 @@ import { getUserDashboardStats } from "@/app/lib/dashboard";
 import { getLoggedInUserId } from "@/lib/auth";
 import AddressClient from "./addressClient";
 export const dynamic = "force-dynamic";
-// import { cookies } from "next/headers";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default async function GetAddresse() {
   const userId = await getLoggedInUserId();
+  const { tenant } = useTenant();
   // cookies();
 
   if (!userId) return null;

@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default function OrderPage() {
   const { orderId } = useParams();
   const [order, setOrder] = useState<any>(null);
-
+  const { tenant } = useTenant();
   // Initial fetch
   useEffect(() => {
     fetch(`/api/orders/${orderId}`)

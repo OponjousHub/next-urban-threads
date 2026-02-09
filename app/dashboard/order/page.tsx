@@ -3,10 +3,12 @@ import { getLoggedInUserId } from "@/lib/auth";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default async function OrdersPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
+  const { tenant } = useTenant();
 
   if (!token) {
     return <p>Please log in to view your orders.</p>;

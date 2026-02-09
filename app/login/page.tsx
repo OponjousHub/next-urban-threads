@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { FiMail, FiLock } from "react-icons/fi";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -10,6 +11,8 @@ export default function LoginPage() {
   const [showError, setShowError] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const { tenant } = useTenant();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

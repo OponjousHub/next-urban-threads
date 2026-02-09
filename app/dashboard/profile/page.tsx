@@ -5,6 +5,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import ChangEmailModal from "@/components/change-email-modal";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default function EditProfilePage() {
   const [image, setImage] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export default function EditProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
+  const { tenant } = useTenant();
   const initials = form.name
     ?.split(" ")
     .map((n) => n[0])

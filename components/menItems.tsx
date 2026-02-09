@@ -6,9 +6,11 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
+import { useTenant } from "@/store/tenant-provider-context";
 
 function WomenItems() {
   const [products, setProducts] = useState<Product[]>([]);
+  const { tenant } = useTenant();
 
   useEffect(() => {
     fetch("/api/products?category=MEN")

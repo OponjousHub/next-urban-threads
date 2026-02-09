@@ -10,6 +10,7 @@ type ConfirmDialogProps = {
   onClose: () => void;
 };
 
+import { useTenant } from "@/store/tenant-provider-context";
 export default function ConfirmDialog({
   open,
   title = "Are you sure?",

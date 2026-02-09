@@ -3,8 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import "@/app/globals.css";
 import { featuredProducts } from "@/data/products";
+import { useTenant } from "@/store/tenant-provider-context";
 
 function Featured() {
+  const { tenant } = useTenant();
   return (
     <>
       <section className="px-[4rem] py-[6rem] text-center text-[#fafafa] bg-black">

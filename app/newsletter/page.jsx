@@ -5,6 +5,7 @@ import { FiMail } from "react-icons/fi";
 
 export default function NewsletterPage() {
   const [email, setEmail] = useState("");
+  const { tenant } = useTenant();
   //   const [status, setStatus] =
   //     (useState < "idle") | "success" | ("error" > "idle");
 
