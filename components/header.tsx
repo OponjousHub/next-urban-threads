@@ -6,6 +6,7 @@ import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi";
 import { useEffect } from "react";
 import { useCart } from "@/store/cart-context";
 import UserMenu from "./header-userMenu";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type User = {
   id: string;
@@ -18,6 +19,7 @@ const Header = () => {
   const { cartItems } = useCart();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { tenant } = useTenant();
 
   useEffect(() => {
     async function loadUser() {

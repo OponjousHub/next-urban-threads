@@ -6,8 +6,10 @@ import { detectCountryFromHeaders } from "@/app/lib/payments/geo";
 import { resolvePaymentConfig } from "@/app/lib/payments/payment";
 import { getPaymentProvider } from "@/app/lib/payments/factory";
 import { getLoggedInUserId } from "@/lib/auth";
+import { getTenant } from "@/lib/tenant/getTenant";
 
 export async function POST(req: NextRequest) {
+  const tenant = await getTenant();
   try {
     const userId = await getLoggedInUserId();
 

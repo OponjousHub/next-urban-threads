@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getLoggedInUserId } from "@/lib/auth";
+import { getTenant } from "@/lib/tenant/getTenant";
 
 // import { includes } from "zod";
 
@@ -10,6 +11,7 @@ export async function GET() {
   const userId = await getLoggedInUserId();
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
+  const tenant = await getTenant();
 
   if (!token) {
     return NextResponse.json(
