@@ -42,6 +42,14 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
+    // password strength vallidation
+    if (newPassword.length < 8) {
+      return NextResponse.json(
+        { message: "Password must be at least 8 characters" },
+        { status: 400 },
+      );
+    }
+
     // 🔐 Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 

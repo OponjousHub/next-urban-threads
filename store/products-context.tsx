@@ -16,7 +16,7 @@ interface ProductContextType {
 }
 
 export const ProductContext = createContext<ProductContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function ProductContextProvider({
