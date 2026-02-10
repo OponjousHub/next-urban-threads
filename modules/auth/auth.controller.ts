@@ -43,28 +43,6 @@ class AuthController {
       throw new Error("Forbidden");
     }
   }
-
-  // GET USER ID FROM TOKEN
-  // static getUserIdFromToken(token: string): string {
-  //   if (!token) {
-  //     throw new Error("Unautorized!");
-  //   }
-
-  //   const payload = this.verifyToken(token);
-  //   if (!payload.id) {
-  //     throw new Error("Invalid token!");
-  //   }
-
-  //   return payload.id;
-  // }
-  // static getUserIdFromToken(token: string): string | null {
-  //   try {
-  //     const payload = this.verifyToken(token);
-  //     return payload?.id ?? null;
-  //   } catch {
-  //     return null;
-  //   }
-  // }
 }
 
 export default AuthController;

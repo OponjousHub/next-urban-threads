@@ -2,27 +2,27 @@ import { NextResponse } from "next/server";
 import ProductService from "./product.service";
 import { CreateProductSchema, UpdateProductSchema } from "./product.schema";
 import { Category } from "@prisma/client";
-import { cookies } from "next/headers";
-import AuthController from "@/modules/auth/auth.controller";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { getLoggedInUserId } from "@/lib/auth";
 import { prisma } from "@/utils/prisma";
 
 export default class ProductController {
   static async create(req: Request) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const userId = await getLoggedInUserId();
+    const tenant = await getDefaultTenant();
 
-    if (!token) {
+    if (!userId) {
       return NextResponse.json(
-        {
-          message: "Unauthorized: token missing",
-        },
-        { status: 401 }
+        { message: "Unauthorized: invalid token" },
+        { status: 401 },
       );
     }
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
 
-    const result = AuthController.verifyToken(token);
     const user = await prisma.user.findUnique({
-      where: { id: result.id },
+      where: { id: userId, tenantId: tenant.id },
       select: { id: true, name: true },
     });
 
@@ -31,7 +31,7 @@ export default class ProductController {
     if (!parsed.success) {
       return NextResponse.json(
         { errors: parsed.error.flatten() },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -48,31 +48,40 @@ export default class ProductController {
       featured,
     } = parsed.data;
 
-    const product = await ProductService.createProduct({
-      name,
-      category,
-      subCategory,
-      price,
-      stock,
-      instock: stock > 0,
-      featured,
-      images,
-      description,
-      sizes,
-      colours,
-      createdBy: user?.id,
-      createdByName: user?.name,
-    });
+    const product = await ProductService.createProduct(
+      {
+        name,
+        category,
+        subCategory,
+        // tenantId: tenant.id,
+        price,
+        stock,
+        instock: stock > 0,
+        featured,
+        images,
+        description,
+        sizes,
+        colours,
+        // createdBy: user?.id ? { connect: { id: user.id } } : undefined,
+        user: user?.id ? { connect: { id: user.id } } : undefined,
+        createdByName: user?.name,
+      },
+      tenant.id,
+    );
 
     // const product = await ProductService.createProduct(parsed.data);
     return NextResponse.json(product, { status: 201 });
   }
 
   static async getAll(req: Request) {
+    const tenant = await getDefaultTenant();
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category") ?? undefined;
-    console.log(category);
     let parsedCategory: Category | undefined = undefined;
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
 
     if (category && Object.values(Category).includes(category as Category)) {
       parsedCategory = category as Category;
@@ -81,7 +90,7 @@ export default class ProductController {
     const products = await ProductService.getProducts(parsedCategory);
     return NextResponse.json(
       { result: products.length, products },
-      { status: 200 }
+      { status: 200 },
     );
   }
 
@@ -90,7 +99,7 @@ export default class ProductController {
     if (!product) {
       return NextResponse.json(
         { message: "Product not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
     return NextResponse.json(product);
@@ -103,7 +112,7 @@ export default class ProductController {
     if (!parsed.success) {
       return NextResponse.json(
         { errors: parsed.error.flatten() },
-        { status: 400 }
+        { status: 400 },
       );
     }
 

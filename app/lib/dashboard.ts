@@ -1,7 +1,13 @@
 import { prisma } from "@/utils/prisma";
 import { OrderStatus } from "@prisma/client";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function getUserDashboardStats(userId: string) {
+  const tenant = await getDefaultTenant();
+
+  if (!tenant) {
+    throw new Error("Default tenant not found");
+  }
   const [
     totalOrders,
     pendingOrders,
@@ -12,12 +18,13 @@ export async function getUserDashboardStats(userId: string) {
     addresses,
   ] = await Promise.all([
     prisma.order.count({
-      where: { userId },
+      where: { userId, tenantId: tenant.id },
     }),
 
     prisma.order.count({
       where: {
         userId,
+        tenantId: tenant.id,
         status: {
           in: [OrderStatus.PENDING, OrderStatus.PROCESSING],
         },
@@ -27,6 +34,7 @@ export async function getUserDashboardStats(userId: string) {
     prisma.order.aggregate({
       where: {
         userId,
+        tenantId: tenant.id,
         status: OrderStatus.PAID,
       },
       _sum: {
@@ -35,7 +43,7 @@ export async function getUserDashboardStats(userId: string) {
     }),
 
     prisma.order.findMany({
-      where: { userId },
+      where: { userId, tenantId: tenant.id },
       orderBy: { createdAt: "desc" },
       take: 5,
 
@@ -55,11 +63,11 @@ export async function getUserDashboardStats(userId: string) {
     }),
 
     prisma.address.findFirst({
-      where: { userId, isDefault: true },
+      where: { userId, tenantId: tenant.id, isDefault: true },
     }),
 
     prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: userId, tenantId: tenant.id },
       select: {
         id: true,
         name: true,
@@ -71,7 +79,12 @@ export async function getUserDashboardStats(userId: string) {
     }),
 
     prisma.address.findMany({
-      where: { userId: userId, isTemporary: false, isDeleted: false },
+      where: {
+        userId: userId,
+        tenantId: tenant.id,
+        isTemporary: false,
+        isDeleted: false,
+      },
       orderBy: { createdAt: "desc" },
     }),
   ]);

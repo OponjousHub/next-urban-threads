@@ -45,7 +45,7 @@ model Product {
   price           Decimal        @db.Decimal(10, 2)
   discountedPrice Decimal?       @db.Decimal(10, 2)
   name            String
-  slug            String         @unique
+  slug            String         
   description     String?
   images          String[]
   thumbnail       String
@@ -73,6 +73,7 @@ model Product {
   reviews         Review[]
   wishlistItem    WishlistItem[]
   @@index([tenantId])
+  @@unique([tenantId, slug])
 }
 
 model Order {

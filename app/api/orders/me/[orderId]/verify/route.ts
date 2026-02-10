@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
 import { PaystackProvider } from "@/app/lib/payments/paystack";
 import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 type RouteParams = {
   params: {
@@ -11,7 +12,10 @@ type RouteParams = {
 };
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  console.log("backend verify GET hit");
+  const tenant = await getDefaultTenant();
+  if (!tenant) {
+    throw new Error("Default tenant not found");
+  }
 
   const body = await req.json().catch(() => ({}));
   const referenceFromClient = body.reference;
@@ -34,6 +38,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       where: {
         id: orderId,
         userId,
+        tenantId: tenant.id,
       },
       include: {
         items: {
@@ -51,7 +56,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     if (!order.paymentReference && referenceFromClient) {
       await prisma.order.update({
-        where: { id: order.id },
+        where: { id: order.id, tenantId: tenant.id },
         data: { paymentReference: referenceFromClient },
       });
 
@@ -83,8 +88,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     } else {
       provider = new FlutterwaveProvider();
     }
-    console.log("This is the service provider:", provider);
-    console.log("This is the ORDER.payment provider:", order.paymentProvider);
+
     const isPaid = await provider.verifyPayment(order.paymentReference);
 
     if (!isPaid) {
@@ -96,7 +100,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // 6️⃣ Mark as PAID (idempotent)
     // ---------------------------
     const updatedOrder = await prisma.order.update({
-      where: { id: order.id },
+      where: { id: order.id, tenantId: tenant.id },
       data: { status: "PAID" },
       include: {
         items: {

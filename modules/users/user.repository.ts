@@ -1,8 +1,8 @@
 import { prisma } from "@/utils/prisma";
-import { Phone } from "lucide-react";
-import { email } from "zod";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+// import { Phone } from "lucide-react";
+// import { email } from "zod";
+// import bcrypt from "bcryptjs";
+// import jwt from "jsonwebtoken";
 
 export const UserRepository = {
   findByEmail(email: string) {
@@ -11,7 +11,7 @@ export const UserRepository = {
     });
   },
 
-  create(data: any) {
+  create(data: any, tenantId: string) {
     return prisma.user.create({
       data: {
         name: data.fullName,
@@ -21,8 +21,17 @@ export const UserRepository = {
         country: data.country,
         phone: data.phone,
         password: data.password,
+
+        tenant: {
+          connect: { id: tenantId },
+        },
+
         addresses: {
           create: {
+            tenant: {
+              connect: { id: tenantId },
+            },
+
             fullName: data.fullName,
             street: data.street,
             city: data.city,
@@ -37,9 +46,9 @@ export const UserRepository = {
     });
   },
 
-  findAll() {
+  findAll(tenantId: string) {
     return prisma.user.findMany({
-      where: { isDeleted: false },
+      where: { isDeleted: false, tenantId },
       select: {
         id: true,
         name: true,
@@ -54,9 +63,9 @@ export const UserRepository = {
     });
   },
 
-  findById(id: string) {
+  findById(id: string, tenantId: string) {
     return prisma.user.findUnique({
-      where: { id },
+      where: { id, tenantId },
       select: {
         id: true,
         name: true,
@@ -73,16 +82,16 @@ export const UserRepository = {
     });
   },
 
-  update(id: string, data: any) {
+  update(id: string, data: any, tenantId: string) {
     return prisma.user.update({
-      where: { id },
+      where: { id, tenantId },
       data,
     });
   },
 
-  softDelete(id: string) {
+  softDelete(id: string, tenantId: string) {
     return prisma.user.update({
-      where: { id },
+      where: { id, tenantId },
       data: {
         isDeleted: true,
         deletedAt: new Date(),

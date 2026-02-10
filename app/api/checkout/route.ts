@@ -6,10 +6,13 @@ import { detectCountryFromHeaders } from "@/app/lib/payments/geo";
 import { resolvePaymentConfig } from "@/app/lib/payments/payment";
 import { getPaymentProvider } from "@/app/lib/payments/factory";
 import { getLoggedInUserId } from "@/lib/auth";
-import { getTenant } from "@/lib/tenant/getTenant";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function POST(req: NextRequest) {
-  const tenant = await getTenant();
+  const tenant = await getDefaultTenant();
+  if (!tenant) {
+    throw new Error("Default tenant not found");
+  }
   try {
     const userId = await getLoggedInUserId();
 
@@ -37,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     if (addressId) {
       const userAddress = await prisma.address.findFirst({
-        where: { id: addressId, userId },
+        where: { id: addressId, userId, tenantId: tenant.id },
       });
 
       if (!userAddress) {
@@ -60,6 +63,9 @@ export async function POST(req: NextRequest) {
           data: {
             ...shippingAddress,
             userId,
+            tenant: {
+              connect: { id: tenant.id },
+            },
             isDefault: false,
           },
         });
@@ -71,6 +77,9 @@ export async function POST(req: NextRequest) {
           data: {
             ...shippingAddress,
             userId,
+            tenant: {
+              connect: { id: tenant.id },
+            },
             isTemporary: true, // optional but recommended
           },
         });
@@ -87,6 +96,7 @@ export async function POST(req: NextRequest) {
     const products = await prisma.product.findMany({
       where: {
         id: { in: items.map((item: any) => item.productId) },
+        tenantId: tenant.id,
       },
     });
 
@@ -111,6 +121,7 @@ export async function POST(req: NextRequest) {
     const order = await prisma.order.create({
       data: {
         userId,
+        tenantId: tenant.id,
         shippingAddressId,
         totalAmount,
         currency,
@@ -124,7 +135,7 @@ export async function POST(req: NextRequest) {
     });
 
     await prisma.order.update({
-      where: { id: order.id },
+      where: { id: order.id, tenantId: tenant.id },
       data: { paymentReference },
     });
 

@@ -3,16 +3,16 @@ import { prisma } from "@/utils/prisma";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getLoggedInUserId } from "@/lib/auth";
-import { getTenant } from "@/lib/tenant/getTenant";
-
-// import { includes } from "zod";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function GET() {
   const userId = await getLoggedInUserId();
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
-  const tenant = await getTenant();
-
+  const tenant = await getDefaultTenant();
+  if (!tenant) {
+    throw new Error("Default tenant not found");
+  }
   if (!token) {
     return NextResponse.json(
       { message: "Unauthorized: missing token!" },
@@ -25,7 +25,7 @@ export async function GET() {
   }
 
   const order = await prisma.order.findMany({
-    where: { userId: userId },
+    where: { userId: userId, tenantId: tenant.id },
     include: { items: { include: { product: true } } },
     orderBy: { createdAt: "desc" },
   });

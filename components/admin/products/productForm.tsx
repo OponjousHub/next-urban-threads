@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ProductImageUploader } from "./productImageUploader";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
-import { useTenant } from "@/store/tenant-provider-context";
+// import { useTenant } from "@/store/tenant-provider-context";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 const CATEGORIES = ["MEN", "WOMEN", "ASSECCORIES"];
@@ -27,7 +27,6 @@ type ZodFieldErrors = {
 export function ProductForm() {
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { tenant } = useTenant();
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -85,8 +84,6 @@ export function ProductForm() {
         credentials: "include",
         body: JSON.stringify(payload),
       });
-      // console.log("STATUS:", response.status);
-      // console.log("HEADERS:", response.headers.get("content-type"));
 
       const data = await response.json();
       if (!response.ok) {
@@ -116,8 +113,6 @@ export function ProductForm() {
           duration: 6000, // ⏱️ 8 seconds
         },
       );
-
-      console.log("Created Product:", data);
 
       // Optional: reset form
       setForm({

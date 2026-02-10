@@ -4,12 +4,19 @@ import { UserRepository } from "./user.repository";
 import { getLoggedInUserId } from "@/lib/auth";
 import welcomeEmail from "@/app/lib/email/template/welcome";
 import { sendEmail } from "@/app/lib/email/sendEmail";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 // import { NextResponse } from "next/server";
 // import jwt from "jsonwebtoken";
 
 export class UserService {
   static async register(data: RegisterInput) {
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
+
     const {
       fullName,
       email,
@@ -29,17 +36,20 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await UserRepository.create({
-      fullName,
-      email,
-      password: hashedPassword,
-      phone,
-      street,
-      postalCode,
-      state,
-      city,
-      country,
-    });
+    const user = await UserRepository.create(
+      {
+        fullName,
+        email,
+        password: hashedPassword,
+        phone,
+        street,
+        postalCode,
+        state,
+        city,
+        country,
+      },
+      tenant.id,
+    );
 
     //  Send welcome email
     const template = welcomeEmail(user.name || "Customer");
@@ -56,17 +66,27 @@ export class UserService {
   }
 
   static async getAllUsers() {
-    return UserRepository.findAll();
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
+    return UserRepository.findAll(tenant.id);
   }
 
   static async getMe(token: string) {
     const userId = await getLoggedInUserId();
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
 
     if (!userId) {
       return "User not found!";
     }
 
-    const user = await UserRepository.findById(userId);
+    const user = await UserRepository.findById(userId, tenant.id);
     if (!user) {
       throw new Error("User not found");
     }
@@ -75,17 +95,27 @@ export class UserService {
   }
 
   static async updateUser(userId: string, data: any) {
-    return UserRepository.update(userId, data);
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
+    return UserRepository.update(userId, data, tenant.id);
   }
 
   static async deleteAccount(token: string) {
     const userId = await getLoggedInUserId();
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
 
     if (!userId) {
       return "User not found!";
     }
 
-    await UserRepository.softDelete(userId);
+    await UserRepository.softDelete(userId, tenant.id);
     return "User account deleted successfully.";
   }
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLoggedInUserId } from "@/lib/auth";
-import { cookies } from "next/headers";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
 
 type RouteParams = {
@@ -10,17 +10,11 @@ type RouteParams = {
 };
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  // const cookieStore = await cookies();
-  // const token = cookieStore.get("token")?.value;
+  const tenant = await getDefaultTenant();
+  if (!tenant) {
+    throw new Error("Default tenant not found");
+  }
 
-  // if (!token) {
-  //   return NextResponse.json(
-  //     { message: "Unauthorized: missing token!" },
-  //     { status: 401 },
-  //   );
-  // }
-
-  // const userId = AuthController.getUserIdFromToken(token);
   const userId = await getLoggedInUserId();
 
   if (!userId) {
@@ -42,6 +36,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     const order = await prisma.order.findUnique({
       where: {
         id: orderId,
+        tenantId: tenant.id,
       },
       include: {
         items: {

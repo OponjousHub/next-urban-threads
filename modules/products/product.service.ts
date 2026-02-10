@@ -1,24 +1,48 @@
 import ProductRepository from "./product.repository";
 import { Category } from "@prisma/client";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export default class ProductService {
-  static async createProduct(data: any) {
-    return ProductRepository.create(data);
+  static async createProduct(data: any, tenantId: string) {
+    return ProductRepository.create(data, tenantId);
   }
 
   static async getProducts(category?: Category) {
-    return ProductRepository.findAll(category ? { category } : undefined);
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
+    return ProductRepository.findAll(
+      tenant.id,
+      category ? { category } : undefined,
+    );
   }
 
   static async getProduct(id: string) {
-    return ProductRepository.findById(id);
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
+    return ProductRepository.findById(id, tenant.id);
   }
 
   static async updateProduct(id: string, data: any) {
-    return ProductRepository.update(id, data);
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
+    return ProductRepository.update(id, data, tenant.id);
   }
 
   static async deleteProduct(id: string) {
-    await ProductRepository.seftDelete(id);
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
+    await ProductRepository.seftDelete(id, tenant.id);
   }
 }
