@@ -63,8 +63,9 @@ export async function POST(req: NextRequest) {
           data: {
             ...shippingAddress,
             userId,
-            tenant: {
-              connect: { id: tenant.id },
+            tenantId: tenant.id,
+            user: {
+              connect: { id: userId },
             },
             isDefault: false,
           },
@@ -77,9 +78,7 @@ export async function POST(req: NextRequest) {
           data: {
             ...shippingAddress,
             userId,
-            tenant: {
-              connect: { id: tenant.id },
-            },
+            tenantId: tenant.id,
             isTemporary: true, // optional but recommended
           },
         });
@@ -113,6 +112,7 @@ export async function POST(req: NextRequest) {
         productId: product.id,
         quantity: item.quantity,
         price: product.price,
+        tenantId: tenant.id,
       };
     });
 

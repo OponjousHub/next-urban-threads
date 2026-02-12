@@ -94,9 +94,27 @@ export function ProductForm() {
           const firstError = fieldErrors
             ? Object.values(fieldErrors)[0]?.[0]
             : undefined;
-          toast.error(firstError || "Invalid product data");
+          toast.custom(
+            <AdminToast
+              type="error"
+              title="Upload failed!"
+              description={`${firstError || "Invalid product data"}`}
+            />,
+            {
+              duration: 6000, // ⏱️ 8 seconds
+            },
+          );
         } else {
-          toast.error(data?.message || "Failed to create product");
+          toast.custom(
+            <AdminToast
+              type="error"
+              title="Upload failed!"
+              description={`${data?.message || "Failed to create product"}`}
+            />,
+            {
+              duration: 6000, // ⏱️ 8 seconds
+            },
+          );
         }
 
         return;
@@ -106,6 +124,7 @@ export function ProductForm() {
       // toast.success("Product created successfully 🎉");
       toast.custom(
         <AdminToast
+          type="success"
           title="Product created"
           description="Your product is now live in the store"
         />,
@@ -129,7 +148,6 @@ export function ProductForm() {
       setImages([]);
     } catch (err) {
       console.error("FETCH ERROR:", err);
-      toast.error("Something went wrong. Please try again.");
       toast.custom(
         <AdminToast
           type="error"
