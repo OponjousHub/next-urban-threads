@@ -23,6 +23,7 @@ model User {
   city         String?
   country      String?
   password     String
+  passwordUpdatedAt DateTime?
   phone        String?
   role         Role           @default(USER)
   avatarUrl    String?  // 👈 optional
