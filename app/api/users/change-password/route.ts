@@ -18,11 +18,11 @@ export async function PATCH(req: NextRequest) {
       throw new Error("Default tenant not found");
     }
 
-    const { currentPassword, newPassword } = await req.json();
+    const { currentPassword, newPassword, confirmPassword } = await req.json();
 
-    if (!currentPassword || !newPassword) {
+    if (!currentPassword || !newPassword || !confirmPassword) {
       return NextResponse.json(
-        { message: "All fields required" },
+        { message: "All fields are required" },
         { status: 400 },
       );
     }

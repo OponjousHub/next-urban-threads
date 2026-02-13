@@ -24,6 +24,8 @@ model User {
   country      String?
   password     String
   passwordUpdatedAt DateTime?
+  twoFactorEnabled  Boolean @default(false)
+  twoFactorSecret   String? // encrypted secret
   phone        String?
   role         Role           @default(USER)
   avatarUrl    String?  // 👈 optional
