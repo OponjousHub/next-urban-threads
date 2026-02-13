@@ -1,35 +1,9 @@
-import { prisma } from "@/utils/prisma";
-import speakeasy from "speakeasy";
+import TwoFAController from "@/modules/2FA/2FA.controller";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function verify2FA({
-  userId,
-  token,
-  secret,
-}: {
-  userId: string;
-  token: string;
-  secret: string;
-}) {
-  const verified = speakeasy.totp({
-    secret,
-    encoding: "base32",
-    token,
-  });
+export async function verify2FA(req: NextRequest) {
+  const body = await req.json();
+  const result = await TwoFAController.verify(body.token);
 
-  if (!verified) throw new Error("Invalid code");
-
-  const encrypted = CryptoJS.AES.encrypt(
-    secret,
-    process.env.TWO_FACTOR_SECRET!,
-  ).toString();
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      twoFactorEnabled: true,
-      twoFactorSecret: encrypted,
-    },
-  });
-
-  return true;
+  return NextResponse.json(result, { status: 200 });
 }

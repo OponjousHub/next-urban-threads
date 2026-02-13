@@ -2,8 +2,16 @@ import { NextResponse } from "next/server";
 import AuthController from "@/modules/auth/auth.controller";
 import { LoginSchema } from "@/modules/auth/auth.schema";
 import { AuthService } from "@/modules/auth/auth.service";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { prisma } from "@/utils/prisma";
+
+import { email } from "zod";
 
 export async function POST(req: Request) {
+  const tenant = await getDefaultTenant();
+  if (!tenant) {
+    throw new Error("Default tenant not found");
+  }
   try {
     const body = await req.json();
 
@@ -14,6 +22,11 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+
+    //  GET USER
+    const user = prisma.user.findUnique({
+      where: { email: body.email, tenantId: tenant.id },
+    });
 
     const result = await AuthController.login(parsed.data);
     const token = AuthService.generateToken(result.user.id);
@@ -28,6 +41,13 @@ export async function POST(req: Request) {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
+
+    if (user.twoFactorEnabled) {
+      return NextResponse.json({
+        requires2FA: true,
+        userId: user.id,
+      });
+    }
 
     return response;
   } catch (error) {

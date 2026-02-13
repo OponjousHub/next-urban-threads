@@ -26,6 +26,8 @@ model User {
   passwordUpdatedAt DateTime?
   twoFactorEnabled  Boolean @default(false)
   twoFactorSecret   String? // encrypted secret
+  twoFactorTempSecret  String?
+  twoFactorTempSecretExpiresAt DateTime?
   phone        String?
   role         Role           @default(USER)
   avatarUrl    String?  // 👈 optional
