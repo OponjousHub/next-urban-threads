@@ -1,7 +1,7 @@
 import { prisma } from "@/utils/prisma";
 
 class TwoFARepository {
-  static async verify(userId: string, tenantId: string) {
+  static async findUserFor2FA(userId: string, tenantId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId, tenantId },
     });
@@ -10,6 +10,7 @@ class TwoFARepository {
   }
 
   static async update(userId: string, tenantId: string, tempSecret: string) {
+    console.log("FINALLY REEEEPPPPOOOO+++++++++++++", tempSecret);
     await prisma.user.update({
       where: { id: userId, tenantId },
       data: {

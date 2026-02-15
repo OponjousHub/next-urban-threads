@@ -6,7 +6,7 @@ import { getLoggedInUserId } from "@/lib/auth";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { NextResponse } from "next/server";
 
-export async function setup2FA() {
+export async function GET() {
   const tenant = await getDefaultTenant();
   const userId = await getLoggedInUserId();
 
@@ -19,11 +19,11 @@ export async function setup2FA() {
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
-
   const secret = speakeasy.generateSecret({
     length: 20,
     name: "UrbanThreads",
   });
+  console.log("SETUP SECRET:", secret.base32);
 
   // Encrypt before saving (optional but recommended)
   const encryptedTempSecret = CryptoJS.AES.encrypt(
@@ -35,12 +35,10 @@ export async function setup2FA() {
     where: { id: userId, tenantId: tenant.id },
     data: {
       twoFactorTempSecret: encryptedTempSecret,
+      twoFactorTempSecretExpiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 mins
     },
   });
 
   const qrCode = await QRCode.toDataURL(secret.otpauth_url!);
-
-  return {
-    qrCode,
-  };
+  return NextResponse.json({ qrCode, secret: secret.base32 }, { status: 200 });
 }

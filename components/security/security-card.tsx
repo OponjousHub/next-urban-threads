@@ -5,7 +5,12 @@ import TwoFactorSection from "@/components/security/twoFactor-section";
 import ActiveSessionsSection from "@/components/security/active-session-section";
 import DangerZoneSection from "@/components/security/danger-zone-section";
 
-export default function SecurityCard() {
+export default function SecurityCard({
+  timeUpdated,
+}: {
+  timeUpdated: string | null;
+}) {
+  console.log(timeUpdated);
   return (
     <div className="bg-white shadow rounded-2xl p-6 space-y-6">
       <div>
@@ -17,7 +22,7 @@ export default function SecurityCard() {
         </p>
       </div>
 
-      <PasswordSection />
+      <PasswordSection passwordUpdated={timeUpdated} />
       <TwoFactorSection />
       <ActiveSessionsSection />
       <DangerZoneSection />

@@ -7,15 +7,21 @@ export default function TwoFactorSection() {
   const [otp, setOtp] = useState("");
 
   const startSetup = async () => {
-    const res = await fetch("/api/auth/2fa/setup");
-    const data = await res.json();
+    const res = await fetch("/api/auth/2FA/setup");
 
+    if (!res.ok) {
+      console.error("Setup failed:", await res.text());
+      return;
+    }
+
+    const data = await res.json();
+    console.log(data.qrCode, data.secret);
     setQrCode(data.qrCode);
     setSecret(data.secret);
   };
 
   const confirm2FA = async () => {
-    await fetch("/api/auth/2fa/verify", {
+    await fetch("/api/auth/2FA/verify", {
       method: "POST",
       body: JSON.stringify({
         secret,
@@ -38,7 +44,7 @@ export default function TwoFactorSection() {
       {!enabled && (
         <button
           onClick={startSetup}
-          className="mt-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-600"
+          className="mt-2 px-4 py-2 border hover:bg-gray-50 rounded-lg"
         >
           Enable 2FA
         </button>

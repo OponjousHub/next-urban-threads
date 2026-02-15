@@ -18,7 +18,7 @@ class TwoFAService {
       throw new Error("Default tenant not found");
     }
 
-    const user = await TwoFARepository.verify(userId, tenant.id);
+    const user = await TwoFARepository.findUserFor2FA(userId, tenant.id);
 
     if (!user?.twoFactorTempSecret) {
       throw new Error("No 2FA setup in progress");
@@ -36,14 +36,34 @@ class TwoFAService {
       process.env.TWO_FACTOR_SECRET!,
     );
 
-    const tempSecret = bytes.toString(CryptoJS.enc.Utf8);
+    const tempSecret = bytes.toString(CryptoJS.enc.Utf8).trim();
+    console.log("Decrypted secret:", tempSecret);
+    console.log("User entered token:", token);
+    console.log("Server time:", new Date());
+
+    const serverToken = speakeasy.totp({
+      secret: tempSecret,
+      encoding: "base32",
+    });
+
+    console.log("SERVER TOKEN:", serverToken);
 
     const verified = speakeasy.totp.verify({
       secret: tempSecret,
       encoding: "base32",
       token,
-      window: 1,
+      window: 2,
     });
+
+    // const verified = speakeasy.totp.verify({
+    //   secret: tempSecret,
+    //   encoding: "base32",
+    //   token: String(token).trim(),
+    //   window: 1,
+    //   algorithm: "sha1",
+    //   digits: 6,
+    //   step: 30,
+    // });
 
     if (!verified) throw new Error("Invalid code");
 
@@ -52,6 +72,7 @@ class TwoFAService {
       tenant.id,
       user.twoFactorTempSecret,
     );
+    console.log("SERVICE HIIIIIIt ---------", user.twoFactorTempSecret);
 
     return res;
   }

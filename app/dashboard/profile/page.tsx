@@ -141,17 +141,6 @@ export default function EditProfilePage() {
     }
   };
 
-  // CHANGE USER EMAIL
-  // const changeEmail = async () => {
-  //   await fetch("/api/profile/change-email", {
-  //     method: "PATCH",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ newEmail }),
-  //   });
-
-  //   toast.success("Check your email to verify change");
-  // };
-
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10">
       <div className="mx-auto max-w-5xl">

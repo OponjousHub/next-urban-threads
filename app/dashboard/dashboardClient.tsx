@@ -18,12 +18,21 @@ type ShippingAddress = {
   postalCode?: string | null;
   country: string;
   phone?: string | null;
+  passwordUpdatedAt?: string | null;
 };
 
 function DashboardClient({ stats }: { stats: DashboardStats }) {
   const hasOrders = stats.recentOrders.length > 0;
   const shippingAddress = stats.defaultAddress as ShippingAddress | null;
   const { user, defaultAddress } = stats;
+
+  const stat = {
+    user: {
+      passwordUpdatedAt: stats.user?.passwordUpdatedAt
+        ? stats.user?.passwordUpdatedAt.toISOString()
+        : null,
+    },
+  };
 
   function escapeRegExp(value: string) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -268,7 +277,7 @@ function DashboardClient({ stats }: { stats: DashboardStats }) {
               </Link>
             </CardContent>
           </Card>
-          <SecurityCard />
+          <SecurityCard timeUpdated={stat.user?.passwordUpdatedAt} />
         </div>
       </div>
     </div>
