@@ -33,9 +33,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
     searchParams.get("tx_ref") ?? // Flutterwave
     undefined;
 
-  console.log("orderId:", orderId);
-  console.log("reference:", reference);
-
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
@@ -50,8 +47,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
     const toastId = "verifying";
 
     async function verifyOrder() {
-      console.log(orderId);
-      console.log(reference);
       try {
         toast.loading("Verifying payment...", { id: toastId });
 
@@ -117,7 +112,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
     return () => clearInterval(interval);
   }, [order, orderId]);
-  console.log(order);
   /* ------------------------------------
      ✅ CENTERED LOADING STATE
   ------------------------------------- */

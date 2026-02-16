@@ -24,7 +24,7 @@ export default function TwoFactorSection() {
     await fetch("/api/auth/2FA/verify", {
       method: "POST",
       body: JSON.stringify({
-        secret,
+        // secret,
         token: otp,
       }),
     });

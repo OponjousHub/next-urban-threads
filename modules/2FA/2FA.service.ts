@@ -37,9 +37,6 @@ class TwoFAService {
     );
 
     const tempSecret = bytes.toString(CryptoJS.enc.Utf8).trim();
-    console.log("Decrypted secret:", tempSecret);
-    console.log("User entered token:", token);
-    console.log("Server time:", new Date());
 
     const serverToken = speakeasy.totp({
       secret: tempSecret,
@@ -65,6 +62,9 @@ class TwoFAService {
     //   step: 30,
     // });
 
+    console.log("VERIFY SECRET:", tempSecret);
+    console.log("SERVER TIME:", Date.now());
+
     if (!verified) throw new Error("Invalid code");
 
     const res = await TwoFARepository.update(
@@ -72,7 +72,6 @@ class TwoFAService {
       tenant.id,
       user.twoFactorTempSecret,
     );
-    console.log("SERVICE HIIIIIIt ---------", user.twoFactorTempSecret);
 
     return res;
   }

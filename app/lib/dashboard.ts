@@ -89,7 +89,7 @@ export async function getUserDashboardStats(userId: string) {
       orderBy: { createdAt: "desc" },
     }),
   ]);
-  console.dir(recentOrders[0]?.items[0], { depth: null });
+  // console.dir(recentOrders[0]?.items[0], { depth: null });
   const serializedRecentOrders = recentOrders.map((order) => {
     return {
       id: order.id,

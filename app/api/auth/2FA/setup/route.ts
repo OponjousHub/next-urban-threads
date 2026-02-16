@@ -23,7 +23,6 @@ export async function GET() {
     length: 20,
     name: "UrbanThreads",
   });
-  console.log("SETUP SECRET:", secret.base32);
 
   // Encrypt before saving (optional but recommended)
   const encryptedTempSecret = CryptoJS.AES.encrypt(
@@ -39,6 +38,25 @@ export async function GET() {
     },
   });
 
-  const qrCode = await QRCode.toDataURL(secret.otpauth_url!);
-  return NextResponse.json({ qrCode, secret: secret.base32 }, { status: 200 });
+  const user = await prisma.user.findUnique({
+    where: { id: userId, tenantId: tenant.id },
+  });
+  let qrCode;
+  if (
+    user?.twoFactorTempSecret &&
+    user.twoFactorTempSecretExpiresAt &&
+    user.twoFactorTempSecretExpiresAt > new Date()
+  ) {
+    qrCode = await QRCode.toDataURL(secret.otpauth_url!);
+  } else {
+    const secret2 = speakeasy.generateSecret({
+      length: 20,
+      name: "UrbanThreads",
+    });
+
+    qrCode = await QRCode.toDataURL(secret2.otpauth_url!);
+  }
+  console.log("SETUP SECRET:", secret.base32);
+
+  return NextResponse.json({ qrCode }, { status: 200 });
 }
