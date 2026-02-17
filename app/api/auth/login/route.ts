@@ -46,6 +46,7 @@ export async function POST(req: Request) {
       return NextResponse.json({
         requires2FA: true,
         userId: user.id,
+        tenantId: tenant.id,
       });
     }
 

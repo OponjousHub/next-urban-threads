@@ -56,7 +56,6 @@ export async function GET() {
 
     qrCode = await QRCode.toDataURL(secret2.otpauth_url!);
   }
-  console.log("SETUP SECRET:", secret.base32);
 
   return NextResponse.json({ qrCode }, { status: 200 });
 }

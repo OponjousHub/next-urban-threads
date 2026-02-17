@@ -43,27 +43,12 @@ class TwoFAService {
       encoding: "base32",
     });
 
-    console.log("SERVER TOKEN:", serverToken);
-
     const verified = speakeasy.totp.verify({
       secret: tempSecret,
       encoding: "base32",
       token,
       window: 2,
     });
-
-    // const verified = speakeasy.totp.verify({
-    //   secret: tempSecret,
-    //   encoding: "base32",
-    //   token: String(token).trim(),
-    //   window: 1,
-    //   algorithm: "sha1",
-    //   digits: 6,
-    //   step: 30,
-    // });
-
-    console.log("VERIFY SECRET:", tempSecret);
-    console.log("SERVER TIME:", Date.now());
 
     if (!verified) throw new Error("Invalid code");
 
@@ -72,7 +57,7 @@ class TwoFAService {
       tenant.id,
       user.twoFactorTempSecret,
     );
-
+    console.log("TWO FA SERVICE", res);
     return res;
   }
 }

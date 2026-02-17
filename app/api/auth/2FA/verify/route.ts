@@ -1,27 +1,11 @@
 import TwoFAController from "@/modules/2FA/2FA.controller";
 import { NextRequest, NextResponse } from "next/server";
 
-// export async function POST(req: NextRequest) {
-//   const body = await req.json();
-//   const result = await TwoFAController.verify(body.token);
-
-//   console.log("RESULT:", result);
-//   console.log("TYPE:", typeof result);
-//   return NextResponse.json(JSON.parse(JSON.stringify(result)), {
-//     status: 200,
-//   });
-
-//   // return NextResponse.json(result, { status: 200 });
-// }
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const result = await TwoFAController.verify(body.token);
-
-    console.log("RESULT:", result);
-    console.log("TYPE:", typeof result);
-
+    console.log("RESULT OF 2FA----------", result);
     return NextResponse.json(result, { status: 200 });
   } catch (error: any) {
     return NextResponse.json(

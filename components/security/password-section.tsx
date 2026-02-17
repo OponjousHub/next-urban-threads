@@ -4,11 +4,13 @@ import { useState } from "react";
 import ChangePasswordModal from "../change-password-modal";
 import formatDate from "@/utils/format-date";
 
-export default async function PasswordSection({
+interface PasswordSectionProps {
+  passwordUpdated?: Date | null;
+}
+
+export default function PasswordSection({
   passwordUpdated,
-}: {
-  passwordUpdated: string | null;
-}) {
+}: PasswordSectionProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -16,7 +18,11 @@ export default async function PasswordSection({
       <div className="flex justify-between items-center">
         <div>
           <h3 className="font-medium">Password</h3>
-          <p className="text-sm text-gray-500">{`Last updated: ${formatDate(passwordUpdated)}`}</p>
+          <p className="text-sm text-gray-500">{`Last updated: ${
+            passwordUpdated
+              ? formatDate(passwordUpdated?.toISOString())
+              : "Never"
+          }`}</p>
           <p className="text-green-600 text-sm mt-1">Strong Password ✓</p>
         </div>
 

@@ -1,8 +1,12 @@
 import { prisma } from "@/utils/prisma";
 import { OrderStatus } from "@prisma/client";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { DashboardStats } from "@/types/dashboard";
 
-export async function getUserDashboardStats(userId: string) {
+// export async function getUserDashboardStats(userId: string) {
+export async function getUserDashboardStats(
+  userId: string,
+): Promise<DashboardStats> {
   const tenant = await getDefaultTenant();
 
   if (!tenant) {

@@ -3,12 +3,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Package, CreditCard, User, MapPin } from "lucide-react";
-import { getUserDashboardStats } from "@/app/lib/dashboard";
+import type { DashboardStats } from "@/types/dashboard";
 import SecurityCard from "@/components/security/security-card";
-
 import Link from "next/link";
-
-type DashboardStats = Awaited<ReturnType<typeof getUserDashboardStats>>;
 
 type ShippingAddress = {
   fullName: string;
@@ -277,7 +274,7 @@ function DashboardClient({ stats }: { stats: DashboardStats }) {
               </Link>
             </CardContent>
           </Card>
-          <SecurityCard timeUpdated={stat.user?.passwordUpdatedAt} />
+          <SecurityCard user={stats} />
         </div>
       </div>
     </div>
