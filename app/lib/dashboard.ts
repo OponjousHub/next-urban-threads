@@ -79,6 +79,7 @@ export async function getUserDashboardStats(
         phone: true,
         createdAt: true,
         passwordUpdatedAt: true,
+        twoFactorEnabled: true,
         status: true,
       },
     }),

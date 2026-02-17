@@ -17,8 +17,10 @@ class TwoFAService {
     if (!tenant) {
       throw new Error("Default tenant not found");
     }
+    console.log("VERIFY-SERVICE HIIIIIT ++++++++", token, userId, tenant.id);
 
     const user = await TwoFARepository.findUserFor2FA(userId, tenant.id);
+    console.log("VERIFY-USER RETURN ++++++++", user);
 
     if (!user?.twoFactorTempSecret) {
       throw new Error("No 2FA setup in progress");
@@ -27,8 +29,10 @@ class TwoFAService {
     if (
       !user.twoFactorTempSecretExpiresAt ||
       user.twoFactorTempSecretExpiresAt < new Date()
-    )
+    ) {
+      console.log("2FA setup expired");
       throw new Error("2FA setup expired");
+    }
 
     // Decrypt temporary secret
     const bytes = CryptoJS.AES.decrypt(
@@ -37,7 +41,7 @@ class TwoFAService {
     );
 
     const tempSecret = bytes.toString(CryptoJS.enc.Utf8).trim();
-
+    console.log("TEMPSECRETE++++++++++", tempSecret);
     const serverToken = speakeasy.totp({
       secret: tempSecret,
       encoding: "base32",
@@ -49,6 +53,7 @@ class TwoFAService {
       token,
       window: 2,
     });
+    console.log("VERIFIED SECRETE++++++++++", verified);
 
     if (!verified) throw new Error("Invalid code");
 

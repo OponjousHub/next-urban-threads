@@ -1,20 +1,33 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function TwoFactorSection({
   twoFAStatus,
 }: {
-  twoFAStatus: Boolean;
+  twoFAStatus: Boolean | undefined;
 }) {
   const [enabled, setEnabled] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [secret, setSecret] = useState("");
   const [otp, setOtp] = useState("");
 
-  const startSetup = async () => {
+  const startSetup = async (enable: string) => {
     const res = await fetch("/api/auth/2FA/setup");
 
     if (!res.ok) {
       console.error("Setup failed:", await res.text());
+      toast.error("2FA Setup failed", {
+        duration: 6000, // 6 seconds
+        style: {
+          border: "1px solid #4f46e5",
+          padding: "12px",
+          color: "#333",
+        },
+        iconTheme: {
+          primary: "#4f46e5",
+          secondary: "#fff",
+        },
+      });
       return;
     }
 
@@ -25,34 +38,95 @@ export default function TwoFactorSection({
   };
 
   const confirm2FA = async () => {
-    await fetch("/api/auth/2FA/verify", {
-      method: "POST",
-      body: JSON.stringify({
-        // secret,
-        token: otp,
-      }),
-    });
+    if (otp.trim() === "") {
+      toast.error(`Please enter the otp`, {
+        duration: 6000, // 6 seconds
+      });
+      return;
+    }
 
-    setEnabled(true);
+    try {
+      const response = await fetch("/api/auth/2FA/verify", {
+        method: "POST",
+        body: JSON.stringify({
+          token: otp,
+        }),
+      });
+      if (!response.ok) {
+        const resData = await response.json();
+        toast.error(`Failed to enable 2FA ❌. ${resData.messge}`, {
+          duration: 6000, // 6 seconds
+          style: {
+            border: "1px solid #4f46e5",
+            padding: "12px",
+            color: "#333",
+          },
+          iconTheme: {
+            primary: "#4f46e5",
+            secondary: "#fff",
+          },
+        });
+        return;
+      }
+      const resData = await response.json();
+      console.log(resData);
+
+      setEnabled(true);
+      setQrCode(null);
+      toast.success(`2FA enabled successfully.`, {
+        duration: 6000, // 6 seconds
+        style: {
+          border: "1px solid #4f46e5",
+          padding: "12px",
+          color: "#333",
+        },
+        iconTheme: {
+          primary: "#4f46e5",
+          secondary: "#fff",
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error(`Internal server error!. ${{ status: 500 }}`, {
+        duration: 6000, // 5 seconds
+        style: {
+          border: "1px solid #4f46e5",
+          padding: "12px",
+          color: "#333",
+        },
+        iconTheme: {
+          primary: "#4f46e5",
+          secondary: "#fff",
+        },
+      });
+    }
   };
 
   return (
     <div className="border-t pt-4">
       <h3 className="font-medium">Two-Factor Authentication</h3>
 
-      <p className="text-sm text-gray-500 mt-1">{`Status: ${twoFAStatus ? "Enabled" : "Not Enabled"}`}</p>
+      <p className="text-sm text-gray-500 mt-1">
+        {enabled
+          ? "Enabled"
+          : `Status: ${twoFAStatus ? "Enabled" : "Not Enabled"}`}
+      </p>
 
       {/* <button className="mt-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
         Enable 2FA
       </button> */}
-      {!enabled && (
+      {
         <button
-          onClick={startSetup}
+          onClick={() => startSetup("enable")}
           className="mt-2 px-4 py-2 border hover:bg-gray-50 rounded-lg"
         >
-          Enable 2FA
+          {enabled
+            ? "Disable 2FA"
+            : !twoFAStatus
+              ? "Enable 2FA"
+              : "Disable 2FA"}
         </button>
-      )}
+      }
 
       {qrCode && (
         <div className="mt-4 space-y-4">

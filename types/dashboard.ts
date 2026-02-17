@@ -46,6 +46,7 @@ export type DashboardUser = {
   phone: string | null;
   createdAt: Date;
   passwordUpdatedAt: Date | null;
+  twoFactorEnabled: Boolean;
   status: string; // or UserStatus enum if shared
 };
 

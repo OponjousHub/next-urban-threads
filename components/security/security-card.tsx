@@ -2,31 +2,13 @@ import PasswordSection from "@/components/security/password-section";
 import TwoFactorSection from "@/components/security/twoFactor-section";
 import ActiveSessionsSection from "@/components/security/active-session-section";
 import DangerZoneSection from "@/components/security/danger-zone-section";
-// import { getLoggedInUserId } from "@/lib/auth";
 import type { DashboardStats } from "@/types/dashboard";
-
-import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import { prisma } from "@/utils/prisma";
 
 export default function SecurityCard({
   userData,
 }: {
   userData: DashboardStats;
 }) {
-  // const tenant = await getDefaultTenant();
-  // const userId = await getLoggedInUserId();
-
-  // if (!userId) {
-  //   throw new Error("Unauthorized");
-  // }
-  // if (!tenant) {
-  //   throw new Error("Default tenant not found");
-  // }
-
-  // const user = await prisma.user.findUnique({
-  //   where: { id: userId, tenantId: tenant.id },
-  // });
-  // console.log(user?.passwordUpdatedAt);
   return (
     <div className="bg-white shadow rounded-2xl p-6 space-y-6">
       <div>
@@ -39,7 +21,7 @@ export default function SecurityCard({
       </div>
 
       <PasswordSection passwordUpdated={userData.user?.passwordUpdatedAt} />
-      <TwoFactorSection twoFAStatus={userData.user.twoFactorEnabled} />
+      <TwoFactorSection twoFAStatus={userData.user?.twoFactorEnabled} />
       <ActiveSessionsSection />
       <DangerZoneSection />
     </div>
