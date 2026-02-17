@@ -10,7 +10,9 @@ interface PasswordSectionProps {
 
 export default function PasswordSection({
   passwordUpdated,
-}: PasswordSectionProps) {
+}: {
+  passwordUpdated: Date | null | undefined;
+}) {
   const [open, setOpen] = useState(false);
 
   return (

@@ -1,6 +1,10 @@
 import { useState } from "react";
 
-export default function TwoFactorSection() {
+export default function TwoFactorSection({
+  twoFAStatus,
+}: {
+  twoFAStatus: Boolean;
+}) {
   const [enabled, setEnabled] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [secret, setSecret] = useState("");
@@ -36,7 +40,7 @@ export default function TwoFactorSection() {
     <div className="border-t pt-4">
       <h3 className="font-medium">Two-Factor Authentication</h3>
 
-      <p className="text-sm text-gray-500 mt-1">Status: Not Enabled</p>
+      <p className="text-sm text-gray-500 mt-1">{`Status: ${twoFAStatus ? "Enabled" : "Not Enabled"}`}</p>
 
       {/* <button className="mt-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
         Enable 2FA

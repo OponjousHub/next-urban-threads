@@ -274,7 +274,7 @@ function DashboardClient({ stats }: { stats: DashboardStats }) {
               </Link>
             </CardContent>
           </Card>
-          <SecurityCard user={stats} />
+          <SecurityCard userData={stats} />
         </div>
       </div>
     </div>

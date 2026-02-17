@@ -3,10 +3,16 @@ import TwoFactorSection from "@/components/security/twoFactor-section";
 import ActiveSessionsSection from "@/components/security/active-session-section";
 import DangerZoneSection from "@/components/security/danger-zone-section";
 // import { getLoggedInUserId } from "@/lib/auth";
+import type { DashboardStats } from "@/types/dashboard";
+
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
 
-export default function SecurityCard() {
+export default function SecurityCard({
+  userData,
+}: {
+  userData: DashboardStats;
+}) {
   // const tenant = await getDefaultTenant();
   // const userId = await getLoggedInUserId();
 
@@ -32,10 +38,8 @@ export default function SecurityCard() {
         </p>
       </div>
 
-      <PasswordSection
-      // passwordUpdated={user?.passwordUpdatedAt}
-      />
-      <TwoFactorSection />
+      <PasswordSection passwordUpdated={userData.user?.passwordUpdatedAt} />
+      <TwoFactorSection twoFAStatus={userData.user.twoFactorEnabled} />
       <ActiveSessionsSection />
       <DangerZoneSection />
     </div>
