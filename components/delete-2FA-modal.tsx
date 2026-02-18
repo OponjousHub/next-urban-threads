@@ -6,8 +6,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-// import { AdminToast } from "@/components/ui/adminToast";
-// import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   open: boolean;
@@ -46,7 +44,7 @@ export default function Disable2FAModal({ open, onClose }: Props) {
         });
         return;
       }
-
+      onClose();
       toast.success("2FA Disabled", {
         duration: 6000, // 6 seconds
         style: {
@@ -60,9 +58,7 @@ export default function Disable2FAModal({ open, onClose }: Props) {
         },
       });
 
-      onClose();
       setOtp("");
-
       window.location.reload();
     } catch (err: any) {
       console.error(err.message);
