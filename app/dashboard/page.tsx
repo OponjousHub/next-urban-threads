@@ -5,7 +5,6 @@ import { getLoggedInUserId } from "@/lib/auth";
 
 export default async function UserDashboard() {
   const userId = await getLoggedInUserId();
-  // const { tenant } = useTenant();
 
   if (!userId) {
     return null; // or redirect

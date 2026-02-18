@@ -32,7 +32,6 @@ export default function TwoFactorSection({
     }
 
     const data = await res.json();
-    console.log(data.qrCode, data.secret);
     setQrCode(data.qrCode);
     setSecret(data.secret);
   };
@@ -69,7 +68,6 @@ export default function TwoFactorSection({
         return;
       }
       const resData = await response.json();
-      console.log(resData);
 
       setEnabled(true);
       setQrCode(null);
@@ -112,9 +110,6 @@ export default function TwoFactorSection({
           : `Status: ${twoFAStatus ? "Enabled" : "Not Enabled"}`}
       </p>
 
-      {/* <button className="mt-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
-        Enable 2FA
-      </button> */}
       {
         <button
           onClick={() => startSetup("enable")}

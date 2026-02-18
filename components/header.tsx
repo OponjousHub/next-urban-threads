@@ -25,6 +25,7 @@ const Header = () => {
     async function loadUser() {
       try {
         const res = await fetch("/api/users/me", {
+          credentials: "include",
           cache: "no-store",
         });
         if (!res.ok) {

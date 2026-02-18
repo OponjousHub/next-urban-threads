@@ -75,6 +75,7 @@ export default function UserMenu({ user, onRemoveAvater }: Props) {
             onClick={async () => {
               await fetch("/api/auth/logout", {
                 method: "POST",
+                credentials: "include",
               });
               router.refresh();
               router.replace("/");

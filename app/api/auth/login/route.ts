@@ -24,11 +24,25 @@ export async function POST(req: Request) {
     }
 
     //  GET USER
-    const user = prisma.user.findUnique({
-      where: { email: body.email, tenantId: tenant.id },
-    });
+    // const user = prisma.user.findUnique({
+    //   where: { email: body.email, tenantId: tenant.id },
+    // });
 
+    // if (!user) {
+    //   return NextResponse.json({ error: "User not found!" }, { status: 401 });
+    // }
+
+    // console.log("LOGIN USER -------------", user.id);
     const result = await AuthController.login(parsed.data);
+
+    if (result.user.twoFactorEnabled) {
+      return NextResponse.json({
+        requires2FA: true,
+        userId: result.user.id,
+        tenantId: tenant.id,
+      });
+    }
+
     const token = AuthService.generateToken(result.user.id);
 
     const response = NextResponse.json(result, { status: 200 });
@@ -41,14 +55,6 @@ export async function POST(req: Request) {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
-
-    if (user.twoFactorEnabled) {
-      return NextResponse.json({
-        requires2FA: true,
-        userId: user.id,
-        tenantId: tenant.id,
-      });
-    }
 
     return response;
   } catch (error) {
