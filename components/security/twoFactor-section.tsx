@@ -8,7 +8,8 @@ export default function TwoFactorSection({
 }) {
   const [enabled, setEnabled] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
-  const [secret, setSecret] = useState("");
+  // const [secret, setSecret] = useState("");
+  const [mode, setMode] = useState<"enable" | "disable" | null>(null);
   const [otp, setOtp] = useState("");
 
   const startSetup = async (enable: string) => {
@@ -33,7 +34,7 @@ export default function TwoFactorSection({
 
     const data = await res.json();
     setQrCode(data.qrCode);
-    setSecret(data.secret);
+    // setSecret(data.secret);
   };
 
   const confirm2FA = async () => {
@@ -111,15 +112,28 @@ export default function TwoFactorSection({
       </p>
 
       {
+        // <button
+        //   onClick={() => startSetup("enable")}
+        //   className="mt-2 px-4 py-2 border hover:bg-gray-50 rounded-lg"
+        // >
+        //   {enabled
+        //     ? "Disable 2FA"
+        //     : !twoFAStatus
+        //       ? "Enable 2FA"
+        //       : "Disable 2FA"}
+        // </button>
         <button
-          onClick={() => startSetup("enable")}
           className="mt-2 px-4 py-2 border hover:bg-gray-50 rounded-lg"
+          onClick={() => {
+            if (twoFAStatus) {
+              setMode("disable");
+            } else {
+              startSetup();
+              setMode("enable");
+            }
+          }}
         >
-          {enabled
-            ? "Disable 2FA"
-            : !twoFAStatus
-              ? "Enable 2FA"
-              : "Disable 2FA"}
+          {twoFAStatus ? "Disable 2FA" : "Enable 2FA"}
         </button>
       }
 
