@@ -73,10 +73,6 @@ export default function ChangEmailModal({ open, onClose, address }: Props) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
-        {/* Title */}
-        {/* <h2 className="text-lg font-semibold text-gray-800">
-          Change Email Address
-        </h2> */}
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">
             Change Email Address

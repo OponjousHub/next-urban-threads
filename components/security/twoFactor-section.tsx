@@ -1,18 +1,18 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import Disable2FAModal from "../delete-2FA-modal";
 
 export default function TwoFactorSection({
   twoFAStatus,
 }: {
-  twoFAStatus: Boolean | undefined;
+  twoFAStatus: boolean | undefined;
 }) {
-  const [enabled, setEnabled] = useState(false);
+  const [showDisableModal, setShowDisableModal] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
-  // const [secret, setSecret] = useState("");
   const [mode, setMode] = useState<"enable" | "disable" | null>(null);
   const [otp, setOtp] = useState("");
 
-  const startSetup = async (enable: string) => {
+  const startSetup = async () => {
     const res = await fetch("/api/auth/2FA/setup");
 
     if (!res.ok) {
@@ -54,7 +54,7 @@ export default function TwoFactorSection({
       });
       if (!response.ok) {
         const resData = await response.json();
-        toast.error(`Failed to enable 2FA ❌. ${resData.messge}`, {
+        toast.error(`Failed to enable 2FA ❌. ${resData.message}`, {
           duration: 6000, // 6 seconds
           style: {
             border: "1px solid #4f46e5",
@@ -70,7 +70,7 @@ export default function TwoFactorSection({
       }
       const resData = await response.json();
 
-      setEnabled(true);
+      // setEnabled(true);
       setQrCode(null);
       toast.success(`2FA enabled successfully.`, {
         duration: 6000, // 6 seconds
@@ -101,18 +101,55 @@ export default function TwoFactorSection({
     }
   };
 
+  const disable2FA = async () => {
+    if (!otp.trim()) {
+      return toast.error("Enter OTP", {
+        duration: 6000, // 6 seconds
+        style: {
+          border: "1px solid #4f46e5",
+          padding: "12px",
+          color: "#333",
+        },
+        iconTheme: {
+          primary: "#4f46e5",
+          secondary: "#fff",
+        },
+      });
+    }
+
+    const res = await fetch("/api/auth/2FA/disable", {
+      method: "POST",
+      body: JSON.stringify({ token: otp }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      toast.error(data.message, {
+        duration: 6000, // 6 seconds
+        style: {
+          border: "1px solid #4f46e5",
+          padding: "12px",
+          color: "#333",
+        },
+        iconTheme: {
+          primary: "#4f46e5",
+          secondary: "#fff",
+        },
+      });
+      return;
+    }
+
+    toast.success("2FA Disabled");
+    window.location.reload();
+  };
+
   return (
     <div className="border-t pt-4">
       <h3 className="font-medium">Two-Factor Authentication</h3>
-
       <p className="text-sm text-gray-500 mt-1">
-        {enabled
-          ? "Enabled"
-          : `Status: ${twoFAStatus ? "Enabled" : "Not Enabled"}`}
+        {`Status: ${twoFAStatus ? "Enabled" : "Not Enabled"}`}
       </p>
-
-      {
-        // <button
+      <button
         //   onClick={() => startSetup("enable")}
         //   className="mt-2 px-4 py-2 border hover:bg-gray-50 rounded-lg"
         // >
@@ -122,22 +159,21 @@ export default function TwoFactorSection({
         //       ? "Enable 2FA"
         //       : "Disable 2FA"}
         // </button>
-        <button
-          className="mt-2 px-4 py-2 border hover:bg-gray-50 rounded-lg"
-          onClick={() => {
-            if (twoFAStatus) {
-              setMode("disable");
-            } else {
-              startSetup();
-              setMode("enable");
-            }
-          }}
-        >
-          {twoFAStatus ? "Disable 2FA" : "Enable 2FA"}
-        </button>
-      }
-
-      {qrCode && (
+        // <button
+        className="mt-2 px-4 py-2 border hover:bg-gray-50 rounded-lg"
+        onClick={() => {
+          if (twoFAStatus) {
+            setShowDisableModal(true);
+            setMode("disable");
+          } else {
+            startSetup();
+            setMode("enable");
+          }
+        }}
+      >
+        {twoFAStatus ? "Disable 2FA" : "Enable 2FA"}
+      </button>
+      {mode === "enable" && qrCode && (
         <div className="mt-4 space-y-4">
           <img src={qrCode} />
 
@@ -156,6 +192,21 @@ export default function TwoFactorSection({
           </button>
         </div>
       )}
+      <Disable2FAModal
+        open={mode === "disable"}
+        onClose={() => setMode(null)}
+      />
+      {/* {mode === "disable" && (
+        <div>
+          <input
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+          />
+
+          <button onClick={disable2FA}>Confirm Disable</button>
+        </div>
+      )} */}
     </div>
   );
 }
