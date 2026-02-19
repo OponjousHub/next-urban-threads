@@ -10,13 +10,16 @@ import {
 type Props = {
   open: boolean;
   onClose: () => void;
+  onSetStatus: () => void;
 };
 
-export default function Disable2FAModal({ open, onClose }: Props) {
+export default function Disable2FAModal({ open, onClose, onSetStatus }: Props) {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const disable2FA = async () => {
+    setLoading(true);
     if (!otp.trim()) {
       setError("Enter OTP");
       return;
@@ -57,7 +60,7 @@ export default function Disable2FAModal({ open, onClose }: Props) {
           secondary: "#fff",
         },
       });
-
+      onSetStatus();
       setOtp("");
       window.location.reload();
     } catch (err: any) {
@@ -74,6 +77,8 @@ export default function Disable2FAModal({ open, onClose }: Props) {
           secondary: "#fff",
         },
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -120,8 +125,9 @@ export default function Disable2FAModal({ open, onClose }: Props) {
               <button
                 onClick={disable2FA}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg"
+                disabled={loading}
               >
-                Confirm Disable
+                {loading ? "Disabling..." : "Confirm Disable"}
               </button>
             </div>
           </div>

@@ -24,6 +24,21 @@ class TwoFARepository {
       },
     });
   }
+  static async saveRecovery(
+    userId: string,
+    tenantId: string,
+    hashedCodes: string[],
+    encryptedSecret: string,
+  ) {
+    return await prisma.user.update({
+      where: { id: userId, tenantId },
+      data: {
+        twoFactorEnabled: true,
+        twoFactorSecret: encryptedSecret,
+        recoveryCodes: hashedCodes,
+      },
+    });
+  }
 }
 
 export default TwoFARepository;

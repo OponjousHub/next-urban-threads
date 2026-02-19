@@ -47,6 +47,8 @@ class DisableTwoFAService {
 
     /* -------- VERIFY OTP -------- */
 
+    if (!user.twoFactorEnabled) throw new Error("2FA already disabled");
+
     const verified = speakeasy.totp.verify({
       secret: decryptedSecret,
       encoding: "base32",

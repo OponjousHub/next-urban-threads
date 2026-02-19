@@ -3,6 +3,8 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import TwoFARepository from "./2FA.repository";
 import CryptoJS from "crypto-js";
 import speakeasy from "speakeasy";
+import { generateRecoveryCodes } from "@/app/lib/recoveryCode";
+import { hashCode } from "@/app/lib/recoveryCode";
 
 class TwoFAService {
   static async verify(token: string) {
@@ -36,10 +38,10 @@ class TwoFAService {
     );
 
     const tempSecret = bytes.toString(CryptoJS.enc.Utf8).trim();
-    const serverToken = speakeasy.totp({
-      secret: tempSecret,
-      encoding: "base32",
-    });
+    // const serverToken = speakeasy.totp({
+    //   secret: tempSecret,
+    //   encoding: "base32",
+    // });
 
     const verified = speakeasy.totp.verify({
       secret: tempSecret,
@@ -50,12 +52,27 @@ class TwoFAService {
 
     if (!verified) throw new Error("Invalid code");
 
+    // ADDING RECOVERY CODES
+    const recoveryCodes = generateRecoveryCodes(10);
+
+    const hashedCodes = recoveryCodes.map((code) => hashCode(code));
+
+    await TwoFARepository.saveRecovery(
+      userId,
+      tenant.id,
+      hashedCodes,
+      user.twoFactorTempSecret,
+    );
+
     const res = await TwoFARepository.update(
       userId,
       tenant.id,
       user.twoFactorTempSecret,
     );
-    return res;
+    return {
+      res,
+      recoveryCodes,
+    };
   }
 }
 

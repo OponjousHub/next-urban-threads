@@ -1,3 +1,5 @@
+import CryptoJS from "crypto-js";
+
 export function decrypt2FASecret(secret: string) {
   const bytes = CryptoJS.AES.decrypt(secret, process.env.TWO_FACTOR_SECRET!);
 

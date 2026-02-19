@@ -19,6 +19,15 @@ export async function GET() {
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      twoFactorTempSecret: null,
+      twoFactorSecret: null,
+    },
+  });
+
   const secret = speakeasy.generateSecret({
     length: 20,
     name: "UrbanThreads",
