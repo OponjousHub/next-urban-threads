@@ -18,18 +18,17 @@ type ShippingAddress = {
   passwordUpdatedAt?: string | null;
 };
 
-function DashboardClient({ stats }: { stats: DashboardStats }) {
+function DashboardClient({
+  stats,
+  recoveryNotice,
+}: {
+  stats: DashboardStats;
+  recoveryNotice: { remaining: number } | null;
+}) {
   const hasOrders = stats.recentOrders.length > 0;
   const shippingAddress = stats.defaultAddress as ShippingAddress | null;
-  const { user, defaultAddress } = stats;
 
-  const stat = {
-    user: {
-      passwordUpdatedAt: stats.user?.passwordUpdatedAt
-        ? stats.user?.passwordUpdatedAt.toISOString()
-        : null,
-    },
-  };
+  const { user } = stats;
 
   function escapeRegExp(value: string) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -58,10 +57,17 @@ function DashboardClient({ stats }: { stats: DashboardStats }) {
   }
 
   const previewItems = stats.recentOrders.slice(0, 2);
-  const remaining = stats.recentOrders.length - previewItems.length;
+  // const remaining = stats.recentOrders.length - previewItems.length;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 mx-24">
+      {recoveryNotice && (
+        <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg mb-4">
+          ⚠️ You logged in using a recovery code. You have{" "}
+          {recoveryNotice.remaining} recovery codes remaining. Consider
+          re-enabling 2FA.
+        </div>
+      )}
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>

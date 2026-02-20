@@ -14,7 +14,7 @@ class DisableTwoFARepository {
       where: { id: userId, tenantId },
       data: {
         twoFactorEnabled: false,
-        // twoFactorSecret: null,
+        recoveryCodes: [],
       },
     });
   }

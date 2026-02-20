@@ -4,12 +4,14 @@ import jwt from "jsonwebtoken";
 import { prisma } from "@/utils/prisma";
 import speakeasy from "speakeasy";
 import CryptoJS from "crypto-js";
+import crypto from "crypto";
+import { hashCode } from "@/app/lib/recoveryCode";
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
   try {
     const body = await req.json();
-    const { userId, token, tenantId } = body;
+    const { userId, token, tenantId, mode } = body;
 
     if (!userId || !token || !tenantId) {
       return NextResponse.json(
@@ -30,6 +32,7 @@ export async function POST(req: Request) {
         twoFactorEnabled: true,
         twoFactorSecret: true,
         status: true,
+        recoveryCodes: true,
       },
     });
 
@@ -42,27 +45,72 @@ export async function POST(req: Request) {
     }
 
     // ⭐ Verify OTP
-    // const isValid = authenticator.verify({
-    const bytes = CryptoJS.AES.decrypt(
-      user.twoFactorSecret,
-      process.env.TWO_FACTOR_SECRET!,
-    );
+    if (mode === "otp") {
+      const bytes = CryptoJS.AES.decrypt(
+        user.twoFactorSecret,
+        process.env.TWO_FACTOR_SECRET!,
+      );
 
-    const decryptedSecret = bytes.toString(CryptoJS.enc.Utf8);
+      const decryptedSecret = bytes.toString(CryptoJS.enc.Utf8);
 
-    console.log("DECRYPTED SECRET:", decryptedSecret);
+      const isValid = speakeasy.totp.verify({
+        secret: decryptedSecret,
+        encoding: "base32",
+        token: token.trim(),
+        window: 2,
+      });
 
-    const isValid = speakeasy.totp.verify({
-      secret: decryptedSecret,
-      encoding: "base32",
-      token: token.trim(),
-      window: 2,
-    });
+      if (!isValid) {
+        return NextResponse.json(
+          { message: "Invalid verification code" },
+          { status: 401 },
+        );
+      }
+    }
 
-    if (!isValid) {
-      return NextResponse.json(
-        { message: "Invalid verification code" },
-        { status: 401 },
+    // Verify Recovery code
+    // ⭐ Verify Recovery code
+    let usedRecoveryLogin = false;
+    let remainingCodes;
+    if (mode === "recovery") {
+      const normalizedToken = token.trim().toUpperCase();
+      const hashedToken = hashCode(normalizedToken);
+
+      const storedCodes = user.recoveryCodes || [];
+
+      const codeIndex = storedCodes.indexOf(hashedToken);
+
+      if (codeIndex === -1) {
+        return NextResponse.json(
+          { message: "Invalid or already used recovery code" },
+          { status: 401 },
+        );
+      }
+
+      // ✅ Remove used code (one-time use)
+      storedCodes.splice(codeIndex, 1);
+
+      // GET the number of Recovery codes remaining
+      remainingCodes = storedCodes.length;
+
+      await prisma.user.update({
+        where: { id: user.id, tenantId },
+        data: {
+          recoveryCodes: storedCodes,
+        },
+      });
+
+      usedRecoveryLogin = true;
+
+      cookieStore.set(
+        "recovery_notice",
+        JSON.stringify({ remaining: remainingCodes }),
+        {
+          httpOnly: true,
+          maxAge: 60 * 2, // 10 minutes
+          sameSite: "lax",
+          path: "/",
+        },
       );
     }
 
@@ -77,6 +125,7 @@ export async function POST(req: Request) {
       {
         userId: user.id,
         tenantId,
+        usedRecoveryLogin,
       },
       jwtSecret,
       { expiresIn: "7d" },
@@ -93,6 +142,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
+      remainingRecoveryCodes: remainingCodes,
     });
   } catch (error) {
     console.error("VERIFY 2FA ERROR:", error);

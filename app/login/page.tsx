@@ -12,10 +12,11 @@ export default function LoginPage() {
   const [requires2FA, setRequires2FA] = useState(false);
   const [tempUserId, setTempUserId] = useState<string | null>(null);
   const [tenantId, setTenantId] = useState<string | null>(null);
-
+  const [useRecovery, setUseRecovery] = useState(false);
   const [showError, setShowError] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"otp" | "recovery">();
 
   useEffect(() => {
     if (requires2FA) {
@@ -75,6 +76,8 @@ export default function LoginPage() {
       return;
     }
     if (!otpCode || !tempUserId) return;
+    console.log("OTP COOODE", otpCode);
+    console.log("MOOOODEEE", mode);
 
     setLoading(true);
 
@@ -87,6 +90,7 @@ export default function LoginPage() {
           userId: tempUserId,
           token: otpCode,
           tenantId,
+          mode,
         }),
       });
 
@@ -116,7 +120,9 @@ export default function LoginPage() {
 
         <p className="text-gray-500 text-center mb-8">
           {requires2FA
-            ? "Enter code from your authenticator"
+            ? !useRecovery
+              ? "Enter code from your authenticator"
+              : "Enter recovery code"
             : "Sign in to continue shopping"}
         </p>
 
@@ -180,41 +186,84 @@ export default function LoginPage() {
         {/* ⭐ 2FA FORM */}
         {requires2FA && (
           <form onSubmit={handleVerify2FA} className="space-y-5">
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">
-                Authentication Code
-              </label>
+            {!useRecovery ? (
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">
+                  Authentication Code
+                </label>
 
-              <input
-                type="text"
-                maxLength={6}
-                placeholder="123456"
-                className="w-full border rounded-lg px-3 py-2 text-center tracking-widest"
-                value={otpCode}
-                onChange={(e) => {
-                  setOtpCode(e.target.value);
-                  setApiError("");
-                }}
-              />
-            </div>
+                <input
+                  type="text"
+                  maxLength={6}
+                  placeholder="123456"
+                  className="w-full border rounded-lg px-3 py-2 text-center tracking-widest"
+                  value={otpCode}
+                  onChange={(e) => {
+                    setOtpCode(e.target.value);
+                    setApiError("");
+                    setMode("otp");
+                  }}
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">
+                  Recovery Code
+                </label>
 
-            {/* ⭐ Forgot password still visible */}
-            <div className="flex justify-end">
-              <a
-                href="/forgot-password"
-                className="text-sm text-indigo-600 hover:underline"
-              >
-                Forgot password?
-              </a>
-            </div>
+                <input
+                  type="text"
+                  maxLength={8}
+                  placeholder="Enter recovery code"
+                  className="w-full border rounded-lg px-3 py-2 text-center tracking-widest"
+                  value={otpCode}
+                  onChange={(e) => {
+                    setOtpCode(e.target.value);
+                    setApiError("");
+                    setMode("recovery");
+                  }}
+                />
+              </div>
+            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg"
-            >
-              {loading ? "Verifying..." : "Verify Code"}
-            </button>
+            {!useRecovery ? (
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-indigo-600 text-white py-3 rounded-lg"
+                  // onClick={()=>setMode("otp")}
+                >
+                  {loading ? "Verifying..." : "Verify Code"}
+                </button>
+
+                <button
+                  type="button"
+                  className="text-sm text-indigo-600 mt-2"
+                  onClick={() => setUseRecovery(true)}
+                >
+                  Use a recovery code instead
+                </button>
+              </div>
+            ) : (
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-indigo-600 text-white py-3 rounded-lg"
+                  // onClick={()=>setMode("recovery")}
+                >
+                  {loading ? "Verifying..." : "Verify recovery code"}
+                </button>
+                <button
+                  type="button"
+                  className="text-sm text-indigo-600 mt-2"
+                  onClick={() => setUseRecovery(false)}
+                >
+                  Back to authenticator
+                </button>
+              </div>
+            )}
           </form>
         )}
       </div>
