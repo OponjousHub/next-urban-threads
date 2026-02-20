@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Disable2FAModal from "../delete-2FA-modal";
+import RecoveryCodesModal from "../RecoveryCodesModal";
 
 export default function TwoFactorSection({
   twoFAStatus,
 }: {
   twoFAStatus: boolean | undefined;
 }) {
-  const [showDisableModal, setShowDisableModal] = useState(false);
+  // const [showDisableModal, setShowDisableModal] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [mode, setMode] = useState<"enable" | "disable" | null>(null);
   const [otp, setOtp] = useState("");
   const [status, setStatus] = useState(twoFAStatus);
   const [loading, setLoading] = useState(false);
+  const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
 
   useEffect(() => {
     setStatus(twoFAStatus);
@@ -75,7 +78,7 @@ export default function TwoFactorSection({
         });
         return;
       }
-      // const resData = await response.json();
+      const resData = await response.json();
 
       // setEnabled(true);
       setQrCode(null);
@@ -92,6 +95,8 @@ export default function TwoFactorSection({
         },
       });
       setStatus(true);
+      setRecoveryCodes(resData.recoveryCodes);
+      setShowRecoveryModal(true);
     } catch (err) {
       console.error(err);
       toast.error(`Internal server error!. ${{ status: 500 }}`, {
@@ -206,6 +211,11 @@ export default function TwoFactorSection({
         open={mode === "disable"}
         onClose={() => setMode(null)}
         onSetStatus={() => setStatus(false)}
+      />
+      <RecoveryCodesModal
+        open={showRecoveryModal}
+        onClose={() => setShowRecoveryModal(false)}
+        codes={recoveryCodes}
       />
     </div>
   );
