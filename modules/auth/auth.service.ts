@@ -14,10 +14,13 @@ export class AuthService {
     // Generating session
     const headersList = await headers();
     const userAgent = headersList.get("user-agent") || "";
-    const ip =
-      headersList.get("x-forwarded-for") ||
-      headersList.get("x-real-ip") ||
-      "unknown";
+
+    const rawIp =
+      headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "";
+    const ip = rawIp.split(",")[0].trim() || "127.0.0.1";
+
+    // Convert IPv6 localhost
+    const normalizedIp = ip === "::1" ? "127.0.0.1" : ip;
 
     const parser = new UAParser(userAgent);
     const browser = parser.getBrowser().name || "Unknown Browser";
@@ -45,7 +48,7 @@ export class AuthService {
       user.id,
       tenant.id,
       userAgent,
-      ip,
+      normalizedIp,
       deviceLabel,
     );
 

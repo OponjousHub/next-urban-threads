@@ -2,6 +2,9 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+
+import { touchSession } from "@/lib/sessions";
 
 export async function getLoggedInUserId(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -10,9 +13,14 @@ export async function getLoggedInUserId(): Promise<string | null> {
   if (!token) return null;
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
+    const payload: any = jwt.verify(token, process.env.JWT_SECRET!) as {
       userId: string;
     };
+
+    if (payload.sessionId) {
+      await touchSession(payload.sessionId); // ✅ Touch once per request
+    }
+
     return payload.userId;
   } catch {
     return null;
@@ -28,6 +36,12 @@ export async function getCurrentSessionId(): Promise<string | null> {
 
   try {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+    console.log("TOKEN SESSION ID:", decoded.sessionId);
+
+    if (decoded.sessionId) {
+      await touchSession(decoded.sessionId); // ✅ Touch once per request
+    }
+
     return decoded.sessionId || null;
   } catch {
     return null;

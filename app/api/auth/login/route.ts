@@ -3,9 +3,6 @@ import AuthController from "@/modules/auth/auth.controller";
 import { LoginSchema } from "@/modules/auth/auth.schema";
 import { AuthService } from "@/modules/auth/auth.service";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import { prisma } from "@/utils/prisma";
-
-import { email } from "zod";
 
 export async function POST(req: Request) {
   const tenant = await getDefaultTenant();

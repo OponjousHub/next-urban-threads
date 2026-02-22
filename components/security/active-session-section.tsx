@@ -27,6 +27,7 @@ export default function ActiveSessionsSection({
 
       {sessions.map((session) => {
         const isCurrent = session.id === currentSessionId;
+        console.log("DB SESSION ID:", session.id);
 
         return (
           <div
