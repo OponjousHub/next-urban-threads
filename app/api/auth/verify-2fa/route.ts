@@ -4,8 +4,9 @@ import jwt from "jsonwebtoken";
 import { prisma } from "@/utils/prisma";
 import speakeasy from "speakeasy";
 import CryptoJS from "crypto-js";
-import crypto from "crypto";
 import { hashCode } from "@/app/lib/recoveryCode";
+const { UAParser } = await import("ua-parser-js");
+import { headers } from "next/headers";
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
@@ -19,6 +20,17 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+
+    const headersList = await headers();
+    const userAgent = headersList.get("user-agent") || "";
+    const ip =
+      headersList.get("x-forwarded-for") ||
+      headersList.get("x-real-ip") ||
+      "unknown";
+    const parser = new UAParser(userAgent);
+    const browser = parser.getBrowser().name || "Unknown Browser";
+    const os = parser.getOS().name || "Unknown OS";
+    const deviceLabel = `${browser} on ${os}`;
 
     // ⭐ Fetch user
     const user = await prisma.user.findUnique({
@@ -121,10 +133,21 @@ export async function POST(req: Request) {
       throw new Error("JWT_SECRET not configured");
     }
 
+    const session = await prisma.session.create({
+      data: {
+        userId: user.id,
+        tenantId,
+        userAgent,
+        ipAddress: ip,
+        deviceName: deviceLabel,
+      },
+    });
+
     const sessionToken = jwt.sign(
       {
         userId: user.id,
         tenantId,
+        sessionId: session.id,
         usedRecoveryLogin,
       },
       jwtSecret,
