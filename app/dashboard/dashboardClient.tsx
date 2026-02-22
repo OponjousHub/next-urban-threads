@@ -21,9 +21,13 @@ type ShippingAddress = {
 function DashboardClient({
   stats,
   recoveryNotice,
+  sessions,
+  currentSessionId,
 }: {
   stats: DashboardStats;
   recoveryNotice: { remaining: number } | null;
+  sessions: any[];
+  currentSessionId: string | null;
 }) {
   const hasOrders = stats.recentOrders.length > 0;
   const shippingAddress = stats.defaultAddress as ShippingAddress | null;
@@ -280,7 +284,11 @@ function DashboardClient({
               </Link>
             </CardContent>
           </Card>
-          <SecurityCard userData={stats} />
+          <SecurityCard
+            userData={stats}
+            sessions={sessions}
+            currentSessionId={currentSessionId}
+          />
         </div>
       </div>
     </div>

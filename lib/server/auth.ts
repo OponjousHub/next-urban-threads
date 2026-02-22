@@ -18,3 +18,18 @@ export async function getLoggedInUserId(): Promise<string | null> {
     return null;
   }
 }
+
+// getCurrentSessionId.ts
+export async function getCurrentSessionId(): Promise<string | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return null;
+
+  try {
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+    return decoded.sessionId || null;
+  } catch {
+    return null;
+  }
+}

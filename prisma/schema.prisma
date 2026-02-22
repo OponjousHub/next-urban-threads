@@ -42,6 +42,7 @@ model User {
   addresses      Address[]
   products     Product[]      @relation("UserProduct")
   reviews      Review[]
+  session      Session[]
   wishlistItem WishlistItem[]
 }
 
@@ -158,6 +159,20 @@ model Tenant {
   updatedAt DateTime @updatedAt
 }
 
+model Session {
+  id            String   @id @default(cuid())
+  userId        String
+  tenantId      String
+  userAgent     String?
+  ipAddress     String?
+  deviceName    String?
+  createdAt     DateTime @default(now())
+  lastActiveAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
 model Review {
   id        String   @id @default(cuid())
   userId    String

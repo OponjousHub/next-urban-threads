@@ -23,15 +23,6 @@ export async function POST(req: Request) {
       );
     }
 
-    //  GET USER
-    // const user = prisma.user.findUnique({
-    //   where: { email: body.email, tenantId: tenant.id },
-    // });
-
-    // if (!user) {
-    //   return NextResponse.json({ error: "User not found!" }, { status: 401 });
-    // }
-
     // console.log("LOGIN USER -------------", user.id);
     const result = await AuthController.login(parsed.data);
 

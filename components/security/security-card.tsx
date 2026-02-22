@@ -6,8 +6,12 @@ import type { DashboardStats } from "@/types/dashboard";
 
 export default function SecurityCard({
   userData,
+  sessions,
+  currentSessionId,
 }: {
   userData: DashboardStats;
+  sessions: any[];
+  currentSessionId: string | null;
 }) {
   return (
     <div className="bg-white shadow rounded-2xl p-6 space-y-6">
@@ -22,7 +26,10 @@ export default function SecurityCard({
 
       <PasswordSection passwordUpdated={userData.user?.passwordUpdatedAt} />
       <TwoFactorSection twoFAStatus={userData.user?.twoFactorEnabled} />
-      <ActiveSessionsSection />
+      <ActiveSessionsSection
+        sessions={sessions}
+        currentSessionId={currentSessionId}
+      />
       <DangerZoneSection />
     </div>
   );

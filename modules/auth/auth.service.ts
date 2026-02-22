@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { authRepository } from "./auth.repository";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { headers } from "next/headers";
+import { UAParser } from "ua-parser-js";
 
 export class AuthService {
   static generateToken(userId: string) {
@@ -9,13 +11,27 @@ export class AuthService {
   }
 
   static async login(email: string, password: string) {
+    // Generating session
+    const headersList = await headers();
+    const userAgent = headersList.get("user-agent") || "";
+    const ip =
+      headersList.get("x-forwarded-for") ||
+      headersList.get("x-real-ip") ||
+      "unknown";
+
+    const parser = new UAParser(userAgent);
+    const browser = parser.getBrowser().name || "Unknown Browser";
+    const os = parser.getOS().name || "Unknown OS";
+    const deviceLabel = `${browser} on ${os}`;
+
+    //GET TENANT ID
     const tenant = await getDefaultTenant();
     if (!tenant) {
       throw new Error("Default tenant not found");
     }
 
+    //GET USER
     const user = await authRepository.login(email, tenant.id);
-
     if (!user || user.isDeleted) {
       throw new Error("Invalid email or password");
     }
@@ -25,8 +41,21 @@ export class AuthService {
       throw new Error("Invalid email or password");
     }
 
+    const session = await authRepository.createSession(
+      user.id,
+      tenant.id,
+      userAgent,
+      ip,
+      deviceLabel,
+    );
+
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      {
+        id: user.id,
+        email: user.email,
+        tenantId: tenant.id,
+        sessionId: session.id,
+      },
       process.env.JWT_SECRET as string,
       { expiresIn: "7d" },
     );
