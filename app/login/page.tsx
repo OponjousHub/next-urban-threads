@@ -47,7 +47,7 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.message || "Invalid email or password!");
+        throw new Error(data?.error || "Invalid email or password!");
       }
 
       // ⭐ IF 2FA REQUIRED

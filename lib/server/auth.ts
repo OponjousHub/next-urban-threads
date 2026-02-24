@@ -44,3 +44,16 @@ export async function getCurrentSessionId(): Promise<string | null> {
     return null;
   }
 }
+export async function getAuthPayload() {
+  const userId = await getLoggedInUserId();
+
+  const tenant = await getDefaultTenant();
+  const currentSessionId = await getCurrentSessionId();
+  console.log(
+    "///////////////////////////////",
+    userId,
+    tenant,
+    currentSessionId,
+  );
+  return { userId, tenant, currentSessionId };
+}

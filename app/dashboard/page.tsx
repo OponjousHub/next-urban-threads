@@ -6,12 +6,13 @@ import { getCurrentSessionId } from "@/lib/auth";
 import { authRepository } from "@/modules/auth/auth.repository";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { touchSession } from "@/lib/sessions";
+import { getAuthPayload } from "@/lib/server/auth";
 
 export default async function UserDashboard() {
   const userId = await getLoggedInUserId();
   const tenant = await getDefaultTenant();
   const currentSessionId = await getCurrentSessionId();
-
+  const auth = await getAuthPayload();
   if (currentSessionId) {
     await touchSession(currentSessionId);
   }
