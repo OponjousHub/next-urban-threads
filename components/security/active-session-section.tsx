@@ -1,6 +1,8 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
+import { useState } from "react";
+import { toastSuccess, toastError } from "@/utils/toast-notification";
 
 type Session = {
   id: string;
@@ -17,15 +19,18 @@ export default function ActiveSessionsSection({
   sessions: Session[];
   currentSessionId: string | null;
 }) {
+  const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
+  const [sessionsState, setSessionsState] = useState(sessions);
+
   return (
     <div className="border-t pt-6 space-y-4">
       <h3 className="font-semibold text-lg">Active Sessions</h3>
 
-      {sessions.length === 0 && (
+      {sessionsState.length === 0 && (
         <p className="text-sm text-gray-500">No active sessions</p>
       )}
 
-      {sessions.map((session) => {
+      {sessionsState.map((session) => {
         const isCurrent = session.id === currentSessionId;
         console.log("DB SESSION ID:", session.id);
 
@@ -57,27 +62,52 @@ export default function ActiveSessionsSection({
 
             {!isCurrent && (
               <button
+                disabled={loadingSessionId === session.id}
                 className="text-red-600 text-sm hover:underline"
-                onClick={() => {
-                  fetch(`/api/sessions/${session.id}`, {
+                onClick={async () => {
+                  setLoadingSessionId(session.id);
+                  const res = await fetch(`/api/sessions/${session.id}`, {
                     method: "DELETE",
-                  }).then(() => location.reload());
+                  });
+
+                  if (res.ok) {
+                    toastSuccess("Session logged out");
+
+                    // remove from UI immediately
+                    setSessionsState((prev) =>
+                      prev.filter((s) => s.id !== session.id),
+                    );
+                  } else {
+                    toastError("Failed to logout session");
+                  }
+
+                  setLoadingSessionId(null);
                 }}
               >
-                Log out
+                {loadingSessionId === session.id ? "Logging out..." : "Log out"}
               </button>
             )}
           </div>
         );
       })}
 
-      {sessions.length > 1 && (
+      {sessionsState.length > 1 && (
         <button
           className="text-sm underline text-red-600"
           onClick={() => {
             fetch("/api/sessions/logout-others", {
               method: "POST",
-            }).then(() => location.reload());
+            }).then((res) => {
+              if (res.ok) {
+                toastSuccess("Logged out of other devices");
+
+                setSessionsState((prev) =>
+                  prev.filter((s) => s.id === currentSessionId),
+                );
+              } else {
+                toastError("Failed to logout other devices");
+              }
+            });
           }}
         >
           Log out of all other devices

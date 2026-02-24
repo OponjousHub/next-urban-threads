@@ -8,7 +8,6 @@ export async function POST() {
   const userId = await getLoggedInUserId();
   const tenant = await getDefaultTenant();
   const cookieStore = await cookies();
-  const currentSessionId = cookieStore.get("session_id")?.value;
 
   if (!tenant) {
     throw new Error("Default tenant not found");
@@ -21,7 +20,7 @@ export async function POST() {
     );
   }
 
-  if (!userId || !tenant || !currentSessionId) {
+  if (!userId || !tenant) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
@@ -29,11 +28,12 @@ export async function POST() {
     where: {
       userId,
       tenantId: tenant.id,
-      NOT: {
-        id: currentSessionId,
-      },
     },
   });
+
+  // Clear cookies
+  cookieStore.delete("token");
+  cookieStore.delete("session_id");
 
   return NextResponse.json({ success: true });
 }
