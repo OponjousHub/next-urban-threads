@@ -3,6 +3,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { toastSuccess, toastError } from "@/utils/toast-notification";
+import DelSessionsModal from "../del-sessions-modal";
 
 type Session = {
   id: string;
@@ -21,15 +22,14 @@ export default function ActiveSessionsSection({
 }) {
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [sessionsState, setSessionsState] = useState(sessions);
+  const [showLogoutOthersModal, setShowLogoutOthersModal] = useState(false);
 
   return (
     <div className="border-t pt-6 space-y-4">
       <h3 className="font-semibold text-lg">Active Sessions</h3>
-
       {sessionsState.length === 0 && (
         <p className="text-sm text-gray-500">No active sessions</p>
       )}
-
       {sessionsState.map((session) => {
         const isCurrent = session.id === currentSessionId;
         console.log("DB SESSION ID:", session.id);
@@ -90,29 +90,39 @@ export default function ActiveSessionsSection({
           </div>
         );
       })}
-
       {sessionsState.length > 1 && (
         <button
           className="text-sm underline text-red-600"
-          onClick={() => {
-            fetch("/api/sessions/logout-others", {
-              method: "POST",
-            }).then((res) => {
-              if (res.ok) {
-                toastSuccess("Logged out of other devices");
-
-                setSessionsState((prev) =>
-                  prev.filter((s) => s.id === currentSessionId),
-                );
-              } else {
-                toastError("Failed to logout other devices");
-              }
-            });
-          }}
+          onClick={() => setShowLogoutOthersModal(true)}
         >
           Log out of all other devices
         </button>
       )}
+      <DelSessionsModal
+        isOpen={showLogoutOthersModal}
+        title="Log out of other devices?"
+        description="This will log you out from all other devices. Your current session will remain active."
+        confirmText="Log out other devices"
+        onCancel={() => setShowLogoutOthersModal(false)}
+        onConfirm={async () => {
+          const res = await fetch("/api/sessions/logout-others", {
+            method: "POST",
+          });
+
+          if (res.ok) {
+            toastSuccess("Logged out of other devices");
+
+            setSessionsState((prev) =>
+              prev.filter((s) => s.id === currentSessionId),
+            );
+          } else {
+            toastError("Failed to logout other devices");
+          }
+
+          setShowLogoutOthersModal(false);
+        }}
+      />
+      ;
     </div>
   );
 }
