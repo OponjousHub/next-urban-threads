@@ -6,10 +6,12 @@ import { prisma } from "@/utils/prisma";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
   const tenant = await getDefaultTenant();
   const userId = await getLoggedInUserId();
+  const { id } = await context.params;
+
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
@@ -22,7 +24,7 @@ export async function DELETE(
   }
 
   await prisma.session.delete({
-    where: { userId, tenantId: tenant.id, id: params.id },
+    where: { userId, tenantId: tenant.id, id },
   });
 
   return Response.json({ success: true });

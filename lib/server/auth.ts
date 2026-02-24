@@ -9,7 +9,6 @@ import { touchSession } from "@/lib/sessions";
 export async function getLoggedInUserId(): Promise<string | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
-  // const token = cookies().get("token")?.value;
   if (!token) return null;
 
   try {
@@ -36,12 +35,10 @@ export async function getCurrentSessionId(): Promise<string | null> {
 
   try {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-    console.log("TOKEN SESSION ID:", decoded.sessionId);
 
     if (decoded.sessionId) {
       await touchSession(decoded.sessionId); // ✅ Touch once per request
     }
-
     return decoded.sessionId || null;
   } catch {
     return null;

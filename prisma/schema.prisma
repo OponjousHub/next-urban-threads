@@ -13,6 +13,8 @@ model User {
   pendingEmail      String?
   emailVerifyToken  String?
   emailTokenExpiry  DateTime?
+  isActive      Boolean  @default(true)
+  deactivatedAt DateTime?
 
   tenant   Tenant @relation(fields: [tenantId], references: [id])
   tenantId String
@@ -189,6 +191,7 @@ model Review {
   @@unique([userId, productId])
   @@index([tenantId])
 }
+
 
 model CartItem {
   id        String  @id @default(cuid())

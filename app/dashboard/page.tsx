@@ -5,17 +5,15 @@ import { getRecoveryLoginFlag } from "@/utils/recoveryLoggedInFlag";
 import { getCurrentSessionId } from "@/lib/auth";
 import { authRepository } from "@/modules/auth/auth.repository";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import { cookies } from "next/headers";
 import { touchSession } from "@/lib/sessions";
 
 export default async function UserDashboard() {
   const userId = await getLoggedInUserId();
   const tenant = await getDefaultTenant();
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get("session_id")?.value;
+  const currentSessionId = await getCurrentSessionId();
 
-  if (sessionId) {
-    await touchSession(sessionId);
+  if (currentSessionId) {
+    await touchSession(currentSessionId);
   }
 
   if (!userId) {
@@ -25,7 +23,6 @@ export default async function UserDashboard() {
     throw new Error("Default tenant not found");
   }
 
-  const currentSessionId = await getCurrentSessionId();
   const sessions = await authRepository.getUserSessions(userId, tenant.id);
 
   const recoveryNotice = await getRecoveryLoginFlag();

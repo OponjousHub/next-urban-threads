@@ -131,32 +131,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generating session
-    // const headersList = await headers();
-    // const userAgent = headersList.get("user-agent") || "";
-
-    // const rawIp =
-    //   headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "";
-    // const ip = rawIp.split(",")[0].trim() || "127.0.0.1";
-
-    // Convert IPv6 localhost
-    // const normalizedIp = ip === "::1" ? "127.0.0.1" : ip;
-
-    // const parser = new UAParser(userAgent);
-    // const browser = parser.getBrowser().name || "Unknown Browser";
-    // const os = parser.getOS().name || "Unknown OS";
-    // const deviceLabel = `${browser} on ${os}`;
-
-    // const session = await prisma.session.create({
-    //   data: {
-    //     userId,
-    //     tenantId,
-    //     userAgent,
-    //     ipAddress: normalizedIp,
-    //     deviceName: deviceLabel,
-    //   },
-    // });
-
     // ⭐ Create JWT session
     const jwtSecret = process.env.JWT_SECRET;
 
@@ -169,7 +143,7 @@ export async function POST(req: Request) {
         userId: user.id,
         tenantId,
         userAgent,
-        ipAddress: ip,
+        ipAddress: normalizedIp,
         deviceName: deviceLabel,
       },
     });

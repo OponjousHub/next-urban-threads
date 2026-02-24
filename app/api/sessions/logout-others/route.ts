@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLoggedInUserId } from "@/lib/auth";
+import { getLoggedInUserId, getCurrentSessionId } from "@/lib/auth";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
 
 export async function POST() {
   const userId = await getLoggedInUserId();
   const tenant = await getDefaultTenant();
-  const cookieStore = await cookies();
-  const currentSessionId = cookieStore.get("session_id")?.value;
+  const currentSessionId = await getCurrentSessionId();
 
   if (!tenant) {
     throw new Error("Default tenant not found");
@@ -20,11 +19,9 @@ export async function POST() {
       { status: 401 },
     );
   }
-
   if (!userId || !tenant || !currentSessionId) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
-
   await prisma.session.deleteMany({
     where: {
       userId,

@@ -24,6 +24,24 @@ export default function ActiveSessionsSection({
   const [sessionsState, setSessionsState] = useState(sessions);
   const [showLogoutOthersModal, setShowLogoutOthersModal] = useState(false);
 
+  const handleConfirm = async () => {
+    console.log("FRONTEND DELETING------");
+
+    const res = await fetch("/api/sessions/logout-others", {
+      method: "POST",
+    });
+
+    if (res.ok) {
+      toastSuccess("Logged out of other devices");
+
+      setSessionsState((prev) => prev.filter((s) => s.id === currentSessionId));
+    } else {
+      toastError("Failed to logout other devices");
+    }
+
+    setShowLogoutOthersModal(false);
+  };
+
   return (
     <div className="border-t pt-6 space-y-4">
       <h3 className="font-semibold text-lg">Active Sessions</h3>
@@ -104,25 +122,8 @@ export default function ActiveSessionsSection({
         description="This will log you out from all other devices. Your current session will remain active."
         confirmText="Log out other devices"
         onCancel={() => setShowLogoutOthersModal(false)}
-        onConfirm={async () => {
-          const res = await fetch("/api/sessions/logout-others", {
-            method: "POST",
-          });
-
-          if (res.ok) {
-            toastSuccess("Logged out of other devices");
-
-            setSessionsState((prev) =>
-              prev.filter((s) => s.id === currentSessionId),
-            );
-          } else {
-            toastError("Failed to logout other devices");
-          }
-
-          setShowLogoutOthersModal(false);
-        }}
+        onConfirm={handleConfirm}
       />
-      ;
     </div>
   );
 }

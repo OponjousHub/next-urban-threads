@@ -9,6 +9,7 @@ export async function POST(req: Request) {
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
+
   try {
     const body = await req.json();
 
@@ -22,6 +23,10 @@ export async function POST(req: Request) {
 
     // console.log("LOGIN USER -------------", user.id);
     const result = await AuthController.login(parsed.data);
+
+    if (!result.user.isActive) {
+      throw new Error("Account deactivated");
+    }
 
     if (result.user.twoFactorEnabled) {
       return NextResponse.json({

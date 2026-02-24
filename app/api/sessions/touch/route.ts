@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { touchSession } from "@/lib/sessions";
+import { getCurrentSessionId } from "@/lib/auth";
 
 export async function POST() {
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get("session_id")?.value;
+  const currentSessionId = await getCurrentSessionId();
 
-  if (!sessionId) {
+  if (!currentSessionId) {
     return NextResponse.json({ ok: false });
   }
 
-  await touchSession(sessionId);
+  await touchSession(currentSessionId);
 
   return NextResponse.json({ ok: true });
 }
