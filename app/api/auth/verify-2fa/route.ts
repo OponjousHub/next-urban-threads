@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import { prisma } from "@/utils/prisma";
 import speakeasy from "speakeasy";
 import CryptoJS from "crypto-js";
-import crypto from "crypto";
 import { hashCode } from "@/app/lib/recoveryCode";
 import { headers } from "next/headers";
 import { UAParser } from "ua-parser-js";
@@ -21,6 +20,21 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+
+    // Generating session
+    const headersList = await headers();
+    const userAgent = headersList.get("user-agent") || "";
+    const ip =
+      headersList.get("x-forwarded-for") ||
+      headersList.get("x-real-ip") ||
+      "unknown";
+
+    // Convert IPv6 localhost
+    const normalizedIp = ip === "::1" ? "127.0.0.1" : ip;
+    const parser = new UAParser(userAgent);
+    const browser = parser.getBrowser().name || "Unknown Browser";
+    const os = parser.getOS().name || "Unknown OS";
+    const deviceLabel = `${browser} on ${os}`;
 
     // ⭐ Fetch user
     const user = await prisma.user.findUnique({
@@ -118,30 +132,30 @@ export async function POST(req: Request) {
     }
 
     // Generating session
-    const headersList = await headers();
-    const userAgent = headersList.get("user-agent") || "";
+    // const headersList = await headers();
+    // const userAgent = headersList.get("user-agent") || "";
 
-    const rawIp =
-      headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "";
-    const ip = rawIp.split(",")[0].trim() || "127.0.0.1";
+    // const rawIp =
+    //   headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "";
+    // const ip = rawIp.split(",")[0].trim() || "127.0.0.1";
 
     // Convert IPv6 localhost
-    const normalizedIp = ip === "::1" ? "127.0.0.1" : ip;
+    // const normalizedIp = ip === "::1" ? "127.0.0.1" : ip;
 
-    const parser = new UAParser(userAgent);
-    const browser = parser.getBrowser().name || "Unknown Browser";
-    const os = parser.getOS().name || "Unknown OS";
-    const deviceLabel = `${browser} on ${os}`;
+    // const parser = new UAParser(userAgent);
+    // const browser = parser.getBrowser().name || "Unknown Browser";
+    // const os = parser.getOS().name || "Unknown OS";
+    // const deviceLabel = `${browser} on ${os}`;
 
-    const session = await prisma.session.create({
-      data: {
-        userId,
-        tenantId,
-        userAgent,
-        ipAddress: normalizedIp,
-        deviceName: deviceLabel,
-      },
-    });
+    // const session = await prisma.session.create({
+    //   data: {
+    //     userId,
+    //     tenantId,
+    //     userAgent,
+    //     ipAddress: normalizedIp,
+    //     deviceName: deviceLabel,
+    //   },
+    // });
 
     // ⭐ Create JWT session
     const jwtSecret = process.env.JWT_SECRET;
@@ -150,12 +164,22 @@ export async function POST(req: Request) {
       throw new Error("JWT_SECRET not configured");
     }
 
+    const session = await prisma.session.create({
+      data: {
+        userId: user.id,
+        tenantId,
+        userAgent,
+        ipAddress: ip,
+        deviceName: deviceLabel,
+      },
+    });
+
     const sessionToken = jwt.sign(
       {
         userId: user.id,
         tenantId,
-        usedRecoveryLogin,
         sessionId: session.id,
+        usedRecoveryLogin,
       },
       jwtSecret,
       { expiresIn: "7d" },

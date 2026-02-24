@@ -34,7 +34,6 @@ export async function POST(req: Request) {
     const token = AuthService.generateToken(result.user.id);
 
     const response = NextResponse.json(result, { status: 200 });
-
     // ✅ SET COOKIE HERE
     response.cookies.set("token", token, {
       httpOnly: true,
