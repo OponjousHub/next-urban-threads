@@ -21,16 +21,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // console.log("LOGIN USER -------------", user.id);
     const result = await AuthController.login(parsed.data);
-
-    if (!result.user.isActive) {
-      return NextResponse.json(
-        { error: "Account deactivated" },
-        { status: 400 },
-      );
-    }
-
     if (result.user.twoFactorEnabled) {
       return NextResponse.json({
         requires2FA: true,

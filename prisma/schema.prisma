@@ -13,7 +13,7 @@ model User {
   pendingEmail      String?
   emailVerifyToken  String?
   emailTokenExpiry  DateTime?
-  isActive      Boolean  @default(true)
+  // isActive      Boolean  @default(true)
   deactivatedAt DateTime?
 
   tenant   Tenant @relation(fields: [tenantId], references: [id])

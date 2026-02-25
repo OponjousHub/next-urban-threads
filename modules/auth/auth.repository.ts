@@ -31,4 +31,14 @@ export const authRepository = {
       orderBy: { createdAt: "desc" },
     });
   },
+
+  update(userId: string, tenantId: string) {
+    return prisma.user.update({
+      where: { id: userId, tenantId },
+      data: {
+        status: "ACTIVE",
+        deactivatedAt: null,
+      },
+    });
+  },
 };

@@ -3,26 +3,13 @@ import { useRouter } from "next/navigation";
 import DelSessionsModal from "../del-sessions-modal";
 import { useState } from "react";
 
-type ModalType = "logout" | "deactivate" | "deactivate-password" | null;
+type ModalType = "logout" | "deactivate-confirm" | "deactivate-password" | null;
 
 export default function DangerZoneSection() {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const handleDeactivate = async () => {
-    const res = await fetch("/api/account/deactivate", {
-      method: "POST",
-    });
-
-    if (res.ok) {
-      toastSuccess("Account deactivated");
-      window.location.href = "/";
-    } else {
-      toastError("Failed to deactivate account");
-    }
-  };
 
   const handleLogoutEverywhere = async () => {
     const res = await fetch("/api/sessions/logout-all", {
@@ -81,7 +68,7 @@ export default function DangerZoneSection() {
         </button>
 
         <button
-          onClick={() => setActiveModal("deactivate")}
+          onClick={() => setActiveModal("deactivate-confirm")}
           className="px-4 py-2 bg-red-600 text-white rounded-lg"
         >
           Deactivate Account
@@ -89,24 +76,28 @@ export default function DangerZoneSection() {
       </div>
 
       <DelSessionsModal
-        isOpen={activeModal !== null}
+        isOpen={
+          activeModal === "logout" || activeModal === "deactivate-confirm"
+        }
         title={
           activeModal === "logout"
             ? "Log out everywhere?"
-            : "Deactivate account?"
+            : "deactivate-confirm?"
         }
         description={
           activeModal === "logout"
             ? "This will log you out from all devices including this one."
-            : "This action will disable your account."
+            : "This action will disable your account. You will no longer be able to log in."
         }
         confirmText={
-          activeModal === "logout" ? "Log out everywhere" : "Deactivate Account"
+          activeModal === "logout" ? "Log out everywhere" : "Continue"
         }
         confirmColor="red"
         onCancel={() => setActiveModal(null)}
         onConfirm={
-          activeModal === "logout" ? handleLogoutEverywhere : handleDeactivate
+          activeModal === "logout"
+            ? handleLogoutEverywhere
+            : () => setActiveModal("deactivate-password")
         }
       />
 

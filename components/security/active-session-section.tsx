@@ -25,8 +25,6 @@ export default function ActiveSessionsSection({
   const [showLogoutOthersModal, setShowLogoutOthersModal] = useState(false);
 
   const handleConfirm = async () => {
-    console.log("FRONTEND DELETING------");
-
     const res = await fetch("/api/sessions/logout-others", {
       method: "POST",
     });
@@ -50,7 +48,6 @@ export default function ActiveSessionsSection({
       )}
       {sessionsState.map((session) => {
         const isCurrent = session.id === currentSessionId;
-        console.log("DB SESSION ID:", session.id);
 
         return (
           <div

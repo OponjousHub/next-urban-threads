@@ -39,9 +39,15 @@ export class AuthService {
       throw new Error("Invalid email or password");
     }
 
+    let reactivated = false;
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       throw new Error("Invalid email or password");
+    }
+
+    if (user.status === "DEACTIVATED") {
+      await authRepository.update(user.id, tenant.id);
+      reactivated = true;
     }
 
     const session = await authRepository.createSession(
@@ -69,6 +75,7 @@ export class AuthService {
       message: "Login successful",
       user: userWithoutPassword,
       token,
+      reactivated,
     };
   }
 }

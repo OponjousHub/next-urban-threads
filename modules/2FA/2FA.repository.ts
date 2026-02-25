@@ -21,6 +21,7 @@ class TwoFARepository {
         twoFactorSecret: encryptedSecret,
         twoFactorTempSecret: null,
         twoFactorTempSecretExpiresAt: null,
+        status: "ACTIVE",
       },
     });
   }

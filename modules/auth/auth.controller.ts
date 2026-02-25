@@ -4,8 +4,6 @@ import { User } from "@prisma/client";
 import { AuthService } from "./auth.service";
 import { getLoggedInUserId } from "@/lib/auth";
 
-type SafeUser = Omit<User, "password">;
-
 class AuthController {
   /**
    * LOGIN USER

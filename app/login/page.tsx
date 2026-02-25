@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-import Link from "next/link";
+import { toastSuccess, toastError } from "@/utils/toast-notification";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -45,7 +44,6 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data?.error || "Invalid email or password!");
       }
@@ -57,7 +55,10 @@ export default function LoginPage() {
         setTenantId(data.tenantId);
         return;
       }
-
+      console.log(data.reactivated);
+      if (data.reactivated) {
+        toastSuccess("Your account has been restored. Welcome back!");
+      }
       // ⭐ LOGIN SUCCESS WITHOUT 2FA
       window.location.href = "/dashboard";
     } catch (err: any) {
@@ -76,8 +77,6 @@ export default function LoginPage() {
       return;
     }
     if (!otpCode || !tempUserId) return;
-    console.log("OTP COOODE", otpCode);
-    console.log("MOOOODEEE", mode);
 
     setLoading(true);
 

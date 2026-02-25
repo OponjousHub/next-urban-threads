@@ -38,10 +38,6 @@ class TwoFAService {
     );
 
     const tempSecret = bytes.toString(CryptoJS.enc.Utf8).trim();
-    // const serverToken = speakeasy.totp({
-    //   secret: tempSecret,
-    //   encoding: "base32",
-    // });
 
     const verified = speakeasy.totp.verify({
       secret: tempSecret,
@@ -51,6 +47,11 @@ class TwoFAService {
     });
 
     if (!verified) throw new Error("Invalid code");
+
+    let reactivated = false;
+    if (user.status === "DEACTIVATED") {
+      reactivated = true;
+    }
 
     // ADDING RECOVERY CODES
     const recoveryCodes = generateRecoveryCodes(10);
@@ -72,6 +73,7 @@ class TwoFAService {
     return {
       res,
       recoveryCodes,
+      reactivated,
     };
   }
 }

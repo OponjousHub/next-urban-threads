@@ -10,6 +10,12 @@ export async function POST(req: Request) {
   const auth = await getAuthPayload();
 
   const { userId, tenant, currentSessionId } = auth;
+  console.log(
+    "----------+++++++++++------------",
+    userId,
+    tenant?.id,
+    currentSessionId,
+  );
   if (!userId || !currentSessionId || !tenant?.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
@@ -33,7 +39,7 @@ export async function POST(req: Request) {
 
   await prisma.user.update({
     where: { id: userId, tenantId: tenant.id },
-    data: { isActive: false },
+    data: { status: "DEACTIVATED", deactivatedAt: new Date() },
   });
 
   // 2️⃣ Delete ALL sessions
