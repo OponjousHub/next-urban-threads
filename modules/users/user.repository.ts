@@ -1,8 +1,4 @@
 import { prisma } from "@/utils/prisma";
-// import { Phone } from "lucide-react";
-// import { email } from "zod";
-// import bcrypt from "bcryptjs";
-// import jwt from "jsonwebtoken";
 
 export const UserRepository = {
   findByEmail(email: string) {

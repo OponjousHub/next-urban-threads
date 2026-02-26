@@ -26,6 +26,8 @@ model User {
   country      String?
   password     String
   passwordUpdatedAt DateTime?
+  resetToken        String?   @unique
+resetTokenExpiry  DateTime?
   twoFactorEnabled  Boolean @default(false)
   twoFactorSecret   String? // encrypted secret
   twoFactorTempSecret  String?
