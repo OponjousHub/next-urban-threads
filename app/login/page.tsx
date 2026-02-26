@@ -101,7 +101,6 @@ export default function LoginPage() {
         throw new Error(data?.message || "Invalid verification code");
       }
 
-      console.log(data.reactivated);
       if (data.reactivated) {
         toastSuccess("Your account has been restored. Welcome back!");
       }

@@ -8,6 +8,7 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
+  const tenantId = searchParams.get("tenant");
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -80,7 +81,6 @@ export default function ResetPasswordPage() {
 
     setError(null);
     setLoading(true);
-
     try {
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
@@ -88,6 +88,7 @@ export default function ResetPasswordPage() {
         body: JSON.stringify({
           token,
           newPassword: password,
+          tenantId,
         }),
       });
 
@@ -99,10 +100,11 @@ export default function ResetPasswordPage() {
         }, 1200);
       } else {
         const data = await res.json();
+        console.log(data);
         setError(data.error || "Reset failed");
         triggerShake();
       }
-    } catch {
+    } catch (err: any) {
       setError("Network error. Please try again.");
       triggerShake();
     }
