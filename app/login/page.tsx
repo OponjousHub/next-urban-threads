@@ -60,7 +60,9 @@ export default function LoginPage() {
         toastSuccess("Your account has been restored. Welcome back!");
       }
       // ⭐ LOGIN SUCCESS WITHOUT 2FA
-      window.location.href = "/dashboard";
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 7000);
     } catch (err: any) {
       setApiError(err.message);
     } finally {

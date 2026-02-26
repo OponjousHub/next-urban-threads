@@ -21,7 +21,7 @@ export default function DangerZoneSection() {
 
       setTimeout(() => {
         window.location.href = "/login";
-      }, 800);
+      }, 8000);
     } else {
       toastError("Failed to logout everywhere");
     }
@@ -46,7 +46,7 @@ export default function DangerZoneSection() {
 
       setTimeout(() => {
         window.location.href = "/";
-      }, 800);
+      }, 8000);
     } else {
       const data = await res.json();
       toastError(data.message || "Invalid password");
