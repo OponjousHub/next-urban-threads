@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toastSuccess, toastError } from "@/utils/toast-notification";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -55,7 +56,6 @@ export default function LoginPage() {
         setTenantId(data.tenantId);
         return;
       }
-      console.log(data.reactivated);
       if (data.reactivated) {
         toastSuccess("Your account has been restored. Welcome back!");
       }
@@ -168,12 +168,12 @@ export default function LoginPage() {
 
             {/* ⭐ Forgot Password */}
             <div className="flex justify-end">
-              <a
+              <Link
                 href="/forgot-password"
                 className="text-sm text-indigo-600 hover:underline"
               >
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             <button

@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     },
   });
 
-  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${rawToken}`;
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${rawToken}&tenant=${tenant.id}`;
 
   await sendEmail({
     to: user.email,
