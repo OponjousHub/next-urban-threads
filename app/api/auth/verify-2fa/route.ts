@@ -147,7 +147,6 @@ export async function POST(req: Request) {
         deviceName: deviceLabel,
       },
     });
-
     const sessionToken = jwt.sign(
       {
         userId: user.id,

@@ -17,11 +17,11 @@ export default async function UserDashboard() {
     await touchSession(currentSessionId);
   }
 
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
   if (!tenant) {
     throw new Error("Default tenant not found");
+  }
+  if (!userId) {
+    throw new Error("Unauthorized");
   }
 
   const sessions = await authRepository.getUserSessions(userId, tenant.id);

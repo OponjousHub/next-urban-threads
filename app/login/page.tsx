@@ -98,10 +98,12 @@ export default function LoginPage() {
       if (!response.ok) {
         throw new Error(data?.message || "Invalid verification code");
       }
-      window.location.href = "/dashboard";
 
-      // router.push("/dashboard");
-      // router.refresh();
+      console.log(data.reactivated);
+      if (data.reactivated) {
+        toastSuccess("Your account has been restored. Welcome back!");
+      }
+      // window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("LOGIN ERROR:", err);
       setApiError(err.message);

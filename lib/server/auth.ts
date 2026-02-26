@@ -36,7 +36,6 @@ export async function getCurrentSessionId(): Promise<string | null> {
   try {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
     console.log("___________============SESSION", decoded.sessionId);
-    console.log("___________============SESSION", decoded);
 
     if (decoded.sessionId) {
       await touchSession(decoded.sessionId); // ✅ Touch once per request

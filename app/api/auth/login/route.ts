@@ -30,11 +30,9 @@ export async function POST(req: Request) {
       });
     }
 
-    const token = AuthService.generateToken(result.user.id);
-
     const response = NextResponse.json(result, { status: 200 });
     // ✅ SET COOKIE HERE
-    response.cookies.set("token", token, {
+    response.cookies.set("token", result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
