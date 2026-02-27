@@ -10,34 +10,32 @@ export async function POST(req: Request) {
     if (!rating || rating < 1 || rating > 5) {
       return NextResponse.json({ message: "Invalid rating" }, { status: 400 });
     }
+
     if (!userId || !tenant) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 400 });
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // TO VERIFY PURCHASE
+    // Verify purchase
     const hasPurchased = await prisma.order.findFirst({
       where: {
         userId,
         tenantId: tenant.id,
-        items: {
-          some: {
-            productId,
-          },
-        },
         paymentStatus: "PAID",
         status: "DELIVERED",
+        items: {
+          some: { productId },
+        },
       },
     });
 
-    // REJECT REVIEW CREATION
     if (!hasPurchased) {
       return NextResponse.json(
         { message: "Only customers who purchased this item can write review" },
-        { status: 400 },
+        { status: 403 },
       );
     }
 
-    // CREATE REVIEW
+    // Create review (default PENDING if moderation enabled)
     const review = await prisma.review.create({
       data: {
         rating,
@@ -45,26 +43,34 @@ export async function POST(req: Request) {
         userId,
         productId,
         tenantId: tenant.id,
+        orderId: hasPurchased.id,
+        verifiedPurchase: true,
+        status: "APPROVED", // or PENDING depending on tenant policy
       },
     });
 
-    // Recalculate product rating
+    // Recalculate product rating (ONLY approved reviews)
     const stats = await prisma.review.aggregate({
-      where: { productId, tenantId: tenant.id, userId },
+      where: {
+        productId,
+        tenantId: tenant.id,
+        status: "APPROVED",
+      },
       _avg: { rating: true },
       _count: true,
     });
 
     await prisma.product.update({
-      where: { id: productId, tenantId: tenant.id },
+      where: { id: productId },
       data: {
-        averageRating: stats._avg.rating || 0,
+        averageRating: stats._avg.rating ?? 0,
         reviewCount: stats._count,
       },
     });
 
     return NextResponse.json(review);
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { message: "Error creating review" },
       { status: 500 },

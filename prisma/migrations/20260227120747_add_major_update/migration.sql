@@ -1,0 +1,20 @@
+-- CreateEnum
+CREATE TYPE "ReviewPolicy" AS ENUM ('AFTER_PAYMENT', 'AFTER_DELIVERY', 'MANUAL_APPROVAL');
+
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN     "rating1Count" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "rating2Count" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "rating3Count" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "rating4Count" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "rating5Count" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "vendorId" TEXT;
+
+-- AlterTable
+ALTER TABLE "Review" ADD COLUMN     "helpfulCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "images" TEXT[],
+ADD COLUMN     "title" TEXT,
+ADD COLUMN     "verifiedPurchase" BOOLEAN NOT NULL DEFAULT false;
+
+-- AlterTable
+ALTER TABLE "Tenant" ADD COLUMN     "autoApproveReviews" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "reviewPolicy" "ReviewPolicy" NOT NULL DEFAULT 'AFTER_PAYMENT';

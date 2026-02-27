@@ -35,6 +35,8 @@
     "react-icons": "^5.5.0",
     "resend": "^6.9.1",
     "slugify": "^1.6.6",
+    "sonner": "^2.0.7",
+    "sooner": "^1.1.4",
     "speakeasy": "^2.0.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",

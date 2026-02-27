@@ -27,7 +27,7 @@ model User {
   password     String
   passwordUpdatedAt DateTime?
   resetToken        String?   @unique
-resetTokenExpiry  DateTime?
+  resetTokenExpiry  DateTime?
   twoFactorEnabled  Boolean @default(false)
   twoFactorSecret   String? // encrypted secret
   twoFactorTempSecret  String?
@@ -81,7 +81,7 @@ model Product {
   deletedAt       DateTime?
 
   vendorId String?
-  vendor   Vendor?
+  // vendor   Vendor?
 
   seoTitle        String?
   seoDescription  String?
@@ -92,8 +92,6 @@ model Product {
   tenant          Tenant @relation(fields: [tenantId], references: [id])
   user            User?          @relation("UserProduct", fields: [createdById], references: [id])
   reviews         Review[]
-  averageRating Float @default(0)
-  reviewCount   Int   @default(0)
   wishlistItem    WishlistItem[]
   @@index([tenantId])
   @@unique([tenantId, slug])
@@ -218,7 +216,6 @@ model Review {
 
   @@unique([userId, productId]) // prevent multiple reviews
   @@index([tenantId])
-  @@unique([userId, productId])
 }
 
 
