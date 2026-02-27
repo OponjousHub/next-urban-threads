@@ -70,8 +70,18 @@ model Product {
   category        Category
   subCategory     String
 
-  // isDeleted       Boolean        @default(false)
+  averageRating   Float @default(0)
+  reviewCount     Int   @default(0)
+  rating1Count    Int   @default(0)
+  rating2Count    Int   @default(0)
+  rating3Count    Int   @default(0)
+  rating4Count    Int   @default(0)
+  rating5Count    Int   @default(0)
+
   deletedAt       DateTime?
+
+  vendorId String?
+  vendor   Vendor?
 
   seoTitle        String?
   seoDescription  String?
@@ -82,6 +92,8 @@ model Product {
   tenant          Tenant @relation(fields: [tenantId], references: [id])
   user            User?          @relation("UserProduct", fields: [createdById], references: [id])
   reviews         Review[]
+  averageRating Float @default(0)
+  reviewCount   Int   @default(0)
   wishlistItem    WishlistItem[]
   @@index([tenantId])
   @@unique([tenantId, slug])
@@ -103,6 +115,7 @@ model Order {
   paymentProvider PaymentProvider
   paymentReference String    @unique
   items           OrderItem[]
+  review          Review[]
   createdAt       DateTime    @default(now())
   @@index([tenantId])
 }
@@ -151,6 +164,9 @@ model Tenant {
   domain    String?
   isDefault Boolean  @default(false)
 
+  reviewPolicy ReviewPolicy @default(AFTER_PAYMENT)
+  autoApproveReviews Boolean @default(false)
+
   users     User[]
   orders    Order[]
   products  Product[]
@@ -182,16 +198,27 @@ model Review {
   id        String   @id @default(cuid())
   userId    String
   tenantId  String
+  status    ReviewStatus @default(PENDING)
+  verifiedPurchase Boolean @default(false)
   rating    Int
+  images    String[] // store URLs
+  title     String?
   comment   String
   createdAt DateTime @default(now())
+  helpfulCount Int @default(0)
   productId String
   product   Product  @relation(fields: [productId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  orderId   String?   // optional (for verified purchase)
+  order     Order?    @relation(fields: [orderId], references: [id])
+  reply        String?
+  repliedAt    DateTime?
+  updatedAt DateTime @updatedAt
 
-  @@unique([userId, productId])
+  @@unique([userId, productId]) // prevent multiple reviews
   @@index([tenantId])
+  @@unique([userId, productId])
 }
 
 
@@ -254,8 +281,20 @@ enum Currency {
   USD
 }
 
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum AccountStatus {
   ACTIVE
   SUSPENDED
   DEACTIVATED
+}
+
+enum ReviewPolicy {
+  AFTER_PAYMENT
+  AFTER_DELIVERY
+  MANUAL_APPROVAL
 }
