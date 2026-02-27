@@ -68,7 +68,6 @@ export async function POST(req: Request) {
       );
 
       const decryptedSecret = bytes.toString(CryptoJS.enc.Utf8);
-
       const isValid = speakeasy.totp.verify({
         secret: decryptedSecret,
         encoding: "base32",

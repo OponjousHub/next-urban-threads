@@ -104,7 +104,7 @@ export default function LoginPage() {
       if (data.reactivated) {
         toastSuccess("Your account has been restored. Welcome back!");
       }
-      // window.location.href = "/dashboard";
+      window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("LOGIN ERROR:", err);
       setApiError(err.message);
