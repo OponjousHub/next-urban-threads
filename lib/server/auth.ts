@@ -49,6 +49,5 @@ export async function getAuthPayload() {
 
   const tenant = await getDefaultTenant();
   const currentSessionId = await getCurrentSessionId();
-
   return { userId, tenant, currentSessionId };
 }

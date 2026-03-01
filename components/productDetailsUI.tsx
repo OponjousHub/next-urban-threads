@@ -1,6 +1,5 @@
 "use client";
 
-import { FiStar } from "react-icons/fi";
 import Image from "next/image";
 import { useCart } from "@/store/cart-context";
 import { Product } from "@/types/product";
@@ -9,9 +8,23 @@ import { CartItem } from "@/types/cart";
 import toast from "react-hot-toast";
 import { cloudinaryDetailImage } from "@/utils/cloudinary-url";
 import { ProductDetailSkeleton } from "./products/productDetailSkeleton";
-import { useTenant } from "@/store/tenant-provider-context";
+import { ReviewForm } from "@/components/reviews/reviewForm";
+import { ReviewList } from "@/components/reviews/reviewList";
+import { RatingSummary } from "@/components/reviews/ratingSummary";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-export function ProductDetailUI({ product }: { product: Product }) {
+interface Props {
+  product: Product;
+  reviews: any[];
+  canReview: boolean;
+}
+
+export function ProductDetailUI({ product, reviews, canReview }: Props) {
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
 
@@ -63,16 +76,25 @@ export function ProductDetailUI({ product }: { product: Product }) {
         <div className="space-y-6">
           <h1 className="text-4xl text-gray-800 font-bold">{product?.name}</h1>
           <div className="flex items-center gap-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <FiStar
-                key={i}
-                className={`${
-                  i < Math.floor(product?.rating)
-                    ? "text-yellow-400"
-                    : "text-gray-300"
-                }`}
-              />
-            ))}
+            <RatingSummary
+              average={product.averageRating ?? 0}
+              count={product.reviewCount ?? 0}
+            />
+
+            {canReview && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <DialogTitle className="text-indigo-600 font-medium hover:underline cursor-pointer">
+                    Write a Review
+                  </DialogTitle>
+                </DialogTrigger>
+
+                <DialogContent className="[&>button]:hidden sm:max-w-lg">
+                  <ReviewForm productId={product.id} />
+                </DialogContent>
+              </Dialog>
+            )}
+
             <span className="text-gray-600 ml-1">
               ({product?.reviews} reviews)
             </span>
@@ -128,6 +150,11 @@ export function ProductDetailUI({ product }: { product: Product }) {
               {product?.category}
             </span>
           </p>
+
+          <div className="mt-16 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
+            <ReviewList reviews={reviews} />
+          </div>
         </div>
       </div>
     </div>

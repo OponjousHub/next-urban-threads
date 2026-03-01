@@ -3,12 +3,12 @@ import { Star } from "lucide-react";
 interface Review {
   id: string;
   rating: number;
-  comment: string;
+  comment: string | null;
   user: {
-    name: string;
+    name: string | null;
   };
   verifiedPurchase: boolean;
-  createdAt: string;
+  createdAt: Date;
 }
 
 interface Props {
@@ -21,7 +21,9 @@ export function ReviewList({ reviews }: Props) {
       {reviews.map((review) => (
         <div key={review.id} className="border-b pb-4">
           <div className="flex items-center justify-between">
-            <div className="font-semibold">{review.user.name}</div>
+            <div className="font-semibold">
+              {review.user.name ?? "Anonymous"}
+            </div>
             <div className="flex items-center gap-1">
               {[...Array(review.rating)].map((_, i) => (
                 <Star

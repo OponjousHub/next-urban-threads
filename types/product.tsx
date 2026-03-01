@@ -11,4 +11,6 @@ export interface Product {
   colours: string[];
   quantity: number;
   featured: boolean;
+  averageRating?: number;
+  reviewCount?: number;
 }
