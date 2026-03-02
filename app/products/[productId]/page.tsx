@@ -37,6 +37,7 @@ export default async function ProductDetailPage({
   });
 
   let canReview = false;
+  let userReview = null;
 
   try {
     const { userId, tenant } = await getAuthPayload();
@@ -54,20 +55,31 @@ export default async function ProductDetailPage({
         },
       });
 
+      userReview = await prisma.review.findFirst({
+        where: {
+          userId,
+          tenantId: tenant.id,
+          productId,
+        },
+      });
+
       const alreadyReviewed = await prisma.review.findFirst({
         where: { userId, productId },
       });
 
       canReview = !!hasPurchased && !alreadyReviewed;
     }
-  } catch {}
-
+  } catch (err) {
+    console.error(err);
+  }
+  console.log("........>>>>>>>>>>>>>", userReview);
   return (
     <Suspense fallback={<ProductDetailSkeleton />}>
       <ProductDetailUI
         product={product}
         reviews={reviews}
         canReview={canReview}
+        userReview={userReview}
       />
     </Suspense>
   );

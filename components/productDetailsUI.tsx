@@ -22,9 +22,15 @@ interface Props {
   product: Product;
   reviews: any[];
   canReview: boolean;
+  userReview: any | null;
 }
 
-export function ProductDetailUI({ product, reviews, canReview }: Props) {
+export function ProductDetailUI({
+  product,
+  reviews,
+  canReview,
+  userReview,
+}: Props) {
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
 
@@ -57,6 +63,9 @@ export function ProductDetailUI({ product, reviews, canReview }: Props) {
       },
     });
   };
+
+  console.log("canReview:", canReview);
+  console.log("userReview:", userReview);
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-6">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -81,23 +90,22 @@ export function ProductDetailUI({ product, reviews, canReview }: Props) {
               count={product.reviewCount ?? 0}
             />
 
-            {canReview && (
+            {(canReview || userReview) && (
               <Dialog>
                 <DialogTrigger asChild>
-                  <DialogTitle className="text-indigo-600 font-medium hover:underline cursor-pointer">
-                    Write a Review
-                  </DialogTitle>
+                  <button className="text-indigo-600 font-medium hover:underline cursor-pointer">
+                    {userReview ? "Edit Review" : "Write Review"}
+                  </button>
                 </DialogTrigger>
 
                 <DialogContent className="[&>button]:hidden sm:max-w-lg">
-                  <ReviewForm productId={product.id} />
+                  <ReviewForm
+                    productId={product.id}
+                    existingReview={userReview}
+                  />
                 </DialogContent>
               </Dialog>
             )}
-
-            <span className="text-gray-600 ml-1">
-              ({product?.reviews} reviews)
-            </span>
           </div>
           <p className="text-3xl font-semibold text-indigo-600">
             ${Number(product?.price)?.toFixed(2)}
@@ -153,7 +161,24 @@ export function ProductDetailUI({ product, reviews, canReview }: Props) {
 
           <div className="mt-16 max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
-            <ReviewList reviews={reviews} />
+
+            {reviews.length === 0 ? (
+              <div className="border border-dashed rounded-2xl p-8 text-center space-y-3">
+                <p className="text-lg font-medium">No reviews yet</p>
+
+                {canReview ? (
+                  <p className="text-sm text-muted-foreground">
+                    You purchased this product. Be the first to review it.
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Be the first to share your experience with this product.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <ReviewList reviews={reviews} />
+            )}
           </div>
         </div>
       </div>

@@ -11,11 +11,16 @@ import { X } from "lucide-react";
 
 interface Props {
   productId: string;
+  existingReview?: {
+    id: string;
+    rating: number;
+    comment: string;
+  } | null;
 }
 
-export function ReviewForm({ productId }: Props) {
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
+export function ReviewForm({ productId, existingReview }: Props) {
+  const [rating, setRating] = useState(existingReview?.rating ?? 0);
+  const [comment, setComment] = useState(existingReview?.comment ?? "");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -27,18 +32,24 @@ export function ReviewForm({ productId }: Props) {
 
     try {
       setLoading(true);
-      console.log("ooooooooooooooooooo", rating, productId, comment);
-      const res = await fetch("/api/reviews", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+
+      const isEditing = !!existingReview;
+
+      const res = await fetch(
+        `/api/reviews/${isEditing ? "update" : "create"}`,
+        {
+          method: isEditing ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            rating,
+            comment,
+            productId,
+            reviewId: existingReview?.id,
+          }),
         },
-        body: JSON.stringify({
-          rating,
-          comment,
-          productId,
-        }),
-      });
+      );
 
       const data = await res.json();
 
