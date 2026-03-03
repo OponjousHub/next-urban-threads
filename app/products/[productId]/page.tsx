@@ -72,7 +72,6 @@ export default async function ProductDetailPage({
   } catch (err) {
     console.error(err);
   }
-  console.log("........>>>>>>>>>>>>>", userReview);
   return (
     <Suspense fallback={<ProductDetailSkeleton />}>
       <ProductDetailUI

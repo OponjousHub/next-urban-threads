@@ -64,9 +64,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // ---------------------------
-    // 3️⃣ If already PAID → return immediately
+    // 3️⃣ Only verify if still pending
     // ---------------------------
-    if (order.status === "PAID") {
+    if (order.status !== "PENDING") {
       return NextResponse.json(order);
     }
 
@@ -80,7 +80,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // ---------------------------
     // 5️⃣ Verify with Paystack
     // ---------------------------
-    // const provider = new PaystackProvider();
     let provider;
 
     if (order.paymentProvider === "PAYSTACK") {
@@ -110,7 +109,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         },
       },
     });
-    console.log("UPDATED ORDERSSSSSS:", updatedOrder);
     return NextResponse.json(updatedOrder);
   } catch (error) {
     console.error("Verify order error:", error);

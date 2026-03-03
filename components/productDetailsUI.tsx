@@ -32,6 +32,7 @@ export function ProductDetailUI({
   userReview,
 }: Props) {
   const [quantity, setQuantity] = useState(1);
+  const [open, setOpen] = useState(false);
   const { addToCart } = useCart();
 
   if (!product) {
@@ -64,8 +65,6 @@ export function ProductDetailUI({
     });
   };
 
-  console.log("canReview:", canReview);
-  console.log("userReview:", userReview);
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-6">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -91,7 +90,7 @@ export function ProductDetailUI({
             />
 
             {(canReview || userReview) && (
-              <Dialog>
+              <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <button className="text-indigo-600 font-medium hover:underline cursor-pointer">
                     {userReview ? "Edit Review" : "Write Review"}
@@ -102,6 +101,7 @@ export function ProductDetailUI({
                   <ReviewForm
                     productId={product.id}
                     existingReview={userReview}
+                    onSuccess={() => setOpen(false)}
                   />
                 </DialogContent>
               </Dialog>

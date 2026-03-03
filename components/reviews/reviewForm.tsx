@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRatingInput } from "./starRatingInput";
@@ -8,9 +8,11 @@ import { toastError, toastSuccess } from "@/utils/toast-notification";
 import { useRouter } from "next/navigation";
 import { DialogClose } from "@/components/ui/dialog";
 import { X } from "lucide-react";
+import { updateProductRating } from "@/lib/calProduct-rating";
 
 interface Props {
   productId: string;
+  onSuccess?: () => void;
   existingReview?: {
     id: string;
     rating: number;
@@ -18,11 +20,18 @@ interface Props {
   } | null;
 }
 
-export function ReviewForm({ productId, existingReview }: Props) {
+export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
   const [rating, setRating] = useState(existingReview?.rating ?? 0);
   const [comment, setComment] = useState(existingReview?.comment ?? "");
   const [loading, setLoading] = useState(false);
+  const [existReview, setExistReview] = useState(existingReview);
   const router = useRouter();
+
+  useEffect(() => {
+    setExistReview(existingReview);
+    setRating(existingReview?.rating ?? 0);
+    setComment(existingReview?.comment ?? "");
+  }, [existingReview]);
 
   async function handleSubmit() {
     if (!rating) {
@@ -33,20 +42,18 @@ export function ReviewForm({ productId, existingReview }: Props) {
     try {
       setLoading(true);
 
-      const isEditing = !!existingReview;
+      const isEditing = !!existReview;
 
       const res = await fetch(
         `/api/reviews/${isEditing ? "update" : "create"}`,
         {
           method: isEditing ? "PATCH" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             rating,
             comment,
             productId,
-            reviewId: existingReview?.id,
+            reviewId: existReview?.id,
           }),
         },
       );
@@ -58,10 +65,19 @@ export function ReviewForm({ productId, existingReview }: Props) {
         return;
       }
 
-      toastSuccess("Review submitted successfully!");
+      setExistReview(data.review ?? data);
+
+      toastSuccess(
+        isEditing
+          ? "Review updated successfully"
+          : "Review submitted successfully",
+      );
+
+      updateProductRating(productId);
       setRating(0);
       setComment("");
       router.refresh();
+      onSuccess?.();
     } catch {
       toastError("Something went wrong");
     } finally {
@@ -84,7 +100,9 @@ export function ReviewForm({ productId, existingReview }: Props) {
         </button>
       </DialogClose>
 
-      <h3 className="text-xl font-semibold">Write a Review</h3>
+      <h3 className="text-xl font-semibold">
+        {existReview ? "Update Review" : "Write a Review"}
+      </h3>
 
       <StarRatingInput value={rating} onChange={setRating} />
 
@@ -115,7 +133,13 @@ export function ReviewForm({ productId, existingReview }: Props) {
           disabled={loading}
           className="min-w-[140px]"
         >
-          {loading ? "Submitting..." : "Submit Review"}
+          {loading
+            ? existReview
+              ? "Updating..."
+              : "Submitting..."
+            : existReview
+              ? "Update Review"
+              : "Submit Review"}
         </Button>
       </div>
     </div>

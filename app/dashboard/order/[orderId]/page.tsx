@@ -4,11 +4,14 @@ import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { GetToast } from "@/components/ui/adminToast";
-import { useTenant } from "@/store/tenant-provider-context";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { ReviewForm } from "@/components/reviews/reviewForm";
+import { OrderStatus } from "@prisma/client";
 
 type OrderItem = {
   id: string;
   product: {
+    id: string;
     name: string;
     price: number;
     images: string;
@@ -18,7 +21,7 @@ type OrderItem = {
 
 type Order = {
   id: string;
-  status: "PENDING" | "PAID" | "FAILED";
+  status: OrderStatus;
   totalAmount: number;
   paymentReference: string | null;
   items: OrderItem[];
@@ -37,8 +40,8 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
   const hasVerified = useRef(false);
-
-  const { tenant } = useTenant();
+  const [userReviews, setUserReviews] = useState<Record<string, any>>({});
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!orderId || hasVerified.current) return;
@@ -91,6 +94,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
     verifyOrder();
   }, [orderId]);
 
+  // VERIFY ODER
   useEffect(() => {
     if (!order || order.status !== "PENDING") return;
 
@@ -112,6 +116,29 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
     return () => clearInterval(interval);
   }, [order, orderId]);
+
+  // CHECK REVIEWS
+  useEffect(() => {
+    if (!order) return;
+
+    async function fetchReviews() {
+      // const res = await fetch(`/api/reviews/me`);
+      const res = await fetch(`/api/reviews/me?orderId=${orderId}`);
+      if (!res.ok) return;
+
+      const reviewData = await res.json();
+      // convert to lookup map by productId
+      const map: Record<string, any> = {};
+      reviewData.forEach((review: any) => {
+        map[review.productId] = review;
+      });
+
+      setUserReviews(map);
+    }
+
+    fetchReviews();
+  }, [order]);
+
   /* ------------------------------------
      ✅ CENTERED LOADING STATE
   ------------------------------------- */
@@ -171,7 +198,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
               className={`font-bold ${
                 order.status === "PAID"
                   ? "text-green-600"
-                  : order.status === "FAILED"
+                  : order.status === "CANCELLED"
                     ? "text-red-600"
                     : "text-yellow-600"
               }`}
@@ -197,7 +224,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
         <ul className="border rounded-lg p-4 space-y-4">
           {order?.items?.map((item) => {
-            console.log(item.product);
             return (
               <li key={item.id} className="flex items-center gap-4">
                 <img
@@ -214,9 +240,31 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                     Price: ${item.product.price}
                   </p>
                 </div>
-                <p className="font-bold">
-                  ${item.product.price * item.quantity}
-                </p>
+                <div>
+                  <p className="font-bold">
+                    ${item.product.price * item.quantity}
+                  </p>
+
+                  {order.status === "DELIVERED" && (
+                    <Dialog open={open} onOpenChange={setOpen}>
+                      <DialogTrigger asChild>
+                        <button className="text-indigo-600 text-sm font-medium hover:underline">
+                          {userReviews[item.product.id]
+                            ? "Edit Review"
+                            : "Write Review"}
+                        </button>
+                      </DialogTrigger>
+
+                      <DialogContent className="[&>button]:hidden sm:max-w-lg">
+                        <ReviewForm
+                          productId={item.product.id}
+                          existingReview={userReviews[item.product.id]}
+                          onSuccess={() => setOpen(false)}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
               </li>
             );
           })}
