@@ -7,6 +7,7 @@ import Link from "next/link";
 import type { Product } from "@/types/product";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
 import { useTenant } from "@/store/tenant-provider-context";
+import { ProductRating } from "@/utils/product-rating";
 
 function WomenItems() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -76,6 +77,10 @@ function WomenItems() {
               </div>
               <div className="p-4">
                 <h3 className="font-medium text-[1.2rem]">{product.name}</h3>
+                <ProductRating
+                  rating={product.averageRating}
+                  count={product.reviewCount}
+                />
                 <p className="font-bold text-[var(--color-primary)] my-2 text-xl">
                   ₦{product.price.toLocaleString()}
                 </p>

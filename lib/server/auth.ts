@@ -3,8 +3,9 @@ import "server-only";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-
+import { prisma } from "@/utils/prisma";
 import { touchSession } from "@/lib/sessions";
+import { redirect } from "next/navigation";
 
 export async function getLoggedInUserId(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -44,10 +45,31 @@ export async function getCurrentSessionId(): Promise<string | null> {
     return null;
   }
 }
+
+export async function getUserRole() {
+  const userId = await getLoggedInUserId();
+
+  const tenant = await getDefaultTenant();
+
+  if (!userId || !tenant) {
+    throw new Error("Unauthorized!");
+  }
+
+  const user = await prisma.user.findFirst({
+    where: { id: userId, tenantId: tenant?.id },
+    select: { id: true, role: true },
+  });
+  if (!user) redirect("/login");
+  const role = user.role;
+
+  return role;
+}
+
 export async function getAuthPayload() {
   const userId = await getLoggedInUserId();
 
   const tenant = await getDefaultTenant();
   const currentSessionId = await getCurrentSessionId();
-  return { userId, tenant, currentSessionId };
+  const role = await getUserRole();
+  return { userId, tenant, currentSessionId, role };
 }

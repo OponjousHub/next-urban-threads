@@ -245,6 +245,7 @@ model WishlistItem {
 enum Role {
   USER
   ADMIN
+  OWNER
 }
 
 enum Category {
