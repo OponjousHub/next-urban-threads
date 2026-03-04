@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useRouter } from "next/navigation";
-import { useTenant } from "@/store/tenant-provider-context";
 
 type User = {
   id: string;
@@ -15,12 +14,12 @@ type User = {
 type Props = {
   user: User | null;
   onRemoveAvater: () => void;
+  role: string | null;
 };
 
-export default function UserMenu({ user, onRemoveAvater }: Props) {
+export default function UserMenu({ user, onRemoveAvater, role }: Props) {
   const [open, setOpen] = useState(false);
 
-  const { tenant } = useTenant();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setOpen(false));
@@ -29,6 +28,11 @@ export default function UserMenu({ user, onRemoveAvater }: Props) {
   const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
     user.name,
   )}&backgroundColor=000000&textColor=ffffff`;
+
+  // CLose User Menu
+  const handleCloseUserMenu = () => {
+    setOpen(false);
+  };
 
   return (
     <div ref={dropdownRef} className="relative left-5">
@@ -50,6 +54,7 @@ export default function UserMenu({ user, onRemoveAvater }: Props) {
           <Link
             href="/dashboard"
             className="block px-4 py-2 text-sm hover:bg-gray-100"
+            onClick={handleCloseUserMenu}
           >
             Dashboard
           </Link>
@@ -57,14 +62,16 @@ export default function UserMenu({ user, onRemoveAvater }: Props) {
           <Link
             href="/dashboard/order"
             className="block px-4 py-2 text-sm hover:bg-gray-100"
+            onClick={handleCloseUserMenu}
           >
             Orders
           </Link>
 
-          {user.role === "ADMIN" && (
+          {role === "ADMIN" && (
             <Link
               href="/admin"
               className="block px-4 py-2 text-sm hover:bg-gray-100"
+              onClick={handleCloseUserMenu}
             >
               Admin Dashboard
             </Link>

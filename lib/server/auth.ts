@@ -73,3 +73,15 @@ export async function getAuthPayload() {
   const role = await getUserRole();
   return { userId, tenant, currentSessionId, role };
 }
+
+export async function getOptionalAuthPayload() {
+  try {
+    return await getAuthPayload();
+  } catch {
+    return {
+      userId: null,
+      role: null,
+      tenant: null,
+    };
+  }
+}

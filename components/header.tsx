@@ -1,13 +1,9 @@
 import { prisma } from "@/utils/prisma";
 import HeaderClient from "./headerClient";
-import { getAuthPayload } from "@/lib/server/auth";
+import { getOptionalAuthPayload } from "@/lib/server/auth";
 
 export default async function header() {
-  const { role } = await getAuthPayload();
-
-  if (!role) {
-    throw new Error("Unauthorized!");
-  }
+  const { role } = await getOptionalAuthPayload();
 
   return <HeaderClient role={role} />;
 }

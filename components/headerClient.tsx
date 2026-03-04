@@ -6,7 +6,6 @@ import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi";
 import { useEffect } from "react";
 import { useCart } from "@/store/cart-context";
 import UserMenu from "./header-userMenu";
-import { useTenant } from "@/store/tenant-provider-context";
 
 type User = {
   id: string;
@@ -14,7 +13,7 @@ type User = {
   role: "ADMIN" | "USER";
 };
 
-const HeaderClient = ({ role }: { role: string }) => {
+const HeaderClient = ({ role }: { role: string | null }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { cartItems } = useCart();
   const [user, setUser] = useState<User | null>(null);
@@ -48,7 +47,6 @@ const HeaderClient = ({ role }: { role: string }) => {
   if (loading) {
     return <header className="bg-white border-b-2 border-[#eee] h-[72px]" />;
   }
-  console.log("USER ROOOLEEE", role);
   return (
     <header className="bg-white border-b-2 border-[#eee] sticky top-0 z-[1000]">
       <div className="flex items-center justify-between max-w-[1200px] mx-auto px-4 py-4">
@@ -90,11 +88,6 @@ const HeaderClient = ({ role }: { role: string }) => {
           <Link className="hover:text-[var(--color-primary)]" href="/sales">
             Sales
           </Link>
-          {role === "ADMIN" && (
-            <Link href="/admin" className="text-sm font-medium">
-              Admin
-            </Link>
-          )}
         </nav>
 
         {/* Search (desktop only) */}
@@ -128,7 +121,12 @@ const HeaderClient = ({ role }: { role: string }) => {
           </Link>
 
           {user ? (
-            <UserMenu user={user} onRemoveAvater={handleReloadHeader} />
+            <UserMenu
+              user={user}
+              onRemoveAvater={handleReloadHeader}
+              role={role}
+              
+            />
           ) : (
             <div className="flex gap-4 ml-8">
               <Link
