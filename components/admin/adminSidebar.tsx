@@ -13,15 +13,25 @@ import {
 interface Props {
   collapsed: boolean;
   toggle: () => void;
+  isMobile?: boolean;
 }
 
-export default function AdminSidebar({ collapsed, toggle }: Props) {
+export default function AdminSidebar({
+  collapsed,
+  toggle,
+  isMobile = false,
+}: Props) {
   const pathname = usePathname();
-  const width = collapsed ? "w-20" : "w-64";
+
+  // On mobile, always full width
+  const width = isMobile ? "w-64" : collapsed ? "w-20" : "w-64";
 
   return (
     <aside
-      className={`${width} bg-white/70 backdrop-blur-xl border-r border-gray-200 min-h-screen transition-all duration-300 flex flex-col`}
+      className={`
+        ${isMobile ? "flex" : "hidden lg:flex"}
+        ${width} flex-col bg-white shadow-lg border-r border-gray-200 h-full transition-all duration-300 z-50
+      `}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-6">
@@ -33,9 +43,7 @@ export default function AdminSidebar({ collapsed, toggle }: Props) {
           className="p-2 rounded-lg hover:bg-gray-100 transition"
         >
           <FiChevronLeft
-            className={`transition-transform duration-300 ${
-              collapsed ? "rotate-180" : ""
-            }`}
+            className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}
           />
         </button>
       </div>
@@ -93,12 +101,9 @@ function SidebarItem({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group
-      ${
-        active
-          ? "bg-indigo-100 text-indigo-700"
-          : "hover:bg-indigo-50 hover:text-indigo-600"
-      }`}
+      className={`flex items-center gap-3 px-3 py-3 rounded-xl duration-200 group transform transition-transform
+        ${active ? "bg-indigo-100 text-indigo-700" : "hover:bg-indigo-50 hover:text-indigo-600"}
+      `}
     >
       {icon}
       {!collapsed && <span className="text-sm font-medium">{label}</span>}
