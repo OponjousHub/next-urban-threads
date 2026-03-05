@@ -31,7 +31,7 @@ export default function AdminLayout({
 
       {/* Mobile Sidebar */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 flex">
+        <div className="lg:hidden fixed inset-0 z-40 flex mt-10">
           {/* Blur backdrop */}
           <div
             className="fixed inset-0 bg-black/30 backdrop-blur-sm"
