@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   FiHome,
   FiShoppingBag,
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default function AdminSidebar({ collapsed, toggle }: Props) {
+  const pathname = usePathname();
   const width = collapsed ? "w-20" : "w-64";
 
   return (
@@ -45,24 +47,28 @@ export default function AdminSidebar({ collapsed, toggle }: Props) {
           icon={<FiHome size={20} />}
           label="Dashboard"
           collapsed={collapsed}
+          pathname={pathname}
         />
         <SidebarItem
           href="/admin/products"
           icon={<FiShoppingBag size={20} />}
           label="Products"
           collapsed={collapsed}
+          pathname={pathname}
         />
         <SidebarItem
           href="/admin/orders"
           icon={<FiUsers size={20} />}
           label="Orders"
           collapsed={collapsed}
+          pathname={pathname}
         />
         <SidebarItem
           href="/admin/settings"
           icon={<FiSettings size={20} />}
           label="Settings"
           collapsed={collapsed}
+          pathname={pathname}
         />
       </nav>
     </aside>
@@ -74,75 +80,28 @@ function SidebarItem({
   icon,
   label,
   collapsed,
+  pathname,
 }: {
   href: string;
   icon: React.ReactNode;
   label: string;
   collapsed: boolean;
+  pathname: string;
 }) {
+  const active = pathname === href || pathname.startsWith(href + "/");
+
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200 group"
+      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group
+      ${
+        active
+          ? "bg-indigo-100 text-indigo-700"
+          : "hover:bg-indigo-50 hover:text-indigo-600"
+      }`}
     >
       {icon}
       {!collapsed && <span className="text-sm font-medium">{label}</span>}
     </Link>
   );
 }
-
-// "use client";
-
-// import Link from "next/link";
-// import { usePathname } from "next/navigation";
-// import {
-//   LayoutDashboard,
-//   Package,
-//   ShoppingCart,
-//   Users,
-//   Star,
-//   Settings,
-// } from "lucide-react";
-
-// const navItems = [
-//   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-//   { name: "Products", href: "/admin/products", icon: Package },
-//   { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
-//   { name: "Customers", href: "/admin/customers", icon: Users },
-//   { name: "Reviews", href: "/admin/reviews", icon: Star },
-//   { name: "Settings", href: "/admin/settings", icon: Settings },
-// ];
-
-// export default function AdminSidebar() {
-//   const pathname = usePathname();
-
-//   return (
-//     <aside className="w-64 bg-white border-r border-gray-100 p-6 md:flex flex-col">
-//       <h2 className="text-xl font-bold mb-10">
-//         Urban<span className="text-indigo-600">Admin</span>
-//       </h2>
-
-//       <nav className="flex flex-col gap-2">
-//         {navItems.map((item) => {
-//           const Icon = item.icon;
-//           const isActive = pathname === item.href;
-
-//           return (
-//             <Link
-//               key={item.name}
-//               href={item.href}
-//               className={`flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-//                 isActive
-//                   ? "bg-black text-white"
-//                   : "text-gray-600 hover:bg-gray-100"
-//               }`}
-//             >
-//               <Icon size={18} />
-//               {item.name}
-//             </Link>
-//           );
-//         })}
-//       </nav>
-//     </aside>
-//   );
-// }
