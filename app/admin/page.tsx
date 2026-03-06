@@ -1,6 +1,8 @@
 import KpiCard from "@/components/admin/KpiCard";
 import RevenueChart from "@/components/admin/charts/revenueChart";
 import RecentOrdersTable from "@/components/admin/tables/recentOrdersTable";
+import DashboardAlerts from "@/components/admin/alerts/systemAlerts";
+import TopProducts from "@/components/admin/dashboard/topProducts";
 
 import {
   FiDollarSign,
@@ -48,14 +50,22 @@ export default function AdminDashboardPage() {
         />
       </section>
 
-      {/* Revenue Chart */}
-      <div className="grid grid-cols-1 gap-6 mt-6">
-        <RevenueChart />
-      </div>
+      {/* Revenue Chart & Alerts*/}
+      <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2">
+          <RevenueChart />
+        </div>
+
+        <DashboardAlerts />
+      </section>
 
       {/* Recent Orders */}
-      <section>
-        <RecentOrdersTable />
+      <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2">
+          <RecentOrdersTable />
+        </div>
+
+        <TopProducts />
       </section>
     </div>
   );
