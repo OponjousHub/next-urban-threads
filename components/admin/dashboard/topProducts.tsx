@@ -41,7 +41,7 @@ const products: Product[] = [
 
 export default function TopProducts() {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold">Top Products</h3>

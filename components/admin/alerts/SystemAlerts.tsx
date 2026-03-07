@@ -25,7 +25,7 @@ export default function DashboardAlerts() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 h-full">
       <h3 className="text-lg font-semibold mb-6">Alerts</h3>
 
       <div className="space-y-4">
