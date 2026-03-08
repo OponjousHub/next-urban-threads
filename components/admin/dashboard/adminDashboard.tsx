@@ -3,7 +3,7 @@
 import DashboardKpis from "@/components/admin/dashboard/dashboardKpis";
 import DashboardAnalytics from "./dashboardAnalytics";
 import DashboardOrders from "./dashboardOrders";
-// import DashboardInventory from "./dashboardInventory";
+import DashboardInventory from "./dashboardInventory";
 
 export default function AdminDashboard() {
   return (
@@ -22,7 +22,7 @@ export default function AdminDashboard() {
 
       <DashboardOrders />
 
-      {/* <DashboardInventory /> */}
+      <DashboardInventory />
     </div>
   );
 }

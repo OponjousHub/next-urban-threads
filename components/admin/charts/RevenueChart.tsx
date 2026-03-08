@@ -10,80 +10,96 @@ import {
   ResponsiveContainer,
   CartesianGrid,
   Area,
-  AreaChart,
+  ComposedChart,
 } from "recharts";
 
 const monthlyData = [
-  { name: "Jan", revenue: 4200, orders: 120 },
-  { name: "Feb", revenue: 3800, orders: 98 },
-  { name: "Mar", revenue: 5200, orders: 150 },
-  { name: "Apr", revenue: 6100, orders: 170 },
-  { name: "May", revenue: 7200, orders: 200 },
-  { name: "Jun", revenue: 6800, orders: 185 },
-];
-
-const weeklyData = [
-  { name: "Mon", revenue: 900, orders: 20 },
-  { name: "Tue", revenue: 1100, orders: 25 },
-  { name: "Wed", revenue: 800, orders: 18 },
-  { name: "Thu", revenue: 1300, orders: 32 },
-  { name: "Fri", revenue: 1700, orders: 40 },
-  { name: "Sat", revenue: 2100, orders: 48 },
-  { name: "Sun", revenue: 1600, orders: 35 },
+  { name: "Jan", revenue: 4200, orders: 120, prev: 3500 },
+  { name: "Feb", revenue: 3800, orders: 98, prev: 3000 },
+  { name: "Mar", revenue: 5200, orders: 150, prev: 4200 },
+  { name: "Apr", revenue: 6100, orders: 170, prev: 5000 },
+  { name: "May", revenue: 7200, orders: 200, prev: 6100 },
+  { name: "Jun", revenue: 6800, orders: 185, prev: 5900 },
 ];
 
 export default function RevenueChart() {
   const [metric, setMetric] = useState<"revenue" | "orders">("revenue");
-  const [range, setRange] = useState<"weekly" | "monthly">("monthly");
+  const [range, setRange] = useState("30");
 
-  const data = range === "monthly" ? monthlyData : weeklyData;
+  const totalRevenue = 12450;
+  const totalOrders = 320;
+  const avgOrder = (totalRevenue / totalOrders).toFixed(2);
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold">Analytics Overview</h3>
+        <div>
+          <h3 className="text-lg font-semibold">Revenue Overview</h3>
+          <p className="text-xs text-gray-500">Compare performance over time</p>
+        </div>
 
-        <div className="flex items-center gap-4">
-          {/* Metric Toggle */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setMetric("revenue")}
-              className={`px-3 py-1 text-sm rounded-md ${
-                metric === "revenue" ? "bg-white shadow-sm" : "text-gray-500"
-              }`}
-            >
-              Revenue
-            </button>
+        <select
+          value={range}
+          onChange={(e) => setRange(e.target.value)}
+          className="text-sm border border-gray-200 rounded-lg px-3 py-1"
+        >
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 3 months</option>
+        </select>
+      </div>
 
-            <button
-              onClick={() => setMetric("orders")}
-              className={`px-3 py-1 text-sm rounded-md ${
-                metric === "orders" ? "bg-white shadow-sm" : "text-gray-500"
-              }`}
-            >
-              Orders
-            </button>
-          </div>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-3 gap-6 mb-6">
+        <div>
+          <p className="text-xs text-gray-500">Revenue</p>
+          <p className="text-xl font-bold">${totalRevenue}</p>
+          <span className="text-xs text-green-600 font-medium">
+            ↑ 8% vs last month
+          </span>
+        </div>
 
-          {/* Range Selector */}
-          <select
-            value={range}
-            onChange={(e) => setRange(e.target.value as "weekly" | "monthly")}
-            className="text-sm border border-gray-200 rounded-lg px-2 py-1"
-          >
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
+        <div>
+          <p className="text-xs text-gray-500">Orders</p>
+          <p className="text-xl font-bold">{totalOrders}</p>
+          <span className="text-xs text-green-600 font-medium">↑ 5%</span>
+        </div>
+
+        <div>
+          <p className="text-xs text-gray-500">Avg Order</p>
+          <p className="text-xl font-bold">${avgOrder}</p>
+          <span className="text-xs text-red-500 font-medium">↓ 2%</span>
         </div>
       </div>
 
+      {/* Metric Toggle */}
+      <div className="flex bg-gray-100 rounded-lg p-1 w-fit mb-4">
+        <button
+          onClick={() => setMetric("revenue")}
+          className={`px-3 py-1 text-sm rounded-md ${
+            metric === "revenue" ? "bg-white shadow-sm" : "text-gray-500"
+          }`}
+        >
+          Revenue
+        </button>
+
+        <button
+          onClick={() => setMetric("orders")}
+          className={`px-3 py-1 text-sm rounded-md ${
+            metric === "orders" ? "bg-white shadow-sm" : "text-gray-500"
+          }`}
+        >
+          Orders
+        </button>
+      </div>
+
       {/* Chart */}
-      <div className="h-80">
+      <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
+          <ComposedChart data={monthlyData}>
             <defs>
-              <linearGradient id="colorMetric" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#6366F1" stopOpacity={0.4} />
                 <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
               </linearGradient>
@@ -104,20 +120,31 @@ export default function RevenueChart() {
               contentStyle={{
                 borderRadius: "10px",
                 border: "none",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
               }}
             />
 
+            {/* Previous period line */}
+            <Line
+              type="monotone"
+              dataKey="prev"
+              stroke="#cbd5f5"
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={false}
+            />
+
+            {/* Main metric */}
             <Area
               type="monotone"
               dataKey={metric}
               stroke="#6366F1"
               strokeWidth={3}
-              fill="url(#colorMetric)"
+              fill="url(#revenueFill)"
               dot={{ r: 4 }}
               activeDot={{ r: 6 }}
             />
-          </AreaChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import RecentOrdersTable from "../tables/recentOrdersTable";
 import TopProducts from "@/components/admin/dashboard/topProducts";
+import OrdersStatusChart from "../charts/ordersStatusChart";
 
 export default function DashboardAnalytics() {
   return (
@@ -8,7 +9,7 @@ export default function DashboardAnalytics() {
         <RecentOrdersTable />
       </div>
 
-      <TopProducts />
+      <OrdersStatusChart />
     </section>
   );
 }
