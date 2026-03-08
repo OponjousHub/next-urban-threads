@@ -12,6 +12,7 @@ import {
   Area,
   ComposedChart,
 } from "recharts";
+import { FiArrowDown, FiArrowUp, FiTrendingDown } from "react-icons/fi";
 
 const monthlyData = [
   { name: "Jan", revenue: 4200, orders: 120, prev: 3500 },
@@ -55,21 +56,28 @@ export default function RevenueChart() {
         <div>
           <p className="text-xs text-gray-500">Revenue</p>
           <p className="text-xl font-bold">${totalRevenue}</p>
-          <span className="text-xs text-green-600 font-medium">
-            ↑ 8% vs last month
+          <span className="flex items-center text-xs text-green-600 font-medium">
+            <FiArrowUp size={11} /> 8% vs last month
           </span>
         </div>
 
         <div>
           <p className="text-xs text-gray-500">Orders</p>
           <p className="text-xl font-bold">{totalOrders}</p>
-          <span className="text-xs text-green-600 font-medium">↑ 5%</span>
+          <span className="flex items-center text-xs text-green-600 font-medium">
+            <span>
+              <FiArrowUp size={11} />
+            </span>{" "}
+            <span>5%</span>
+          </span>
         </div>
 
         <div>
           <p className="text-xs text-gray-500">Avg Order</p>
           <p className="text-xl font-bold">${avgOrder}</p>
-          <span className="text-xs text-red-500 font-medium">↓ 2%</span>
+          <span className="flex items-center text-xs text-red-500 font-medium">
+            <FiArrowDown size={11} /> 2%
+          </span>
         </div>
       </div>
 

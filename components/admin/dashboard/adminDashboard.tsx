@@ -4,7 +4,7 @@ import DashboardKpis from "@/components/admin/dashboard/dashboardKpis";
 import DashboardAnalytics from "./dashboardAnalytics";
 import DashboardOrders from "./dashboardOrders";
 import DashboardInventory from "./dashboardInventory";
-
+import DashboardSalesByCategory from "./dashboardSalesByCategory";
 export default function AdminDashboard() {
   return (
     <div className="space-y-8">
@@ -19,6 +19,7 @@ export default function AdminDashboard() {
       <DashboardKpis />
 
       <DashboardAnalytics />
+      <DashboardSalesByCategory />
 
       <DashboardOrders />
 
