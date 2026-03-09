@@ -1,6 +1,6 @@
 import RecentOrdersTable from "../tables/recentOrdersTable";
 import TopProducts from "@/components/admin/dashboard/topProducts";
-import OrdersStatusChart from "../charts/ordersStatusChart";
+// import OrdersStatusChart from "../charts/ordersStatusChart";
 
 export default function DashboardAnalytics() {
   return (

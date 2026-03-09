@@ -33,7 +33,13 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <DashboardKpis />
+      <DashboardKpis
+        totalRevenue={data.revenue}
+        totalCustomer={data.totalCustomers}
+        totalOrder={data.totalOrders}
+        conversion={data.conversionRate}
+        returningCustomerRate={data.returningCustomerRate}
+      />
 
       <DashboardAnalytics />
       <DashboardSalesByCategory />
