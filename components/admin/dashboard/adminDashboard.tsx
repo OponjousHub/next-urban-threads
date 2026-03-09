@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import DashboardKpis from "@/components/admin/dashboard/dashboardKpis";
 import DashboardAnalytics from "./dashboardAnalytics";
 import DashboardOrders from "./dashboardOrders";
@@ -8,6 +9,20 @@ import DashboardSalesByCategory from "./dashboardSalesByCategory";
 import CustomerInsights from "@/components/admin/dashboard/customerInsights";
 
 export default function AdminDashboard() {
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    async function loadDashboard() {
+      const res = await fetch("/api/admin/dashboard");
+      const json = await res.json();
+      setData(json);
+    }
+
+    loadDashboard();
+  }, []);
+
+  if (!data) return <p>Loading dashboard...</p>;
+  console.log(data);
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -27,7 +42,10 @@ export default function AdminDashboard() {
 
       <DashboardInventory />
       <div className="grid grid-cols-1 lg:grid-cols-2 ">
-        <CustomerInsights />
+        <CustomerInsights
+          totalCustomer={data.totalCustomers}
+          newCustomer={data.newCustomersToday}
+        />
       </div>
     </div>
   );

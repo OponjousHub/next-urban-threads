@@ -2,28 +2,34 @@
 
 import { FiUsers, FiUserPlus, FiRepeat } from "react-icons/fi";
 
-export default function CustomerInsights() {
+export default function CustomerInsights({
+  totalCustomer,
+  newCustomer,
+}: {
+  totalCustomer: number;
+  newCustomer: number;
+}) {
   const stats = [
     {
       title: "Total Customers",
-      value: 890,
+      value: totalCustomer,
       icon: <FiUsers />,
       color: "bg-indigo-100 text-indigo-600",
     },
     {
       title: "New Today",
-      value: 12,
+      value: newCustomer,
       icon: <FiUserPlus />,
       color: "bg-green-100 text-green-600",
     },
     {
       title: "Returning",
-      value: 38,
+      value: totalCustomer - newCustomer,
       icon: <FiRepeat />,
       color: "bg-blue-100 text-blue-600",
     },
   ];
-
+  console.log(totalCustomer, newCustomer);
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 ">
       {/* Header */}
