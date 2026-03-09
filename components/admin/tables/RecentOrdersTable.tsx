@@ -46,7 +46,7 @@ const orders: Order[] = [
 
 export default function RecentOrdersTable() {
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 h-full">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold">Recent Orders</h3>

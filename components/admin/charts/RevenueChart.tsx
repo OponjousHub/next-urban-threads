@@ -32,7 +32,7 @@ export default function RevenueChart() {
   const avgOrder = (totalRevenue / totalOrders).toFixed(2);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

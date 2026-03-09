@@ -17,7 +17,7 @@ const products: Product[] = [
 
 export default function LowStockProducts() {
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 h-full">
       <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
         <FiAlertTriangle className="text-orange-500" />
         Low Stock
