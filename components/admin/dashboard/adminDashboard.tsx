@@ -5,6 +5,8 @@ import DashboardAnalytics from "./dashboardAnalytics";
 import DashboardOrders from "./dashboardOrders";
 import DashboardInventory from "./dashboardInventory";
 import DashboardSalesByCategory from "./dashboardSalesByCategory";
+import CustomerInsights from "@/components/admin/dashboard/customerInsights";
+
 export default function AdminDashboard() {
   return (
     <div className="space-y-8">
@@ -24,6 +26,9 @@ export default function AdminDashboard() {
       <DashboardOrders />
 
       <DashboardInventory />
+      <div className="grid grid-cols-1 lg:grid-cols-2 ">
+        <CustomerInsights />
+      </div>
     </div>
   );
 }
