@@ -22,7 +22,6 @@ export default function AdminDashboard() {
   }, []);
 
   if (!data) return <p>Loading dashboard...</p>;
-  console.log(data);
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -41,7 +40,10 @@ export default function AdminDashboard() {
         returningCustomerRate={data.returningCustomerRate}
       />
 
-      <DashboardAnalytics />
+      <DashboardAnalytics
+        totalRevenue={data.revenue}
+        totalOrders={data.totalOrders}
+      />
       <DashboardSalesByCategory />
 
       <DashboardOrders />

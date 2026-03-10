@@ -40,7 +40,6 @@ export async function GET() {
         },
       },
     });
-
     /* -------------------- Customers -------------------- */
 
     const totalCustomers = await prisma.user.count({

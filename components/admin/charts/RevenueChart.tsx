@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -26,10 +26,28 @@ const monthlyData = [
 export default function RevenueChart() {
   const [metric, setMetric] = useState<"revenue" | "orders">("revenue");
   const [range, setRange] = useState("30");
+  const [revenueData, setRevenueData] = useState<number>();
+  const [totalOrders, setTotalOrders] = useState<number>();
+  const [revenueChange, setRevenueChange] = useState<number>(0);
+  const [chartData, setChartData] = useState<any[]>([]);
 
-  const totalRevenue = 12450;
-  const totalOrders = 320;
-  const avgOrder = (totalRevenue / totalOrders).toFixed(2);
+  const avgOrder =
+    totalOrders && totalOrders > 0 ? (revenueData ?? 0) / totalOrders : 0;
+
+  useEffect(() => {
+    async function loadData() {
+      const res = await fetch(`/api/admin/revenue?range=${range}`);
+      const data = await res.json();
+
+      setRevenueData(data.revenue);
+      setTotalOrders(data.orders);
+      setRevenueChange(data.revenueChange);
+      setChartData(data.chartData);
+    }
+
+    loadData();
+  }, [range]);
+  console.log("RANGE-----------", range);
 
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
@@ -55,9 +73,20 @@ export default function RevenueChart() {
       <div className="grid grid-cols-3 gap-6 mb-6">
         <div>
           <p className="text-xs text-gray-500">Revenue</p>
-          <p className="text-xl font-bold">${totalRevenue}</p>
+          <p className="text-xl font-bold">${revenueData}</p>
           <span className="flex items-center text-xs text-green-600 font-medium">
-            <FiArrowUp size={11} /> 8% vs last month
+            <span
+              className={`flex items-center text-xs font-medium ${
+                revenueChange >= 0 ? "text-green-600" : "text-red-500"
+              }`}
+            >
+              {revenueChange >= 0 ? (
+                <FiArrowUp size={11} />
+              ) : (
+                <FiArrowDown size={11} />
+              )}
+              {Math.abs(revenueChange).toFixed(1)}% vs last period
+            </span>
           </span>
         </div>
 
@@ -74,7 +103,7 @@ export default function RevenueChart() {
 
         <div>
           <p className="text-xs text-gray-500">Avg Order</p>
-          <p className="text-xl font-bold">${avgOrder}</p>
+          <p className="text-xl font-bold">${avgOrder.toFixed(2)}</p>
           <span className="flex items-center text-xs text-red-500 font-medium">
             <FiArrowDown size={11} /> 2%
           </span>
@@ -105,7 +134,7 @@ export default function RevenueChart() {
       {/* Chart */}
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={monthlyData}>
+          <ComposedChart data={chartData}>
             <defs>
               <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#6366F1" stopOpacity={0.4} />
