@@ -2,11 +2,13 @@ import RevenueChart from "../charts/revenueChart";
 import DashboardAlerts from "../alerts/systemAlerts";
 
 export default function DashboardAnalytics({
-  totalRevenue,
-  totalOrders,
+  lowstock,
+  orderStatus,
+  newCustomers,
 }: {
-  totalRevenue: number;
-  totalOrders: number;
+  lowstock: { id: string; name: string; stock: number }[];
+  orderStatus: number;
+  newCustomers: number;
 }) {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
@@ -15,7 +17,11 @@ export default function DashboardAnalytics({
       </div>
 
       <div className="h-full">
-        <DashboardAlerts />
+        <DashboardAlerts
+          lowstock={lowstock}
+          orderStatus={orderStatus}
+          newCustomers={newCustomers}
+        />
       </div>
     </section>
   );

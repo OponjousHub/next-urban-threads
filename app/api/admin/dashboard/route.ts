@@ -125,7 +125,7 @@ export async function GET() {
     const deliveredOrders = await prisma.order.count({
       where: { status: "DELIVERED", tenantId: tenant.id },
     });
-
+    console.log("LOW STOCK", lowStock);
     return NextResponse.json({
       revenue,
       totalOrders,
