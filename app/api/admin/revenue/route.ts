@@ -25,78 +25,72 @@ export async function GET(req: Request) {
   const tenant = await getDefaultTenant();
   if (!tenant) throw new Error("Default tenant not found");
 
-  const current = await prisma.order.aggregate({
-    where: {
-      tenantId: tenant.id,
-      status: { in: ["PAID", "SHIPPED", "DELIVERED"] },
-      createdAt: {
-        gte: startDate,
+  const [current, previous, groupedOrders] = await Promise.all([
+    prisma.order.aggregate({
+      where: {
+        tenantId: tenant.id,
+        status: { in: ["PAID", "SHIPPED", "DELIVERED"] },
+        createdAt: {
+          gte: startDate,
+        },
       },
-    },
-    _sum: {
-      totalAmount: true,
-    },
-    _count: {
-      id: true,
-    },
-  });
-
-  const previous = await prisma.order.aggregate({
-    where: {
-      tenantId: tenant.id,
-      status: { in: ["PAID", "SHIPPED", "DELIVERED"] },
-      createdAt: {
-        gte: previousStartDate,
-        lt: startDate,
+      _sum: {
+        totalAmount: true,
       },
-    },
-    _sum: {
-      totalAmount: true,
-    },
-    _count: {
-      id: true,
-    },
-  });
-
-  const ordersForChart = await prisma.order.findMany({
-    where: {
-      tenantId: tenant.id,
-      status: { in: ["PAID", "SHIPPED", "DELIVERED"] },
-      createdAt: {
-        gte: startDate,
+      _count: {
+        id: true,
       },
-    },
-    select: {
-      totalAmount: true,
-      createdAt: true,
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
-  });
+    }),
 
-  // Convert the orders into daily buckets.
+    prisma.order.aggregate({
+      where: {
+        tenantId: tenant.id,
+        status: { in: ["PAID", "SHIPPED", "DELIVERED"] },
+        createdAt: {
+          gte: previousStartDate,
+          lt: startDate,
+        },
+      },
+      _sum: {
+        totalAmount: true,
+      },
+      _count: {
+        id: true,
+      },
+    }),
 
+    prisma.$queryRaw<{ date: Date; revenue: number; orders: bigint }[]>`
+  SELECT
+    DATE("createdAt") as date,
+    SUM("totalAmount") as revenue,
+    COUNT(*) as orders
+  FROM "Order"
+  WHERE
+    "tenantId" = ${tenant.id}
+    AND "status" IN ('PAID','SHIPPED','DELIVERED')
+    AND "createdAt" >= ${startDate}
+  GROUP BY DATE("createdAt")
+  ORDER BY DATE("createdAt") ASC
+  `,
+  ]);
+
+  // Creating the chartMap
   const chartMap: Record<
     string,
     { name: string; revenue: number; orders: number }
   > = {};
 
-  ordersForChart.forEach((order) => {
-    const date = new Date(order.createdAt).toLocaleDateString("en-US", {
+  groupedOrders.forEach((row) => {
+    const label = new Date(row.date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     });
-    if (!chartMap[date]) {
-      chartMap[date] = {
-        name: date,
-        revenue: 0,
-        orders: 0,
-      };
-    }
 
-    chartMap[date].revenue += order.totalAmount.toNumber();
-    chartMap[date].orders += 1;
+    chartMap[label] = {
+      name: label,
+      revenue: Number(row.revenue),
+      orders: Number(row.orders),
+    };
   });
 
   let chartData = [];
