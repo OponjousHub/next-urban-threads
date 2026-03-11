@@ -1,5 +1,6 @@
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
+import { calculateChange } from "@/lib/analytics/calculateChange";
 
 function getStartDate(range: string) {
   const now = new Date();
@@ -52,6 +53,9 @@ export async function GET(req: Request) {
     _sum: {
       totalAmount: true,
     },
+    _count: {
+      id: true,
+    },
   });
 
   const ordersForChart = await prisma.order.findMany({
@@ -95,22 +99,53 @@ export async function GET(req: Request) {
     chartMap[date].orders += 1;
   });
 
-  // Convert the object to Array
-  const chartData = Object.values(chartMap);
+  let chartData = [];
 
-  const revenue = current._sum.totalAmount?.toNumber?.() ?? 0;
-  const orders = current._count.id ?? 0;
+  for (let i = 0; i < days; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+
+    const label = d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+
+    chartData.push(
+      chartMap[label] || {
+        name: label,
+        revenue: 0,
+        orders: 0,
+      },
+    );
+  }
+
+  const currentRevenue = current._sum.totalAmount?.toNumber?.() ?? 0;
+  const currentOrders = current._count.id ?? 0;
   const previousRevenue = previous._sum.totalAmount?.toNumber?.() ?? 0;
+  const previousOrders = previous._count.id ?? 0;
 
-  const revenueChange =
-    previousRevenue > 0
-      ? ((revenue - previousRevenue) / previousRevenue) * 100
-      : 0;
+  const currentAvgOrder =
+    currentOrders > 0 ? currentRevenue / currentOrders : 0;
+  const previousAvgOrder =
+    previousOrders > 0 ? previousRevenue / previousOrders : 0;
+
+  const revenueStats = calculateChange(currentRevenue, previousRevenue);
+  const ordersStats = calculateChange(currentOrders, previousOrders);
+  const avgStats = calculateChange(currentAvgOrder, previousAvgOrder);
 
   return Response.json({
-    revenue,
-    orders,
-    revenueChange,
+    revenue: currentRevenue,
+    revenueChange: revenueStats.change,
+    revenueTrend: revenueStats.trend,
+
+    orders: currentOrders,
+    ordersChange: ordersStats.change,
+    ordersTrend: ordersStats.trend,
+
+    avgOrderValue: currentAvgOrder,
+    avgOrderChange: avgStats.change,
+    avgOrderTrend: avgStats.trend,
+
     chartData,
   });
 }
