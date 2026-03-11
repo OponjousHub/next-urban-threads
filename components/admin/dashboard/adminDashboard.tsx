@@ -22,7 +22,7 @@ export default function AdminDashboard() {
   }, []);
 
   if (!data) return <p>Loading dashboard...</p>;
-
+  console.log(data);
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -46,7 +46,7 @@ export default function AdminDashboard() {
         orderStatus={data.orderStatus?.pending}
         newCustomers={data.newCustomersToday}
       />
-      <DashboardSalesByCategory />
+      <DashboardSalesByCategory orderStatus={data.orderStatus} />
 
       <DashboardOrders />
 

@@ -2,15 +2,31 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
-const data = [
-  { name: "Paid", value: 60 },
-  { name: "Pending", value: 25 },
-  { name: "Cancelled", value: 15 },
-];
+const STATUS_COLORS: Record<string, string> = {
+  Paid: "#22c55e",
+  Pending: "#f59e0b",
+  Cancelled: "#ef4444",
+  Delivered: "#3b82f6",
+};
 
-const COLORS = ["#22c55e", "#f59e0b", "#ef4444"];
+export default function OrdersStatusChart({
+  orderStatus,
+}: {
+  orderStatus: {
+    paid: number;
+    pending: number;
+    cancelled: number;
+    delivered: number;
+  };
+}) {
+  const data = [
+    { name: "Paid", value: orderStatus.paid },
+    { name: "Pending", value: orderStatus.pending },
+    { name: "Cancelled", value: orderStatus.cancelled },
+    { name: "Delivered", value: orderStatus.delivered },
+  ].filter((item) => item.value > 0);
 
-export default function OrdersStatusChart() {
+  const totalOrders = data.reduce((sum, item) => sum + item.value, 0);
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
       {/* Header */}
@@ -29,8 +45,28 @@ export default function OrdersStatusChart() {
                 dataKey="value"
               >
                 {data.map((entry, index) => (
-                  <Cell key={index} fill={COLORS[index]} />
+                  <Cell key={entry.name} fill={STATUS_COLORS[entry.name]} />
                 ))}
+
+                <text
+                  x="50%"
+                  y="50%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className="text-lg font-semibold fill-gray-800"
+                >
+                  {totalOrders}
+                </text>
+
+                <text
+                  x="50%"
+                  y="62%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className="text-xs fill-gray-400"
+                >
+                  Orders
+                </text>
               </Pie>
 
               <Tooltip />
@@ -48,7 +84,7 @@ export default function OrdersStatusChart() {
               <div className="flex items-center gap-2">
                 <span
                   className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: COLORS[index] }}
+                  style={{ backgroundColor: STATUS_COLORS[item.name] }}
                 />
                 <span className="text-sm text-gray-600">{item.name}</span>
               </div>
