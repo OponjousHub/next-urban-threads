@@ -5,10 +5,10 @@ export default function DashboardSalesByCategory({
   orderStatus,
 }: {
   orderStatus: {
-    paid: number;
-    pending: number;
-    cancelled: number;
-    delivered: number;
+    paid: { count: number; revenue: number };
+    pending: { count: number; revenue: number };
+    cancelled: { count: number; revenue: number };
+    delivered: { count: number; revenue: number };
   };
 }) {
   return (

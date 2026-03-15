@@ -1,6 +1,7 @@
 "use client";
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { useRouter } from "next/navigation";
 
 const STATUS_COLORS: Record<string, string> = {
   Paid: "#22c55e",
@@ -9,21 +10,62 @@ const STATUS_COLORS: Record<string, string> = {
   Delivered: "#3b82f6",
 };
 
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+
+    return (
+      <div className="bg-white border border-gray-200 shadow-sm rounded-lg p-3 text-sm">
+        <p className="font-medium text-gray-800">{data.name}</p>
+        <p className="text-gray-600">{data.value} orders</p>
+        <p className="text-gray-500">
+          ₦{data.revenue.toLocaleString()} revenue
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
 export default function OrdersStatusChart({
   orderStatus,
 }: {
   orderStatus: {
-    paid: number;
-    pending: number;
-    cancelled: number;
-    delivered: number;
+    paid: { count: number; revenue: number };
+    pending: { count: number; revenue: number };
+    cancelled: { count: number; revenue: number };
+    delivered: { count: number; revenue: number };
   };
 }) {
+  const router = useRouter();
+  const STATUS_ROUTE: Record<string, string> = {
+    Paid: "/admin/orders?status=PAID",
+    Pending: "/admin/orders?status=PENDING",
+    Cancelled: "/admin/orders?status=CANCELLED",
+    Delivered: "/admin/orders?status=DELIVERED",
+  };
   const data = [
-    { name: "Paid", value: orderStatus.paid },
-    { name: "Pending", value: orderStatus.pending },
-    { name: "Cancelled", value: orderStatus.cancelled },
-    { name: "Delivered", value: orderStatus.delivered },
+    {
+      name: "Paid",
+      value: orderStatus.paid.count,
+      revenue: orderStatus.paid.revenue,
+    },
+    {
+      name: "Pending",
+      value: orderStatus.pending.count,
+      revenue: orderStatus.pending.revenue,
+    },
+    {
+      name: "Cancelled",
+      value: orderStatus.cancelled.count,
+      revenue: orderStatus.cancelled.revenue,
+    },
+    {
+      name: "Delivered",
+      value: orderStatus.delivered.count,
+      revenue: orderStatus.delivered.revenue,
+    },
   ].filter((item) => item.value > 0);
 
   const totalOrders = data.reduce((sum, item) => sum + item.value, 0);
@@ -45,7 +87,12 @@ export default function OrdersStatusChart({
                 dataKey="value"
               >
                 {data.map((entry, index) => (
-                  <Cell key={entry.name} fill={STATUS_COLORS[entry.name]} />
+                  <Cell
+                    key={entry.name}
+                    fill={STATUS_COLORS[entry.name]}
+                    className="cursor-pointer"
+                    onClick={() => router.push(STATUS_ROUTE[entry.name])}
+                  />
                 ))}
 
                 <text
@@ -69,7 +116,7 @@ export default function OrdersStatusChart({
                 </text>
               </Pie>
 
-              <Tooltip />
+              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -79,7 +126,8 @@ export default function OrdersStatusChart({
           {data.map((item, index) => (
             <div
               key={item.name}
-              className="flex items-center justify-between gap-4"
+              onClick={() => router.push(STATUS_ROUTE[item.name])}
+              className="flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50 translate rounded-md px-2 py-1"
             >
               <div className="flex items-center gap-2">
                 <span

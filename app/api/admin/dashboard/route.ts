@@ -90,10 +90,38 @@ export async function GET() {
       orderBy: {
         createdAt: "desc",
       },
-      include: {
-        user: true,
+
+      select: {
+        id: true,
+        totalAmount: true,
+        status: true,
+        createdAt: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
     });
+
+    /*--------------------- Transform RecentOrder to desired structure------------- */
+
+    const formattedRecentOrders = recentOrders.map((order) => ({
+      id: order.id,
+      customer: order.user?.name || "Guest Customer",
+      email: order.user?.email || "No email",
+      amount: Number(order.totalAmount),
+      status:
+        order.status === "PAID"
+          ? "Paid"
+          : order.status === "PENDING"
+            ? "Pending"
+            : order.status === "CANCELLED"
+              ? "Cancelled"
+              : "Paid",
+      date: order.createdAt,
+    }));
 
     /*--------------------- Returning Customers ------------- */
     const orderCounts: Record<string, number> = {};
@@ -109,38 +137,75 @@ export async function GET() {
     const returningCustomerRate =
       totalCustomers > 0 ? (returningCustomers / totalCustomers) * 100 : 0;
 
+    // const paidOrders = await prisma.order.count({
+    //   where: { status: "PAID", tenantId: tenant.id },
+    // });
+
+    // const pendingOrders = await prisma.order.count({
+    //   where: { status: "PENDING", tenantId: tenant.id },
+    // });
+
+    // const cancelledOrders = await prisma.order.count({
+    //   where: { status: "CANCELLED", tenantId: tenant.id },
+    // });
+    // const deliveredOrders = await prisma.order.count({
+    //   where: { status: "DELIVERED", tenantId: tenant.id },
+    // });
+
     /* -------------------- Order status -------------------- */
+    // Querying the database grouped by status
 
-    const paidOrders = await prisma.order.count({
-      where: { status: "PAID", tenantId: tenant.id },
+    const statusStats = await prisma.order.groupBy({
+      by: ["status"],
+      where: {
+        tenantId: tenant.id,
+      },
+      _count: {
+        id: true,
+      },
+      _sum: { totalAmount: true },
     });
 
-    const pendingOrders = await prisma.order.count({
-      where: { status: "PENDING", tenantId: tenant.id },
+    // Converting statusStats to desired structure
+
+    const orderStatus = {
+      paid: { count: 0, revenue: 0 },
+      pending: { count: 0, revenue: 0 },
+      cancelled: { count: 0, revenue: 0 },
+      delivered: { count: 0, revenue: 0 },
+    };
+
+    statusStats.forEach((row) => {
+      const revenue = row._sum.totalAmount?.toNumber?.() ?? 0;
+      const count = row._count.id ?? 0;
+
+      if (row.status === "PAID") {
+        orderStatus.paid = { count, revenue };
+      }
+
+      if (row.status === "PENDING") {
+        orderStatus.pending = { count, revenue };
+      }
+
+      if (row.status === "CANCELLED") {
+        orderStatus.cancelled = { count, revenue };
+      }
+
+      if (row.status === "DELIVERED") {
+        orderStatus.delivered = { count, revenue };
+      }
     });
 
-    const cancelledOrders = await prisma.order.count({
-      where: { status: "CANCELLED", tenantId: tenant.id },
-    });
-    const deliveredOrders = await prisma.order.count({
-      where: { status: "DELIVERED", tenantId: tenant.id },
-    });
-    console.log("LOW STOCK", lowStock);
     return NextResponse.json({
       revenue,
       totalOrders,
       totalCustomers,
       newCustomersToday,
       lowStock,
-      recentOrders,
+      formattedRecentOrders,
       conversionRate,
       returningCustomerRate,
-      orderStatus: {
-        paid: paidOrders,
-        pending: pendingOrders,
-        cancelled: cancelledOrders,
-        delivered: deliveredOrders,
-      },
+      orderStatus,
     });
   } catch (error) {
     console.error(error);

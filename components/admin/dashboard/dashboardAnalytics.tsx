@@ -7,9 +7,16 @@ export default function DashboardAnalytics({
   newCustomers,
 }: {
   lowstock: { id: string; name: string; stock: number }[];
-  orderStatus: number;
+  orderStatus: {
+    paid: { count: number; revenue: number };
+    pending: { count: number; revenue: number };
+    cancelled: { count: number; revenue: number };
+    delivered: { count: number; revenue: number };
+  };
   newCustomers: number;
 }) {
+  console.log("DASHBOARD Analytic Orderstatus", orderStatus);
+
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
       <div className="h-full">
