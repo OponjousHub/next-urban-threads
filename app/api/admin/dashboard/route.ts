@@ -123,6 +123,59 @@ export async function GET() {
       date: order.createdAt,
     }));
 
+    /* -------------------- Top products -------------------- */
+
+    const topProductsRaw = await prisma.orderItem.groupBy({
+      by: ["productId"],
+      where: {
+        order: {
+          tenantId: tenant.id,
+          status: {
+            in: ["PAID", "SHIPPED", "DELIVERED"],
+          },
+        },
+      },
+      _sum: {
+        quantity: true,
+        price: true,
+      },
+      orderBy: {
+        _sum: {
+          quantity: "desc",
+        },
+      },
+      take: 4,
+    });
+
+    // Fetch Products for the IDs
+
+    const productIds = topProductsRaw.map((p) => p.productId);
+
+    const productDetails = await prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+      },
+      select: {
+        id: true,
+        name: true,
+        images: true,
+      },
+    });
+
+    // Merge the result
+
+    const topProducts = topProductsRaw.map((item) => {
+      const product = productDetails.find((p) => p.id === item.productId);
+
+      return {
+        id: item.productId,
+        name: product?.name ?? "Unknown product",
+        image: product?.images ?? "/placeholder.png",
+        sales: item._sum.quantity ?? 0,
+        revenue: item._sum.price?.toNumber?.() ?? 0,
+      };
+    });
+
     /*--------------------- Returning Customers ------------- */
     const orderCounts: Record<string, number> = {};
 
@@ -136,21 +189,6 @@ export async function GET() {
 
     const returningCustomerRate =
       totalCustomers > 0 ? (returningCustomers / totalCustomers) * 100 : 0;
-
-    // const paidOrders = await prisma.order.count({
-    //   where: { status: "PAID", tenantId: tenant.id },
-    // });
-
-    // const pendingOrders = await prisma.order.count({
-    //   where: { status: "PENDING", tenantId: tenant.id },
-    // });
-
-    // const cancelledOrders = await prisma.order.count({
-    //   where: { status: "CANCELLED", tenantId: tenant.id },
-    // });
-    // const deliveredOrders = await prisma.order.count({
-    //   where: { status: "DELIVERED", tenantId: tenant.id },
-    // });
 
     /* -------------------- Order status -------------------- */
     // Querying the database grouped by status
@@ -206,6 +244,7 @@ export async function GET() {
       conversionRate,
       returningCustomerRate,
       orderStatus,
+      topProducts,
     });
   } catch (error) {
     console.error(error);

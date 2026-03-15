@@ -48,7 +48,10 @@ export default function AdminDashboard() {
       />
       <DashboardSalesByCategory orderStatus={data.orderStatus} />
 
-      <DashboardOrders recentOders={data.formattedRecentOrders} />
+      <DashboardOrders
+        recentOders={data.formattedRecentOrders}
+        products={data.topProducts}
+      />
 
       <DashboardInventory />
       <div className="grid grid-cols-1 lg:grid-cols-2 ">
