@@ -1,5 +1,7 @@
 "use client";
 
+import Avatar from "@/utils/avatar";
+
 interface Order {
   id: string;
   customer: string;
@@ -43,7 +45,7 @@ export default function RecentOrdersTable({ orders }: { orders: Order[] }) {
 
                 <td className="py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gray-200" />
+                    <Avatar name={order.customer} />
                     <div>
                       <p className="font-medium">{order.customer}</p>
                       <p className="text-xs text-gray-500">{order.email}</p>

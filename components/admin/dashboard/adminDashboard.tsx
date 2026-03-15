@@ -22,7 +22,7 @@ export default function AdminDashboard() {
   }, []);
 
   if (!data) return <p>Loading dashboard...</p>;
-
+  console.log("TOP ORDERSSS", data);
   return (
     <div className="space-y-8">
       {/* Header */}
