@@ -51,15 +51,20 @@ export default function AdminDashboard() {
       <DashboardOrders
         recentOders={data.formattedRecentOrders}
         products={data.topProducts}
+        // totalCustomer={data.totalCustomers}
+        // newCustomer={data.newCustomersToday}
       />
 
-      <DashboardInventory />
-      <div className="grid grid-cols-1 lg:grid-cols-2 ">
+      <DashboardInventory
+        totalCustomer={data.totalCustomers}
+        newCustomer={data.newCustomersToday}
+      />
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 ">
         <CustomerInsights
           totalCustomer={data.totalCustomers}
           newCustomer={data.newCustomersToday}
         />
-      </div>
+      </div> */}
     </div>
   );
 }

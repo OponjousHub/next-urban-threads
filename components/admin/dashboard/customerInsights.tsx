@@ -31,7 +31,7 @@ export default function CustomerInsights({
   ];
   console.log(totalCustomer, newCustomer);
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 ">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 h-full">
       {/* Header */}
       <h3 className="text-lg font-semibold mb-6">Customer Insights</h3>
 
