@@ -10,17 +10,16 @@ import {
   CartesianGrid,
 } from "recharts";
 
-const data = [
-  { category: "Hoodies", sales: 45 },
-  { category: "Jeans", sales: 25 },
-  { category: "Jackets", sales: 18 },
-  { category: "T-Shirts", sales: 12 },
-];
+interface Props {
+  data: {
+    category: string;
+    sales: number;
+  }[];
+}
 
-export default function SalesByCategoryChart() {
+export default function SalesByCategoryChart({ data }: Props) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      {/* Header */}
       <h3 className="text-lg font-semibold mb-6">Sales by Category</h3>
 
       <div className="h-64">

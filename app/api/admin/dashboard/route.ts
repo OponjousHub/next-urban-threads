@@ -35,9 +35,6 @@ export async function GET() {
     const totalOrders = await prisma.order.count({
       where: {
         tenantId: tenant.id,
-        status: {
-          in: ["PAID", "SHIPPED", "DELIVERED"],
-        },
       },
     });
     /* -------------------- Customers -------------------- */
@@ -221,6 +218,57 @@ export async function GET() {
       _sum: { totalAmount: true },
     });
 
+    /* -------------------- Sales by category -------------------- */
+
+    const salesByCategoryRaw = await prisma.orderItem.groupBy({
+      by: ["productId"],
+      where: {
+        order: {
+          tenantId: tenant.id,
+          status: {
+            in: ["PAID", "SHIPPED", "DELIVERED"],
+          },
+        },
+      },
+      _sum: {
+        quantity: true,
+      },
+    });
+
+    // Getting the product category
+
+    const productIDs = salesByCategoryRaw.map((i) => i.productId);
+
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIDs },
+      },
+      select: {
+        id: true,
+        category: true,
+      },
+    });
+
+    // Merge multiple products that may belong to same category
+    const categoryMap: Record<string, number> = {};
+
+    salesByCategoryRaw.forEach((item) => {
+      const product = products.find((p) => p.id === item.productId);
+
+      const category = product?.category ?? "Other";
+
+      const quantity = item._sum.quantity ?? 0;
+
+      categoryMap[category] = (categoryMap[category] || 0) + quantity;
+    });
+
+    const salesByCategory = Object.entries(categoryMap).map(
+      ([category, sales]) => ({
+        category,
+        sales,
+      }),
+    );
+
     // Converting statusStats to desired structure
 
     const orderStatus = {
@@ -295,6 +343,7 @@ export async function GET() {
       orderStatus,
       topProducts,
       activities,
+      salesByCategory,
     });
   } catch (error) {
     console.error(error);

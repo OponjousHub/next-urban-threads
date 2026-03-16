@@ -44,7 +44,10 @@ export default function AdminDashboard() {
         orderStatus={data.orderStatus}
         newCustomers={data.newCustomersToday}
       />
-      <DashboardSalesByCategory orderStatus={data.orderStatus} />
+      <DashboardSalesByCategory
+        orderStatus={data.orderStatus}
+        catData={data.salesByCategory}
+      />
 
       <DashboardOrders
         recentOders={data.formattedRecentOrders}
