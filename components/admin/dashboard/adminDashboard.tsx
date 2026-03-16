@@ -6,7 +6,6 @@ import DashboardAnalytics from "./dashboardAnalytics";
 import DashboardOrders from "./dashboardOrders";
 import DashboardInventory from "./dashboardInventory";
 import DashboardSalesByCategory from "./dashboardSalesByCategory";
-import CustomerInsights from "@/components/admin/dashboard/customerInsights";
 
 export default function AdminDashboard() {
   const [data, setData] = useState<any>(null);
@@ -22,7 +21,6 @@ export default function AdminDashboard() {
   }, []);
 
   if (!data) return <p>Loading dashboard...</p>;
-  console.log("TOP ORDERSSS", data);
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -51,20 +49,13 @@ export default function AdminDashboard() {
       <DashboardOrders
         recentOders={data.formattedRecentOrders}
         products={data.topProducts}
-        // totalCustomer={data.totalCustomers}
-        // newCustomer={data.newCustomersToday}
       />
 
       <DashboardInventory
         totalCustomer={data.totalCustomers}
         newCustomer={data.newCustomersToday}
+        activities={data.activities}
       />
-      {/* <div className="grid grid-cols-1 lg:grid-cols-2 ">
-        <CustomerInsights
-          totalCustomer={data.totalCustomers}
-          newCustomer={data.newCustomersToday}
-        />
-      </div> */}
     </div>
   );
 }

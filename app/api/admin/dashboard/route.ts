@@ -65,6 +65,24 @@ export async function GET() {
       },
     });
 
+    /* -------------------- Recent users -------------------- */
+
+    const recentUsers = await prisma.user.findMany({
+      where: {
+        role: "USER",
+        tenantId: tenant.id,
+      },
+      take: 3,
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+      },
+    });
+
     /* -------------------- Low stock -------------------- */
 
     const lowStock = await prisma.product.findMany({
@@ -146,7 +164,6 @@ export async function GET() {
       },
       take: 4,
     });
-
     // Fetch Products for the IDs
 
     const productIds = topProductsRaw.map((p) => p.productId);
@@ -234,6 +251,38 @@ export async function GET() {
       }
     });
 
+    /* -------------------- Recent Activity -------------------- */
+
+    const activities = [
+      // Orders
+      ...recentOrders.map((order) => ({
+        id: `order-${order.id}`,
+        type: "order",
+        message: `${order.user?.name || "Guest"} placed an order ($${Number(
+          order.totalAmount,
+        )})`,
+        time: order.createdAt,
+      })),
+
+      // New users
+      ...recentUsers.map((user) => ({
+        id: `user-${user.id}`,
+        type: "user",
+        message: `${user.name || "New user"} created an account`,
+        time: user.createdAt,
+      })),
+
+      // Low stock
+      ...lowStock.map((product) => ({
+        id: `stock-${product.id}`,
+        type: "stock",
+        message: `${product.name} stock running low (${product.stock} left)`,
+        time: new Date(),
+      })),
+    ]
+      .sort((a, b) => b.time.getTime() - a.time.getTime())
+      .slice(0, 6);
+
     return NextResponse.json({
       revenue,
       totalOrders,
@@ -245,6 +294,7 @@ export async function GET() {
       returningCustomerRate,
       orderStatus,
       topProducts,
+      activities,
     });
   } catch (error) {
     console.error(error);
