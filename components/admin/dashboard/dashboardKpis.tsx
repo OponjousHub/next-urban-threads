@@ -1,4 +1,5 @@
 import KpiCard from "../KpiCard";
+import { useState, useEffect } from "react";
 import {
   FiDollarSign,
   FiShoppingBag,
@@ -7,6 +8,7 @@ import {
   FiRepeat,
   FiBarChart2,
 } from "react-icons/fi";
+
 export default function DashboardAnalytics({
   totalRevenue,
   totalCustomer,
@@ -20,53 +22,72 @@ export default function DashboardAnalytics({
   conversion: number;
   returningCustomerRate: number;
 }) {
+  const [kpiData, setKPIData] = useState<any>(null);
+
+  // Fetch Kpi percentage change
+  useEffect(() => {
+    async function loadKpiChange() {
+      const res = await fetch("/api/admin/revenue");
+      const json = await res.json();
+      setKPIData(json);
+    }
+
+    loadKpiChange();
+  }, []);
+  console.log("KPIKPIKPI", kpiData);
+
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
       <KpiCard
         title="Total Revenue"
-        value={totalRevenue}
+        value={kpiData?.revenue}
         prefix="$"
-        change={8}
+        change={kpiData?.revenueChange}
         icon={<FiDollarSign />}
       />
 
       <KpiCard
         title="Average Order Value"
-        value={totalOrder > 0 ? totalRevenue / totalOrder : 0}
+        value={
+          kpiData?.avgOrderValue
+          // > 0
+          //   ? kpiData?.revenue / kpiData?.avgOrderValue
+          //   : 0
+        }
         prefix="$"
         decimals={2}
         icon={<FiBarChart2 />}
-        change={0}
+        change={kpiData?.avgOrderValue}
       />
 
       <KpiCard
         title="Total Orders"
-        value={totalOrder}
+        value={kpiData?.orders}
         icon={<FiShoppingBag />}
-        change={-5}
+        change={kpiData?.ordersChange}
       />
 
       <KpiCard
         title="Customers"
-        value={totalCustomer}
+        value={kpiData?.customers}
         icon={<FiUsers />}
-        change={12}
+        change={kpiData?.customersChange}
       />
       <KpiCard
         title="Conversion Rate"
-        value={conversion}
+        value={kpiData?.conversionRate}
         suffix="%"
-        change={0}
+        change={kpiData?.conversionChange}
         decimals={1}
         icon={<FiTrendingUp />}
       />
       <KpiCard
         title="Returning Customers"
-        value={returningCustomerRate}
+        value={kpiData?.returningCustomerRate}
         suffix="%"
         decimals={1}
         icon={<FiRepeat />}
-        change={0}
+        change={kpiData?.returningCustomerChange}
       />
     </section>
   );

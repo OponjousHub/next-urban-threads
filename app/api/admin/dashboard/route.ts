@@ -9,7 +9,7 @@ export async function GET() {
   }
 
   try {
-    /* -------------------- Revenue -------------------- */
+    /* -------------------- Order -------------------- */
 
     const orders = await prisma.order.findMany({
       where: {
@@ -25,19 +25,7 @@ export async function GET() {
       },
     });
 
-    const revenue = orders.reduce(
-      (sum, o) => sum + o.totalAmount.toNumber(),
-      0,
-    );
-
-    /* -------------------- Orders count -------------------- */
-
-    const totalOrders = await prisma.order.count({
-      where: {
-        tenantId: tenant.id,
-      },
-    });
-    /* -------------------- Customers -------------------- */
+    // /* -------------------- Customers -------------------- */
 
     const totalCustomers = await prisma.user.count({
       where: { role: "USER", tenantId: tenant.id },
@@ -45,12 +33,6 @@ export async function GET() {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    /*--------------------- Coversion Rate -------------------*/
-
-    const uniqueBuyers = new Set(orders.map((o) => o.userId)).size;
-    const conversionRate =
-      totalCustomers > 0 ? (uniqueBuyers / totalCustomers) * 100 : 0;
 
     /*--------------------- Today New Customers -------------------*/
 
@@ -190,7 +172,7 @@ export async function GET() {
       };
     });
 
-    /*--------------------- Returning Customers ------------- */
+    // /*--------------------- Returning Customers ------------- */
     const orderCounts: Record<string, number> = {};
 
     orders.forEach((o) => {
@@ -332,18 +314,14 @@ export async function GET() {
       .slice(0, 6);
 
     return NextResponse.json({
-      revenue,
-      totalOrders,
-      totalCustomers,
       newCustomersToday,
       lowStock,
       formattedRecentOrders,
-      conversionRate,
-      returningCustomerRate,
       orderStatus,
       topProducts,
       activities,
       salesByCategory,
+      totalCustomers,
     });
   } catch (error) {
     console.error(error);

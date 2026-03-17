@@ -25,23 +25,27 @@ export async function GET(req: Request) {
   const tenant = await getDefaultTenant();
   if (!tenant) throw new Error("Default tenant not found");
 
-  const [current, previous, groupedOrders] = await Promise.all([
+  const [
+    currentOrdersData,
+    previousOrdersData,
+    currentCustomers,
+    previousCustomers,
+    groupedOrders,
+    currentReturningRaw,
+    previousReturningRaw,
+  ] = await Promise.all([
+    // Current period orders
     prisma.order.aggregate({
       where: {
         tenantId: tenant.id,
         status: { in: ["PAID", "SHIPPED", "DELIVERED"] },
-        createdAt: {
-          gte: startDate,
-        },
+        createdAt: { gte: startDate },
       },
-      _sum: {
-        totalAmount: true,
-      },
-      _count: {
-        id: true,
-      },
+      _sum: { totalAmount: true },
+      _count: { id: true },
     }),
 
+    // Previous period orders
     prisma.order.aggregate({
       where: {
         tenantId: tenant.id,
@@ -51,27 +55,72 @@ export async function GET(req: Request) {
           lt: startDate,
         },
       },
-      _sum: {
-        totalAmount: true,
+      _sum: { totalAmount: true },
+      _count: { id: true },
+    }),
+
+    // Current customers
+    prisma.user.count({
+      where: {
+        tenantId: tenant.id,
+        role: "USER",
+        createdAt: { gte: startDate },
+      },
+    }),
+
+    // Previous customers
+    prisma.user.count({
+      where: {
+        tenantId: tenant.id,
+        role: "USER",
+        createdAt: {
+          gte: previousStartDate,
+          lt: startDate,
+        },
+      },
+    }),
+
+    // Chart data
+    prisma.$queryRaw<{ date: Date; revenue: number; orders: bigint }[]>`
+    SELECT
+      DATE("createdAt") as date,
+      SUM("totalAmount") as revenue,
+      COUNT(*) as orders
+    FROM "Order"
+    WHERE
+      "tenantId" = ${tenant.id}
+      AND "status" IN ('PAID','SHIPPED','DELIVERED')
+      AND "createdAt" >= ${startDate}
+    GROUP BY DATE("createdAt")
+    ORDER BY DATE("createdAt") ASC
+  `,
+
+    // Current returning customers
+    prisma.order.groupBy({
+      by: ["userId"],
+      where: {
+        tenantId: tenant.id,
+        createdAt: { gte: startDate },
       },
       _count: {
         id: true,
       },
     }),
 
-    prisma.$queryRaw<{ date: Date; revenue: number; orders: bigint }[]>`
-  SELECT
-    DATE("createdAt") as date,
-    SUM("totalAmount") as revenue,
-    COUNT(*) as orders
-  FROM "Order"
-  WHERE
-    "tenantId" = ${tenant.id}
-    AND "status" IN ('PAID','SHIPPED','DELIVERED')
-    AND "createdAt" >= ${startDate}
-  GROUP BY DATE("createdAt")
-  ORDER BY DATE("createdAt") ASC
-  `,
+    // Previous returning customers
+    prisma.order.groupBy({
+      by: ["userId"],
+      where: {
+        tenantId: tenant.id,
+        createdAt: {
+          gte: previousStartDate,
+          lt: startDate,
+        },
+      },
+      _count: {
+        id: true,
+      },
+    }),
   ]);
 
   // Creating the chartMap
@@ -113,32 +162,88 @@ export async function GET(req: Request) {
     );
   }
 
-  const currentRevenue = current._sum.totalAmount?.toNumber?.() ?? 0;
-  const currentOrders = current._count.id ?? 0;
-  const previousRevenue = previous._sum.totalAmount?.toNumber?.() ?? 0;
-  const previousOrders = previous._count.id ?? 0;
+  // DERIVING VALUES FROM PROMISE>ALL VALUES
+
+  const currentRevenue = currentOrdersData._sum.totalAmount?.toNumber?.() ?? 0;
+
+  const previousRevenue =
+    previousOrdersData._sum.totalAmount?.toNumber?.() ?? 0;
+
+  const currentOrders = currentOrdersData._count.id ?? 0;
+  const previousOrders = previousOrdersData._count.id ?? 0;
+
+  // DERIVE KPIs
 
   const currentAvgOrder =
     currentOrders > 0 ? currentRevenue / currentOrders : 0;
+
   const previousAvgOrder =
     previousOrders > 0 ? previousRevenue / previousOrders : 0;
+
+  // CALCULATE CONVERSION RATE
+
+  const currentConversion =
+    currentCustomers > 0 ? (currentOrders / currentCustomers) * 100 : 0;
+
+  const previousConversion =
+    previousCustomers > 0 ? (previousOrders / previousCustomers) * 100 : 0;
 
   const revenueStats = calculateChange(currentRevenue, previousRevenue);
   const ordersStats = calculateChange(currentOrders, previousOrders);
   const avgStats = calculateChange(currentAvgOrder, previousAvgOrder);
 
+  const customerStats = calculateChange(currentCustomers, previousCustomers);
+
+  const conversionStats = calculateChange(
+    currentConversion,
+    previousConversion,
+  );
+
+  // Calculating returning customers - extracting only customers with more than 1 order
+
+  const currentReturningCustomers = currentReturningRaw.filter(
+    (u) => u._count.id > 1,
+  ).length;
+
+  const previousReturningCustomers = previousReturningRaw.filter(
+    (u) => u._count.id > 1,
+  ).length;
+
+  // Convert to rate (percentage)
+
+  const currentReturningRate =
+    currentCustomers > 0
+      ? (currentReturningCustomers / currentCustomers) * 100
+      : 0;
+
+  const previousReturningRate =
+    previousCustomers > 0
+      ? (previousReturningCustomers / previousCustomers) * 100
+      : 0;
+
+  // Calculate returning customer change
+  const returningStats = calculateChange(
+    currentReturningRate,
+    previousReturningRate,
+  );
   return Response.json({
     revenue: currentRevenue,
     revenueChange: revenueStats.change,
-    revenueTrend: revenueStats.trend,
 
     orders: currentOrders,
     ordersChange: ordersStats.change,
-    ordersTrend: ordersStats.trend,
 
     avgOrderValue: currentAvgOrder,
     avgOrderChange: avgStats.change,
-    avgOrderTrend: avgStats.trend,
+
+    customers: currentCustomers,
+    customersChange: customerStats.change,
+
+    conversionRate: currentConversion,
+    conversionChange: conversionStats.change,
+
+    returningCustomerRate: currentReturningRate,
+    returningCustomerChange: returningStats.change,
 
     chartData,
   });
