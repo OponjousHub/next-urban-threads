@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/admin/adminSidebar";
 import AdminTopbar from "./adminTopbar";
+
+type User = {
+  name: string;
+  image?: string | null;
+};
 
 export default function AdminLayout({
   children,
@@ -11,6 +16,20 @@ export default function AdminLayout({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<User>();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const user = await fetch(
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/users/me`,
+        {
+          cache: "no-store",
+        },
+      ).then((res) => res.json());
+      setUser(user);
+    };
+    getUser();
+  }, []);
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
@@ -22,7 +41,7 @@ export default function AdminLayout({
 
       {/* Right side */}
       <div className="flex flex-col flex-1">
-        <AdminTopbar toggle={() => setMobileOpen(!mobileOpen)} />
+        <AdminTopbar toggle={() => setMobileOpen(!mobileOpen)} user={user} />
 
         <main className="flex-1  mb-10 overflow-y-auto p-6 bg-gray-50">
           {children}

@@ -43,7 +43,6 @@ export async function getActivities(tenantId: string) {
   ]
     .sort((a, b) => b.time.getTime() - a.time.getTime())
     .slice(0, 6);
-  //   console.log("ACTIVITIIIIEEESSS============", activities);
 
   return activities;
 }

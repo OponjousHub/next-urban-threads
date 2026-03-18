@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { getActivities } from "@/lib/analytics/getActivities";
+import { getRecentOrders } from "@/lib/data/orders";
+import { getLowStockProducts } from "@/lib/data/products";
 
 export async function GET() {
   const tenant = await getDefaultTenant();
@@ -11,22 +13,9 @@ export async function GET() {
 
   try {
     /* -------------------- Order -------------------- */
+    const orders = await getRecentOrders(tenant.id);
 
-    const orders = await prisma.order.findMany({
-      where: {
-        status: {
-          in: ["PAID", "SHIPPED", "DELIVERED"],
-        },
-        tenantId: tenant.id,
-      },
-      select: {
-        userId: true,
-        totalAmount: true,
-        createdAt: true,
-      },
-    });
-
-    // /* -------------------- Customers -------------------- */
+    /* -------------------- Customers -------------------- */
 
     const totalCustomers = await prisma.user.count({
       where: { role: "USER", tenantId: tenant.id },
@@ -47,18 +36,7 @@ export async function GET() {
 
     /* -------------------- Low stock -------------------- */
 
-    const lowStock = await prisma.product.findMany({
-      where: {
-        stock: { lt: 5 },
-        tenantId: tenant.id,
-      },
-      select: {
-        id: true,
-        name: true,
-        stock: true,
-      },
-      take: 5,
-    });
+    const lowStock = await getLowStockProducts(tenant.id);
 
     /* -------------------- Recent orders -------------------- */
 
