@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { getActivities } from "@/lib/analytics/getActivities";
 
 export async function GET() {
   const tenant = await getDefaultTenant();
@@ -41,24 +42,6 @@ export async function GET() {
         role: "USER",
         tenantId: tenant.id,
         createdAt: { gte: today },
-      },
-    });
-
-    /* -------------------- Recent users -------------------- */
-
-    const recentUsers = await prisma.user.findMany({
-      where: {
-        role: "USER",
-        tenantId: tenant.id,
-      },
-      take: 3,
-      orderBy: {
-        createdAt: "desc",
-      },
-      select: {
-        id: true,
-        name: true,
-        createdAt: true,
       },
     });
 
@@ -179,12 +162,12 @@ export async function GET() {
       orderCounts[o.userId] = (orderCounts[o.userId] || 0) + 1;
     });
 
-    const returningCustomers = Object.values(orderCounts).filter(
-      (count) => count > 1,
-    ).length;
+    // const returningCustomers = Object.values(orderCounts).filter(
+    //   (count) => count > 1,
+    // ).length;
 
-    const returningCustomerRate =
-      totalCustomers > 0 ? (returningCustomers / totalCustomers) * 100 : 0;
+    // const returningCustomerRate =
+    //   totalCustomers > 0 ? (returningCustomers / totalCustomers) * 100 : 0;
 
     /* -------------------- Order status -------------------- */
     // Querying the database grouped by status
@@ -283,35 +266,34 @@ export async function GET() {
 
     /* -------------------- Recent Activity -------------------- */
 
-    const activities = [
-      // Orders
-      ...recentOrders.map((order) => ({
-        id: `order-${order.id}`,
-        type: "order",
-        message: `${order.user?.name || "Guest"} placed an order ($${Number(
-          order.totalAmount,
-        )})`,
-        time: order.createdAt,
-      })),
+    // const activities = [
+    //   // Orders
+    //   ...recentOrders.map((order) => ({
+    //     id: `order-${order.id}`,
+    //     type: "order",
+    //     message: `${order.user?.name || "Guest"} placed an order ($${Number(
+    //       order.totalAmount,
+    //     )})`,
+    //     time: order.createdAt,
+    //   })),
 
-      // New users
-      ...recentUsers.map((user) => ({
-        id: `user-${user.id}`,
-        type: "user",
-        message: `${user.name || "New user"} created an account`,
-        time: user.createdAt,
-      })),
+    //   // New users
+    //   ...recentUsers.map((user) => ({
+    //     id: `user-${user.id}`,
+    //     type: "user",
+    //     message: `${user.name || "New user"} created an account`,
+    //     time: user.createdAt,
+    //   })),
 
-      // Low stock
-      ...lowStock.map((product) => ({
-        id: `stock-${product.id}`,
-        type: "stock",
-        message: `${product.name} stock running low (${product.stock} left)`,
-        time: new Date(),
-      })),
-    ]
-      .sort((a, b) => b.time.getTime() - a.time.getTime())
-      .slice(0, 6);
+    //   // Low stock
+    //   ...lowStock.map((product) => ({
+    //     id: `stock-${product.id}`,
+    //     type: "stock",
+    //     message: `${product.name} stock running low (${product.stock} left)`,
+    //     time: new Date(),
+    //   })),
+    // ]
+    const activities = await getActivities(tenant.id);
 
     return NextResponse.json({
       newCustomersToday,

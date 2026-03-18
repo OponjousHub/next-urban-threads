@@ -1,10 +1,28 @@
 import { FiBell, FiSearch, FiMenu } from "react-icons/fi";
+import { useState, useEffect } from "react";
 
 interface Props {
   toggle: () => void;
 }
 
+type Activity = {
+  id: string;
+  type: "order" | "user" | "stock";
+  message: string;
+  time: string;
+};
+
 export default function AdminTopbar({ toggle }: Props) {
+  const [open, setOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Activity[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/activities")
+      .then((res) => res.json())
+      .then(setNotifications);
+  }, []);
+  console.log("NOTIFICATIONS============", notifications);
+
   return (
     <header className="h-16 bg-white border-b border-gray-100 px-6 flex items-center justify-between">
       <button
@@ -25,10 +43,10 @@ export default function AdminTopbar({ toggle }: Props) {
       {/* Right Section */}
       <div className="flex items-center gap-6">
         {/* Notifications */}
-        <button className="relative">
+        <button className="relative" onClick={() => setOpen(!open)}>
           <FiBell size={20} className="text-gray-600" />
           <span className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
-            3
+            {notifications?.length}
           </span>
         </button>
 
@@ -38,6 +56,15 @@ export default function AdminTopbar({ toggle }: Props) {
           <span className="text-sm font-medium">Admin</span>
         </div>
       </div>
+      {open && (
+        <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-xl p-4">
+          {notifications?.map((n) => (
+            <div key={n.id} className="text-sm border-b py-2">
+              {n.message}
+            </div>
+          ))}
+        </div>
+      )}
     </header>
   );
 }
