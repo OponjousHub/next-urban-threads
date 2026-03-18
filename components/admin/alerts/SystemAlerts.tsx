@@ -16,8 +16,6 @@ export default function DashboardAlerts({
   };
   newCustomers: number;
 }) {
-  console.log("orderStatus.pending?.count", orderStatus.pending?.count);
-  console.log("orderStatus", orderStatus);
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 h-full">
       <h3 className="text-lg font-semibold mb-6">Alerts</h3>
@@ -50,7 +48,7 @@ export default function DashboardAlerts({
         )}
 
         {/* Pending orders */}
-        {orderStatus.pending?.count > 0 && (
+        {orderStatus?.pending?.count > 0 && (
           <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
             <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-yellow-100 text-yellow-600">
               <FiAlertCircle />
