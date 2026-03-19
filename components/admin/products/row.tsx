@@ -1,26 +1,27 @@
+import { FiEdit, FiTrash2 } from "react-icons/fi";
+
 export default function Row({ product }: { product: any }) {
   const stockStatus =
     product.stock === 0 ? "out" : product.stock <= 5 ? "low" : "ok";
 
   return (
-    <tr className="border-t hover:bg-gray-50 transition">
+    <tr className="border-t hover:bg-gray-50 transition h-16">
+      {/* fixed row height */}
       {/* Product */}
       <td className="p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 h-full">
           <div className="w-10 h-10 rounded-lg bg-gray-200" />
 
-          <div>
+          <div className="flex flex-col justify-center h-full">
             <p className="font-medium">{product.name}</p>
             <p className="text-xs text-gray-500">ID: {product.id}</p>
           </div>
         </div>
       </td>
-
       {/* Price */}
-      <td>₦{product.price.toLocaleString()}</td>
-
+      <td className="align-middle">₦{product.price.toLocaleString()}</td>
       {/* Stock */}
-      <td>
+      <td className="align-middle">
         <span
           className={`text-xs px-2 py-1 rounded-full ${
             stockStatus === "out"
@@ -37,9 +38,8 @@ export default function Row({ product }: { product: any }) {
               : product.stock}
         </span>
       </td>
-
       {/* Status */}
-      <td>
+      <td className="align-middle">
         <span
           className={`text-xs px-2 py-1 rounded-full ${
             product.status === "active"
@@ -50,10 +50,16 @@ export default function Row({ product }: { product: any }) {
           {product.status}
         </span>
       </td>
-
       {/* Actions */}
-      <td className="text-right pr-4">
-        <button className="text-sm text-gray-600 hover:text-black">Edit</button>
+      <td className="pr-4 align-middle">
+        <div className="flex justify-end items-center gap-2 h-full">
+          <button className="text-gray-600 hover:text-blue-600">
+            <FiEdit size={18} />
+          </button>
+          <button className="text-gray-600 hover:text-red-600">
+            <FiTrash2 size={18} />
+          </button>
+        </div>
       </td>
     </tr>
   );

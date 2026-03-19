@@ -96,13 +96,18 @@ function SidebarItem({
   collapsed: boolean;
   pathname: string;
 }) {
-  const active = pathname === href || pathname.startsWith(href + "/");
+  const active =
+    href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
 
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-3 py-3 rounded-xl duration-200 group transform transition-transform
-        ${active ? "bg-indigo-100 text-indigo-700" : "hover:bg-indigo-50 hover:text-indigo-600"}
+      className={`flex items-center gap-3 px-3 py-3 rounded-xl duration-200
+        ${
+          active
+            ? "bg-indigo-100 text-indigo-700"
+            : "hover:bg-indigo-50 hover:text-indigo-600"
+        }
       `}
     >
       {icon}

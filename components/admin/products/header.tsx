@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Header() {
   return (
     <div className="flex items-center justify-between">
@@ -14,9 +16,11 @@ export default function Header() {
           className="border rounded-lg px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-black/10"
         />
 
-        <button className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:opacity-90">
-          + Add Product
-        </button>
+        <Link href="/admin/products/new">
+          <button className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:opacity-90">
+            + Add Product
+          </button>
+        </Link>
       </div>
     </div>
   );
