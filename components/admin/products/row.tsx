@@ -1,4 +1,4 @@
-function Row({ product }: { product: any }) {
+export default function Row({ product }: { product: any }) {
   const stockStatus =
     product.stock === 0 ? "out" : product.stock <= 5 ? "low" : "ok";
 

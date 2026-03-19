@@ -1,4 +1,6 @@
-function ProductsTable({ products }: { products: any[] }) {
+import Row from "./row";
+
+export default function ProductsTable({ products }: { products: any[] }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       <table className="w-full text-sm">
