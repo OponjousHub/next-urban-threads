@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react";
 import DashboardKpis from "@/components/admin/dashboard/dashboardKpis";
-import DashboardAnalytics from "./dashboardAnalytics";
-import DashboardOrders from "./dashboardOrders";
-import DashboardInventory from "./dashboardInventory";
-import DashboardSalesByCategory from "./dashboardSalesByCategory";
+import DashboardAnalytics from "../../../components/admin/dashboard/dashboardAnalytics";
+import DashboardOrders from "../../../components/admin/dashboard/dashboardOrders";
+import DashboardInventory from "../../../components/admin/dashboard/dashboardInventory";
+import DashboardSalesByCategory from "../../../components/admin/dashboard/dashboardSalesByCategory";
 
 export default function AdminDashboard() {
-  // const [data, setData] = useState<any>(null);
   const [data, setData] = useState({
     revenue: 0,
     totalCustomers: 0,
