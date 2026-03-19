@@ -1,14 +1,21 @@
-"use client";
-
-import { mockProducts } from "@/mock/products";
 import Header from "@/components/admin/products/header";
 import ProductsTable from "@/components/admin/products/product-table";
+import { useEffect, useState } from "react";
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  //   const [loading, setLoading] = useState(true);
+
+  const res = await fetch("http://localhost:3000/api/products", {
+    cache: "no-store",
+  });
+
+  const data = await res.json();
+
   return (
     <div className="space-y-6">
       <Header />
-      <ProductsTable products={mockProducts} />
+
+      <ProductsTable products={data.products || []} />
     </div>
   );
 }

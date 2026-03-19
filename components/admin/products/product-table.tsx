@@ -1,19 +1,17 @@
 import Row from "./row";
 
 export default function ProductsTable({ products }: { products: any[] }) {
+  if (!products.length) {
+    return (
+      <div className="bg-white rounded-xl p-10 text-center text-gray-500">
+        No products found
+      </div>
+    );
+  }
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
       <table className="w-full text-sm">
-        <thead className="bg-gray-50 text-gray-600">
-          <tr>
-            <th className="text-left p-4">Product</th>
-            <th className="text-left">Price</th>
-            <th className="text-left">Stock</th>
-            <th className="text-left">Status</th>
-            <th className="text-right pr-4">Actions</th>
-          </tr>
-        </thead>
-
+        <thead>...</thead>
         <tbody>
           {products.map((product) => (
             <Row key={product.id} product={product} />
