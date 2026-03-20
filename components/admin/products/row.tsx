@@ -13,7 +13,10 @@ export default function Row({ product }: { product: any }) {
     <tr className="border-t hover:bg-gray-50 transition h-16">
       {/* fixed row height */}
       {/* Product */}
-      <td className="p-4">
+      <td
+        className="p-4 cursor-pointer"
+        onClick={() => router.push(`/admin/products/${product.id}`)}
+      >
         <div className="flex items-center gap-3 h-full">
           {product.images?.[0] ? (
             <img
