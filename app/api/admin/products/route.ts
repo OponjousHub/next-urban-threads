@@ -19,6 +19,9 @@ export async function GET() {
 
   try {
     const products = await prisma.product.findMany({
+      where: {
+        deletedAt: null,
+      },
       orderBy: { createdAt: "desc" },
     });
 

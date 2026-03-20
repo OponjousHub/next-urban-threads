@@ -1,12 +1,66 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { AdminToast } from "@/components/ui/adminToast";
+import { useState } from "react";
 
 export default function ProductDetails({ product }: { product: any }) {
+  const [deleting, setDeleting] = useState(false);
   const router = useRouter();
 
   const stockStatus =
     product.stock === 0 ? "out" : product.stock <= 5 ? "low" : "ok";
+
+  async function handleDelete() {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this product?",
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      setDeleting(true);
+      const res = await fetch(`/api/admin/products/${product.id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.custom(
+          <AdminToast
+            type="error"
+            title="Delete failed"
+            description={data?.message || "Something went wrong"}
+          />,
+          { duration: 6000 },
+        );
+        return;
+      }
+
+      toast.custom(
+        <AdminToast
+          type="success"
+          title="Product deleted"
+          description="The product has been removed successfully"
+        />,
+        { duration: 4000 },
+      );
+      setDeleting(false);
+      router.push("/admin/products");
+    } catch (err) {
+      setDeleting(false);
+      toast.custom(
+        <AdminToast
+          type="error"
+          title="Delete failed"
+          description="Network error. Try again."
+        />,
+        { duration: 6000 },
+      );
+    }
+  }
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
@@ -25,8 +79,11 @@ export default function ProductDetails({ product }: { product: any }) {
             Edit
           </button>
 
-          <button className="px-4 py-2 bg-red-600 text-white rounded-md">
-            Delete
+          <button
+            className="bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
+            onClick={handleDelete}
+          >
+            {deleting ? "Deleting..." : "Delete"}
           </button>
         </div>
       </div>

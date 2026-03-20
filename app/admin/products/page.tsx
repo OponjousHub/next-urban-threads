@@ -1,6 +1,5 @@
 import Header from "@/components/admin/products/header";
 import ProductsTable from "@/components/admin/products/product-table";
-import { useEffect, useState } from "react";
 
 export default async function ProductsPage() {
   //   const [loading, setLoading] = useState(true);
