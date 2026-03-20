@@ -5,6 +5,7 @@ import { ProductImageUploader } from "./productImageUploader";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 const CATEGORIES = ["MEN", "WOMEN", "ACCESSORIES"];
@@ -25,6 +26,10 @@ type ZodFieldErrors = {
   fieldErrors?: Record<string, string[]>;
 };
 
+type ProductFormProps = {
+  initialData?: any;
+};
+
 function Section({ title, children }: any) {
   return (
     <div className="border rounded-2xl p-6 bg-white shadow-sm">
@@ -34,21 +39,24 @@ function Section({ title, children }: any) {
   );
 }
 
-export function ProductForm() {
-  const [images, setImages] = useState<string[]>([]);
+export function ProductForm({ initialData }: ProductFormProps) {
+  const [images, setImages] = useState<string[]>(initialData?.images || []);
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    name: "",
-    description: "",
-    price: "",
-    stock: "",
-    category: "MEN",
-    subCategory: "",
-    sizes: [] as string[],
-    colours: [] as string[],
-    featured: false,
+    name: initialData?.name || "",
+    description: initialData?.description || "",
+    price: initialData?.price?.toString() || "",
+    stock: initialData?.stock?.toString() || "",
+    category: initialData?.category || "MEN",
+    subCategory: initialData?.subCategory || "",
+    sizes: initialData?.sizes || [],
+    colours: initialData?.colours || [],
+    featured: initialData?.featured || false,
   });
+
+  const router = useRouter();
+  const isEdit = !!initialData;
 
   function toggleSize(size: string) {
     setForm((prev) => ({
@@ -86,12 +94,17 @@ export function ProductForm() {
         images,
       };
 
-      const response = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        isEdit ? `/api/products/${initialData.id}` : "/api/products",
+        {
+          method: isEdit ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        },
+      );
 
       const data = await response.json();
 
@@ -145,6 +158,9 @@ export function ProductForm() {
         featured: false,
       });
       setImages([]);
+      if (isEdit) {
+        router.push("/admin/products");
+      }
     } catch (err) {
       toast.custom(
         <AdminToast
@@ -163,7 +179,9 @@ export function ProductForm() {
     <div className="min-h-screen bg-gray-50 py-10">
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold">Create New Product</h1>
+          <h1 className="text-2xl font-semibold">
+            {initialData ? "Edit Product" : "Create Product"}
+          </h1>
           <p className="text-sm text-gray-500">
             Add a new product to your store
           </p>
@@ -346,7 +364,13 @@ export function ProductForm() {
                   disabled={loading}
                   className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700"
                 >
-                  {loading ? "Saving..." : "Save Product"}
+                  {loading
+                    ? isEdit
+                      ? "Updating..."
+                      : "Saving..."
+                    : isEdit
+                      ? "Update Product"
+                      : "Save Product"}
                 </button>
               </div>
             </div>
