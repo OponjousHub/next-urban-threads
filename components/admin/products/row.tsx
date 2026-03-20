@@ -10,7 +10,15 @@ export default function Row({ product }: { product: any }) {
       {/* Product */}
       <td className="p-4">
         <div className="flex items-center gap-3 h-full">
-          <div className="w-10 h-10 rounded-lg bg-gray-200" />
+          {product.images?.[0] ? (
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-10 h-10 rounded-lg object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-lg bg-gray-200" />
+          )}
 
           <div className="flex flex-col justify-center h-full">
             <p className="font-medium">{product.name}</p>
@@ -38,18 +46,7 @@ export default function Row({ product }: { product: any }) {
               : product.stock}
         </span>
       </td>
-      {/* Status */}
-      <td className="align-middle">
-        <span
-          className={`text-xs px-2 py-1 rounded-full ${
-            product.status === "active"
-              ? "bg-green-100 text-green-600"
-              : "bg-gray-200 text-gray-600"
-          }`}
-        >
-          {product.status}
-        </span>
-      </td>
+
       {/* Actions */}
       <td className="pr-4 align-middle">
         <div className="flex justify-end items-center gap-2 h-full">
