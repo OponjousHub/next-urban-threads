@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProductImageUploader } from "./productImageUploader";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
@@ -30,6 +30,18 @@ type ProductFormProps = {
   initialData?: any;
 };
 
+type ProductFormState = {
+  name: string;
+  description: string;
+  price: string;
+  stock: string;
+  category: string;
+  subCategory: string;
+  sizes: string[];
+  colours: string[];
+  featured: boolean;
+};
+
 function Section({ title, children }: any) {
   return (
     <div className="border rounded-2xl p-6 bg-white shadow-sm">
@@ -40,23 +52,43 @@ function Section({ title, children }: any) {
 }
 
 export function ProductForm({ initialData }: ProductFormProps) {
-  const [images, setImages] = useState<string[]>(initialData?.images || []);
-  const [loading, setLoading] = useState(false);
-
-  const [form, setForm] = useState({
-    name: initialData?.name || "",
-    description: initialData?.description || "",
-    price: initialData?.price?.toString() || "",
-    stock: initialData?.stock?.toString() || "",
-    category: initialData?.category || "MEN",
-    subCategory: initialData?.subCategory || "",
-    sizes: initialData?.sizes || [],
-    colours: initialData?.colours || [],
-    featured: initialData?.featured || false,
-  });
-
   const router = useRouter();
   const isEdit = !!initialData;
+
+  // ✅ Initialize form state from initialData
+  const [form, setForm] = useState<ProductFormState>({
+    name: "",
+    description: "",
+    price: "",
+    stock: "",
+    category: "MEN",
+    subCategory: "",
+    sizes: [],
+    colours: [],
+    featured: false,
+  });
+
+  const [images, setImages] = useState<string[]>([]);
+
+  const [loading, setLoading] = useState(false);
+
+  // Fill the form and images from initialData if editing
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        name: initialData.name || "",
+        description: initialData.description || "",
+        price: initialData.price?.toString() || "",
+        stock: initialData.stock?.toString() || "",
+        category: initialData.category || "MEN",
+        subCategory: initialData.subCategory || "",
+        sizes: initialData.sizes || [],
+        colours: initialData.colours || [],
+        featured: initialData.featured || false,
+      });
+      setImages(initialData.images || []);
+    }
+  }, [initialData]);
 
   function toggleSize(size: string) {
     setForm((prev) => ({
@@ -93,9 +125,12 @@ export function ProductForm({ initialData }: ProductFormProps) {
         stock: Number(form.stock),
         images,
       };
-
+      console.log("ETIT ID", initialData.id);
+      console.log("PAYLOAD", payload);
       const response = await fetch(
-        isEdit ? `/api/products/${initialData.id}` : "/api/products",
+        isEdit
+          ? `/api/admin/products/${initialData.id}`
+          : "/api/admin/products",
         {
           method: isEdit ? "PATCH" : "POST",
           headers: {
@@ -114,7 +149,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
           const firstError = fieldErrors
             ? Object.values(fieldErrors)[0]?.[0]
             : undefined;
-
           toast.custom(
             <AdminToast
               type="error"
@@ -128,7 +162,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
             <AdminToast
               type="error"
               title="Upload failed!"
-              description={data?.message || "Failed to create product"}
+              description={data?.message || "Failed to save product"}
             />,
             { duration: 6000 },
           );
@@ -139,26 +173,27 @@ export function ProductForm({ initialData }: ProductFormProps) {
       toast.custom(
         <AdminToast
           type="success"
-          title="Product created"
+          title={isEdit ? "Product updated" : "Product created"}
           description="Your product is now live in the store"
         />,
         { duration: 6000 },
       );
 
-      // reset
-      setForm({
-        name: "",
-        description: "",
-        price: "",
-        stock: "",
-        category: "MEN",
-        subCategory: "",
-        sizes: [],
-        colours: [],
-        featured: false,
-      });
-      setImages([]);
-      if (isEdit) {
+      // reset form if creating
+      if (!isEdit) {
+        setForm({
+          name: "",
+          description: "",
+          price: "",
+          stock: "",
+          category: "MEN",
+          subCategory: "",
+          sizes: [],
+          colours: [],
+          featured: false,
+        });
+        setImages([]);
+      } else {
         router.push("/admin/products");
       }
     } catch (err) {
@@ -180,10 +215,12 @@ export function ProductForm({ initialData }: ProductFormProps) {
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold">
-            {initialData ? "Edit Product" : "Create Product"}
+            {isEdit ? "Edit Product" : "Create Product"}
           </h1>
           <p className="text-sm text-gray-500">
-            Add a new product to your store
+            {isEdit
+              ? "Update your product details"
+              : "Add a new product to your store"}
           </p>
         </div>
 
@@ -191,7 +228,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* LEFT SIDE */}
             <div className="lg:col-span-2 space-y-8">
-              {/* BASIC INFO */}
               <Section title="Basic Information">
                 <div className="space-y-6">
                   <div>
@@ -208,7 +244,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
                       }
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium mb-1">
                       Description
@@ -225,7 +260,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 </div>
               </Section>
 
-              {/* PRICING */}
               <Section title="Pricing & Inventory">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -244,7 +278,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
                       }
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium mb-1">
                       Stock Quantity
@@ -264,7 +297,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 </div>
               </Section>
 
-              {/* CATEGORY */}
               <Section title="Organization">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <select
@@ -278,7 +310,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
                       <option key={cat}>{cat}</option>
                     ))}
                   </select>
-
                   <input
                     className="input"
                     placeholder="Sub category (e.g. T-Shirt)"
@@ -290,9 +321,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 </div>
               </Section>
 
-              {/* VARIANTS */}
               <Section title="Variants">
-                {/* Sizes */}
                 <div className="mb-6">
                   <p className="text-sm font-medium mb-2">Sizes</p>
                   <div className="flex flex-wrap gap-2">
@@ -316,7 +345,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
                   </div>
                 </div>
 
-                {/* Colours */}
                 <div>
                   <p className="text-sm font-medium mb-2">Colours</p>
                   <div className="flex flex-wrap gap-2">
@@ -341,14 +369,13 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 </div>
               </Section>
 
-              {/* IMAGES */}
               <Section title="Product Images">
                 <ProductImageUploader
                   onUploadComplete={(imgs) => setImages(imgs)}
+                  initialImages={images}
                 />
               </Section>
 
-              {/* ACTIONS */}
               <div className="flex justify-between items-center pt-6 border-t">
                 <Link href={"/admin/products"}>
                   <button
@@ -379,7 +406,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
             <div className="space-y-6">
               <div className="border rounded-2xl p-6 bg-white shadow-sm">
                 <h3 className="font-semibold mb-4">Status</h3>
-
                 <label className="flex items-center justify-between">
                   <span>Featured Product</span>
                   <input

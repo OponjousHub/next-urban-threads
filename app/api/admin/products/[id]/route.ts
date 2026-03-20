@@ -1,9 +1,11 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+
 export async function PATCH(
   req: Request,
   { params }: { params: { id: string } },
 ) {
+  console.log("PARAMS PARAMS EDIT ROUTE", params.id);
   const tenant = await getDefaultTenant();
   if (!tenant) {
     throw new Error("Default tenant not found");

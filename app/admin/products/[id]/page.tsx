@@ -1,9 +1,11 @@
-import { notFound } from "next/navigation";
+// app/admin/products/[id]/page.tsx
+
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import { ProductForm } from "@/components/admin/products/productForm";
+import { notFound } from "next/navigation";
+import ProductDetails from "@/components/admin/products/productDetails";
 
-export default async function EditProductPage({
+export default async function ProductDetailPage({
   params,
 }: {
   params: { id: string };
@@ -19,5 +21,11 @@ export default async function EditProductPage({
 
   if (!product) return notFound();
 
-  return <ProductForm initialData={product} />;
+  // ✅ Convert Decimal
+  const safeProduct = {
+    ...product,
+    price: Number(product.price),
+  };
+
+  return <ProductDetails product={safeProduct} />;
 }

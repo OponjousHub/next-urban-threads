@@ -1,3 +1,5 @@
+"use client";
+
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 
@@ -54,7 +56,7 @@ export default function Row({ product }: { product: any }) {
       <td className="pr-4 align-middle">
         <div className="flex justify-end items-center gap-2 h-full">
           <button
-            onClick={() => router.push(`/admin/products/${product.id}`)}
+            onClick={() => router.push(`/admin/products/${product.id}/edit`)}
             className="text-gray-600 hover:text-blue-600"
           >
             <FiEdit size={18} />
