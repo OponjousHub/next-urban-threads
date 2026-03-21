@@ -11,7 +11,7 @@ export default function Header() {
         </p>
       </div>
 
-      <div className="flex items-center gap-10">
+      <div className="flex items-center gap-6">
         <ProductSearch />
 
         <Link href="/admin/products/new">
