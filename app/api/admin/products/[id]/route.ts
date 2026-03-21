@@ -6,6 +6,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: { id: string } },
 ) {
+  const paramsId = await params;
   const tenant = await getDefaultTenant();
   if (!tenant) {
     throw new Error("Default tenant not found");
@@ -14,7 +15,7 @@ export async function PATCH(
     const body = await req.json();
 
     const updated = await prisma.product.update({
-      where: { id: params.id, tenantId: tenant.id },
+      where: { id: paramsId.id, tenantId: tenant.id },
       data: body,
     });
 

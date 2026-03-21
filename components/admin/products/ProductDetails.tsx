@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import { useState } from "react";
+import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 
 export default function ProductDetails({ product }: { product: any }) {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const router = useRouter();
 
@@ -13,12 +15,6 @@ export default function ProductDetails({ product }: { product: any }) {
     product.stock === 0 ? "out" : product.stock <= 5 ? "low" : "ok";
 
   async function handleDelete() {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product?",
-    );
-
-    if (!confirmDelete) return;
-
     try {
       setDeleting(true);
       const res = await fetch(`/api/admin/products/${product.id}`, {
@@ -47,7 +43,6 @@ export default function ProductDetails({ product }: { product: any }) {
         />,
         { duration: 4000 },
       );
-      setDeleting(false);
       router.push("/admin/products");
     } catch (err) {
       setDeleting(false);
@@ -59,6 +54,8 @@ export default function ProductDetails({ product }: { product: any }) {
         />,
         { duration: 6000 },
       );
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -80,8 +77,9 @@ export default function ProductDetails({ product }: { product: any }) {
           </button>
 
           <button
-            className="bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
-            onClick={handleDelete}
+            className="bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 hover:bg-red-700"
+            // onClick={handleDelete}
+            onClick={() => setShowDeleteModal(true)}
           >
             {deleting ? "Deleting..." : "Delete"}
           </button>
@@ -201,6 +199,12 @@ export default function ProductDetails({ product }: { product: any }) {
           </div>
         </div>
       </div>
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        loading={deleting}
+      />
     </div>
   );
 }
