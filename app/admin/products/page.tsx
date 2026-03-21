@@ -13,7 +13,6 @@ export default async function ProductsPage() {
   return (
     <div className="space-y-6">
       <Header />
-
       <ProductsTable products={data.products || []} />
     </div>
   );
