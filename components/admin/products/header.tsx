@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProductSearch } from "@/components/admin/products/product-search";
+import { ProductFilters } from "@/components/admin/products/product-filters";
 
 export default function Header() {
   return (
@@ -11,8 +12,11 @@ export default function Header() {
         </p>
       </div>
 
-      <div className="flex items-center gap-6">
-        <ProductSearch />
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          <ProductSearch />
+          <ProductFilters />
+        </div>
 
         <Link href="/admin/products/new">
           <button className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:opacity-90">

@@ -7,7 +7,13 @@ import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import { useRouter } from "next/navigation";
 
-export default function ProductsTable({ products }: { products: any[] }) {
+export default function ProductsTable({
+  products,
+  query,
+}: {
+  products: any[];
+  query?: string;
+}) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -88,6 +94,7 @@ export default function ProductsTable({ products }: { products: any[] }) {
               <Row
                 key={product.id}
                 product={product}
+                query={query}
                 onDeleteClick={(product) => {
                   setSelectedProduct(product);
                   setShowDeleteModal(true);

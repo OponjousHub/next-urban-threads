@@ -1,33 +1,43 @@
 import Header from "@/components/admin/products/header";
 import ProductsTable from "@/components/admin/products/product-table";
 import { prisma } from "@/utils/prisma";
+import { Category } from "@prisma/client";
 
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: { q?: string };
+  searchParams: {
+    q?: string;
+    category?: string;
+    stock?: string;
+    featured?: string;
+  };
 }) {
   const query = searchParams.q || "";
+  const categoryEnum = searchParams.category
+    ? (Category[
+        searchParams.category.toUpperCase() as keyof typeof Category
+      ] as Category)
+    : undefined;
+  const { q, category, stock, featured } = searchParams;
 
   const products = await prisma.product.findMany({
     where: {
-      deletedAt: null, // if using soft delete
-      ...(query && {
+      deletedAt: null,
+
+      ...(q && {
         OR: [
-          {
-            name: {
-              contains: query,
-              mode: "insensitive",
-            },
-          },
-          {
-            description: {
-              contains: query,
-              mode: "insensitive",
-            },
-          },
+          { name: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
         ],
       }),
+
+      ...(categoryEnum && { category: categoryEnum }),
+
+      ...(featured && { featured: featured === "true" }),
+
+      ...(stock === "low" && { stock: { lte: 5 } }),
+      ...(stock === "out" && { stock: 0 }),
     },
     orderBy: { createdAt: "desc" },
   });
@@ -46,10 +56,13 @@ export default async function ProductsPage({
   return (
     <div className="space-y-6">
       <Header />
-      <ProductsTable
-        // products={data.products || []}
-        products={safeProducts}
-      />
+      {query && (
+        <p className="text-sm text-gray-600">
+          Showing results for{" "}
+          <span className="font-medium text-black">"{query}"</span>
+        </p>
+      )}
+      <ProductsTable products={safeProducts} query={query} />
     </div>
   );
 }

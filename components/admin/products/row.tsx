@@ -8,13 +8,30 @@ import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 export default function Row({
   product,
   onDeleteClick,
+  query,
 }: {
   product: any;
   onDeleteClick: (product: any) => void;
+  query?: string;
 }) {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const router = useRouter();
+
+  // Highlighting a matched search text
+  function highlight(text: string, query: string) {
+    if (!query) return text;
+
+    const parts = text.split(new RegExp(`(${query})`, "gi"));
+
+    return parts.map((part, i) =>
+      part.toLowerCase() === query.toLowerCase() ? (
+        <span key={i} className="bg-yellow-200 rounded px-1">
+          {part}
+        </span>
+      ) : (
+        part
+      ),
+    );
+  }
 
   const stockStatus =
     product.stock === 0 ? "out" : product.stock <= 5 ? "low" : "ok";
@@ -40,7 +57,9 @@ export default function Row({
             )}
 
             <div className="flex flex-col justify-center h-full">
-              <p className="font-medium">{product.name}</p>
+              <p className="font-medium">
+                {highlight(product.name, query || "")}
+              </p>
               <p className="text-xs text-gray-500">ID: {product.id}</p>
             </div>
           </div>
@@ -85,12 +104,6 @@ export default function Row({
           </div>
         </td>
       </tr>
-      {/* <ConfirmDeleteModal
-        open={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDelete}
-        loading={deleting}
-      /> */}
     </>
   );
 }

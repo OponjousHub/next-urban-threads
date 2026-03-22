@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
+import { FiX } from "react-icons/fi";
 
 export function ProductSearch() {
   const router = useRouter();
@@ -24,6 +25,12 @@ export function ProductSearch() {
     return () => clearTimeout(delay);
   }, [query]);
 
+  // Clear field button
+  function clearSearch() {
+    setQuery("");
+    router.push("/admin/products");
+  }
+
   return (
     <form className="flex gap-2">
       <input
@@ -32,6 +39,18 @@ export function ProductSearch() {
         onChange={(e) => setQuery(e.target.value)}
         className="input w-64"
       />
+
+      {/* Add clear field button */}
+      {query && (
+        <button
+          type="button"
+          onClick={clearSearch}
+          className="flex items-center justify-center w-8 h-8 rounded-full 
+               hover:bg-gray-200 transition"
+        >
+          <FiX size={18} className="text-gray-600 hover:text-red-500" />
+        </button>
+      )}
     </form>
   );
 }
