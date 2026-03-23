@@ -43,7 +43,7 @@ export default function AdminLayout({
       <div className="flex flex-col flex-1">
         <AdminTopbar toggle={() => setMobileOpen(!mobileOpen)} user={user} />
 
-        <main className="flex-1  mb-10 overflow-y-auto p-6 bg-gray-50">
+        <main className="flex-1 mb-10 overflow-y-auto bg-gray-50">
           {children}
         </main>
       </div>

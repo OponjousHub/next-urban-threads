@@ -54,7 +54,7 @@ export default async function ProductsPage({
   const data = await res.json();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sticky top-0 z-30">
       <Header />
       {query && (
         <p className="text-sm text-gray-600">
