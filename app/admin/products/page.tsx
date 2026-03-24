@@ -1,5 +1,6 @@
 import Header from "@/components/admin/products/header";
 import ProductsTable from "@/components/admin/products/product-table";
+import Pagination from "@/components/admin/products/product-pagination";
 import { prisma } from "@/utils/prisma";
 import { Category } from "@prisma/client";
 
@@ -100,6 +101,7 @@ export default async function ProductsPage({
         </p>
       )}
       <ProductsTable products={safeProducts} query={query} />
+      <Pagination totalPages={totalPages} />
     </div>
   );
 }

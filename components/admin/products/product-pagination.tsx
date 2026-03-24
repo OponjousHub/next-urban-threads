@@ -15,23 +15,27 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
   };
 
   return (
-    <div className="flex items-center justify-between mt-6">
+    <div className="flex items-center justify-center mt-6 space-x-4">
       <button
         disabled={currentPage === 1}
         onClick={() => goToPage(currentPage - 1)}
-        className="px-3 py-1 border rounded disabled:opacity-50"
+        className="px-4 py-2 bg-white border border-gray-300 rounded-full shadow-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
       >
         Prev
       </button>
 
-      <span className="text-sm">
-        Page {currentPage} of {totalPages}
-      </span>
+      <div className="flex items-center space-x-2">
+        <span className="text-sm text-gray-500">Page</span>
+        <span className="px-3 py-1 bg-indigo-100 text-indigo-700 font-medium rounded-full shadow-sm">
+          {currentPage}
+        </span>
+        <span className="text-sm text-gray-500">of {totalPages}</span>
+      </div>
 
       <button
         disabled={currentPage === totalPages}
         onClick={() => goToPage(currentPage + 1)}
-        className="px-3 py-1 border rounded disabled:opacity-50"
+        className="px-4 py-2 bg-white border border-gray-300 rounded-full shadow-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
       >
         Next
       </button>
