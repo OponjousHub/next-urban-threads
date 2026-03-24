@@ -37,7 +37,7 @@ export function ProductSearch() {
         placeholder="Search products..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="input w-64"
+        className="input w-[100%] md:w-[40%]"
       />
 
       {/* Add clear field button */}

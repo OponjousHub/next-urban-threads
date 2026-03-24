@@ -22,11 +22,11 @@ export default function ProductSorting() {
 
   return (
     <select
-      className="border rounded-lg px-3 py-2 text-sm"
+      className="border rounded-lg px-3 py-2 text-sm min-w-fit"
       value={currentSort}
       onChange={(e) => updateParam("sort", e.target.value)}
     >
-      <option value="">Default</option>
+      <option value="">Sort by</option>
       <option value="newest">Newest</option>
       <option value="price_asc">Price (Low → High)</option>
       <option value="price_desc">Price (High → Low)</option>
