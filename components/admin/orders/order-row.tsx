@@ -1,13 +1,12 @@
-type Order = {
+// types/order.ts
+export type Order = {
   id: string;
-  createdAt: string;
+  createdAt: Date;
   total: number;
   paymentStatus: "PENDING" | "PAID" | "FAILED";
-  orderStatus: "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
-  customer: {
-    name: string;
-    email: string;
-  };
+  status: "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  itemsCount: number;
+  customer: { name: string; email: string } | null;
 };
 
 export function OrderRow({ order }: { order: Order; query?: string }) {
@@ -33,11 +32,11 @@ export function OrderRow({ order }: { order: Order; query?: string }) {
       <td className="py-3 px-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-            {order.customer.name?.charAt(0)}
+            {order.customer?.name?.charAt(0)}
           </div>
           <div>
-            <p className="font-medium text-sm">{order.customer.name}</p>
-            <p className="text-xs text-gray-500">{order.customer.email}</p>
+            <p className="font-medium text-sm">{order.customer?.name}</p>
+            <p className="text-xs text-gray-500">{order.customer?.email}</p>
           </div>
         </div>
       </td>
@@ -65,10 +64,10 @@ export function OrderRow({ order }: { order: Order; query?: string }) {
       <td className="py-3 px-4">
         <span
           className={`px-2 py-1 text-xs rounded-full ${
-            statusStyles[order.orderStatus]
+            statusStyles[order.status]
           }`}
         >
-          {order.orderStatus}
+          {order.status}
         </span>
       </td>
 

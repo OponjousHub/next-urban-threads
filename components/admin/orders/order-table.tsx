@@ -1,10 +1,11 @@
 import { OrderRow } from "./order-row";
+import { Order } from "./order-row";
 
 export default function OrdersTable({
   orders,
   query,
 }: {
-  orders: any[];
+  orders: Order[];
   query?: string;
 }) {
   return (

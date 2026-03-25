@@ -1,6 +1,7 @@
 import Header from "@/components/admin/products/header";
 import ProductsTable from "@/components/admin/products/product-table";
 import Pagination from "@/components/admin/products/product-pagination";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
 import { Category } from "@prisma/client";
 
@@ -16,6 +17,11 @@ export default async function ProductsPage({
     page?: string;
   };
 }) {
+  const tenant = await getDefaultTenant();
+  if (!tenant) {
+    throw new Error("Default tenant not found");
+  }
+
   const query = searchParams.q || "";
   const categoryEnum = searchParams.category
     ? (Category[
@@ -41,6 +47,7 @@ export default async function ProductsPage({
   const products = await prisma.product.findMany({
     where: {
       deletedAt: null,
+      tenantId: tenant.id,
 
       ...(q && {
         OR: [
@@ -65,6 +72,7 @@ export default async function ProductsPage({
   const totalProducts = await prisma.product.count({
     where: {
       deletedAt: null,
+      tenantId: tenant.id,
 
       ...(q && {
         OR: [
