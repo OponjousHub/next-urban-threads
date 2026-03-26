@@ -6,6 +6,7 @@ import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
+import { useRouter } from "next/navigation";
 
 type SelectedOrder = {
   status: "DELIVERED" | "CANCELLED";
@@ -22,6 +23,7 @@ export default function OrdersTable({
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<SelectedOrder>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   // Update Function
   async function updateOrderStatus(status: string, orderId: string) {
@@ -47,8 +49,7 @@ export default function OrdersTable({
         />,
         { duration: 6000 },
       );
-
-      // later we’ll refresh table
+      router.refresh();
     } catch (err: any) {
       console.error(err);
       toast.custom(
@@ -115,6 +116,16 @@ export default function OrdersTable({
             updateOrderStatus(selectedOrder.status, selectedOrder.order.id)
           }
           loading={loading}
+          loadingText={
+            selectedOrder?.status === "CANCELLED"
+              ? "Cancelling..."
+              : "Updating..."
+          }
+          action={
+            selectedOrder?.status === "CANCELLED"
+              ? "Cancel order"
+              : "Mark as delivered"
+          }
           title={
             selectedOrder.status === "CANCELLED"
               ? "Cancel Order"

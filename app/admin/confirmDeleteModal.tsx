@@ -7,6 +7,8 @@ type Props = {
   onClose: () => void;
   onConfirm: () => void;
   loading?: boolean;
+  loadingText: string;
+  action: string;
   title?: string;
   description?: string;
 };
@@ -16,6 +18,8 @@ export function ConfirmDeleteModal({
   onClose,
   onConfirm,
   loading,
+  loadingText,
+  action,
   title = "Delete product",
   description = "Are you sure you want to delete this product? This action cannot be undone.",
 }: Props) {
@@ -59,7 +63,7 @@ export function ConfirmDeleteModal({
                   disabled={loading}
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-60"
                 >
-                  {loading ? "Deleting..." : "Delete Product"}
+                  {loading ? loadingText : action}
                 </button>
               </div>
             </div>

@@ -108,7 +108,7 @@ export function OrderRow({
             onClick={() => setOpen(!open)}
             className="p-3 rounded-full hover:bg-gray-200 transition"
           >
-            <FiMoreVertical className="text-gray-600" />
+            <FiMoreVertical className="text-gray-600" size={12} />
           </button>
 
           {open && (
