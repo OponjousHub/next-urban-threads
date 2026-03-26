@@ -114,8 +114,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
       toast.error("Please upload at least one image");
       return;
     }
-    console.log("form form form", form);
-    console.log("IMAGES STATE:", images);
+
 
     try {
       setLoading(true);
@@ -126,13 +125,10 @@ export function ProductForm({ initialData }: ProductFormProps) {
         stock: Number(form.stock),
         images,
       };
-      console.log("SUBMITTING THE PRODUCT FORM");
-      if (isEdit) {
-        console.log("EDIT ID", initialData.id);
-      }
-      console.log("PAYLOAD", payload);
-      console.log("form form form", form);
-      console.log("IMAGES STATE:", images);
+      // if (isEdit) {
+      //   console.log("EDIT ID", initialData.id);
+      // }
+ 
 
       const response = await fetch(
         isEdit ? `/api/admin/products/${initialData.id}` : "/api/products",

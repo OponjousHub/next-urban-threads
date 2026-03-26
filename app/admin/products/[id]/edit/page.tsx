@@ -28,20 +28,3 @@ export default async function EditProductPage({
 
   return <ProductForm initialData={productData} />;
 }
-// import { notFound } from "next/navigation";
-// import { prisma } from "@/lib/prisma";
-// import { ProductForm } from "../new/ProductForm";
-
-// export default async function EditProductPage({ params }: { params: { id: string } }) {
-//   const product = await prisma.product.findUnique({ where: { id: params.id } });
-
-//   if (!product) return notFound();
-
-//   const productData = {
-//     ...product,
-//     price: Number(product.price),
-//     discountedPrice: product.discountedPrice ? Number(product.discountedPrice) : undefined,
-//   };
-
-//   return <ProductForm initialData={productData} />;
-// }

@@ -4,6 +4,8 @@ import { OrderRow } from "./order-row";
 import { Order } from "./order-row";
 import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { AdminToast } from "@/components/ui/adminToast";
 
 type SelectedOrder = {
   status: "DELIVERED" | "CANCELLED";
@@ -33,9 +35,30 @@ export default function OrdersTable({
 
       if (!res.ok) throw new Error();
 
+      toast.custom(
+        <AdminToast
+          type="success"
+          title={"Order status update"}
+          description={
+            selectedOrder?.status === "CANCELLED"
+              ? "Order was cancelled successfully"
+              : "Order status was updated to delivered"
+          }
+        />,
+        { duration: 6000 },
+      );
+
       // later we’ll refresh table
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      toast.custom(
+        <AdminToast
+          type="error"
+          title="Update status failed!"
+          description={err.error || "Could not update order status"}
+        />,
+        { duration: 6000 },
+      );
     } finally {
       setLoading(false);
       setShowModal(false);
