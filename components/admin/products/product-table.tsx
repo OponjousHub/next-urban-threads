@@ -110,6 +110,8 @@ export default function ProductsTable({
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
         loading={deleting}
+        loadingText="Deleting..."
+        action="Delete Product"
       />
     </>
   );

@@ -3,28 +3,16 @@
 import { FiMoreVertical } from "react-icons/fi";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { OrderStatus, Order, Action } from "@/types/order";
 
-// types/order.ts
-export type Order = {
-  id: string;
-  createdAt: Date;
-  total: number;
-  paymentStatus: "PENDING" | "PAID" | "FAILED";
-  status: "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "PENDING";
-  itemsCount: number;
-  customer: { name: string; email: string } | null;
+type Props = {
+  order: Order;
+  query?: string;
+  onAction: (action: Action, order: Order) => void;
 };
 
-export function OrderRow({
-  order,
-  onDeleteClick,
-}: {
-  order: Order;
-  onDeleteClick: (status: "DELIVERED" | "CANCELLED", order: Order) => void;
-  query?: string;
-}) {
+export function OrderRow({ order, onAction }: Props) {
   const [open, setOpen] = useState(false);
-
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -53,12 +41,16 @@ export function OrderRow({
     PENDING: "bg-orange-100 text-orange-700",
   };
 
+  const isDisabled = (target: OrderStatus) =>
+    order.status === target || order.status === "CANCELLED";
+
+  const menuItem =
+    "w-full text-left px-4 py-2 text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed";
+
   return (
-    <tr className="border-b hover:bg-gray-50 transition ">
-      {/* Order ID */}
+    <tr className="border-b hover:bg-gray-50 transition">
       <td className="py-3 px-4 font-medium">#{order.id.slice(0, 8)}</td>
 
-      {/* Customer */}
       <td className="py-3 px-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
@@ -71,15 +63,12 @@ export function OrderRow({
         </div>
       </td>
 
-      {/* Date */}
       <td className="py-3 px-4 text-gray-600 text-sm">
         {new Date(order.createdAt).toLocaleDateString()}
       </td>
 
-      {/* Total */}
       <td className="py-3 px-4 font-medium">${order.total.toFixed(2)}</td>
 
-      {/* Payment Status */}
       <td className="py-3 px-4">
         <span
           className={`px-2 py-1 text-xs rounded-full ${
@@ -90,7 +79,6 @@ export function OrderRow({
         </span>
       </td>
 
-      {/* Order Status */}
       <td className="py-3 px-4">
         <span
           className={`px-2 py-1 text-xs rounded-full ${
@@ -101,57 +89,79 @@ export function OrderRow({
         </span>
       </td>
 
-      {/* Actions */}
       <td className="py-3 px-4 text-right">
-        <div ref={ref} className="relative inline-block text-left">
+        <div ref={ref} className=" inline-block text-left z-50">
           <button
             onClick={() => setOpen(!open)}
             className="p-3 rounded-full hover:bg-gray-200 transition"
           >
-            <FiMoreVertical className="text-gray-600" size={12} />
+            <FiMoreVertical size={14} />
           </button>
 
           {open && (
-            <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-50">
+            <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-xl z-1000 isolate">
+              {/* View */}
               <button
                 onClick={() => router.push(`/admin/orders/${order.id}`)}
-                className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm"
+                className={menuItem}
               >
                 View details
               </button>
 
+              {/* Status Updates */}
               <button
+                disabled={isDisabled("PROCESSING")}
                 onClick={() => {
                   setOpen(false);
-                  onDeleteClick("DELIVERED", order);
+                  onAction({ type: "status", value: "PROCESSING" }, order);
                 }}
-                disabled={order.status === "DELIVERED"}
-                // className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm"
-                className={`w-full text-left px-4 py-2 text-sm 
-  ${
-    order.status === "DELIVERED" || order.status === "CANCELLED"
-      ? "opacity-50 cursor-not-allowed"
-      : "hover:bg-gray-50 cursor-pointer"
-  }
-`}
+                className={menuItem}
+              >
+                Mark as processing
+              </button>
+
+              <button
+                disabled={isDisabled("SHIPPED")}
+                onClick={() => {
+                  setOpen(false);
+                  onAction({ type: "status", value: "SHIPPED" }, order);
+                }}
+                className={menuItem}
+              >
+                Mark as shipped
+              </button>
+
+              <button
+                disabled={isDisabled("DELIVERED")}
+                onClick={() => {
+                  setOpen(false);
+                  onAction({ type: "status", value: "DELIVERED" }, order);
+                }}
+                className={menuItem}
               >
                 Mark as delivered
               </button>
 
+              {/* Payment */}
               <button
-                // onClick={() => setShowModal(true)}
+                disabled={order.paymentStatus === "PAID"}
                 onClick={() => {
                   setOpen(false);
-                  onDeleteClick("CANCELLED", order);
+                  onAction({ type: "payment", value: "PAID" }, order);
                 }}
+                className={menuItem}
+              >
+                Mark as paid
+              </button>
+
+              {/* Cancel */}
+              <button
                 disabled={order.status === "CANCELLED"}
-                className={`w-full text-left px-4 py-2 text-sm  text-red-600
-  ${
-    order.status === "DELIVERED" || order.status === "CANCELLED"
-      ? "opacity-50 cursor-not-allowed"
-      : "hover:bg-gray-50 cursor-pointer"
-  }
-`}
+                onClick={() => {
+                  setOpen(false);
+                  onAction({ type: "status", value: "CANCELLED" }, order);
+                }}
+                className={`${menuItem} text-red-600`}
               >
                 Cancel order
               </button>

@@ -1,15 +1,23 @@
 "use client";
 
 import { OrderRow } from "./order-row";
-import { Order } from "./order-row";
+import { Order } from "@/types/order";
+
 import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import { useRouter } from "next/navigation";
 
+type Action =
+  | {
+      type: "status";
+      value: "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+    }
+  | { type: "payment"; value: "PAID" };
+
 type SelectedOrder = {
-  status: "DELIVERED" | "CANCELLED";
+  action: Action;
   order: Order;
 } | null;
 
@@ -25,14 +33,19 @@ export default function OrdersTable({
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Update Function
-  async function updateOrderStatus(status: string, orderId: string) {
+  // 🔥 Unified update function
+  async function updateOrder(action: Action, orderId: string) {
     try {
       setLoading(true);
 
       const res = await fetch(`/api/orders/${orderId}`, {
         method: "PATCH",
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({
+          ...(action.type === "status" && { status: action.value }),
+          ...(action.type === "payment" && {
+            paymentStatus: action.value,
+          }),
+        }),
       });
 
       if (!res.ok) throw new Error();
@@ -40,25 +53,25 @@ export default function OrdersTable({
       toast.custom(
         <AdminToast
           type="success"
-          title={"Order status update"}
+          title="Order updated"
           description={
-            selectedOrder?.status === "CANCELLED"
-              ? "Order was cancelled successfully"
-              : "Order status was updated to delivered"
+            action.type === "payment"
+              ? "Payment marked as paid"
+              : `Order marked as ${action.value.toLowerCase()}`
           }
         />,
-        { duration: 6000 },
+        { duration: 4000 },
       );
+
       router.refresh();
     } catch (err: any) {
-      console.error(err);
       toast.custom(
         <AdminToast
           type="error"
-          title="Update status failed!"
-          description={err.error || "Could not update order status"}
+          title="Update failed"
+          description={err?.message || "Could not update order"}
         />,
-        { duration: 6000 },
+        { duration: 4000 },
       );
     } finally {
       setLoading(false);
@@ -71,7 +84,7 @@ export default function OrdersTable({
       <div className="bg-white rounded-2xl border shadow-sm overflow-visible">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
-            <tr className=" text-left text-lg ">
+            <tr className="text-left text-lg">
               <th className="py-3 px-4">Order</th>
               <th className="py-3 px-4">Customer</th>
               <th className="py-3 px-4">Date</th>
@@ -95,12 +108,17 @@ export default function OrdersTable({
                   key={order.id}
                   order={order}
                   query={query}
-                  onDeleteClick={(
-                    status: "DELIVERED" | "CANCELLED",
-                    order: any,
-                  ) => {
-                    setSelectedOrder({ status, order });
-                    setShowModal(true);
+                  onAction={(action, order) => {
+                    // 🚨 Only CANCEL needs confirmation
+                    if (
+                      action.type === "status" &&
+                      action.value === "CANCELLED"
+                    ) {
+                      setSelectedOrder({ action, order });
+                      setShowModal(true);
+                    } else {
+                      updateOrder(action, order.id);
+                    }
                   }}
                 />
               ))
@@ -108,34 +126,21 @@ export default function OrdersTable({
           </tbody>
         </table>
       </div>
+
+      {/* ✅ Modal ONLY for destructive action */}
       {selectedOrder && (
         <ConfirmDeleteModal
           open={showModal}
           onClose={() => setShowModal(false)}
-          onConfirm={() =>
-            updateOrderStatus(selectedOrder.status, selectedOrder.order.id)
-          }
+          onConfirm={() => {
+            if (!selectedOrder) return;
+            updateOrder(selectedOrder.action, selectedOrder.order.id);
+          }}
           loading={loading}
-          loadingText={
-            selectedOrder?.status === "CANCELLED"
-              ? "Cancelling..."
-              : "Updating..."
-          }
-          action={
-            selectedOrder?.status === "CANCELLED"
-              ? "Cancel order"
-              : "Mark as delivered"
-          }
-          title={
-            selectedOrder.status === "CANCELLED"
-              ? "Cancel Order"
-              : "Mark as delivered"
-          }
-          description={`Are you sure you want to ${
-            selectedOrder.status === "CANCELLED"
-              ? "cancel this order?"
-              : "mark this order as delivered?"
-          }`}
+          loadingText="Cancelling..."
+          action="Cancel order"
+          title="Cancel Order"
+          description="Are you sure you want to cancel this order?"
         />
       )}
     </>
