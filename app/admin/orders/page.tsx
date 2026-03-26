@@ -1,7 +1,7 @@
 import OrdersTable from "@/components/admin/orders/order-table";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
-import { Order } from "@/components/admin/orders/order-row";
+import { Order } from "@/types/order";
 
 export default async function OrdersPage() {
   const tenant = await getDefaultTenant();

@@ -204,6 +204,8 @@ export default function ProductDetails({ product }: { product: any }) {
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
         loading={deleting}
+        action="Delete Product"
+        loadingText="Deleting..."
       />
     </div>
   );
