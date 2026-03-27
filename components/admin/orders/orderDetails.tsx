@@ -10,6 +10,7 @@ interface OrderItem {
   name: string;
   quantity: number;
   price: number;
+  image: string;
 }
 
 interface Customer {
@@ -123,7 +124,7 @@ export default function OrderDetails({ order }: { order: Order }) {
         <h2 className="font-medium text-lg mb-3">Items</h2>
         <table className="w-full text-sm border-collapse">
           <thead>
-            <tr className="bg-gray-50 text-gray-600 uppercase text-xs">
+            <tr className="bg-gray-50 text-gray-600 uppercase text-sm">
               <th className="py-2 px-3 text-left">Item</th>
               <th className="py-2 px-3">Qty</th>
               <th className="py-2 px-3">Price</th>
@@ -131,14 +132,21 @@ export default function OrderDetails({ order }: { order: Order }) {
             </tr>
           </thead>
           <tbody>
-            {localOrder.items.map((item) => (
+            {order.items.map((item) => (
               <tr key={item.id} className="border-b">
-                <td className="py-2 px-3">{item.name}</td>
+                <td className="py-2 px-3 flex items-center gap-2">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-10 h-10 object-cover rounded"
+                  />
+                  <span>{item.name}</span>
+                </td>
                 <td className="py-2 px-3 text-center">{item.quantity}</td>
-                <td className="py-2 px-3 text-right">
+                <td className="py-2 px-3 text-center">
                   ${item.price.toFixed(2)}
                 </td>
-                <td className="py-2 px-3 text-right">
+                <td className="py-2 px-3 text-center">
                   ${(item.price * item.quantity).toFixed(2)}
                 </td>
               </tr>
