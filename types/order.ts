@@ -1,11 +1,4 @@
-export type OrderStatus =
-  | "PENDING"
-  | "PROCESSING"
-  | "SHIPPED"
-  | "DELIVERED"
-  | "CANCELLED";
-
-export type PaymentStatus = "PENDING" | "PAID" | "FAILED";
+import { OrderStatus, PaymentStatus } from "@prisma/client";
 
 export type Order = {
   id: string;
@@ -20,9 +13,9 @@ export type Order = {
 export type Action =
   | {
       type: "status";
-      value: "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+      value: OrderStatus;
     }
   | {
       type: "payment";
-      value: "PAID";
+      value: PaymentStatus;
     };

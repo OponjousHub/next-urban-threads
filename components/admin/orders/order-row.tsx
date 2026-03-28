@@ -3,7 +3,8 @@
 import { FiMoreVertical } from "react-icons/fi";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { OrderStatus, Order, Action } from "@/types/order";
+import { Order, Action } from "@/types/order";
+import { OrderStatus } from "@prisma/client";
 
 type Props = {
   order: Order;
