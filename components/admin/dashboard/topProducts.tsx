@@ -20,7 +20,7 @@ export default function TopProducts({ products }: { products: Product[] }) {
       </div>
 
       <div className="space-y-4">
-        {products.map((product, index) => (
+        {products?.map((product, index) => (
           <div
             key={product.id}
             className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition"

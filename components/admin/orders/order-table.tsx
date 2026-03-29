@@ -89,6 +89,9 @@ export default function OrdersTable({
     router.push(`/admin/orders?${params.toString()}`);
   }
 
+  const base =
+    "px-3 py-1.5 text-sm rounded-lg border transition disabled:opacity-40 disabled:cursor-not-allowed";
+
   return (
     <>
       <div className="bg-white rounded-2xl border shadow-sm overflow-visible">
@@ -137,45 +140,58 @@ export default function OrdersTable({
         </table>
 
         {/* Pagination & Page Info */}
-        <div className="flex justify-between items-center mt-4 flex-wrap gap-2">
-          <p className="text-sm text-gray-500">
-            Showing {(currentPage - 1) * 10 + 1}–
-            {Math.min(currentPage * 10, totalOrders)} of {totalOrders} orders
-          </p>
+        <div className="border-t px-4 py-10 bg-gray-50 rounded-b-2xl">
+          <div className="flex justify-center items-center flex-wrap gap-3">
+            <div className="flex justify-between items-center mt-4 flex-wrap gap-2">
+              <p className="text-sm text-gray-600">
+                Showing{" "}
+                <span className="font-medium">
+                  {(currentPage - 1) * 10 + 1}
+                </span>
+                –
+                <span className="font-medium">
+                  {Math.min(currentPage * 10, totalOrders)}
+                </span>{" "}
+                of <span className="font-medium">{totalOrders}</span>
+              </p>
 
-          <div className="flex gap-2 flex-wrap">
-            {/* Previous */}
-            <button
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-3 py-1 border rounded-md bg-white hover:bg-gray-100 disabled:opacity-50"
-            >
-              Previous
-            </button>
+              <div className="flex items-center gap-1">
+                {/* Previous */}
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`${base} bg-white hover:bg-gray-100`}
+                >
+                  ←
+                </button>
 
-            {/* Page Numbers */}
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button
-                key={p}
-                onClick={() => goToPage(p)}
-                className={`px-3 py-1 border rounded-md ${
-                  p === currentPage
-                    ? "bg-indigo-500 text-white border-indigo-500"
-                    : "bg-white hover:bg-gray-100"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
+                {/* Page Numbers (limit visible pages 👇 important) */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .slice(Math.max(0, currentPage - 3), currentPage + 2)
+                  .map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => goToPage(p)}
+                      className={`${base} ${
+                        p === currentPage
+                          ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                          : "bg-white hover:bg-gray-100"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
 
-            {/* Next */}
-            <button
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 border rounded-md bg-white hover:bg-gray-100 disabled:opacity-50"
-            >
-              Next
-            </button>
+                {/* Next */}
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`${base} bg-white hover:bg-gray-100`}
+                >
+                  →
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

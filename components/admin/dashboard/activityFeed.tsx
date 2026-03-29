@@ -18,7 +18,7 @@ interface Props {
 export default function ActivityFeed({ activities }: Props) {
   const [expanded, setExpanded] = useState(false);
 
-  const visibleActivities = expanded ? activities : activities.slice(0, 4);
+  const visibleActivities = expanded ? activities : activities?.slice(0, 4);
 
   const getIcon = (type: Activity["type"]) => {
     switch (type) {
@@ -51,7 +51,7 @@ export default function ActivityFeed({ activities }: Props) {
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold">Recent Activity</h3>
 
-        {activities.length > 4 && (
+        {activities?.length > 4 && (
           <button
             onClick={() => setExpanded(!expanded)}
             className="text-sm text-indigo-600 hover:underline"
@@ -67,7 +67,7 @@ export default function ActivityFeed({ activities }: Props) {
         <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-200" />
 
         <div className="space-y-6">
-          {visibleActivities.map((activity) => {
+          {visibleActivities?.map((activity) => {
             const { icon, color } = getIcon(activity.type);
 
             return (
