@@ -162,6 +162,11 @@ model Tenant {
   domain    String?
   isDefault Boolean  @default(false)
 
+  email     String?
+  currency  String   @default("USD")
+  timezone  String   @default("UTC")
+  logo      String?
+
   reviewPolicy ReviewPolicy @default(AFTER_PAYMENT)
   autoApproveReviews Boolean @default(false)
 
