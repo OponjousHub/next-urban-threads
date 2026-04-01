@@ -12,7 +12,7 @@ import ChangEmailModal from "@/components/change-email-modal";
 export const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email"),
-  password: z.string().optional(),
+  phone: z.string().optional(),
 });
 
 type ProfileData = z.infer<typeof profileSchema>;
@@ -47,11 +47,11 @@ export function ProfileSection() {
         );
         return;
       }
-
+      console.log(data);
       reset({
         name: data.name || "",
         email: data.email || "",
-        password: "",
+        phone: data.phone || "",
       });
     }
 
@@ -124,10 +124,10 @@ export function ProfileSection() {
             Change Email
           </button>
           <Input
-            label="New Password"
-            type="password"
-            {...register("password")}
-            error={errors.password?.message}
+            label="Phone number"
+            type="Phone"
+            {...register("phone")}
+            error={errors.phone?.message}
           />
 
           <button

@@ -19,6 +19,7 @@ export async function GET() {
       select: {
         name: true,
         email: true,
+        phone: true,
       },
     });
 
@@ -43,17 +44,12 @@ export async function PATCH(req: NextRequest) {
 
     const body = await req.json();
 
-    const { name, email, password } = body;
+    const { name, phone } = body;
 
     const updateData: any = {
       name,
-      email,
+      phone,
     };
-
-    // Only update password if provided
-    if (password && password.length > 0) {
-      updateData.password = await hash(password, 10);
-    }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId, tenantId: tenant.id },
