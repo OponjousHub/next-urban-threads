@@ -75,6 +75,7 @@ export default function EditProfilePage() {
         },
         iconTheme: {
           primary: "#4f46e5",
+
           secondary: "#fff",
         },
       });
@@ -236,9 +237,7 @@ export default function EditProfilePage() {
                     disabled
                     className="mt-1 w-full cursor-not-allowed rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-500"
                   />
-                  {/* <p className="mt-1 text-xs text-gray-500">
-                    Email cannot be changed
-                  </p> */}
+
                   <button
                     type="button"
                     onClick={() => setOpen(true)}

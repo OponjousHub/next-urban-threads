@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
+import { AdminToast } from "@/components/ui/adminToast";
+import ChangEmailModal from "@/components/change-email-modal";
 
 /* ---------------- Schema ---------------- */
 export const profileSchema = z.object({
@@ -15,9 +17,9 @@ export const profileSchema = z.object({
 
 type ProfileData = z.infer<typeof profileSchema>;
 
-/* ---------------- Profile Section Component ---------------- */
 export function ProfileSection() {
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const {
     register,
@@ -33,6 +35,18 @@ export function ProfileSection() {
     async function load() {
       const res = await fetch("/api/admin/profile");
       const data = await res.json();
+
+      if (!res.ok) {
+        toast.custom(
+          <AdminToast
+            type="error"
+            title="Fetch profile failed"
+            description={data?.message || "Something went wrong"}
+          />,
+          { duration: 6000 },
+        );
+        return;
+      }
 
       reset({
         name: data.name || "",
@@ -56,9 +70,24 @@ export function ProfileSection() {
 
       if (!res.ok) throw new Error();
 
-      toast.success("Profile updated");
+      toast.custom(
+        <AdminToast
+          type="success"
+          title="Update profile"
+          description="Profile updated successfully"
+        />,
+        { duration: 4000 },
+      );
     } catch {
       toast.error("Update failed");
+      toast.custom(
+        <AdminToast
+          type="error"
+          title="Profile update failed"
+          description="Network error. Try again."
+        />,
+        { duration: 6000 },
+      );
     } finally {
       setLoading(false);
     }
@@ -84,7 +113,16 @@ export function ProfileSection() {
             label="Email"
             {...register("email")}
             error={errors.email?.message}
+            disabled={"disabled"}
+            css="mt-1 w-full cursor-not-allowed rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-500"
           />
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="text-sm font-medium text-blue-600 hover:underline"
+          >
+            Change Email
+          </button>
           <Input
             label="New Password"
             type="password"
@@ -101,6 +139,7 @@ export function ProfileSection() {
           </button>
         </div>
       </form>
+      <ChangEmailModal open={open} onClose={() => setOpen(false)} />
     </div>
   );
 }
@@ -110,9 +149,10 @@ function Input({ label, error, ...props }: any) {
   return (
     <div>
       <label className="text-sm font-medium">{label}</label>
+
       <input
         {...props}
-        className="mt-1 w-full px-3 py-2 border rounded-lg text-sm"
+        className={`mt-1 w-full px-3 py-2 border rounded-lg text-sm ${props.css}`}
       />
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
