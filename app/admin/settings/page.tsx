@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { ProfileSection } from "@/components/admin/settings/profile-section";
 import ChangePasswordAdmin from "@/components/admin/settings/change-password-setting";
+import GeneralSettings from "@/components/admin/settings/general-setting";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
-  const [open, setOpen] = useState(false);
 
   const tabs = [
     { id: "general", label: "General" },
@@ -54,22 +54,6 @@ export default function SettingsPage() {
         {activeTab === "password" && <ChangePasswordAdmin />}
         {activeTab === "billing" && <BillingPlaceholder />}
       </main>
-    </div>
-  );
-}
-
-/* ---------------- General Settings ---------------- */
-
-function GeneralSettings() {
-  return (
-    <div className="bg-white border rounded-2xl shadow-sm p-6">
-      <h2 className="text-sm font-semibold mb-4">Store Information</h2>
-
-      <div className="space-y-4">
-        <Input label="Store Name" />
-        <Input label="Support Email" />
-        <Input label="Currency" />
-      </div>
     </div>
   );
 }
