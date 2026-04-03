@@ -8,7 +8,6 @@ export async function GET() {
   }
 
   const activities = await getActivities(tenant.id);
-  console.log("ACTIVITIIIIEEESSSroute============", activities);
 
   return Response.json(activities);
 }

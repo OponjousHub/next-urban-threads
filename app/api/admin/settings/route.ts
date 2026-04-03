@@ -21,7 +21,12 @@ export async function PATCH(req: Request) {
         logo,
         primaryColor,
         timezone,
-        address,
+        address: {
+          updateMany: {
+            where: { id: tenant.id },
+            data: { street: address },
+          },
+        },
       },
     });
 

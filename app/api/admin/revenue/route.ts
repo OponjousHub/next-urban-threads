@@ -1,6 +1,7 @@
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
 import { calculateChange } from "@/lib/analytics/calculateChange";
+import { OrderStatus } from "@prisma/client";
 
 function getStartDate(range: string) {
   const now = new Date();
@@ -38,7 +39,15 @@ export async function GET(req: Request) {
     prisma.order.aggregate({
       where: {
         tenantId: tenant.id,
-        status: { in: ["PAID", "SHIPPED", "DELIVERED"] },
+        status: {
+          in: [
+            OrderStatus.SHIPPED,
+            OrderStatus.DELIVERED,
+            OrderStatus.CANCELLED,
+            OrderStatus.PENDING,
+            OrderStatus.PROCESSING,
+          ],
+        },
         createdAt: { gte: startDate },
       },
       _sum: { totalAmount: true },
@@ -49,7 +58,15 @@ export async function GET(req: Request) {
     prisma.order.aggregate({
       where: {
         tenantId: tenant.id,
-        status: { in: ["PAID", "SHIPPED", "DELIVERED"] },
+        status: {
+          in: [
+            OrderStatus.SHIPPED,
+            OrderStatus.DELIVERED,
+            OrderStatus.CANCELLED,
+            OrderStatus.PENDING,
+            OrderStatus.PROCESSING,
+          ],
+        },
         createdAt: {
           gte: previousStartDate,
           lt: startDate,
