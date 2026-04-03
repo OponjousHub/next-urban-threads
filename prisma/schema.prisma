@@ -166,6 +166,7 @@ model Tenant {
   currency  String   @default("USD")
   timezone  String   @default("UTC")
   logo      String?
+  primaryColor String?
 
   reviewPolicy ReviewPolicy @default(AFTER_PAYMENT)
   autoApproveReviews Boolean @default(false)

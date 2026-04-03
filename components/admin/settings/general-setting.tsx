@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import { useForm } from "react-hook-form";
@@ -10,6 +10,11 @@ export const settingSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email"),
   currency: z.string().optional(),
+
+  logo: z.string().optional(), // URL
+  primaryColor: z.string().optional(),
+  timezone: z.string().optional(),
+  address: z.string().optional(),
 });
 
 /* ✅ FIX */
@@ -26,6 +31,25 @@ export default function GeneralSettings() {
   } = useForm<FormData>({
     resolver: zodResolver(settingSchema),
   });
+
+  useEffect(() => {
+    async function load() {
+      const res = await fetch("/api/admin/settings");
+      const data = await res.json();
+
+      reset({
+        name: data.name || "",
+        email: data.email || "",
+        currency: data.currency || "",
+        logo: data.logo || "",
+        primaryColor: data.primaryColor || "#000000",
+        timezone: data.timezone || "",
+        address: data.address || "",
+      });
+    }
+
+    load();
+  }, [reset]);
 
   async function onSubmit(data: FormData) {
     try {
@@ -74,6 +98,16 @@ export default function GeneralSettings() {
 
         <Input label="Currency" {...register("currency")} />
 
+        <Input
+          label="Primary Color"
+          type="color"
+          {...register("primaryColor")}
+        />
+
+        <Input label="Timezone" {...register("timezone")} />
+
+        <TextArea label="Address" {...register("address")} />
+
         <div className="flex justify-end">
           <button
             type="submit"
@@ -93,6 +127,18 @@ function Input({ label, ...props }: any) {
     <div>
       <label className="text-sm font-medium">{label}</label>
       <input
+        {...props}
+        className="mt-1 w-full px-3 py-2 border rounded-lg text-sm"
+      />
+    </div>
+  );
+}
+
+function TextArea({ label, ...props }: any) {
+  return (
+    <div>
+      <label className="text-sm font-medium">{label}</label>
+      <textarea
         {...props}
         className="mt-1 w-full px-3 py-2 border rounded-lg text-sm"
       />
