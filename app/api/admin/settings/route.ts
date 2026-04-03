@@ -9,12 +9,19 @@ export async function PATCH(req: Request) {
 
     const body = await req.json();
 
+    const { name, email, currency, logo, primaryColor, timezone, address } =
+      body;
+
     const updated = await prisma.tenant.update({
       where: { id: tenant.id },
       data: {
-        name: body.name,
-        email: body.email,
-        currency: body.currency,
+        name,
+        email,
+        currency,
+        logo,
+        primaryColor,
+        timezone,
+        address,
       },
     });
 

@@ -22,11 +22,25 @@ type FormData = z.infer<typeof settingSchema>;
 
 export default function GeneralSettings() {
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const currencies = [
+    { code: "USD", label: "US Dollar ($)" },
+    { code: "NGN", label: "Nigerian Naira (₦)" },
+    { code: "EUR", label: "Euro (€)" },
+    { code: "GBP", label: "British Pound (£)" },
+    { code: "CAD", label: "Canadian Dollar (C$)" },
+    { code: "AUD", label: "Australian Dollar (A$)" },
+  ];
+
+  const timezones = Intl.supportedValuesOf("timeZone");
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(settingSchema),
@@ -87,25 +101,140 @@ export default function GeneralSettings() {
     }
   }
 
+  // Upload logo to cloudinary
+  const logo = watch("logo");
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file); // same key your backend expects
+
+    try {
+      setUploading(true);
+
+      const res = await fetch("/api/upload/image-upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+
+      setValue("logo", data.url, { shouldDirty: true });
+      toast.success("Logo uploaded!");
+    } catch (err) {
+      toast.error("Logo upload failed");
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="bg-white border rounded-2xl shadow-sm p-6 space-y-6">
         <h2 className="text-sm font-semibold">Store Information</h2>
 
+        {/* Store basics */}
         <Input label="Store Name" {...register("name")} />
-
         <Input label="Support Email" {...register("email")} />
 
-        <Input label="Currency" {...register("currency")} />
+        {/* Row: Currency + Color + Timezone */}
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* Currency */}
+          <div>
+            <label className="text-sm font-medium">Currency</label>
+            <select
+              {...register("currency")}
+              className="mt-1 w-full px-3 py-2 border rounded-lg text-sm"
+            >
+              {currencies.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <Input
-          label="Primary Color"
-          type="color"
-          {...register("primaryColor")}
-        />
+          {/* Primary Color */}
+          <div>
+            <label className="text-sm font-medium">Primary Color</label>
+            <input
+              type="color"
+              {...register("primaryColor")}
+              className="mt-1 w-full h-[42px] border rounded-lg"
+            />
+          </div>
 
-        <Input label="Timezone" {...register("timezone")} />
+          {/* Timezone */}
+          <div>
+            <label className="text-sm font-medium">Timezone</label>
+            <select
+              {...register("timezone")}
+              className="mt-1 w-full px-3 py-2 border rounded-lg text-sm"
+            >
+              {timezones.map((tz) => (
+                <option key={tz} value={tz}>
+                  {tz}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
+        {/* Logo */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Logo</label>
+
+          <div className="border-2 border-dashed rounded-xl p-4 text-center hover:bg-gray-50 transition">
+            {uploading ? (
+              <p className="text-sm text-gray-500">Uploading...</p>
+            ) : logo ? (
+              <div className="flex flex-col items-center gap-3">
+                <img
+                  src={logo}
+                  alt="logo"
+                  className="h-16 object-contain rounded border"
+                />
+                <div className="flex gap-3">
+                  {/* Change */}
+                  <label className="cursor-pointer text-sm text-indigo-600 hover:underline">
+                    Change
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* Remove */}
+                  <button
+                    type="button"
+                    onClick={() => setValue("logo", "", { shouldDirty: true })}
+                    className="text-sm text-red-500 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <label className="cursor-pointer block text-sm text-gray-500">
+                Click to upload logo
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </label>
+            )}
+          </div>
+        </div>
+
+        {/* Address */}
         <TextArea label="Address" {...register("address")} />
 
         <div className="flex justify-end">
