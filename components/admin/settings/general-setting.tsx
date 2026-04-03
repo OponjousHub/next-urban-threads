@@ -50,6 +50,7 @@ export default function GeneralSettings() {
     async function load() {
       const res = await fetch("/api/admin/settings");
       const data = await res.json();
+      console.log(data);
 
       reset({
         name: data.name || "",
