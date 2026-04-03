@@ -12,6 +12,9 @@ export async function getTenant() {
   // For now → return default tenant
   const tenant = await prisma.tenant.findFirst({
     where: { isDefault: true },
+    include: {
+      address: true,
+    },
   });
 
   if (!tenant) {
