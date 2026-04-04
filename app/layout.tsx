@@ -6,6 +6,8 @@ import { TenantProvider } from "@/store/tenant-provider-context";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { getTenant } from "../lib/tenant/getTenant";
 import { Toaster } from "react-hot-toast";
+import { darkenColor } from "@/utils/color-shades";
+import { lightenColor } from "@/utils/color-shades";
 import "./globals.css";
 
 export const metadata = {

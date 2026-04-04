@@ -1,4 +1,4 @@
-function darkenColor(hex: string, percent: number) {
+export function darkenColor(hex: string, percent: number) {
   const num = parseInt(hex.replace("#", ""), 16);
   const amt = Math.round(2.55 * percent);
 
@@ -9,7 +9,7 @@ function darkenColor(hex: string, percent: number) {
   return `#${((R << 16) | (G << 8) | B).toString(16).padStart(6, "0")}`;
 }
 
-function lightenColor(hex: string, percent: number) {
+export function lightenColor(hex: string, percent: number) {
   const num = parseInt(hex.replace("#", ""), 16);
   const amt = Math.round(2.55 * percent);
 

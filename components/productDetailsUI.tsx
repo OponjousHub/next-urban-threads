@@ -92,7 +92,7 @@ export function ProductDetailUI({
             {(canReview || userReview) && (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                  <button className="text-indigo-600 font-medium hover:underline cursor-pointer">
+                  <button className="text-[var(--color-primary)] font-medium hover:underline cursor-pointer">
                     {userReview ? "Edit Review" : "Write Review"}
                   </button>
                 </DialogTrigger>
@@ -147,7 +147,7 @@ export function ProductDetailUI({
           {/* Add to Cart Button */}
           <button
             onClick={() => handleAddToCart(product)}
-            className="bg-primary hover:bg-primary-dark text-white px-8 py-3 cursor-pointer rounded-lg font-semibold w-full md:w-auto"
+            className="bg-primary  hover:bg-[var(--color-primary-dark)] text-white px-8 py-3 cursor-pointer rounded-lg font-semibold w-full md:w-auto"
             // className="btn-primary text-white px-8 py-3 cursor-pointer rounded-lg font-semibold transition w-full md:w-auto"
           >
             Add to Cart

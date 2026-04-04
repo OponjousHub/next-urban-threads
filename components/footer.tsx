@@ -116,7 +116,7 @@ export default function Footer() {
           {/* ✅ Newsletter Link (replaces form) */}
           <Link
             href="/newsletter"
-            className="inline-block bg-[var(--color-primary)] text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors font-medium"
+            className="inline-block bg-[var(--color-primary)] text-white px-6 py-2 rounded-md hover:bg-[var(--color-primary-dark)] transition-colors font-medium"
           >
             Join Our Newsletter
           </Link>

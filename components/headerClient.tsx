@@ -129,7 +129,7 @@ const HeaderClient = ({
             placeholder="Search product..."
             className="focus:bg-white border-0 outline-0 py-2 px-3 text-[1.6rem] bg-transparent"
           />
-          <button className="bg-[var(--color-primary)] hover:text-[var(--color-primary-dark)] px-4 py-2 border-0 text-amber-50 font-medium transition-colors duration-200 cursor-pointer text-[1.6rem]">
+          <button className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] px-4 py-2 border-0 text-amber-50 font-medium transition-colors duration-200 cursor-pointer text-[1.6rem]">
             Search
           </button>
         </div>
@@ -145,7 +145,7 @@ const HeaderClient = ({
               <FiShoppingCart size={20} /> <span>Cart</span>
               {/* Show count only when there is something in the cart*/}
               {cartCount > 0 && (
-                <span className="absolute -top-3 -right-7 w-5 h-5 text-[10px] bg-indigo-600 text-white rounded-full p-4 flex items-center justify-center font-semibold ">
+                <span className="absolute -top-3 -right-7 w-5 h-5 text-[10px] bg-[var(--color-primary)] text-white rounded-full p-4 flex items-center justify-center font-semibold ">
                   {cartCount}
                 </span>
               )}
