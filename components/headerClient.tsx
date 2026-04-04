@@ -13,7 +13,13 @@ type User = {
   role: "ADMIN" | "USER";
 };
 
-const HeaderClient = ({ role }: { role: string | null }) => {
+const HeaderClient = ({
+  role,
+  tenantName,
+}: {
+  role: string | null;
+  tenantName: string;
+}) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { cartItems } = useCart();
   const [user, setUser] = useState<User | null>(null);
@@ -44,9 +50,35 @@ const HeaderClient = ({ role }: { role: string | null }) => {
   };
   const cartCount = cartItems.reduce((sum, cur) => sum + cur.quantity, 0);
 
-  if (loading) {
-    return <header className="bg-white border-b-2 border-[#eee] h-[72px]" />;
-  }
+  // COMPUTING THE SHAPE OF THE STORE NAME
+  const storeName = tenantName || "Store";
+
+  // Split by spaces
+  const nameParts = storeName.trim().split(" ");
+
+  // Decide how to render
+  const RenderStoreName = () => {
+    if (nameParts.length === 1) {
+      // Only one word → highlight it
+      return (
+        <span className="text-[var(--color-primary)]">{nameParts[0]}</span>
+      );
+    } else {
+      // Multiple words → first word normal, second word highlighted
+      return (
+        <>
+          {nameParts[0]}{" "}
+          <span className="text-[var(--color-primary)]">
+            {nameParts.slice(1).join(" ")}
+          </span>
+        </>
+      );
+    }
+  };
+
+  // if (loading) {
+  //   return <header className="bg-white border-b-2 border-[#eee] h-[72px]" />;
+  // }
   return (
     <header className="bg-white border-b-2 border-[#eee] sticky top-0 z-[1000]">
       <div className="flex items-center justify-between max-w-[1200px] mx-auto px-4 py-4">
@@ -55,7 +87,7 @@ const HeaderClient = ({ role }: { role: string | null }) => {
           href="/"
           className="text-[#222] text-[2.4rem] font-bold no-underline"
         >
-          Urban<span className="text-[var(--color-primary)]">Threads</span>
+          <RenderStoreName />
         </Link>
 
         {/* Navigation */}
@@ -97,7 +129,7 @@ const HeaderClient = ({ role }: { role: string | null }) => {
             placeholder="Search product..."
             className="focus:bg-white border-0 outline-0 py-2 px-3 text-[1.6rem] bg-transparent"
           />
-          <button className="bg-[var(--color-primary)] px-4 py-2 border-0 text-amber-50 font-medium transition-colors duration-200 hover:bg-[#005ac1] cursor-pointer text-[1.6rem]">
+          <button className="bg-[var(--color-primary)] hover:text-[var(--color-primary-dark)] px-4 py-2 border-0 text-amber-50 font-medium transition-colors duration-200 cursor-pointer text-[1.6rem]">
             Search
           </button>
         </div>
@@ -125,7 +157,6 @@ const HeaderClient = ({ role }: { role: string | null }) => {
               user={user}
               onRemoveAvater={handleReloadHeader}
               role={role}
-              
             />
           ) : (
             <div className="flex gap-4 ml-8">

@@ -48,23 +48,23 @@ export default function OrdersStatusChart({
   const data = [
     {
       name: "Paid",
-      value: orderStatus?.paid.count,
-      revenue: orderStatus?.paid.revenue,
+      value: orderStatus?.paid?.count,
+      revenue: orderStatus?.paid?.revenue,
     },
     {
       name: "Pending",
-      value: orderStatus?.pending.count,
-      revenue: orderStatus?.pending.revenue,
+      value: orderStatus?.pending?.count,
+      revenue: orderStatus?.pending?.revenue,
     },
     {
       name: "Cancelled",
-      value: orderStatus?.cancelled.count,
-      revenue: orderStatus?.cancelled.revenue,
+      value: orderStatus?.cancelled?.count,
+      revenue: orderStatus?.cancelled?.revenue,
     },
     {
       name: "Delivered",
-      value: orderStatus?.delivered.count,
-      revenue: orderStatus?.delivered.revenue,
+      value: orderStatus?.delivered?.count,
+      revenue: orderStatus?.delivered?.revenue,
     },
   ].filter((item) => item.value > 0);
 

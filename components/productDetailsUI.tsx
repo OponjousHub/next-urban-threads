@@ -107,7 +107,7 @@ export function ProductDetailUI({
               </Dialog>
             )}
           </div>
-          <p className="text-3xl font-semibold text-indigo-600">
+          <p className="text-3xl font-semibold text-[var(--color-primary)]">
             ${Number(product?.price)?.toFixed(2)}
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -147,7 +147,8 @@ export function ProductDetailUI({
           {/* Add to Cart Button */}
           <button
             onClick={() => handleAddToCart(product)}
-            className="bg-indigo-600 text-white px-8 py-3 cursor-pointer rounded-lg font-semibold hover:bg-indigo-700 transition w-full md:w-auto"
+            className="bg-primary hover:bg-primary-dark text-white px-8 py-3 cursor-pointer rounded-lg font-semibold w-full md:w-auto"
+            // className="btn-primary text-white px-8 py-3 cursor-pointer rounded-lg font-semibold transition w-full md:w-auto"
           >
             Add to Cart
           </button>
