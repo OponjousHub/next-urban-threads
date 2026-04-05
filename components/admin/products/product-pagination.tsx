@@ -26,7 +26,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
 
       <div className="flex items-center space-x-2">
         <span className="text-sm text-gray-500">Page</span>
-        <span className="px-3 py-1 bg-indigo-100 text-indigo-700 font-medium rounded-full shadow-sm">
+        <span className="px-3 py-1 bg-[var(--color-primary)] text-white font-medium rounded-full shadow-sm">
           {currentPage}
         </span>
         <span className="text-sm text-gray-500">of {totalPages}</span>

@@ -121,8 +121,8 @@ export function ProductImageUploader({
         type="button"
         disabled={uploading || !files.length}
         onClick={uploadImages}
-        className="bg-indigo-600 text-white px-4 py-2 rounded-md
-                   hover:bg-indigo-700 transition disabled:opacity-60"
+        className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-md
+                   hover:bg-[var(--color-primary-dark)]transition disabled:opacity-60"
       >
         {uploading ? "Uploading..." : "Upload Images"}
       </button>

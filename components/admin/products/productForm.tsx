@@ -115,7 +115,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
       return;
     }
 
-
     try {
       setLoading(true);
 
@@ -128,7 +127,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
       // if (isEdit) {
       //   console.log("EDIT ID", initialData.id);
       // }
- 
 
       const response = await fetch(
         isEdit ? `/api/admin/products/${initialData.id}` : "/api/products",
@@ -238,7 +236,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     <input
                       required
                       placeholder="Enter product name"
-                      className="input"
+                      className="input focus:ring-[var(--color-primary-ring)]"
                       value={form.name}
                       onChange={(e) =>
                         setForm({ ...form, name: e.target.value })
@@ -251,7 +249,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     </label>
                     <textarea
                       rows={4}
-                      className="input"
+                      className="input focus:ring-[var(--color-primary-ring)]"
                       value={form.description}
                       onChange={(e) =>
                         setForm({ ...form, description: e.target.value })
@@ -272,7 +270,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                       min="0"
                       inputMode="numeric"
                       required
-                      className="input"
+                      className="input focus:ring-[var(--color-primary-ring)]"
                       value={form.price}
                       onChange={(e) =>
                         setForm({ ...form, price: e.target.value })
@@ -288,7 +286,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                       min={0}
                       inputMode="numeric"
                       required
-                      className="input"
+                      className="input focus:ring-[var(--color-primary-ring)]"
                       value={form.stock}
                       onChange={(e) =>
                         setForm({ ...form, stock: e.target.value })
@@ -301,7 +299,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
               <Section title="Organization">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <select
-                    className="input"
+                    className="input  focus:ring-[var(--color-primary-ring)]"
                     value={form.category}
                     onChange={(e) =>
                       setForm({ ...form, category: e.target.value })
@@ -312,7 +310,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     ))}
                   </select>
                   <input
-                    className="input"
+                    className="input focus:ring-[var(--color-primary-ring)]"
                     placeholder="Sub category (e.g. T-Shirt)"
                     value={form.subCategory}
                     onChange={(e) =>
@@ -335,7 +333,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                           onClick={() => toggleSize(size)}
                           className={`px-3 py-1 rounded-md border text-sm ${
                             active
-                              ? "bg-indigo-600 text-white border-indigo-600"
+                              ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
                               : "border-gray-300"
                           }`}
                         >
@@ -358,7 +356,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                           onClick={() => toggleColour(colour)}
                           className={`px-3 py-1 rounded-md border text-sm ${
                             active
-                              ? "bg-indigo-600 text-white border-indigo-600"
+                              ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
                               : "border-gray-300"
                           }`}
                         >
@@ -390,7 +388,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700"
+                  className="bg-[var(--color-primary)] text-white px-6 py-3 rounded-md hover:bg-[var(--color-primary-dark)]"
                 >
                   {loading
                     ? isEdit
@@ -405,7 +403,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
             {/* RIGHT SIDEBAR */}
             <div className="space-y-6">
-              <div className="border rounded-2xl p-6 bg-white shadow-sm">
+              <div className="border rounded-2xl p-6 bg-white shadow-sm ">
                 <h3 className="font-semibold mb-4">Status</h3>
                 <label className="flex items-center justify-between">
                   <span>Featured Product</span>

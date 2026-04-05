@@ -40,7 +40,7 @@ export default function OrderFilters() {
           onClick={() => updateDateRange(today, today)}
           className={`px-3 py-1 text-sm border rounded-lg hover:bg-gray-200 ${
             params.get("from") === today && params.get("to") === today
-              ? "bg-indigo-500 text-white border-indigo-500"
+              ? "bg-[var(--color-primary)] text-white border-[var(--color-primary-light)] hover:bg-[var(--color-primary-dark)]"
               : "bg-gray-100 text-gray-700"
           }`}
         >
@@ -65,7 +65,7 @@ export default function OrderFilters() {
             last7.setDate(new Date().getDate() - 7);
             const last7Str = last7.toISOString().split("T")[0];
             return from === last7Str && to === today
-              ? "bg-indigo-500 text-white border-indigo-500"
+              ? "bg-[var(--color-primary)] text-white border-[var(--color-primary-light)] hover:bg-[var(--color-primary-dark)]"
               : "bg-gray-100 text-gray-700";
           })()}`}
         >
@@ -90,7 +90,7 @@ export default function OrderFilters() {
             last30.setDate(new Date().getDate() - 30);
             const last30Str = last30.toISOString().split("T")[0];
             return from === last30Str && to === today
-              ? "bg-indigo-500 text-white border-indigo-500"
+              ? "bg-[var(--color-primary)] text-white border-[var(--color-primary-light)] hover:bg-[var(--color-primary-dark)]"
               : "bg-gray-100 text-gray-700";
           })()}`}
         >
@@ -110,7 +110,7 @@ export default function OrderFilters() {
               onChange={(e) =>
                 updateDateRange(e.target.value, params.get("to") || "")
               }
-              className="px-3 py-2 border border-gray-300 rounded-lg shadow-md bg-gray-50 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm"
+              className="px-3 py-2 border border-gray-300 rounded-lg shadow-md bg-gray-50 focus:border-[var(--color-primary-lighter)] focus:ring-1 focus:ring-[var(--color-primary-ring)] text-sm"
             />
           </div>
 
@@ -133,7 +133,7 @@ export default function OrderFilters() {
           <select
             onChange={(e) => updateParam("payment", e.target.value)}
             defaultValue={params.get("payment") || "ALL"}
-            className="px-3 py-2 border border-gray-300 rounded-lg shadow-md bg-gray-50 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-lg shadow-md bg-gray-50 focus:ring-[var(--color-primary-ring)] focus:ring-1  text-sm"
           >
             <option value="ALL">All Payments</option>
             <option value="PAID">Paid</option>
@@ -148,7 +148,7 @@ export default function OrderFilters() {
           <select
             onChange={(e) => updateParam("status", e.target.value)}
             defaultValue={params.get("status") || "ALL"}
-            className="px-3 py-2 border border-gray-300 rounded-lg shadow-md bg-gray-50 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-lg shadow-md bg-gray-50 focus:ring-[var(--color-primary-ring)] focus:ring-1 text-sm"
           >
             <option value="ALL">All Status</option>
             <option value="PROCESSING">Processing</option>
@@ -163,7 +163,7 @@ export default function OrderFilters() {
           placeholder="Search orders..."
           defaultValue={params.get("query") || ""}
           onBlur={(e) => updateParam("query", e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm w-[80%] lg:w-60 bg-gray-50 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+          className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm w-[80%] lg:w-60 bg-gray-50 focus:ring-[var(--color-primary-ring)] focus:ring-1 "
         />
 
         {/* Reset Button */}

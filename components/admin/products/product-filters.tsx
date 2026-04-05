@@ -21,7 +21,7 @@ export function ProductFilters() {
       <div className="flex flex-col text-xs text-gray-500">
         <span>Category</span>
         <select
-          className="input w-auto text-sm min-w-fit"
+          className="input w-auto text-sm min-w-fit focus:ring-[var(--color-primary-ring)]"
           onChange={(e) => updateParam("category", e.target.value)}
           defaultValue={searchParams.get("category") || ""}
         >
@@ -32,11 +32,12 @@ export function ProductFilters() {
         </select>
       </div>
       <div className="h-6 w-px bg-gray-300 mx-2" />
+
       {/* Stock */}
       <div className="flex flex-col text-xs text-gray-500">
         <span>Stock</span>
         <select
-          className="input w-auto min-w-fit"
+          className="input w-auto min-w-fit focus:ring-[var(--color-primary-ring)]"
           onChange={(e) => updateParam("stock", e.target.value)}
           defaultValue={searchParams.get("stock") || ""}
         >
@@ -46,11 +47,12 @@ export function ProductFilters() {
         </select>
       </div>
       <div className="h-6 w-px bg-gray-300 mx-2" />
+
       {/* Featured */}
       <div className="flex flex-col text-xs text-gray-500">
         <span>Featured</span>
         <select
-          className="input w-auto min-w-fit"
+          className="input w-auto min-w-fit focus:ring-[var(--color-primary-ring)] "
           onChange={(e) => updateParam("featured", e.target.value)}
           defaultValue={searchParams.get("featured") || ""}
         >

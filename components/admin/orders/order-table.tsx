@@ -174,7 +174,7 @@ export default function OrdersTable({
                       onClick={() => goToPage(p)}
                       className={`${base} ${
                         p === currentPage
-                          ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                          ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-sm"
                           : "bg-white hover:bg-gray-100"
                       }`}
                     >

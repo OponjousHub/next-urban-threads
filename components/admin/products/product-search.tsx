@@ -37,7 +37,7 @@ export function ProductSearch() {
         placeholder="Search products..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="input w-[100%] md:w-[40%]"
+        className="input w-[100%] md:w-[40%] focus:ring-[var(--color-primary-ring)]"
       />
 
       {/* Add clear field button */}
