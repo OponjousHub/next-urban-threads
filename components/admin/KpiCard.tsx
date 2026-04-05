@@ -82,7 +82,11 @@ export default function KpiCard({
         </div>
 
         {/* Optional icon */}
-        {icon && <div className="text-indigo-500 text-3xl">{icon}</div>}
+        {icon && (
+          <div className="text-[var(--color-primary-light)] text-3xl">
+            {icon}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -16,7 +16,7 @@ export default function RecentOrdersTable({ orders }: { orders: Order[] }) {
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 h-full">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold">Recent Orders</h3>
-        <button className="text-sm text-indigo-600 hover:underline">
+        <button className="text-sm text-[var(--color-primary)] hover:underline">
           View all
         </button>
       </div>

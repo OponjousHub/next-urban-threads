@@ -54,7 +54,7 @@ export default function ActivityFeed({ activities }: Props) {
         {activities?.length > 4 && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-sm text-indigo-600 hover:underline"
+            className="text-sm text-[var(--color-primary)] hover:underline"
           >
             {expanded ? "Show less" : "View all"}
           </button>

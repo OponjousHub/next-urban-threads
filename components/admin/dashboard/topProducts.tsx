@@ -14,7 +14,7 @@ export default function TopProducts({ products }: { products: Product[] }) {
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold">Top Products</h3>
 
-        <button className="text-sm text-indigo-600 hover:underline">
+        <button className="text-sm text-[var(--color-primary)] hover:underline">
           View all
         </button>
       </div>

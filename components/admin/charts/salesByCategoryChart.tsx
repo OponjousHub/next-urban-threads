@@ -50,7 +50,11 @@ export default function SalesByCategoryChart({ data }: Props) {
               }}
             />
 
-            <Bar dataKey="sales" fill="#6366F1" radius={[6, 6, 6, 6]} />
+            <Bar
+              dataKey="sales"
+              fill="var(--color-primary)"
+              radius={[6, 6, 6, 6]}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
