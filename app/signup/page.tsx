@@ -352,7 +352,7 @@ export default function SignupPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition"
+            className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white py-3 rounded-lg font-semibold transition"
           >
             Create Account
           </button>
@@ -363,7 +363,7 @@ export default function SignupPage() {
           Already have an account?{" "}
           <Link
             href="/login"
-            className="text-indigo-600 font-medium hover:underline"
+            className="text-[var(--color-primary)] font-medium hover:underline"
           >
             Log in
           </Link>

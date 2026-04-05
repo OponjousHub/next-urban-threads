@@ -169,7 +169,7 @@ export default function LoginPage() {
             <div className="flex justify-end">
               <Link
                 href="/forgot-password"
-                className="text-sm text-indigo-600 hover:underline"
+                className="text-sm text-[var(--color-primary)] hover:underline"
               >
                 Forgot password?
               </Link>
@@ -178,7 +178,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg"
+              className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg"
             >
               {loading ? "Logging in..." : "Log In"}
             </button>
@@ -233,7 +233,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-indigo-600 text-white py-3 rounded-lg"
+                  className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg"
                   // onClick={()=>setMode("otp")}
                 >
                   {loading ? "Verifying..." : "Verify Code"}
@@ -241,7 +241,7 @@ export default function LoginPage() {
 
                 <button
                   type="button"
-                  className="text-sm text-indigo-600 mt-2"
+                  className="text-sm text-[var(--color-primary)] mt-2"
                   onClick={() => setUseRecovery(true)}
                 >
                   Use a recovery code instead
@@ -252,14 +252,14 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-indigo-600 text-white py-3 rounded-lg"
+                  className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg"
                   // onClick={()=>setMode("recovery")}
                 >
                   {loading ? "Verifying..." : "Verify recovery code"}
                 </button>
                 <button
                   type="button"
-                  className="text-sm text-indigo-600 mt-2"
+                  className="text-sm text-[var(--color-primary)] mt-2"
                   onClick={() => setUseRecovery(false)}
                 >
                   Back to authenticator
