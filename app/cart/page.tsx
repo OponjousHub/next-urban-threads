@@ -116,7 +116,7 @@ export default function CartPage() {
         <Link href={"/checkout"}>
           <button
             disabled={cartItems.length === 0}
-            className="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition disabled:opacity-60"
+            className="mt-6 w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-medium py-3 rounded-xl transition disabled:opacity-60"
           >
             Proceed to Checkout
           </button>

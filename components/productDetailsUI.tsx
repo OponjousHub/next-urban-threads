@@ -148,7 +148,6 @@ export function ProductDetailUI({
           <button
             onClick={() => handleAddToCart(product)}
             className="bg-primary  hover:bg-[var(--color-primary-dark)] text-white px-8 py-3 cursor-pointer rounded-lg font-semibold w-full md:w-auto"
-            // className="btn-primary text-white px-8 py-3 cursor-pointer rounded-lg font-semibold transition w-full md:w-auto"
           >
             Add to Cart
           </button>

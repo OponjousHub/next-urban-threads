@@ -19,3 +19,34 @@ export function lightenColor(hex: string, percent: number) {
 
   return `#${((R << 16) | (G << 8) | B).toString(16).padStart(6, "0")}`;
 }
+
+export function lighterColor(hex: string, percent: number) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const amt = Math.round(2.55 * percent);
+
+  const R = Math.min((num >> 16) + amt, 255);
+  const G = Math.min(((num >> 8) & 0x00ff) + amt, 255);
+  const B = Math.min((num & 0x0000ff) + amt, 255);
+
+  return `#${((R << 16) | (G << 8) | B).toString(16).padStart(6, "0")}`;
+}
+
+export function lightestColor(hex: string, percent: number) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const amt = Math.round(2.55 * percent);
+
+  const R = Math.min((num >> 16) + amt, 255);
+  const G = Math.min(((num >> 8) & 0x00ff) + amt, 255);
+  const B = Math.min((num & 0x0000ff) + amt, 255);
+
+  return `#${((R << 16) | (G << 8) | B).toString(16).padStart(6, "0")}`;
+}
+
+export function hexToRgba(hex: string, alpha: number) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}

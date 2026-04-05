@@ -20,7 +20,7 @@ function Hero() {
         <Link href={"/products"}>
           <button
             type="button"
-            className="flex items-center font-bold px-[32px] py-[14px] text-[2rem] cursor-pointer bg-[var(--color-primary)] rounded-[6px] hover:bg-[#3730a3]"
+            className="flex items-center font-bold px-[32px] py-[14px] text-[2rem] cursor-pointer bg-[var(--color-primary)] rounded-[6px] hover:bg-[var(--color-primary-dark)]"
           >
             Shop Now
           </button>

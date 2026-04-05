@@ -105,8 +105,8 @@ function SidebarItem({
       className={`flex items-center gap-3 px-3 py-3 rounded-xl duration-200
         ${
           active
-            ? "bg-indigo-100 text-indigo-700"
-            : "hover:bg-indigo-50 hover:text-indigo-600"
+            ? "bg-[var(--color-primary-lighter)] text-[var(--color-primary-dark)]"
+            : "hover:bg-[var(--color-primary-lightest)] hover:text-indigo-600hover:bg-[var(--color-primary)]"
         }
       `}
     >

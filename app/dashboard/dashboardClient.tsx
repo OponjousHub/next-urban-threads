@@ -196,7 +196,10 @@ function DashboardClient({
                         ${Number(order.totalAmount).toFixed(2)}
                       </p>
                       <Link href={`${`/dashboard/order/${order.id}`}`}>
-                        <Button size="sm" className="mt-2">
+                        <Button
+                          size="sm"
+                          className="mt-2 text-white hover:bg-[var(--color-primary-dark)]"
+                        >
                           View
                         </Button>
                       </Link>

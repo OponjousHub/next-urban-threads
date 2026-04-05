@@ -7,7 +7,13 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { getTenant } from "../lib/tenant/getTenant";
 import { Toaster } from "react-hot-toast";
 import { darkenColor } from "@/utils/color-shades";
-import { lightenColor } from "@/utils/color-shades";
+import {
+  lightenColor,
+  lighterColor,
+  lightestColor,
+  hexToRgba,
+} from "@/utils/color-shades";
+// import {hexToRgba}
 import "./globals.css";
 
 export const metadata = {
@@ -30,6 +36,9 @@ export default async function RootLayout({
 
   const primaryDark = darkenColor(primaryColor, 20);
   const primaryLight = lightenColor(primaryColor, 20);
+  const primaryLighter = lighterColor(primaryColor, 60);
+  const primaryLightest = lightestColor(primaryColor, 70);
+  const primaryRing = hexToRgba(primaryColor, 0.3);
 
   return (
     <html lang="en">
@@ -38,6 +47,9 @@ export default async function RootLayout({
           ["--color-primary" as any]: primaryColor,
           ["--color-primary-dark" as any]: primaryDark,
           ["--color-primary-light" as any]: primaryLight,
+          ["--color-primary-lighter" as any]: primaryLighter,
+          ["--color-primary-lightest" as any]: primaryLightest,
+          ["--color-primary-ring" as any]: primaryRing,
         }}
       >
         <TenantProvider tenant={tenant}>

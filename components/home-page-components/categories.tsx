@@ -26,7 +26,7 @@ function Categories() {
       <div className="mt-[4rem]">
         <Link
           href="/products"
-          className="inline-block bg-[#4f46e5] text-white text-2xl font-lg px-8 py-3 rounded-lg shadow-lg hover:bg-[#4338ca] transition"
+          className="inline-block bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white text-2xl font-lg px-8 py-3 rounded-lg shadow-lg hover:bg-[#4338ca] transition"
         >
           Shop All Products
         </Link>

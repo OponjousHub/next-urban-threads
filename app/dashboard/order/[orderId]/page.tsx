@@ -6,7 +6,8 @@ import toast from "react-hot-toast";
 import { GetToast } from "@/components/ui/adminToast";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ReviewForm } from "@/components/reviews/reviewForm";
-import { OrderStatus } from "@prisma/client";
+// import { OrderStatus } from "@prisma/client";
+import { OrderStatus, PaymentStatus } from "@prisma/client";
 
 type OrderItem = {
   id: string;
@@ -22,6 +23,7 @@ type OrderItem = {
 type Order = {
   id: string;
   status: OrderStatus;
+  paymentStatus: PaymentStatus;
   totalAmount: number;
   paymentReference: string | null;
   items: OrderItem[];
@@ -196,7 +198,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
             <span className="font-semibold">Status:</span>{" "}
             <span
               className={`font-bold ${
-                order.status === "PAID"
+                order.paymentStatus === PaymentStatus.PAID
                   ? "text-green-600"
                   : order.status === "CANCELLED"
                     ? "text-red-600"
@@ -248,7 +250,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                   {order.status === "DELIVERED" && (
                     <Dialog open={open} onOpenChange={setOpen}>
                       <DialogTrigger asChild>
-                        <button className="text-indigo-600 text-sm font-medium hover:underline">
+                        <button className="text-[var(--color-primary)] text-sm font-medium hover:underline">
                           {userReviews[item.product.id]
                             ? "Edit Review"
                             : "Write Review"}

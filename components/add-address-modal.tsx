@@ -152,6 +152,7 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
             <Checkbox
               checked={form.isDefault}
               onCheckedChange={(v) => handleChange("isDefault", v)}
+              className="text-white"
             />
             <span className="text-sm">Set as default address</span>
           </div>
@@ -161,7 +162,11 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
               Cancel
             </Button>
 
-            <Button onClick={handleSubmit} disabled={loading}>
+            <Button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="text-white"
+            >
               {loading
                 ? "Saving..."
                 : address

@@ -206,7 +206,7 @@ export default function CheckoutClient({
                     key={address.id}
                     className={`flex gap-3 rounded-lg border p-4 cursor-pointer ${
                       selectedAddressId === address.id
-                        ? "border-indigo-600 bg-indigo-50"
+                        ? "border-[var(--color-primary)] bg-indigo-50"
                         : ""
                     }`}
                   >
@@ -265,7 +265,7 @@ export default function CheckoutClient({
         ${
           errors.email
             ? "border-red-500 focus:ring-red-500"
-            : "focus:ring-indigo-500"
+            : "focus:ring-[var(--color-primary-ring)]"
         }`}
                 />
                 {errors.email && (
@@ -282,7 +282,7 @@ export default function CheckoutClient({
                   ? setShowNewAddressForm(true)
                   : setShowNewAddressForm(false);
               }}
-              className="text-indigo-600 text-sm"
+              className="text-[var(--color-primary)] text-sm"
             >
               + Add new address
             </button>
@@ -301,7 +301,7 @@ export default function CheckoutClient({
                     value={formData.fullName}
                     onChange={handleChange}
                     required
-                    className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                   />
                 </div>
 
@@ -315,7 +315,7 @@ export default function CheckoutClient({
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                   />
                 </div>
               </div>
@@ -331,7 +331,7 @@ export default function CheckoutClient({
                   onChange={handleChange}
                   required
                   placeholder="+234 801 234 5678"
-                  className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                 />
               </div>
               <div>
@@ -344,7 +344,7 @@ export default function CheckoutClient({
                   value={formData.street}
                   onChange={handleChange}
                   required
-                  className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
@@ -358,7 +358,7 @@ export default function CheckoutClient({
                     value={formData.city}
                     onChange={handleChange}
                     required
-                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                   />
                 </div>
 
@@ -373,7 +373,7 @@ export default function CheckoutClient({
                     value={formData.state}
                     onChange={handleChange}
                     placeholder="Lagos"
-                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                   />
                 </div>
 
@@ -387,7 +387,7 @@ export default function CheckoutClient({
                     value={formData.postalCode}
                     onChange={handleChange}
                     required
-                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                   />
                 </div>
 
@@ -401,7 +401,7 @@ export default function CheckoutClient({
                     value={formData.country}
                     onChange={handleChange}
                     required
-                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                   />
                 </div>
               </div>{" "}
@@ -416,7 +416,7 @@ export default function CheckoutClient({
               name="paymentMethod"
               value={formData.paymentMethod}
               onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
             >
               <option value="credit-card">Credit Card</option>
               <option value="paypal">PayPal</option>
@@ -429,7 +429,7 @@ export default function CheckoutClient({
                 type="checkbox"
                 checked={saveAddress}
                 onChange={(e) => setSaveAddress(e.target.checked)}
-                className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                className="h-4 w-4 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary-ring)] bg-[var(--color-primary)]"
               />
               Save this address for future checkouts
             </label>
@@ -438,7 +438,7 @@ export default function CheckoutClient({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition"
+            className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-medium py-3 rounded-xl transition"
           >
             Place Order
           </button>

@@ -21,8 +21,6 @@ export default function DashboardInventory({
   newCustomer: number;
   activities: Activity[];
 }) {
-  console.log("TOP ORDERSSS", activities);
-
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
       <div className="grid grid-cols-1 lg:grid-cols-2h-full">

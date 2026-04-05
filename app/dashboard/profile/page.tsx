@@ -241,7 +241,7 @@ export default function EditProfilePage() {
                   <button
                     type="button"
                     onClick={() => setOpen(true)}
-                    className="text-sm font-medium text-blue-600 hover:underline"
+                    className="text-sm font-medium text-[var(--color-primary)] hover:underline"
                   >
                     Change Email
                   </button>
