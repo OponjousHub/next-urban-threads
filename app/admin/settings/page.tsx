@@ -27,7 +27,7 @@ export default function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
                   activeTab === tab.id
-                    ? "bg-indigo-50 text-indigo-600 font-medium"
+                    ? "bg-[var(--color-primary-lightest)] text-[var(--color-primary)] font-medium"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
               >

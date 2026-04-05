@@ -242,7 +242,7 @@ export default function GeneralSettings() {
           <button
             type="submit"
             disabled={loading || !isDirty}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm"
+            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm"
           >
             {loading ? "Saving..." : "Save changes"}
           </button>

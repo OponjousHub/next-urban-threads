@@ -119,7 +119,7 @@ export function ProfileSection() {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="text-sm font-medium text-blue-600 hover:underline"
+            className="text-sm font-medium text-[var(--color-primary)] hover:underline"
           >
             Change Email
           </button>
@@ -133,7 +133,7 @@ export function ProfileSection() {
           <button
             type="submit"
             disabled={loading || !isDirty}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm"
+            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm"
           >
             {loading ? "Saving..." : "Update Profile"}
           </button>
