@@ -19,7 +19,7 @@ export default function Footer() {
         {/* Company Info */}
         <div>
           <h2 className="text-white text-2xl font-semibold mb-4">
-            Urban Threads
+            {tenant.name}
           </h2>
           <p className="text-md leading-relaxed">
             Your one-stop shop for quality products at the best prices. We make
@@ -141,7 +141,7 @@ export default function Footer() {
 
       {/* Divider */}
       <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-400">
-        © {new Date().getFullYear()} Urban Threads. All rights reserved.
+        © {new Date().getFullYear()} {`${tenant.name}. All rights reserved.`}
       </div>
     </footer>
   );
