@@ -181,6 +181,7 @@ model Tenant {
   WishlistItem WishlistItem[]
   cartItem  CartItem[]
   review    Review[]
+  categories Category[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -264,6 +265,7 @@ model Category {
   image    String?
   tenantId String
   products  Product[]
+  tenant   Tenant  @relation(fields: [tenantId], references: [id])
 }
 
 enum Role {

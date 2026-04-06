@@ -201,7 +201,7 @@ export default function GeneralSettings() {
                 />
                 <div className="flex gap-3">
                   {/* Change */}
-                  <label className="cursor-pointer text-sm text-indigo-600 hover:underline">
+                  <label className="cursor-pointer text-sm text-[var(--color-primary)]hover:underline">
                     Change
                     <input
                       type="file"
