@@ -98,19 +98,27 @@ export async function GET(req: Request) {
     }),
 
     // Chart data
-    prisma.$queryRaw<{ date: Date; revenue: number; orders: bigint }[]>`
-    SELECT
-      DATE("createdAt") as date,
-      SUM("totalAmount") as revenue,
-      COUNT(*) as orders
-    FROM "Order"
-    WHERE
-      "tenantId" = ${tenant.id}
-      AND "status" IN ('PAID','SHIPPED','DELIVERED')
-      AND "createdAt" >= ${startDate}
-    GROUP BY DATE("createdAt")
-    ORDER BY DATE("createdAt") ASC
-  `,
+    prisma.order.groupBy({
+      by: ["createdAt"],
+      where: {
+        tenantId: tenant.id,
+        status: {
+          in: [
+            OrderStatus.SHIPPED,
+            OrderStatus.DELIVERED,
+            OrderStatus.PROCESSING,
+            OrderStatus.PENDING,
+          ],
+        },
+        createdAt: { gte: startDate },
+      },
+      _sum: {
+        totalAmount: true,
+      },
+      _count: {
+        id: true,
+      },
+    }),
 
     // Current returning customers
     prisma.order.groupBy({
@@ -147,15 +155,15 @@ export async function GET(req: Request) {
   > = {};
 
   groupedOrders.forEach((row) => {
-    const label = new Date(row.date).toLocaleDateString("en-US", {
+    const label = new Date(row.createdAt).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     });
 
     chartMap[label] = {
       name: label,
-      revenue: Number(row.revenue),
-      orders: Number(row.orders),
+      revenue: Number(row._sum.totalAmount ?? 0),
+      orders: row._count.id,
     };
   });
 
