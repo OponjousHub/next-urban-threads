@@ -1,32 +1,37 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-// import { useTenant } from "@/store/tenant-provider-context";
+import { useTenant } from "@/store/tenant-provider-context";
 
-function Hero() {
-  // const { tenant } = useTenant();
+export default function Hero() {
+  const { tenant } = useTenant();
+
   return (
-    <>
+    <section className="relative h-[70vh] flex items-center justify-center text-white">
       <Image
-        src={"/img/featured-img.jpg"}
-        alt={"'Hero image"}
+        src="/img/featured-img.jpg"
+        alt="Hero"
         fill
-        className="w-full h-full absolute object-fill brightness-65"
+        className="object-cover"
       />
-      <div className="relative flex flex-col gap-4 items-center justify-center h-[80vh] text-[#fff] overflow-hidden">
-        <h1 className="text-[4rem] font-extrabold "> Urban Threads</h1>
-        <p className="text-[2rem] text-center">
-          Trendy streetwear & accessories for your everyday style.
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/50" />
+
+      <div className="relative text-center max-w-3xl px-6">
+        <h1 className="text-5xl font-bold mb-4">{tenant.name}</h1>
+
+        <p className="text-lg mb-6 text-gray-200">
+          Discover products from multiple vendors in one place
         </p>
-        <Link href={"/products"}>
-          <button
-            type="button"
-            className="flex items-center font-bold px-[32px] py-[14px] text-[2rem] cursor-pointer bg-[var(--color-primary)] rounded-[6px] hover:bg-[var(--color-primary-dark)]"
-          >
+
+        <Link href="/products">
+          <button className="bg-primary hover:bg-primary-dark px-8 py-3 rounded-lg font-semibold transition">
             Shop Now
           </button>
         </Link>
       </div>
-    </>
+    </section>
   );
 }
-export default Hero;

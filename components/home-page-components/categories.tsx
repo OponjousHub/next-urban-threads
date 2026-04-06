@@ -1,38 +1,38 @@
-import "@/app/globals.css";
+"use client";
+
 import Link from "next/link";
-import { useTenant } from "@/store/tenant-provider-context";
 
-function Categories() {
+const categories = [
+  { name: "Men", image: "/img/cat-men.jpg" },
+  { name: "Women", image: "/img/cat-women.jpg" },
+  { name: "Accessories", image: "/img/cat-accessories.jpg" },
+];
+
+export default function CategoryGrid() {
   return (
-    <section className="px-[4rem] pt-32 pb-16 text-center text-[#fafafa]">
-      <h1 className="text-[#333] text-4xl mt-[8rem] mb-[4rem] font-bold">
-        Shop by Category
-      </h1>
+    <section className="px-6 py-12">
+      <h2 className="text-2xl font-semibold mb-6">Shop by Category</h2>
 
-      {/* Category Grid */}
-      <div className="text-[#555] grid grid-cols-[repeat(auto-fit,_minmax(180px,_1fr))] gap-8 mt-[2rem]">
-        <Link href="/products/men" className="category-style">
-          Men
-        </Link>
-        <Link href="/products/women" className="category-style">
-          Women
-        </Link>
-        <Link href="/products/accessories" className="category-style">
-          Accessories
-        </Link>
-      </div>
+      <div className="grid md:grid-cols-3 gap-6">
+        {categories.map((cat) => (
+          <Link
+            key={cat.name}
+            href={`/products/${cat.name.toLowerCase()}`}
+            className="relative h-40 rounded-xl overflow-hidden group"
+          >
+            <img
+              src={cat.image}
+              className="w-full h-full object-cover group-hover:scale-105 transition"
+            />
 
-      {/* Shop All Button */}
-      <div className="mt-[4rem]">
-        <Link
-          href="/products"
-          className="inline-block bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white text-2xl font-lg px-8 py-3 rounded-lg shadow-lg hover:bg-[#4338ca] transition"
-        >
-          Shop All Products
-        </Link>
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <span className="text-white font-semibold text-lg">
+                {cat.name}
+              </span>
+            </div>
+          </Link>
+        ))}
       </div>
     </section>
   );
 }
-
-export default Categories;
