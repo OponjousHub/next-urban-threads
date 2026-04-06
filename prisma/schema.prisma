@@ -67,7 +67,8 @@ model Product {
   featured        Boolean         @default(false)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
-  category        Category
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id])
   subCategory     String
 
   averageRating   Float @default(0)
@@ -251,21 +252,24 @@ model WishlistItem {
 }
 
 model Vendor {
-  id       String
+  id       String  @id @default(cuid())
   name     String
   tenantId String
+}
+
+model Category {
+  id       String   @id @default(cuid())
+  name     String
+  slug     String   @unique
+  image    String?
+  tenantId String
+  products  Product[]
 }
 
 enum Role {
   USER
   ADMIN
   OWNER
-}
-
-enum Category {
-  MEN
-  WOMEN
-  ASSECCORIES
 }
 
 enum OrderStatus {

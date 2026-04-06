@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ProfileSection } from "@/components/admin/settings/profile-section";
 import ChangePasswordAdmin from "@/components/admin/settings/change-password-setting";
 import GeneralSettings from "@/components/admin/settings/general-setting";
+import ManageCategory from "@/components/admin/settings/category-setting";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -12,7 +13,7 @@ export default function SettingsPage() {
     { id: "general", label: "General" },
     { id: "profile", label: "Profile" },
     { id: "password", label: "Change password" },
-    { id: "billing", label: "Billing" },
+    { id: "category", label: "Manage category" },
   ];
 
   return (
@@ -52,7 +53,7 @@ export default function SettingsPage() {
         {activeTab === "general" && <GeneralSettings />}
         {activeTab === "profile" && <ProfileSection />}
         {activeTab === "password" && <ChangePasswordAdmin />}
-        {activeTab === "billing" && <BillingPlaceholder />}
+        {activeTab === "category" && <ManageCategory />}
       </main>
     </div>
   );

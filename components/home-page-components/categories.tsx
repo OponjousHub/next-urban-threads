@@ -3,9 +3,9 @@
 import Link from "next/link";
 
 const categories = [
-  { name: "Men", image: "/img/cat-men.jpg" },
-  { name: "Women", image: "/img/cat-women.jpg" },
-  { name: "Accessories", image: "/img/cat-accessories.jpg" },
+  { name: "Men", image: "/img/britons-glass.jpg" },
+  { name: "Women", image: "/img/amenia stylish handbag.jpg" },
+  { name: "Accessories", image: "/img/watch2.jpg" },
 ];
 
 export default function CategoryGrid() {
