@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import ProductService from "./product.service";
 import { CreateProductSchema, UpdateProductSchema } from "./product.schema";
-import { Category } from "@prisma/client";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { getLoggedInUserId } from "@/lib/auth";
 import { prisma } from "@/utils/prisma";
@@ -53,7 +52,6 @@ export default class ProductController {
         name,
         category,
         subCategory,
-        // tenantId: tenant.id,
         price,
         stock,
         instock: stock > 0,
@@ -62,14 +60,12 @@ export default class ProductController {
         description,
         sizes,
         colours,
-        // createdBy: user?.id ? { connect: { id: user.id } } : undefined,
         user: user?.id ? { connect: { id: user.id } } : undefined,
         createdByName: user?.name,
       },
       tenant.id,
     );
 
-    // const product = await ProductService.createProduct(parsed.data);
     return NextResponse.json(product, { status: 201 });
   }
 
@@ -77,17 +73,27 @@ export default class ProductController {
     const tenant = await getDefaultTenant();
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category") ?? undefined;
-    let parsedCategory: Category | undefined = undefined;
 
     if (!tenant) {
       throw new Error("Default tenant not found");
     }
 
-    if (category && Object.values(Category).includes(category as Category)) {
-      parsedCategory = category as Category;
+  
+    let categoryFilter = {};
+
+    if (category) {
+      categoryFilter = {
+        category: {
+          slug: category.toLowerCase(), // 🔥 match slug
+        },
+      };
     }
 
-    const products = await ProductService.getProducts(parsedCategory);
+    const products = await ProductService.getProducts(
+      // parsedCategory,
+      categoryFilter,
+    );
+
     return NextResponse.json(
       { result: products.length, products },
       { status: 200 },

@@ -1,5 +1,5 @@
 import ProductRepository from "./product.repository";
-import { Category } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export default class ProductService {
@@ -7,16 +7,21 @@ export default class ProductService {
     return ProductRepository.create(data, tenantId);
   }
 
-  static async getProducts(category?: Category) {
+  static async getProducts(categoryFilter?: Prisma.ProductWhereInput) {
     const tenant = await getDefaultTenant();
 
     if (!tenant) {
       throw new Error("Default tenant not found");
     }
-    return ProductRepository.findAll(
-      tenant.id,
-      category ? { category } : undefined,
-    );
+    return ProductRepository.findAll({
+      where: {
+        tenantId: tenant.id,
+        ...categoryFilter, // 🔥 THIS is the key
+      },
+      include: {
+        category: true,
+      },
+    });
   }
 
   static async getProduct(id: string) {

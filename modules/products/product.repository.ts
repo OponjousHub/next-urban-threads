@@ -32,14 +32,8 @@ export default class ProductRepository {
     });
   }
 
-  static findAll(tenantId: string, where?: Prisma.ProductWhereInput) {
-    return prisma.product.findMany({
-      where: {
-        deletedAt: null,
-        tenantId,
-        ...where,
-      },
-    });
+  static findAll(args: Prisma.ProductFindManyArgs) {
+    return prisma.product.findMany(args);
   }
 
   static findById(id: string, tenantId: string) {
