@@ -72,27 +72,39 @@ export default class ProductController {
   static async getAll(req: Request) {
     const tenant = await getDefaultTenant();
     const { searchParams } = new URL(req.url);
+
     const category = searchParams.get("category") ?? undefined;
+    const featured = searchParams.get("featured"); // ✅ NEW
 
     if (!tenant) {
       throw new Error("Default tenant not found");
     }
 
-  
-    let categoryFilter = {};
+    let filters: any = {
+      tenantId: tenant.id,
+    };
 
+    // ✅ Category filter
     if (category) {
-      categoryFilter = {
-        category: {
-          slug: category.toLowerCase(), // 🔥 match slug
-        },
+      filters.category = {
+        slug: category.toLowerCase(),
       };
     }
 
-    const products = await ProductService.getProducts(
-      // parsedCategory,
-      categoryFilter,
-    );
+    // ✅ Featured filter (THIS FIXES YOUR ISSUE)
+    if (featured === "true") {
+      filters.featured = true;
+    }
+
+    const products = await ProductService.getProducts({
+      where: filters,
+      include: {
+        category: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
     return NextResponse.json(
       { result: products.length, products },

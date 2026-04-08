@@ -1,27 +1,29 @@
 import ProductRepository from "./product.repository";
 import { Prisma } from "@prisma/client";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { prisma } from "@/utils/prisma";
 
 export default class ProductService {
   static async createProduct(data: any, tenantId: string) {
     return ProductRepository.create(data, tenantId);
   }
 
-  static async getProducts(categoryFilter?: Prisma.ProductWhereInput) {
-    const tenant = await getDefaultTenant();
+  static async getProducts(args: Prisma.ProductFindManyArgs) {
+    return prisma.product.findMany(args);
+    // const tenant = await getDefaultTenant();
 
-    if (!tenant) {
-      throw new Error("Default tenant not found");
-    }
-    return ProductRepository.findAll({
-      where: {
-        tenantId: tenant.id,
-        ...categoryFilter, // 🔥 THIS is the key
-      },
-      include: {
-        category: true,
-      },
-    });
+    // if (!tenant) {
+    //   throw new Error("Default tenant not found");
+    // }
+    // return ProductRepository.findAll({
+    //   where: {
+    //     tenantId: tenant.id,
+    //     ...categoryFilter, // 🔥 THIS is the key
+    //   },
+    //   include: {
+    //     category: true,
+    //   },
+    // });
   }
 
   static async getProduct(id: string) {
