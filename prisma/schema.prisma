@@ -266,6 +266,7 @@ model Category {
   tenantId String
   products  Product[]
   tenant   Tenant  @relation(fields: [tenantId], references: [id])
+  isFeatured Boolean @default(true)
 }
 
 enum Role {

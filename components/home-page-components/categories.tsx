@@ -8,11 +8,16 @@ type Category = {
   name: string;
   slug: string;
   image?: string | null;
+  isFeatured: boolean;
 };
 
 export default function CategoryGrid() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const visibleCategories = categories
+    .filter((cat) => cat.isFeatured)
+    .slice(0, 4);
 
   useEffect(() => {
     async function loadCategories() {
@@ -40,28 +45,28 @@ export default function CategoryGrid() {
       ) : categories.length === 0 ? (
         <p className="text-sm text-gray-400">No categories available</p>
       ) : (
-        <div className="grid md:grid-cols-3 gap-6">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/products?category=${cat.slug}`} // ✅ better than name
-              className="relative h-40 rounded-xl overflow-hidden group"
-            >
-              {/* Image */}
-              <img
-                src={cat.image || "/img/placeholder.jpg"}
-                alt={cat.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-              />
-
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                <span className="text-white font-semibold text-lg">
-                  {cat.name}
-                </span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+          {visibleCategories.map((cat) => (
+            <Link key={cat.id} href={`/products/${cat.slug}`}>
+              <div className="rounded-xl overflow-hidden shadow hover:shadow-lg transition">
+                <img
+                  src={cat.image || "/placeholder.png"}
+                  alt={cat.name}
+                  className="w-full h-40 object-cover"
+                />
+                <div className="p-3 text-center font-medium">{cat.name}</div>
               </div>
             </Link>
           ))}
+        </div>
+      )}
+      {categories.length > 4 && (
+        <div className="text-center mt-6">
+          <Link href="/categories">
+            <button className="px-6 py-2 border rounded-lg hover:bg-gray-100">
+              View All Categories
+            </button>
+          </Link>
         </div>
       )}
     </section>

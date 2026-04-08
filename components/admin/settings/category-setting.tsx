@@ -10,12 +10,15 @@ type Category = {
   name: string;
   slug: string;
   image?: string | null;
+  isFeatured: boolean; // ✅ NEW
 };
 
 export default function CategoriesAdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [isFeatured, setIsFeatured] = useState(true); // ✅ NEW
+
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,7 +43,7 @@ export default function CategoriesAdminPage() {
     loadCategories();
   }, []);
 
-  /* ---------------- Upload Image (instant) ---------------- */
+  /* ---------------- Upload Image ---------------- */
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -50,7 +53,7 @@ export default function CategoriesAdminPage() {
 
     try {
       setUploading(true);
-      console.log("UPLOADING -----------", file);
+
       const res = await fetch("/api/upload/image-upload", {
         method: "POST",
         body: formData,
@@ -59,8 +62,7 @@ export default function CategoriesAdminPage() {
       if (!res.ok) throw new Error();
 
       const data = await res.json();
-
-      setImageUrl(data.url); // 👈 save uploaded image
+      setImageUrl(data.url);
 
       toast.custom(
         <AdminToast
@@ -102,10 +104,12 @@ export default function CategoriesAdminPage() {
         body: JSON.stringify({
           name,
           image: imageUrl,
+          isFeatured, // ✅ SEND THIS
         }),
       });
 
       if (!res.ok) throw new Error();
+
       toast.custom(
         <AdminToast
           type="success"
@@ -116,6 +120,7 @@ export default function CategoriesAdminPage() {
 
       setName("");
       setImageUrl("");
+      setIsFeatured(true); // reset
       loadCategories();
     } catch {
       toast.custom(
@@ -130,7 +135,32 @@ export default function CategoriesAdminPage() {
     }
   }
 
-  /* ---------------- Delete Category ---------------- */
+  /* ---------------- Toggle Featured ---------------- */
+  async function toggleFeatured(cat: Category) {
+    const updated = !cat.isFeatured;
+
+    try {
+      const res = await fetch(`/api/admin/category/${cat.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isFeatured: updated }),
+      });
+
+      if (!res.ok) throw new Error();
+
+      setCategories((prev) =>
+        prev.map((c) => (c.id === cat.id ? { ...c, isFeatured: updated } : c)),
+      );
+
+      toast.success("Updated");
+    } catch {
+      toast.error("Failed to update");
+    }
+  }
+
+  /* ---------------- Delete ---------------- */
   async function deleteCategory(id: string) {
     const deletingToast = toast.loading("Deleting category...");
 
@@ -202,6 +232,16 @@ export default function CategoriesAdminPage() {
           )}
         </div>
 
+        {/* ✅ Featured toggle */}
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={isFeatured}
+            onChange={(e) => setIsFeatured(e.target.checked)}
+          />
+          Show on homepage
+        </label>
+
         {/* Submit */}
         <div className="flex justify-end">
           <button
@@ -234,15 +274,38 @@ export default function CategoriesAdminPage() {
                     className="w-12 h-12 object-cover rounded"
                   />
                 )}
-                <span className="font-medium">{cat.name}</span>
+
+                <div>
+                  <span className="font-medium">{cat.name}</span>
+
+                  {/* ✅ Status */}
+                  <p className="text-xs text-gray-500">
+                    {cat.isFeatured ? "Visible on homepage" : "Hidden"}
+                  </p>
+                </div>
               </div>
 
-              <button
-                onClick={() => deleteCategory(cat.id)}
-                className="text-red-500 hover:text-red-700 text-sm"
-              >
-                Delete
-              </button>
+              <div className="flex items-center gap-3">
+                {/* Toggle */}
+                <button
+                  onClick={() => toggleFeatured(cat)}
+                  className={`text-xs px-3 py-1 rounded-full ${
+                    cat.isFeatured
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {cat.isFeatured ? "Featured" : "Hidden"}
+                </button>
+
+                {/* Delete */}
+                <button
+                  onClick={() => deleteCategory(cat.id)}
+                  className="text-red-500 hover:text-red-700 text-sm"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </li>
           ))}
         </ul>

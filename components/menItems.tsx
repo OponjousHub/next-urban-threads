@@ -8,26 +8,82 @@ import type { Product } from "@/types/product";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
 import { useTenant } from "@/store/tenant-provider-context";
 import { ProductRating } from "@/utils/product-rating";
+import { useParams } from "next/navigation";
+
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+  image?: string | null;
+};
 
 function WomenItems() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  // const [activeCategory, setActiveCategory] = useState<Category | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const { tenant } = useTenant();
+  const { slug } = useParams();
+
+  // useEffect(() => {
+  //   if (!activeCategory) return;
+
+  //   setLoading(true);
+
+  //   fetch(`/api/products?category=${activeCategory.slug}`)
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setProducts(data.products);
+  //     })
+  //     .finally(() => setLoading(false));
+  // }, [activeCategory]);
 
   useEffect(() => {
-    fetch("/api/products?category=MEN")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("FROM THE FRONTEND:", data.products);
-        const prodData = data.products;
-        setProducts(prodData);
-      });
+    if (!slug) return;
+
+    async function loadProducts() {
+      try {
+        const res = await fetch(`/api/products?category=${slug}`);
+        const data = await res.json();
+        setProducts(data.products);
+      } catch (err) {
+        console.error("Failed to load products");
+      }
+    }
+
+    loadProducts();
+  }, [slug]);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const res = await fetch("/api/admin/category"); // 🔥 public endpoint
+        const data = await res.json();
+        setCategories(data);
+      } catch (err) {
+        console.error("Failed to load categories");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCategories();
   }, []);
-  console.log("FROM THE FRONTEND:", products);
+
+  // useEffect(() => {
+  //   if (categories.length > 0) {
+  //     const defaultCat = categories.find((c) => c.name.toLowerCase() === "men");
+  //     setActiveCategory(defaultCat || categories[0]);
+  //   }
+  // }, [categories]);
+
   return (
     <div className="bg-gray-50 py-10 px-6 min-h-screen max-w-7xl my-0 mx-auto">
       <div className="flex justify-between mt-6 mb-12">
-        <h1 className="text-gray-800 text-3xl font-bold">
-          Shop Women Products
+        <h1 className="text-gray-800 text-3xl font-bold capitalize">
+          Shop {String(slug).charAt(0).toUpperCase() + String(slug).slice(1)}{" "}
+          Products
         </h1>
         {/* Search */}
         <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-1/2 bg-white">
@@ -36,21 +92,22 @@ function WomenItems() {
             type="text"
             placeholder="Search for products..."
             className="w-full outline-none text-gray-700 text-xl"
-            // value={search}
-            // onChange={(e) => setSearch(e.target.value)}
           />
         </div>{" "}
       </div>
 
       <div className="space-x-3 mb-6">
-        {["Men", "Women", "Accessories"].map((cat) => (
-          <Link key={cat} href={`/products/${cat.toLowerCase()}`}>
+        {categories.map((cat) => (
+          <Link key={cat.id} href={`/products/${cat.slug}`}>
             <button
-              className={
-                "bg-[var(--color-primary)] px-5 py-2 rounded-full text-white transition-all duration-200 font-medium cursor-pointer"
-              }
+              className={`px-5 py-2 rounded-full font-medium cursor-pointer transition-all duration-200
+        ${
+          slug === cat.slug
+            ? "bg-[var(--color-primary)] text-white"
+            : "bg-[var(--color-primary-lightest)] text-[var(--color-primary-dark)] hover:bg-gray-300"
+        }`}
             >
-              {cat}
+              {cat.name}
             </button>
           </Link>
         ))}
