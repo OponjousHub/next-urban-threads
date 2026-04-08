@@ -14,10 +14,14 @@ type Category = {
 export default function CategoryGrid() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
 
-  const visibleCategories = categories
-    .filter((cat) => cat.isFeatured)
-    .slice(0, 4);
+  // Preparing the category
+  const filteredCategories = categories.filter((cat) => cat.isFeatured);
+
+  const visibleCategories = showAll
+    ? filteredCategories
+    : filteredCategories.slice(0, 4);
 
   useEffect(() => {
     async function loadCategories() {
@@ -60,13 +64,14 @@ export default function CategoryGrid() {
           ))}
         </div>
       )}
-      {categories.length > 4 && (
+      {filteredCategories.length > 4 && (
         <div className="text-center mt-6">
-          <Link href="/categories">
-            <button className="px-6 py-2 border rounded-lg hover:bg-gray-100">
-              View All Categories
-            </button>
-          </Link>
+          <button
+            onClick={() => setShowAll((prev) => !prev)}
+            className="px-6 py-2 border rounded-lg hover:bg-gray-100 transition"
+          >
+            {showAll ? "Show Less" : "View All Categories"}
+          </button>
         </div>
       )}
     </section>

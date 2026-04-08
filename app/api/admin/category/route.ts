@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { name, image } = body;
+  const { name, image, isFeatured } = body;
 
   if (!name) {
     return new Response(JSON.stringify({ error: "Name required" }), {
@@ -37,7 +37,8 @@ export async function POST(req: Request) {
       tenantId: tenant.id,
       name,
       slug: name.toLowerCase().replace(/\s+/g, "-"),
-      image, // <-- comes from Cloudinary now
+      image,
+      isFeatured,
     },
   });
 
