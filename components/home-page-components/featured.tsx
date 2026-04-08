@@ -13,7 +13,7 @@ function Featured() {
   useEffect(() => {
     async function loadFeatured() {
       try {
-        const res = await fetch("/api/products?featured=true");
+        const res = await fetch("/api/products/featured?featured=true");
         const data = await res.json();
 
         setProducts(data.products.slice(0, 8)); // 👈 show max 8
@@ -32,7 +32,7 @@ function Featured() {
       <div className="flex justify-between items-center mb-10">
         <h2 className="text-3xl font-bold">Featured Products</h2>
 
-        <Link href="/products?featured=true">
+        <Link href="/products/featured?featured=true">
           <button className="px-4 py-2 border border-white rounded-lg text-sm hover:bg-white hover:text-black transition">
             View All
           </button>
