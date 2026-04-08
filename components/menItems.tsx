@@ -26,19 +26,6 @@ function WomenItems() {
   const { tenant } = useTenant();
   const { slug } = useParams();
 
-  // useEffect(() => {
-  //   if (!activeCategory) return;
-
-  //   setLoading(true);
-
-  //   fetch(`/api/products?category=${activeCategory.slug}`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setProducts(data.products);
-  //     })
-  //     .finally(() => setLoading(false));
-  // }, [activeCategory]);
-
   useEffect(() => {
     if (!slug) return;
 
@@ -70,13 +57,6 @@ function WomenItems() {
 
     loadCategories();
   }, []);
-
-  // useEffect(() => {
-  //   if (categories.length > 0) {
-  //     const defaultCat = categories.find((c) => c.name.toLowerCase() === "men");
-  //     setActiveCategory(defaultCat || categories[0]);
-  //   }
-  // }, [categories]);
 
   return (
     <div className="bg-gray-50 py-10 px-6 min-h-screen max-w-7xl my-0 mx-auto">
