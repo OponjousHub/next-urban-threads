@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function PromoBanner() {
   return (
     <section className="px-6 py-10">
@@ -8,10 +10,11 @@ export default function PromoBanner() {
           </h3>
           <p className="text-sm opacity-80">Limited time offer</p>
         </div>
-
-        <button className="bg-white text-primary px-6 py-2 rounded-lg">
-          Shop Now
-        </button>
+        <Link href="/products?flash=true">
+          <button className="bg-white text-primary px-6 py-2 rounded-lg">
+            Shop Now
+          </button>
+        </Link>
       </div>
     </section>
   );

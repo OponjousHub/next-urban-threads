@@ -79,7 +79,7 @@ function FlashDeals() {
                     ₦{product.price.toLocaleString()}
                   </p>
 
-                  <Link href={`/products/${product.id}`}>
+                  <Link href={`/products/details/${product.id}`}>
                     <button className="mt-2 w-full text-sm bg-black text-white py-2 rounded hover:bg-gray-800 transition">
                       Buy Now
                     </button>

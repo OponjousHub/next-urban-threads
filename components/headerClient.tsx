@@ -101,23 +101,26 @@ const HeaderClient = ({
           </Link>
           <Link
             className="hover:text-[var(--color-primary)]"
-            href="/products/men"
+            href={`/products?category=men`}
           >
             Men
           </Link>
           <Link
             className="hover:text-[var(--color-primary)]"
-            href="/products/women"
+            href="/products?category=women"
           >
             Women
           </Link>
           <Link
             className="hover:text-[var(--color-primary)]"
-            href="/products/accessories"
+            href="/products?category=accessories"
           >
             Accessories
           </Link>
-          <Link className="hover:text-[var(--color-primary)]" href="/sales">
+          <Link
+            className="hover:text-[var(--color-primary)]"
+            href="/products?flash=true"
+          >
             Sales
           </Link>
         </nav>
