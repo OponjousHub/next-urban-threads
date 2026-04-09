@@ -32,7 +32,7 @@ function Featured() {
       <div className="flex justify-between items-center mb-10">
         <h2 className="text-3xl font-bold">Featured Products</h2>
 
-        <Link href="/products/featured?featured=true">
+        <Link href="/products?featured=true">
           <button className="px-4 py-2 border border-white rounded-lg text-sm hover:bg-white hover:text-black transition">
             View All
           </button>

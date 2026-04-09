@@ -51,7 +51,7 @@ export default function CategoryGrid() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
           {visibleCategories.map((cat) => (
-            <Link key={cat.id} href={`/products/${cat.slug}`}>
+            <Link key={cat.id} href={`/products?category=${cat.slug}`}>
               <div className="rounded-xl overflow-hidden shadow hover:shadow-lg transition">
                 <img
                   src={cat.image || "/placeholder.png"}
