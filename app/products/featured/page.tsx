@@ -41,22 +41,6 @@ export default function ProductsPage() {
       .then((data) => setProducts(data.products));
   }, [featured]);
 
-  // useEffect(() => {
-  //   if (!slug) return;
-
-  //   async function loadProducts() {
-  //     try {
-  //       const res = await fetch(`/api/products?category=${slug}`);
-  //       const data = await res.json();
-  //       setProducts(data.products);
-  //     } catch (err) {
-  //       console.error("Failed to load products");
-  //     }
-  //   }
-
-  //   loadProducts();
-  // }, [slug]);
-
   useEffect(() => {
     async function loadCategories() {
       try {

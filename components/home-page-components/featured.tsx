@@ -13,7 +13,7 @@ function Featured() {
   useEffect(() => {
     async function loadFeatured() {
       try {
-        const res = await fetch("/api/products/featured?featured=true");
+        const res = await fetch("/api/products?featured=true");
         const data = await res.json();
 
         setProducts(data.products.slice(0, 8)); // 👈 show max 8

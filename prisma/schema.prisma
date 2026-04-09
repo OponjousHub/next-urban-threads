@@ -70,6 +70,7 @@ model Product {
   categoryId      String
   category        Category? @relation(fields: [categoryId], references: [id])
   subCategory     String
+  isFlashDeal     Boolean @default(false)
 
   averageRating   Float @default(0)
   reviewCount     Int   @default(0)

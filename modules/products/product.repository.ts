@@ -32,8 +32,12 @@ export default class ProductRepository {
     });
   }
 
-  static findAll(args: Prisma.ProductFindManyArgs) {
-    return prisma.product.findMany(args);
+  // static findAll(args: Prisma.ProductFindManyArgs) {
+  //   return prisma.product.findMany(args);
+  // }
+
+  static findAll(filters: Prisma.ProductFindManyArgs) {
+    return prisma.product.findMany(filters);
   }
 
   static findById(id: string, tenantId: string) {

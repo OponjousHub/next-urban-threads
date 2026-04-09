@@ -74,7 +74,8 @@ export default class ProductController {
     const { searchParams } = new URL(req.url);
 
     const category = searchParams.get("category") ?? undefined;
-    const featured = searchParams.get("featured"); // ✅ NEW
+    const featured = searchParams.get("featured") === "true";
+    const flash = searchParams.get("flash") === "true";
 
     if (!tenant) {
       throw new Error("Default tenant not found");
@@ -84,6 +85,14 @@ export default class ProductController {
       tenantId: tenant.id,
     };
 
+    if (featured) {
+      filters.featured = true; // <-- only fetch featured products
+    }
+
+    if (flash) {
+      filters.isFlashDeal = true;
+    }
+
     // ✅ Category filter
     if (category) {
       filters.category = {
@@ -91,20 +100,7 @@ export default class ProductController {
       };
     }
 
-    // ✅ Featured filter (THIS FIXES YOUR ISSUE)
-    if (featured === "true") {
-      filters.featured = true;
-    }
-
-    const products = await ProductService.getProducts({
-      where: filters,
-      include: {
-        category: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    const products = await ProductService.getProducts(filters);
 
     return NextResponse.json(
       { result: products.length, products },
