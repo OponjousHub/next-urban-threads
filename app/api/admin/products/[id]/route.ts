@@ -13,10 +13,38 @@ export async function PATCH(
   }
   try {
     const body = await req.json();
+    console.log("ppppppppppppppppppp", body);
+    const {
+      name,
+      category,
+      subCategory,
+      price,
+      images,
+      description,
+      sizes,
+      colours,
+      stock,
+      featured,
+      flash,
+    } = body;
 
     const updated = await prisma.product.update({
       where: { id: paramsId.id, tenantId: tenant.id },
-      data: body,
+      data: {
+        name,
+        category: {
+          connect: { id: category },
+        },
+        subCategory,
+        price,
+        images,
+        description,
+        sizes,
+        colours,
+        stock,
+        featured,
+        isFlashDeal: flash,
+      },
     });
 
     return Response.json(updated);

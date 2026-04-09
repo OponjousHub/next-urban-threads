@@ -37,7 +37,7 @@ export default class ProductController {
     const {
       name,
       category,
-      subCategory, // ✅ REQUIRED
+      subCategory,
       price,
       images,
       description,
@@ -45,17 +45,32 @@ export default class ProductController {
       colours,
       stock,
       featured,
+      flash,
     } = parsed.data;
+    console.log("CATEGORY IIII", category);
+
+    const categoryExists = await prisma.category.findUnique({
+      where: { id: category },
+    });
+
+    if (!categoryExists) {
+      return NextResponse.json(
+        { message: "Category not found" },
+        { status: 400 },
+      );
+    }
 
     const product = await ProductService.createProduct(
       {
         name,
-        category,
+        // categoryId: category,
+        category: { connect: { id: category } },
         subCategory,
         price,
         stock,
         instock: stock > 0,
         featured,
+        isFlashDeal: flash,
         images,
         description,
         sizes,

@@ -28,9 +28,15 @@ function Newsletter() {
         body: JSON.stringify({ email }),
       });
 
-      if (!res.ok) throw new Error();
+      const data = await res.json();
 
-      setMessage("✅ Subscribed successfully!");
+      if (!res.ok) {
+        setMessage(data.error || "Failed to subscribe");
+        return;
+      }
+
+      setMessage(data.message || "Subscribed successfully!");
+      setEmail("");
       setEmail("");
     } catch (err) {
       setMessage("❌ Failed to subscribe. Try again.");

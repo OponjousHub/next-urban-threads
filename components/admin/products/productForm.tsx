@@ -40,6 +40,18 @@ type ProductFormState = {
   sizes: string[];
   colours: string[];
   featured: boolean;
+  flash: boolean;
+};
+
+type Category = {
+  id: string;
+  name: string;
+  // slug     String   @unique
+  // image    String?
+  // tenantId String
+  // // products  Product[]
+  // tenant   Tenant  @relation(fields: [tenantId], references: [id])
+  // isFeatured Boolean @default(true)
 };
 
 function Section({ title, children }: any) {
@@ -55,22 +67,42 @@ export function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter();
   const isEdit = !!initialData;
 
+  const [categories, setCategories] = useState<Category[]>([]);
+
   // ✅ Initialize form state from initialData
   const [form, setForm] = useState<ProductFormState>({
     name: "",
     description: "",
     price: "",
     stock: "",
-    category: "MEN",
+    category: "",
     subCategory: "",
     sizes: [],
     colours: [],
     featured: false,
+    flash: false,
   });
 
   const [images, setImages] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(false);
+
+  console.log("CCCCCCCCCCCCCCCC", form.category);
+
+  // FETCH CATEGORIES
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const res = await fetch("/api/admin/category");
+        const data = await res.json();
+        setCategories(data);
+      } catch (err) {
+        console.error("Failed to load categories");
+      }
+    }
+
+    loadCategories();
+  }, []);
 
   // Fill the form and images from initialData if editing
   useEffect(() => {
@@ -80,11 +112,12 @@ export function ProductForm({ initialData }: ProductFormProps) {
         description: initialData.description || "",
         price: initialData.price?.toString() || "",
         stock: initialData.stock?.toString() || "",
-        category: initialData.category || "MEN",
+        category: initialData.categoryId || "",
         subCategory: initialData.subCategory || "",
         sizes: initialData.sizes || [],
         colours: initialData.colours || [],
         featured: initialData.featured || false,
+        flash: initialData.flash || false,
       });
       setImages(initialData.images || []);
     }
@@ -127,6 +160,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
       // if (isEdit) {
       //   console.log("EDIT ID", initialData.id);
       // }
+      console.log("PAYLOAD", payload);
 
       const response = await fetch(
         isEdit ? `/api/admin/products/${initialData.id}` : "/api/products",
@@ -185,11 +219,12 @@ export function ProductForm({ initialData }: ProductFormProps) {
           description: "",
           price: "",
           stock: "",
-          category: "MEN",
+          category: "",
           subCategory: "",
           sizes: [],
           colours: [],
           featured: false,
+          flash: false,
         });
         setImages([]);
       } else {
@@ -299,14 +334,18 @@ export function ProductForm({ initialData }: ProductFormProps) {
               <Section title="Organization">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <select
-                    className="input  focus:ring-[var(--color-primary-ring)]"
                     value={form.category}
                     onChange={(e) =>
                       setForm({ ...form, category: e.target.value })
                     }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat}>{cat}</option>
+                    <option value="">Select Category</option>
+
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
                     ))}
                   </select>
                   <input
@@ -405,16 +444,28 @@ export function ProductForm({ initialData }: ProductFormProps) {
             <div className="space-y-6">
               <div className="border rounded-2xl p-6 bg-white shadow-sm ">
                 <h3 className="font-semibold mb-4">Status</h3>
-                <label className="flex items-center justify-between">
-                  <span>Featured Product</span>
-                  <input
-                    type="checkbox"
-                    checked={form.featured}
-                    onChange={(e) =>
-                      setForm({ ...form, featured: e.target.checked })
-                    }
-                  />
-                </label>
+                <div className="flex flex-col gap-4">
+                  <label className="flex items-center justify-between">
+                    <span>Featured Product</span>
+                    <input
+                      type="checkbox"
+                      checked={form.featured}
+                      onChange={(e) =>
+                        setForm({ ...form, featured: e.target.checked })
+                      }
+                    />
+                  </label>
+                  <label className="flex items-center justify-between">
+                    <span>Flash Product</span>
+                    <input
+                      type="checkbox"
+                      checked={form.flash}
+                      onChange={(e) =>
+                        setForm({ ...form, flash: e.target.checked })
+                      }
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           </div>
