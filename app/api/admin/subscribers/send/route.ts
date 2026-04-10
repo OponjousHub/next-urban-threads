@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { sendEmail } from "@/app/lib/email/sendEmail";
+import { NewsletterEmail } from "@/app/lib/email/template/newsletter";
 
 export async function POST(req: Request) {
   const tenant = await getDefaultTenant();
@@ -20,17 +21,17 @@ export async function POST(req: Request) {
     where: { tenantId: tenant.id },
   });
 
-  // ⚠️ IMPORTANT: avoid sending 1000 emails at once
+  // ✅ FIX 1: correct function call
+  const template = NewsletterEmail({
+    subject,
+    message,
+  });
+
   for (const sub of subscribers) {
     await sendEmail({
       to: sub.email,
-      subject,
-      html: `
-        <div>
-          <h2>${subject}</h2>
-          <p>${message}</p>
-        </div>
-      `,
+      subject: template.subject, // ✅ use from template
+      html: template.html, // ✅ FIX 2
     });
   }
 

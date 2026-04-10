@@ -15,7 +15,7 @@ export default function SettingsPage() {
     { id: "profile", label: "Profile" },
     { id: "password", label: "Change password" },
     { id: "category", label: "Manage category" },
-    { id: "subcription", label: "Manage subcription" },
+    { id: "newsletter", label: "Manage subcription" },
   ];
 
   return (
@@ -56,7 +56,7 @@ export default function SettingsPage() {
         {activeTab === "profile" && <ProfileSection />}
         {activeTab === "password" && <ChangePasswordAdmin />}
         {activeTab === "category" && <ManageCategory />}
-        {activeTab === "category" && <NewsletterAdminPage />}
+        {activeTab === "newsletter" && <NewsletterAdminPage />}
       </main>
     </div>
   );

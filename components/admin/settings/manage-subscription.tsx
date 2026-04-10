@@ -56,11 +56,8 @@ export default function NewsletterAdminPage() {
       setLoading(false);
     }
   }
-
   return (
     <div className="p-8 max-w-5xl">
-      <h1 className="text-2xl font-bold mb-6">Newsletter</h1>
-
       {/* SEND FORM */}
       <div className="bg-white p-6 rounded-xl border mb-8">
         <input
