@@ -6,9 +6,6 @@ import welcomeEmail from "@/app/lib/email/template/welcome";
 import { sendEmail } from "@/app/lib/email/sendEmail";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
-// import { NextResponse } from "next/server";
-// import jwt from "jsonwebtoken";
-
 export class UserService {
   static async register(data: RegisterInput) {
     const tenant = await getDefaultTenant();

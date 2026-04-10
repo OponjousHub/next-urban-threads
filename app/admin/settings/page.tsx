@@ -5,6 +5,7 @@ import { ProfileSection } from "@/components/admin/settings/profile-section";
 import ChangePasswordAdmin from "@/components/admin/settings/change-password-setting";
 import GeneralSettings from "@/components/admin/settings/general-setting";
 import ManageCategory from "@/components/admin/settings/category-setting";
+import NewsletterAdminPage from "@/components/admin/settings/manage-subscription";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -14,6 +15,7 @@ export default function SettingsPage() {
     { id: "profile", label: "Profile" },
     { id: "password", label: "Change password" },
     { id: "category", label: "Manage category" },
+    { id: "subcription", label: "Manage subcription" },
   ];
 
   return (
@@ -54,6 +56,7 @@ export default function SettingsPage() {
         {activeTab === "profile" && <ProfileSection />}
         {activeTab === "password" && <ChangePasswordAdmin />}
         {activeTab === "category" && <ManageCategory />}
+        {activeTab === "category" && <NewsletterAdminPage />}
       </main>
     </div>
   );

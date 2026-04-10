@@ -4,7 +4,6 @@ import { useState } from "react";
 import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   FiUser,
   FiMail,
@@ -14,8 +13,6 @@ import {
   FiGlobe,
   FiHome,
 } from "react-icons/fi";
-// import { initialize } from "next/dist/server/lib/render-server";
-// import { getLoggedInUser } from "@/lib/auth";
 
 const initialState = {
   name: "",
@@ -32,18 +29,10 @@ const initialState = {
 export default function SignupPage() {
   const [form, setForm] = useState(initialState);
   const [isLoading, setIsLoading] = useState(false);
-  // const [isRegistered, setIsRegistered] = useState(false);
-  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
-  // if(isRegistered){
-  //   const loginRegistered = async () => {
-  //     const response = await fetch
-  //   }
-  // }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

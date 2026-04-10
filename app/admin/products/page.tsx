@@ -3,7 +3,6 @@ import ProductsTable from "@/components/admin/products/product-table";
 import Pagination from "@/components/admin/products/product-pagination";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
-import { Category } from "@prisma/client";
 
 export default async function ProductsPage({
   searchParams,
@@ -23,11 +22,7 @@ export default async function ProductsPage({
   }
 
   const query = searchParams.q || "";
-  const categoryEnum = searchParams.category
-    ? (Category[
-        searchParams.category.toUpperCase() as keyof typeof Category
-      ] as Category)
-    : undefined;
+  const category = searchParams.category;
   const { q, stock, featured, sort } = searchParams;
 
   // Building orderBy for sorting
@@ -56,7 +51,11 @@ export default async function ProductsPage({
         ],
       }),
 
-      ...(categoryEnum && { category: categoryEnum }),
+      ...(category && {
+        category: {
+          slug: category.toLowerCase(),
+        },
+      }),
 
       ...(featured && { featured: featured === "true" }),
 
@@ -81,7 +80,11 @@ export default async function ProductsPage({
         ],
       }),
 
-      ...(categoryEnum && { category: categoryEnum }),
+      ...(category && {
+        category: {
+          slug: category.toLowerCase(),
+        },
+      }),
       ...(featured && { featured: featured === "true" }),
       ...(stock === "low" && { stock: { lte: 5 } }),
       ...(stock === "out" && { stock: 0 }),
