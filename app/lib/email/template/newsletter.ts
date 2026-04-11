@@ -1,4 +1,6 @@
-export function NewsletterEmail({
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+
+export async function NewsletterEmail({
   subject,
   message,
   ctaText = "Shop Now",
@@ -9,6 +11,9 @@ export function NewsletterEmail({
   ctaText?: string;
   ctaLink?: string;
 }) {
+  const tenant = await getDefaultTenant();
+  if (!tenant) throw new Error("Tenant not found");
+
   return {
     subject,
 
@@ -20,7 +25,7 @@ export function NewsletterEmail({
           
           <!-- Header -->
           <div style="background:black; color:white; padding:20px; text-align:center;">
-            <h1 style="margin:0;">Urban Threads</h1>
+            <h1 style="margin:0;">${tenant.name}</h1>
           </div>
 
           <!-- Hero -->
@@ -59,7 +64,7 @@ export function NewsletterEmail({
 
           <!-- Footer -->
           <div style="padding:20px; text-align:center; font-size:12px; color:#999;">
-            <p>© ${new Date().getFullYear()} Urban Threads</p>
+            <p>© ${new Date().getFullYear()} ${tenant.name}</p>
 
             <p style="margin-top:10px;">
               <a href="${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe"
