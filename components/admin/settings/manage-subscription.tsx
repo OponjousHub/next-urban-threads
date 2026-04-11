@@ -14,6 +14,23 @@ export default function NewsletterAdminPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [progress, setProgress] = useState({
+    total: 0,
+    sent: 0,
+    status: "idle",
+  });
+
+  // poll progress
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const res = await fetch("/api/admin/subscribers/progress");
+      const data = await res.json();
+      setProgress(data);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Load subscribers
   useEffect(() => {
     async function loadSubscribers() {
@@ -56,6 +73,10 @@ export default function NewsletterAdminPage() {
       setLoading(false);
     }
   }
+
+  const percentage =
+    progress.total > 0 ? Math.round((progress.sent / progress.total) * 100) : 0;
+
   return (
     <div className="p-8 max-w-5xl">
       {/* SEND FORM */}
@@ -82,6 +103,28 @@ export default function NewsletterAdminPage() {
         >
           {loading ? "Sending..." : "Send Newsletter"}
         </button>
+
+         {/* 🔥 PROGRESS UI */}
+      {progress.status !== "idle" && (
+        <div className="mt-6">
+          <p className="text-sm text-gray-600">
+            Sending... {progress.sent} / {progress.total}
+          </p>
+
+          <div className="w-full bg-gray-200 rounded h-3 mt-2">
+            <div
+              className="bg-green-500 h-3 rounded transition-all"
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+
+          {progress.status === "done" && (
+            <p className="text-green-600 mt-2">
+              ✅ All emails sent successfully!
+            </p>
+          )}
+        </div>
+      )}
       </div>
 
       {/* SUBSCRIBERS LIST */}
