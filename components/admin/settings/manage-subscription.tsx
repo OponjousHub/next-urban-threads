@@ -21,12 +21,24 @@ export default function NewsletterAdminPage() {
   });
 
   // poll progress
+
   useEffect(() => {
-    const interval = setInterval(async () => {
-      const res = await fetch("/api/admin/subscribers/progress");
-      const data = await res.json();
-      setProgress(data);
-    }, 1000);
+    let interval: NodeJS.Timeout;
+
+    async function startPolling() {
+      interval = setInterval(async () => {
+        const res = await fetch("/api/admin/subscribers/progress");
+        const data = await res.json();
+
+        setProgress(data);
+
+        // ✅ STOP when done
+        if (data.status === "done") {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
+    startPolling();
 
     return () => clearInterval(interval);
   }, []);
@@ -55,7 +67,7 @@ export default function NewsletterAdminPage() {
 
     try {
       setLoading(true);
-
+      // startPolling();
       const res = await fetch("/api/admin/subscribers/send", {
         method: "POST",
         body: JSON.stringify({ subject, message }),
@@ -104,27 +116,27 @@ export default function NewsletterAdminPage() {
           {loading ? "Sending..." : "Send Newsletter"}
         </button>
 
-         {/* 🔥 PROGRESS UI */}
-      {progress.status !== "idle" && (
-        <div className="mt-6">
-          <p className="text-sm text-gray-600">
-            Sending... {progress.sent} / {progress.total}
-          </p>
-
-          <div className="w-full bg-gray-200 rounded h-3 mt-2">
-            <div
-              className="bg-green-500 h-3 rounded transition-all"
-              style={{ width: `${percentage}%` }}
-            />
-          </div>
-
-          {progress.status === "done" && (
-            <p className="text-green-600 mt-2">
-              ✅ All emails sent successfully!
+        {/* 🔥 PROGRESS UI */}
+        {progress.status !== "idle" && (
+          <div className="mt-6">
+            <p className="text-sm text-gray-600">
+              Sending... {progress.sent} / {progress.total}
             </p>
-          )}
-        </div>
-      )}
+
+            <div className="w-full bg-gray-200 rounded h-3 mt-2">
+              <div
+                className="bg-green-500 h-3 rounded transition-all"
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+
+            {progress.status === "done" && (
+              <p className="text-green-600 mt-2">
+                ✅ All emails sent successfully!
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* SUBSCRIBERS LIST */}

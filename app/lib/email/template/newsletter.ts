@@ -1,18 +1,21 @@
-import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+// import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function NewsletterEmail({
   subject,
   message,
+  tenantName,
+  email,
   ctaText = "Shop Now",
   ctaLink = process.env.NEXT_PUBLIC_APP_URL,
 }: {
   subject: string;
   message: string;
+  tenantName: string;
+  email: string;
   ctaText?: string;
   ctaLink?: string;
 }) {
-  const tenant = await getDefaultTenant();
-  if (!tenant) throw new Error("Tenant not found");
+  // const tenant = await getDefaultTenant();
 
   return {
     subject,
@@ -25,7 +28,7 @@ export async function NewsletterEmail({
           
           <!-- Header -->
           <div style="background:black; color:white; padding:20px; text-align:center;">
-            <h1 style="margin:0;">${tenant.name}</h1>
+            <h1 style="margin:0;">${tenantName}</h1>
           </div>
 
           <!-- Hero -->
@@ -64,10 +67,10 @@ export async function NewsletterEmail({
 
           <!-- Footer -->
           <div style="padding:20px; text-align:center; font-size:12px; color:#999;">
-            <p>© ${new Date().getFullYear()} ${tenant.name}</p>
+            <p>© ${new Date().getFullYear()} ${tenantName}</p>
 
             <p style="margin-top:10px;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe"
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe?email=${encodeURIComponent(email)}"
                  style="color:#999; text-decoration:underline;">
                 Unsubscribe
               </a>

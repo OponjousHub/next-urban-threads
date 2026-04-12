@@ -161,7 +161,7 @@ tenant   Tenant @relation(fields: [tenantId], references: [id])
 model Tenant {
   id        String   @id @default(cuid())
   name      String
-   storeType StoreType @default(SINGLE_VENDOR)
+  storeType StoreType @default(SINGLE_VENDOR)
   slug      String   @unique
   domain    String?
   isDefault Boolean  @default(false)
@@ -277,6 +277,7 @@ model Newsletter {
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   createdAt DateTime @default(now())
+  @@unique([email, tenantId])
 }
 
 enum Role {

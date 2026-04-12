@@ -1,5 +1,3 @@
-// lib/newsletterProgress.ts
-
 type Progress = {
   total: number;
   sent: number;
