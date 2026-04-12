@@ -73,13 +73,16 @@ function Newsletter() {
         >
           {loading ? "Subscribing..." : "Subscribe"}
         </button>
-        <p className="text-sm mt-4 text-gray-200">
-          Already subscribed?{" "}
-          <a href="/unsubscribe" className="underline">
-            Unsubscribe here
-          </a>
-        </p>
       </form>
+      <p className="text-sm mt-4 text-gray-200">
+        Already subscribed?{" "}
+        <a
+          href="/unsubscribe"
+          className="relative text-white/80 hover:text-white transition-colors duration-300 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+        >
+          Unsubscribe here
+        </a>
+      </p>
 
       {/* Feedback */}
       {message && <p className="mt-6 text-sm font-medium">{message}</p>}
