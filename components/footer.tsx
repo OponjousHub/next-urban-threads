@@ -139,18 +139,20 @@ export default function Footer() {
           {/* SUPPORT */}
           <div>
             <h3 className="text-white font-semibold mb-4">Support</h3>
-            <ul className="space-y-2 text-sm">
+
+            <ul className="space-y-3 text-sm">
               {[
-                { label: "Contact Us", href: "/contact" },
-                { label: "Shipping & Returns", href: "/shipping" },
-                { label: "FAQs", href: "/faqs" },
-                { label: "Track Order", href: "/track-order" },
+                { label: "Contact Us", href: "/contact", icon: "📩" },
+                { label: "Shipping & Returns", href: "/shipping", icon: "🚚" },
+                { label: "FAQs", href: "/faqs", icon: "❓" },
+                { label: "Track Order", href: "/track-order", icon: "📦" },
               ].map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="hover:text-white transition"
+                    className="flex items-center gap-2 hover:text-white transition"
                   >
+                    <span>{item.icon}</span>
                     {item.label}
                   </Link>
                 </li>
