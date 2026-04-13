@@ -21,11 +21,13 @@ export async function POST(req: Request) {
     }
 
     const contact = await prisma.contact.create({
-      where: { tenantId: tenant.id },
       data: {
         name,
         email,
         message,
+        tenant: {
+          connect: { id: tenant.id },
+        },
       },
     });
 
