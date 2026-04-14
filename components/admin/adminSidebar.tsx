@@ -72,6 +72,13 @@ export default function AdminSidebar({
           pathname={pathname}
         />
         <SidebarItem
+          href="/admin/support"
+          icon={<FiUsers size={20} />}
+          label="Support"
+          collapsed={collapsed}
+          pathname={pathname}
+        />
+        <SidebarItem
           href="/admin/settings"
           icon={<FiSettings size={20} />}
           label="Settings"

@@ -2,6 +2,7 @@
 
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { UpdateButtons } from "./update-buttons";
 
 export default async function SupportPage({
   searchParams,
@@ -88,49 +89,6 @@ export default async function SupportPage({
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-//////////////////////////////////////////////////////////////////
-// ✅ CLIENT COMPONENT (handles button clicks)
-//////////////////////////////////////////////////////////////////
-
-("use client");
-
-import { useTransition } from "react";
-
-function UpdateButtons({ id }: { id: string }) {
-  const [isPending, startTransition] = useTransition();
-
-  const updateStatus = (status: string) => {
-    startTransition(async () => {
-      await fetch("/api/admin/support/update", {
-        method: "POST",
-        body: JSON.stringify({ id, status }),
-      });
-
-      window.location.reload();
-    });
-  };
-
-  return (
-    <div className="flex gap-2">
-      <button
-        onClick={() => updateStatus("READ")}
-        disabled={isPending}
-        className="text-xs bg-blue-500 text-white px-3 py-1 rounded"
-      >
-        Mark as Read
-      </button>
-
-      <button
-        onClick={() => updateStatus("RESOLVED")}
-        disabled={isPending}
-        className="text-xs bg-green-500 text-white px-3 py-1 rounded"
-      >
-        Resolve
-      </button>
     </div>
   );
 }
