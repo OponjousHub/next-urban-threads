@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { ContactSupportEmail } from "@/app/lib/email/template/contact-support";
 import { sendEmail } from "@/app/lib/email/sendEmail";
+import { detectSupportIntent } from "@/app/admin/support/message-priority-detector";
 
 export async function POST(req: Request) {
   const tenant = await getDefaultTenant();
@@ -38,13 +39,16 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    const tag = autoTag(message);
+    // const tag = autoTag(message);
+    const { priority, tag } = detectSupportIntent(message);
+
     // ✅ Save to DB
     const contact = await prisma.contact.create({
       data: {
         name,
         email,
         message,
+        priority,
         tag,
         tenant: {
           connect: { id: tenant.id },

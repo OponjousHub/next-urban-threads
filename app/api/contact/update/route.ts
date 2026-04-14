@@ -11,9 +11,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  let updateData: any = {};
+
+  if (status === "HIGH_PRIORITY") {
+    updateData.priority = "HIGH";
+  } else {
+    updateData.status = status;
+  }
+
   await prisma.contact.update({
     where: { id, tenantId: tenant.id },
-    data: { status },
+    data: updateData,
   });
 
   return Response.json({ success: true });
