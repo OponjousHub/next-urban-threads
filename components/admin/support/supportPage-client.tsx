@@ -1,6 +1,8 @@
 "use client";
 
 import { UpdateButtons } from "@/components/admin/support/update-buttons";
+import toast from "react-hot-toast";
+import { AdminToast } from "@/components/ui/adminToast";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -10,7 +12,7 @@ type Message = {
   email: string;
   message: string;
   status: string;
-  tag: string;
+  tag: string | null;
   priority: string;
 };
 
@@ -30,6 +32,7 @@ export default function SupportPageClient({
   unreadCount: number;
 }) {
   const [selected, setSelected] = useState<Message | null>(null);
+  const [localMessages, setLocalMessages] = useState(messages);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -39,21 +42,26 @@ export default function SupportPageClient({
 
     setSending(true);
 
-    await fetch("/api/admin/support/reply", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: selected.email,
-        name: selected.name,
-        message: reply,
-      }),
-    });
+    try {
+      await fetch("/api/admin/support/reply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: selected.email,
+          name: selected.name,
+          message: reply,
+        }),
+      });
 
-    setReply("");
-    setSending(false);
-    alert("Reply sent ✅");
+      setReply("");
+      toast.success("Reply sent ✅");
+    } catch (err) {
+      toast.error("Failed to send reply ❌");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -102,10 +110,34 @@ export default function SupportPageClient({
 
         {/* MESSAGE LIST */}
         <div className="space-y-3">
-          {messages.map((msg) => (
+          {localMessages.map((msg) => (
             <div
               key={msg.id}
-              onClick={() => setSelected(msg)} // ✅ STEP 3
+              onClick={() => {
+                setSelected({
+                  ...msg,
+                  status: "READ",
+                });
+
+                setLocalMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === msg.id ? { ...m, status: "READ" } : m,
+                  ),
+                );
+
+                if (msg.status === "UNREAD") {
+                  fetch("/api/admin/support/update", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      id: msg.id,
+                      status: "READ",
+                    }),
+                  });
+                }
+              }}
               className={`border rounded-xl p-3 cursor-pointer transition
                 ${
                   selected?.id === msg.id
@@ -113,10 +145,26 @@ export default function SupportPageClient({
                     : "bg-white hover:bg-gray-50"
                 }`}
             >
-              <p className="font-semibold">{msg.name}</p>
-              <p className="text-xs text-gray-500">{msg.email}</p>
+              <p
+                className={`${
+                  msg.status === "UNREAD" ? "font-extrabold" : "font-normal"
+                }`}
+              >
+                {msg.name}
+              </p>
+              <p
+                className={`${
+                  msg.status === "UNREAD" ? "font-bold" : "font-normal"
+                } text-xs text-gray-500`}
+              >
+                {msg.email}
+              </p>
 
-              <p className="text-sm mt-2 line-clamp-2 text-gray-600">
+              <p
+                className={`${
+                  msg.status === "UNREAD" ? "font-bold" : "font-normal"
+                } text-sm mt-2 truncate line-clamp-2 text-gray-600`}
+              >
                 {msg.message}
               </p>
 
