@@ -6,6 +6,7 @@ import {
   FiHome,
   FiShoppingBag,
   FiUsers,
+  FiInbox,
   FiSettings,
   FiChevronLeft,
 } from "react-icons/fi";
@@ -73,8 +74,8 @@ export default function AdminSidebar({
         />
         <SidebarItem
           href="/admin/support"
-          icon={<FiUsers size={20} />}
-          label="Support"
+          icon={<FiInbox size={20} />}
+          label="Inbox"
           collapsed={collapsed}
           pathname={pathname}
         />
