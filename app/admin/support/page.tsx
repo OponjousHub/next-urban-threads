@@ -1,8 +1,7 @@
-// /app/admin/support/page.tsx
-
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { UpdateButtons } from "./update-buttons";
+import Link from "next/link";
 
 export default async function SupportPage({
   searchParams,
@@ -16,14 +15,16 @@ export default async function SupportPage({
 
   if (!tenant) return <div>No tenant found</div>;
 
-  const { status, priority } = searchParams;
+  //   const { status, priority } = searchParams;
+  const statusParam = searchParams.status?.toUpperCase();
+  const priorityParam = searchParams.priority?.toUpperCase();
 
   // ✅ Fetch with filters
   const messages = await prisma.contact.findMany({
     where: {
       tenantId: tenant.id,
-      ...(status && { status: status as any }),
-      ...(priority && { priority: priority as any }),
+      ...(statusParam && { status: statusParam as any }),
+      ...(priorityParam && { priority: priorityParam as any }),
     },
     orderBy: { createdAt: "desc" },
   });
@@ -34,18 +35,31 @@ export default async function SupportPage({
 
       {/* ✅ FILTER UI */}
       <div className="flex gap-3 mb-6 flex-wrap">
-        <a href="/admin/support" className="px-3 py-1 border rounded">
-          All
-        </a>
-        <a href="?status=UNREAD" className="px-3 py-1 border rounded">
-          Unread
-        </a>
-        <a href="?status=RESOLVED" className="px-3 py-1 border rounded">
-          Resolved
-        </a>
-        <a href="?priority=HIGH" className="px-3 py-1 border rounded">
-          Urgent
-        </a>
+        <div className="flex gap-3 mb-6 flex-wrap">
+          <FilterButton
+            href="/admin/support"
+            label="All"
+            active={!statusParam && !priorityParam}
+          />
+
+          <FilterButton
+            href="/admin/support?status=UNREAD"
+            label="Unread"
+            active={statusParam === "UNREAD"}
+          />
+
+          <FilterButton
+            href="/admin/support?status=RESOLVED"
+            label="Resolved"
+            active={statusParam === "RESOLVED"}
+          />
+
+          <FilterButton
+            href="/admin/support?priority=HIGH"
+            label="Urgent"
+            active={priorityParam === "HIGH"}
+          />
+        </div>
       </div>
 
       {/* ✅ Messages */}
@@ -84,11 +98,36 @@ export default async function SupportPage({
 
             {/* ✅ ACTION BUTTONS (client component inside server) */}
             <div className="mt-4">
-              <UpdateButtons id={msg.id} />
+              <UpdateButtons id={msg.id} status={msg.status} />
             </div>
           </div>
         ))}
       </div>
     </div>
+  );
+}
+
+function FilterButton({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`px-4 py-1.5 rounded-full text-sm border transition-all duration-200
+        ${
+          active
+            ? "bg-black text-white border-black shadow-sm"
+            : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100 hover:text-black"
+        }
+      `}
+    >
+      {label}
+    </Link>
   );
 }

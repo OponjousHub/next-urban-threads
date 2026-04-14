@@ -1,13 +1,15 @@
 "use client";
 
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 
-export function UpdateButtons({ id }: { id: string }) {
+export function UpdateButtons({ id, status }: { id: string; status: string }) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const updateStatus = (status: string) => {
     startTransition(async () => {
-      await fetch("/api/admin/support/update", {
+      await fetch("/api/contact/update", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -15,27 +17,38 @@ export function UpdateButtons({ id }: { id: string }) {
         body: JSON.stringify({ id, status }),
       });
 
-      window.location.reload();
+      router.refresh();
     });
   };
 
   return (
     <div className="flex gap-2">
-      <button
-        onClick={() => updateStatus("READ")}
-        disabled={isPending}
-        className="text-xs bg-blue-500 text-white px-3 py-1 rounded"
-      >
-        Mark as Read
-      </button>
+      {status !== "READ" && (
+        <button
+          onClick={() => updateStatus("READ")}
+          className="text-xs bg-blue-500 text-white px-3 py-1 rounded"
+        >
+          Mark as Read
+        </button>
+      )}
 
-      <button
-        onClick={() => updateStatus("RESOLVED")}
-        disabled={isPending}
-        className="text-xs bg-green-500 text-white px-3 py-1 rounded"
-      >
-        Resolve
-      </button>
+      {status !== "RESOLVED" && (
+        <button
+          onClick={() => updateStatus("RESOLVED")}
+          className="text-xs bg-green-500 text-white px-3 py-1 rounded"
+        >
+          Resolve
+        </button>
+      )}
+
+      {status === "RESOLVED" && (
+        <button
+          onClick={() => updateStatus("UNREAD")}
+          className="text-xs bg-yellow-500 text-white px-3 py-1 rounded"
+        >
+          Reopen
+        </button>
+      )}
     </div>
   );
 }
