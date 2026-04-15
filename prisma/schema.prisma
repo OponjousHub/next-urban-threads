@@ -185,6 +185,8 @@ model Tenant {
   categories Category[]
   newsletter Newsletter[]
   contact   Contact[]
+  shippingPolicy String? @db.Text
+  returnPolicy    String? @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

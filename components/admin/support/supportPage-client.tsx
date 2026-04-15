@@ -113,7 +113,7 @@ export default function SupportPageClient({
           {localMessages.map((msg) => (
             <div
               key={msg.id}
-              onClick={() => {
+              onClick={async () => {
                 setSelected({
                   ...msg,
                   status: "READ",
@@ -126,7 +126,7 @@ export default function SupportPageClient({
                 );
 
                 if (msg.status === "UNREAD") {
-                  fetch("/api/admin/support/update", {
+                  await fetch("/api/contact4/update", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",

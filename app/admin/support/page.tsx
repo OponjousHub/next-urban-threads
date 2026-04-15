@@ -1,8 +1,6 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import { UpdateButtons } from "../../../components/admin/support/update-buttons";
 import SupportPageClient from "@/components/admin/support/supportPage-client";
-import Link from "next/link";
 
 export default async function SupportPage({
   searchParams,

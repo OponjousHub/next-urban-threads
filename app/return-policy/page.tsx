@@ -7,14 +7,14 @@ export default async function ShippingPage() {
 
   const data = await prisma.tenant.findUnique({
     where: { id: tenant.id },
-    select: { shippingPolicy: true },
+    select: { returnPolicy: true },
   });
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Shipping Policy</h1>
+      <h1 className="text-2xl font-bold mb-4">Return Policy</h1>
       <p className="whitespace-pre-line">
-        {data?.shippingPolicy || "No shipping policy set yet."}
+        {data?.returnPolicy || "No shipping policy set yet."}
       </p>
     </div>
   );
