@@ -6,6 +6,7 @@ import ChangePasswordAdmin from "@/components/admin/settings/change-password-set
 import GeneralSettings from "@/components/admin/settings/general-setting";
 import ManageCategory from "@/components/admin/settings/category-setting";
 import NewsletterAdminPage from "@/components/admin/settings/manage-subscription";
+import PolicyForm from "@/components/admin/settings/policy-form";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -15,7 +16,8 @@ export default function SettingsPage() {
     { id: "profile", label: "Profile" },
     { id: "password", label: "Change password" },
     { id: "category", label: "Manage category" },
-    { id: "newsletter", label: "Manage subcription" },
+    { id: "newsletter", label: "Manage Newsletter" },
+    { id: "shipping & return", label: "Shipping &  Return" },
   ];
 
   return (
@@ -57,6 +59,7 @@ export default function SettingsPage() {
         {activeTab === "password" && <ChangePasswordAdmin />}
         {activeTab === "category" && <ManageCategory />}
         {activeTab === "newsletter" && <NewsletterAdminPage />}
+        {activeTab === "shipping & return" && <PolicyForm />}
       </main>
     </div>
   );

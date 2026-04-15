@@ -21,3 +21,22 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ success: true });
 }
+
+// /api/admin/settings/policies/route.ts
+
+export async function GET() {
+  const tenant = await getDefaultTenant();
+  if (!tenant) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const data = await prisma.tenant.findUnique({
+    where: { id: tenant.id },
+    select: {
+      shippingPolicy: true,
+      returnPolicy: true,
+    },
+  });
+
+  return NextResponse.json(data);
+}

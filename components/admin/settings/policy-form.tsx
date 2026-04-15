@@ -1,12 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import RichTextEditor from "@/components/ui/rich-text-editor";
 
-export default function PolicyForm({ initialData }) {
-  const [shipping, setShipping] = useState(initialData.shippingPolicy || "");
-  const [returns, setReturns] = useState(initialData.returnPolicy || "");
+export default function PolicyForm() {
+  const [shipping, setShipping] = useState("");
+  const [returns, setReturns] = useState("");
+
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch("/api/admin/settings/policies");
+      const data = await res.json();
+
+      setShipping(data.shippingPolicy || "");
+      setReturns(data.returnPolicy || "");
+    };
+
+    fetchData();
+  }, []);
 
   const save = async () => {
     setLoading(true);
@@ -28,20 +42,22 @@ export default function PolicyForm({ initialData }) {
     <div className="space-y-6">
       <div>
         <h2 className="font-bold mb-2">Shipping Policy</h2>
-        <textarea
-          className="w-full border p-3 rounded"
+        <RichTextEditor value={shipping} onChange={setShipping} />
+        {/* <textarea
+          className="w-full border p-3 rounded min-h-64"
           value={shipping}
           onChange={(e) => setShipping(e.target.value)}
-        />
+        /> */}
       </div>
 
       <div>
         <h2 className="font-bold mb-2">Return Policy</h2>
-        <textarea
-          className="w-full border p-3 rounded"
+        <RichTextEditor value={returns} onChange={setReturns} />
+        {/* <textarea
+          className="w-full border p-3 rounded min-h-64"
           value={returns}
           onChange={(e) => setReturns(e.target.value)}
-        />
+        /> */}
       </div>
 
       <button

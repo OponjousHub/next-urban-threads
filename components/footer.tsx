@@ -143,7 +143,8 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               {[
                 { label: "Contact Us", href: "/contact", icon: "📩" },
-                { label: "Shipping & Returns", href: "/shipping", icon: "🚚" },
+                { label: "Shipping", href: "/shipping", icon: "🚚" },
+                { label: "Returns", href: "/return-policy  ", icon: "🚚" },
                 { label: "FAQs", href: "/faqs", icon: "❓" },
                 { label: "Track Order", href: "/track-order", icon: "📦" },
               ].map((item) => (
