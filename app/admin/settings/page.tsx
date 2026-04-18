@@ -7,6 +7,7 @@ import GeneralSettings from "@/components/admin/settings/general-setting";
 import ManageCategory from "@/components/admin/settings/category-setting";
 import NewsletterAdminPage from "@/components/admin/settings/manage-subscription";
 import PolicyForm from "@/components/admin/settings/policy-form";
+import FAQForm from "@/components/admin/settings/faq-form";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -17,7 +18,10 @@ export default function SettingsPage() {
     { id: "password", label: "Change password" },
     { id: "category", label: "Manage category" },
     { id: "newsletter", label: "Manage Newsletter" },
-    { id: "shipping & return", label: "Shipping &  Return" },
+    { id: "policies", label: "Shipping & Return" },
+    // { id: "policies", label: "Policies" },
+    { id: "faqs", label: "FAQs" },
+    { id: "track-order", label: "Track Order" },
   ];
 
   return (
@@ -59,7 +63,8 @@ export default function SettingsPage() {
         {activeTab === "password" && <ChangePasswordAdmin />}
         {activeTab === "category" && <ManageCategory />}
         {activeTab === "newsletter" && <NewsletterAdminPage />}
-        {activeTab === "shipping & return" && <PolicyForm />}
+        {activeTab === "policies" && <PolicyForm />}
+        {activeTab === "faqs" && <FAQForm />}
       </main>
     </div>
   );

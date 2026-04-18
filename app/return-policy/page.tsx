@@ -17,7 +17,7 @@ export default async function ShippingPage() {
       <div
         className="prose max-w-none"
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(data?.returnPolicy || ""),
+          __html: data?.returnPolicy || "",
         }}
       />
     </div>

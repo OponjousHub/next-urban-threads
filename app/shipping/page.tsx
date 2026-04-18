@@ -1,6 +1,7 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import DOMPurify from "dompurify";
+// import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 
 export default async function ShippingPage() {
   const tenant = await getDefaultTenant();
@@ -15,9 +16,9 @@ export default async function ShippingPage() {
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">Shipping Policy</h1>
       <div
-        className="prose max-w-none"
+        className="prose max-w-none px-3"
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(data?.shippingPolicy || ""),
+          __html: data?.shippingPolicy || "",
         }}
       />
     </div>

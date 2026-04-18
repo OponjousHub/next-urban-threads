@@ -134,7 +134,7 @@ function DashboardClient({
                   When you place your first order, it will show up here.
                 </p>
                 <Link href="/">
-                  <Button className="mt-4">Start Shopping</Button>
+                  <Button className="mt-4 text-white">Start Shopping</Button>
                 </Link>
               </div>
             ) : (

@@ -11,9 +11,21 @@ export default function RichTextEditor({
   onChange: (val: string) => void;
 }) {
   const editor = useEditor({
-    extensions: [StarterKit],
-    content: value,
-    immediatelyRender: false, // ✅ ADD THIS
+    extensions: [
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3], // ✅ ensure headings work
+        },
+        bulletList: {
+          keepMarks: true,
+        },
+        orderedList: {
+          keepMarks: true,
+        },
+      }),
+    ],
+    content: value || "",
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
@@ -25,15 +37,22 @@ export default function RichTextEditor({
     <div className="border rounded-lg p-3 bg-white">
       {/* Toolbar */}
       <div className="flex gap-2 mb-3 border-b pb-2 flex-wrap">
-        <button onClick={() => editor.chain().focus().toggleBold().run()}>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+        >
           <b>B</b>
         </button>
 
-        <button onClick={() => editor.chain().focus().toggleItalic().run()}>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+        >
           <i>I</i>
         </button>
 
         <button
+          type="button"
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 2 }).run()
           }
@@ -41,19 +60,25 @@ export default function RichTextEditor({
           H2
         </button>
 
-        <button onClick={() => editor.chain().focus().toggleBulletList().run()}>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+        >
           • List
         </button>
 
         <button
+          type="button"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
           1. List
         </button>
       </div>
 
-      {/* Editor */}
-      <EditorContent editor={editor} className="min-h-[150px]" />
+      <EditorContent
+        editor={editor}
+        className="prose max-w-none min-h-[150px]"
+      />
     </div>
   );
 }

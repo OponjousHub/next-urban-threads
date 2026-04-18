@@ -7,7 +7,7 @@ import RichTextEditor from "@/components/ui/rich-text-editor";
 export default function PolicyForm() {
   const [shipping, setShipping] = useState("");
   const [returns, setReturns] = useState("");
-
+  const [loadingData, setLoadingData] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -17,6 +17,7 @@ export default function PolicyForm() {
 
       setShipping(data.shippingPolicy || "");
       setReturns(data.returnPolicy || "");
+      setLoadingData(false);
     };
 
     fetchData();
@@ -37,27 +38,19 @@ export default function PolicyForm() {
     toast.success("Policies updated ✅");
     setLoading(false);
   };
-
+  if (loadingData) {
+    return <div>Loading policies...</div>;
+  }
   return (
     <div className="space-y-6">
       <div>
         <h2 className="font-bold mb-2">Shipping Policy</h2>
         <RichTextEditor value={shipping} onChange={setShipping} />
-        {/* <textarea
-          className="w-full border p-3 rounded min-h-64"
-          value={shipping}
-          onChange={(e) => setShipping(e.target.value)}
-        /> */}
       </div>
 
       <div>
         <h2 className="font-bold mb-2">Return Policy</h2>
         <RichTextEditor value={returns} onChange={setReturns} />
-        {/* <textarea
-          className="w-full border p-3 rounded min-h-64"
-          value={returns}
-          onChange={(e) => setReturns(e.target.value)}
-        /> */}
       </div>
 
       <button
