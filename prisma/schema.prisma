@@ -287,10 +287,15 @@ model FAQ {
   id        String   @id @default(cuid())
   question  String
   answer    String
+
+  category  String   @default("General") 
+  order     Int      @default(0)         
+
   tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
 }
 
 enum ContactStatus {

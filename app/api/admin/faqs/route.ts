@@ -19,12 +19,13 @@ export async function POST(req: Request) {
   if (!tenant)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { question, answer } = await req.json();
+  const { question, answer, category } = await req.json();
 
   const faq = await prisma.fAQ.create({
     data: {
       question,
       answer,
+      category: category || "General",
       tenantId: tenant.id,
     },
   });
