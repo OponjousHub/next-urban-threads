@@ -7,6 +7,20 @@ html {
   box-sizing: border-box;
 }
 
+.ProseMirror {
+  min-height: 150px;
+  width: 100%;
+  outline: none;
+}
+
+.ProseMirror p {
+  margin: 0;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
 :root {
   --color-primary: #4f46e5;
   --color-primary-light: #818cf8;

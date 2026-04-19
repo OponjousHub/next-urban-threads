@@ -2,6 +2,7 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useEffect } from "react";
 
 export default function RichTextEditor({
   value,
@@ -14,29 +15,40 @@ export default function RichTextEditor({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3], // ✅ ensure headings work
+          levels: [1, 2, 3],
         },
-        bulletList: {
-          keepMarks: true,
-        },
-        orderedList: {
-          keepMarks: true,
-        },
+        bulletList: {},
+        orderedList: {},
+        listItem: {},
       }),
     ],
+
     content: value || "",
+
     immediatelyRender: false,
+
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
   });
 
+  // ⚠️ CRITICAL FIX: only sync when VALUE changes externally (NOT every render)
+  useEffect(() => {
+    if (!editor) return;
+
+    const current = editor.getHTML();
+    if (value !== current) {
+      editor.commands.setContent(value || "", {
+        emitUpdate: false,
+      });
+    }
+  }, [value, editor]);
+
   if (!editor) return null;
 
   return (
-    <div className="border rounded-lg p-3 bg-white">
-      {/* Toolbar */}
-      <div className="flex gap-2 mb-3 border-b pb-2 flex-wrap">
+    <div className="border rounded-lg bg-white">
+      <div className="flex gap-2 p-2 border-b flex-wrap">
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -75,10 +87,7 @@ export default function RichTextEditor({
         </button>
       </div>
 
-      <EditorContent
-        editor={editor}
-        className="prose max-w-none min-h-[150px]"
-      />
+      <EditorContent editor={editor} />
     </div>
   );
 }

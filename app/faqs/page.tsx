@@ -8,24 +8,35 @@ export default async function FAQPage() {
     where: { tenantId: tenant!.id },
   });
 
+  const grouped = faqs.reduce(
+    (acc, faq) => {
+      if (!acc[faq.category]) acc[faq.category] = [];
+      acc[faq.category].push(faq);
+      return acc;
+    },
+    {} as Record<string, typeof faqs>,
+  );
+
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">FAQs</h1>
 
-      {faqs.map((faq) => (
-        <div key={faq.id}>
-          <h2 className="font-semibold">{faq.question}</h2>
+      {Object.entries(grouped).map(([category, items]) => (
+        <div key={category}>
+          <h2 className="text-xl font-bold mt-6">{category}</h2>
 
-          <details className="border rounded-lg p-4">
-            <summary className="cursor-pointer font-semibold">
-              {faq.question}
-            </summary>
+          {items.map((faq) => (
+            <details key={faq.id} className="border rounded p-3 mt-2">
+              <summary className="cursor-pointer font-medium">
+                {faq.question}
+              </summary>
 
-            <div
-              className="mt-2 prose"
-              dangerouslySetInnerHTML={{ __html: faq.answer }}
-            />
-          </details>
+              <div
+                className="mt-2 prose"
+                dangerouslySetInnerHTML={{ __html: faq.answer }}
+              />
+            </details>
+          ))}
         </div>
       ))}
     </div>

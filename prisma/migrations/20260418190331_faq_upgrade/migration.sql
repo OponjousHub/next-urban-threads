@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "FAQ" ADD COLUMN     "category" TEXT NOT NULL DEFAULT 'General',
+ADD COLUMN     "order" INTEGER NOT NULL DEFAULT 0;

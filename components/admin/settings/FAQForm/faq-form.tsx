@@ -3,6 +3,21 @@
 import { useEffect, useState } from "react";
 import RichTextEditor from "@/components/ui/rich-text-editor";
 import toast from "react-hot-toast";
+import SortableItem from "./sortableItem";
+import FAQEditModal from "./FAQEditModal";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
 
 type FAQ = {
   id: string;
@@ -17,20 +32,23 @@ export default function FAQForm() {
   const [loadingFAG, setLoadingFAG] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(false);
-  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [category, setCategory] = useState("General");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editQuestion, setEditQuestion] = useState("");
   const [editAnswer, setEditAnswer] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
 
-  // fetch
-  //   useEffect(() => {
-  //     setLoadingFAG(true);
-  //     fetch("/api/admin/faqs")
-  //       .then((res) => res.json())
-  //       .then(setFaqs);
-  //     setLoadingFAG(false);
-  //   }, []);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 150, // hold for 150ms before drag
+        tolerance: 5,
+      },
+    }),
+  );
   useEffect(() => {
     const fetchFaqs = async () => {
       setLoadingFAG(true);
@@ -44,6 +62,13 @@ export default function FAQForm() {
 
     fetchFaqs();
   }, []);
+
+  const openEditModal = (faq: any) => {
+    setEditId(faq.id);
+    setEditQuestion(faq.question);
+    setEditAnswer(faq.answer);
+    setIsEditOpen(true);
+  };
 
   // add
   const addFAQ = async () => {
@@ -73,29 +98,62 @@ export default function FAQForm() {
     }
   };
 
-  const saveEdit = async (id: string) => {
+  // Edit FAQ
+  // const saveEdit = async (id: string) => {
+  //   console.log("SAVING FAG", id);
+  //   try {
+  //     setLoadingEdit(true);
+  //     await fetch(`/api/admin/faqs/${id}`, {
+  //       method: "PATCH",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         question: editQuestion,
+  //         answer: editAnswer,
+  //         category,
+  //       }),
+  //     });
+
+  //     setFaqs((prev) =>
+  //       prev.map((f) =>
+  //         f.id === id
+  //           ? { ...f, question: editQuestion, answer: editAnswer }
+  //           : f,
+  //       ),
+  //     );
+
+  //     setEditingId(null);
+  //   } catch (err) {
+  //     toast.error("Failed to add FAQ ❌");
+  //   } finally {
+  //     setLoadingEdit(false);
+  //   }
+  // };
+  const saveEdit = async () => {
+    if (!editId) return;
+
+    setLoadingEdit(true);
+
     try {
-      setLoadingEdit(true);
-      await fetch(`/api/admin/faqs/${id}`, {
+      await fetch(`/api/admin/faqs/${editId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: editQuestion,
           answer: editAnswer,
+          category,
         }),
       });
 
       setFaqs((prev) =>
         prev.map((f) =>
-          f.id === id
+          f.id === editId
             ? { ...f, question: editQuestion, answer: editAnswer }
             : f,
         ),
       );
 
-      setEditingId(null);
-    } catch (err) {
-      toast.error("Failed to add FAQ ❌");
+      setIsEditOpen(false);
+      setEditId(null);
     } finally {
       setLoadingEdit(false);
     }
@@ -104,7 +162,7 @@ export default function FAQForm() {
   // delete
   const deleteFAQ = async (id: string) => {
     try {
-      setLoadingDelete(true);
+      setDeletingId(id);
       await fetch(`/api/admin/faqs/${id}`, {
         method: "DELETE",
       });
@@ -115,8 +173,37 @@ export default function FAQForm() {
       console.error(err);
       toast.error("Failed to delete FAQ ❌");
     } finally {
-      setLoadingDelete(false);
+      setDeletingId(null);
     }
+  };
+
+  const handleDragEnd = async (event: any) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = faqs.findIndex((f) => f.id === active.id);
+    const newIndex = faqs.findIndex((f) => f.id === over.id);
+
+    const newItems = arrayMove(faqs, oldIndex, newIndex);
+
+    setFaqs(newItems); // ✅ instant UI update
+
+    // ✅ send new order to backend
+    await fetch("/api/admin/faqs/reorder", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        items: newItems.map((item, index) => ({
+          id: item.id,
+          order: index,
+        })),
+      }),
+    });
+
+    toast.success("Reordered ✅");
   };
 
   return (
@@ -142,11 +229,7 @@ export default function FAQForm() {
             className="w-full border p-2 rounded"
           />
 
-          <RichTextEditor
-            key={answer} // 👈 forces reset
-            value={answer}
-            onChange={setAnswer}
-          />
+          <RichTextEditor value={answer} onChange={setAnswer} />
 
           <button
             onClick={addFAQ}
@@ -168,87 +251,49 @@ export default function FAQForm() {
                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300"></span>
-
                 <span className="ml-3">Loading FAQs...</span>
               </div>
             </div>
           ) : faqs.length === 0 ? (
             <div className="text-center text-gray-400 py-10">No FAQs found</div>
           ) : (
-            faqs.map((faq) => (
-              <div key={faq.id} className="border rounded-xl p-4 bg-white">
-                {editingId === faq.id ? (
-                  // ✏️ EDIT MODE
-                  <div
-                    className={`${loadingEdit ? "opacity-60 pointer-events-none" : ""}`}
-                  >
-                    <div className="space-y-2">
-                      <input
-                        value={editQuestion}
-                        onChange={(e) => setEditQuestion(e.target.value)}
-                        className="w-full border p-2 rounded"
-                      />
-
-                      <RichTextEditor
-                        value={editAnswer}
-                        onChange={setEditAnswer}
-                      />
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => saveEdit(faq.id)}
-                          className="bg-black text-white px-3 py-1 rounded"
-                        >
-                          {loadingEdit ? "Saving..." : "Save"}
-                        </button>
-
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="text-gray-500"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  // 👁️ VIEW MODE
-                  <>
-                    <div className="flex justify-between">
-                      <p className="font-semibold">{faq.question}</p>
-
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => {
-                            setEditingId(faq.id);
-                            setEditQuestion(faq.question);
-                            setEditAnswer(faq.answer);
-                          }}
-                          className="text-blue-500 text-sm"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          onClick={() => deleteFAQ(faq.id)}
-                          className="text-red-500 text-sm"
-                        >
-                          {loadingDelete ? "Deleting..." : "Delete"}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div
-                      className="prose mt-2"
-                      dangerouslySetInnerHTML={{ __html: faq.answer }}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={faqs.map((f) => f.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {faqs.map((faq) => (
+                    <SortableItem
+                      key={faq.id}
+                      faq={faq}
+                      openId={openId}
+                      setOpenId={setOpenId}
+                      onEdit={openEditModal}
+                      deleteFAQ={deleteFAQ}
+                      deletingId={deletingId}
                     />
-                  </>
-                )}
-              </div>
-            ))
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
         </div>
       </div>
+      <FAQEditModal
+        open={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        question={editQuestion}
+        setQuestion={setEditQuestion}
+        answer={editAnswer}
+        setAnswer={setEditAnswer}
+        onSave={saveEdit}
+        loading={loadingEdit}
+      />
     </div>
   );
 }

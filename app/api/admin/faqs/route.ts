@@ -8,7 +8,7 @@ export async function GET() {
 
   const faqs = await prisma.fAQ.findMany({
     where: { tenantId: tenant.id },
-    orderBy: { createdAt: "desc" },
+    orderBy: { order: "asc" },
   });
 
   return NextResponse.json(faqs);
