@@ -8,6 +8,7 @@ import ManageCategory from "@/components/admin/settings/category-setting";
 import NewsletterAdminPage from "@/components/admin/settings/manage-subscription";
 import PolicyForm from "@/components/admin/settings/policy-form";
 import FAQForm from "@/components/admin/settings/FAQForm/faq-form";
+// import { AdminOrderTrackingPage } from "../orders/[id]/tracking/page";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -19,7 +20,6 @@ export default function SettingsPage() {
     { id: "category", label: "Manage category" },
     { id: "newsletter", label: "Manage Newsletter" },
     { id: "policies", label: "Shipping & Return" },
-    // { id: "policies", label: "Policies" },
     { id: "faqs", label: "FAQs" },
     { id: "track-order", label: "Track Order" },
   ];
@@ -65,6 +65,7 @@ export default function SettingsPage() {
         {activeTab === "newsletter" && <NewsletterAdminPage />}
         {activeTab === "policies" && <PolicyForm />}
         {activeTab === "faqs" && <FAQForm />}
+        {/* {activeTab === "track-order" && <AdminOrderTrackingPage />} */}
       </main>
     </div>
   );

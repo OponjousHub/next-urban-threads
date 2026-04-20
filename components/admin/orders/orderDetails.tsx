@@ -116,6 +116,12 @@ export default function OrderDetails({ order }: { order: Order }) {
                 Cancel Order
               </button>
             )}
+            <button
+              onClick={() => router.push(`/admin/orders/${order.id}/tracking`)}
+              className="bg-blue-600 text-white px-4 py-2 rounded mt-2 w-full"
+            >
+              Track Order
+            </button>
           </div>
         </div>
       </div>

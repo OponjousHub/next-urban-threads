@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
 type Event = {
   id: string;
@@ -11,23 +12,24 @@ type Event = {
   createdAt: string;
 };
 
-export default function AdminOrderTrackingPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function AdminOrderTrackingPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [status, setStatus] = useState("SHIPPED");
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [location, setLocation] = useState("");
 
+  const params = useParams();
+  const orderId = params.id as string;
+
+  if (!orderId) return null;
+
   useEffect(() => {
     fetchEvents();
   }, []);
 
   const fetchEvents = async () => {
-    const res = await fetch(`/api/orders/${params.id}/tracking`);
+    const res = await fetch(`/api/orders/${orderId}/tracking`);
     const data = await res.json();
     setEvents(data);
   };
