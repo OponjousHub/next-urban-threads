@@ -110,6 +110,8 @@ model Order {
   user              User            @relation(fields: [userId], references: [id])
   items             OrderItem[]
   review            Review[]
+  orderTrackingEvent OrderTrackingEvent[]
+  orderStatusHistory OrderStatusHistory[]
 
   @@index([tenantId, createdAt, status])
 }
@@ -296,6 +298,34 @@ model FAQ {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model OrderStatusHistory {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+
+  status    String   // "PAID", "SHIPPED", etc
+  message   String?  // human-readable update
+  location  String?  // optional (e.g. "Lagos Hub")
+  
+  createdAt DateTime @default(now())
+}
+
+model OrderTrackingEvent {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+
+  type      String   // "STATUS_CHANGE", "COURIER_SCAN", "NOTE"
+  title     String
+  description String?
+  metadata  Json?
+  status      String   // "PLACED", "SHIPPED", etc
+  message     String?  // optional details
+  location    String?  // "Lagos Hub"
+
+  createdAt DateTime @default(now())
 }
 
 enum ContactStatus {
