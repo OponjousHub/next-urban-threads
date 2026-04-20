@@ -7,36 +7,52 @@ export async function POST(
   { params }: { params: { id: string } },
 ) {
   const tenant = await getDefaultTenant();
+
   if (!tenant) {
     return NextResponse.json(
       { error: "Default tenant not found" },
       { status: 404 },
     );
   }
+
   try {
     const body = await req.json();
 
-    const { status, title, message, location } = body;
+    const {
+      status, // should match OrderStatus enum
+      title,
+      description, // ✅ renamed from message
+      location,
+      type, // optional (enum)
+    } = body;
 
+    // ✅ Create tracking event
     const event = await prisma.orderTrackingEvent.create({
-      where: { tenantId: tenant.id },
       data: {
         orderId: params.id,
-        status,
+        tenantId: tenant.id,
+
+        type: type || "STATUS_CHANGE", // ✅ enum default
+        status: status || undefined, // ✅ optional enum
+
         title,
-        message,
+        description,
         location,
       },
     });
 
-    // OPTIONAL: also update order current status
-    await prisma.order.update({
-      where: { id: params.id },
-      data: { status },
-    });
+    // ✅ Only update order if this is a status change
+    if (status) {
+      await prisma.order.update({
+        where: { id: params.id },
+        data: { status },
+      });
+    }
 
     return NextResponse.json(event);
   } catch (err) {
+    console.error(err);
+
     return NextResponse.json(
       { error: "Failed to create tracking event" },
       { status: 500 },

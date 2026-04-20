@@ -313,19 +313,22 @@ model OrderStatusHistory {
 }
 
 model OrderTrackingEvent {
-  id        String   @id @default(cuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id])
+  id          String   @id @default(cuid())
 
-  type      String   // "STATUS_CHANGE", "COURIER_SCAN", "NOTE"
-  title     String
-  description String?
-  metadata  Json?
-  status      String   // "PLACED", "SHIPPED", etc
-  message     String?  // optional details
-  location    String?  // "Lagos Hub"
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
 
-  createdAt DateTime @default(now())
+  tenantId    String
+  type        TrackingEventType  // ✅ ENUM
+  status      OrderStatus?       // ✅ OPTIONAL ENUM
+
+  title       String
+  description String?            // ✅ keep only this (remove message)
+
+  location    String?
+  metadata    Json?
+
+  createdAt   DateTime @default(now())
 }
 
 enum ContactStatus {
@@ -355,10 +358,14 @@ enum Role {
 
 enum OrderStatus {
   PENDING
+  PROCESSING
   SHIPPED
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
   DELIVERED
   CANCELLED
-  PROCESSING
+  RETURNED
+  FAILED
 }
 
 enum PaymentProvider {
@@ -398,4 +405,11 @@ enum ReviewPolicy {
   AFTER_PAYMENT
   AFTER_DELIVERY
   MANUAL_APPROVAL
+}
+
+enum TrackingEventType {
+  STATUS_CHANGE
+  COURIER_UPDATE
+  NOTE
+  SYSTEM
 }
