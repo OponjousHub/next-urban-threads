@@ -3,136 +3,184 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
+/* ---------------- TYPES ---------------- */
+
 type Event = {
   id: string;
   status: string;
-  title: string;
-  description?: string;
+  title?: string;
+  message?: string;
   location?: string;
   createdAt: string;
 };
 
-export default function AdminOrderTrackingPage() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [status, setStatus] = useState("SHIPPED");
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState("");
-  const [message, setMessage] = useState("");
-  const [location, setLocation] = useState("");
+/* ---------------- CONFIG ---------------- */
 
+const STATUS_CONFIG: Record<string, { title: string; message: string }> = {
+  PENDING: {
+    title: "Order placed",
+    message: "Your order has been received",
+  },
+  PROCESSING: {
+    title: "Processing",
+    message: "We are preparing your order",
+  },
+  SHIPPED: {
+    title: "Shipped",
+    message: "Your package has left our warehouse",
+  },
+  OUT_FOR_DELIVERY: {
+    title: "Out for delivery",
+    message: "Your package is out for delivery and will arrive today",
+  },
+  DELIVERED: {
+    title: "Delivered",
+    message: "Your order has been delivered",
+  },
+};
+
+/* ---------------- COMPONENT ---------------- */
+
+export default function AdminOrderTrackingPage() {
   const params = useParams();
   const orderId = params.id as string;
 
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [location, setLocation] = useState("");
+
   if (!orderId) return null;
+
+  /* ---------------- FETCH ---------------- */
+
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/orders/${orderId}/tracking`);
+      const data = await res.json();
+
+      // newest first
+      const sorted = [...data].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+
+      setEvents(sorted);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
-  const fetchEvents = async () => {
-    const res = await fetch(`/api/orders/${orderId}/tracking`);
-    const data = await res.json();
-    setEvents(data);
+  /* ---------------- QUICK ACTION ---------------- */
+
+  const handleQuickUpdate = async (status: string) => {
+    const config = STATUS_CONFIG[status];
+
+    if (!config) return;
+
+    setSubmitting(true);
+
+    try {
+      await fetch(`/api/admin/orders/${orderId}/tracking`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status,
+          title: config.title,
+          message: config.message,
+          location,
+          type: "STATUS_CHANGE",
+        }),
+      });
+
+      setLocation("");
+      await fetchEvents();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const addTracking = async () => {
-    await fetch(`/api/admin/orders/${params.id}/tracking`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        status,
-        title,
-        description: message,
-        location,
-        type,
-      }),
-    });
-
-    setTitle("");
-    setMessage("");
-    setLocation("");
-
-    fetchEvents();
-  };
+  /* ---------------- UI ---------------- */
 
   return (
     <div className="grid grid-cols-2 gap-10 p-6">
-      {/* LEFT: FORM */}
-      <div className="space-y-3 border p-4 rounded-xl">
+      {/* LEFT: QUICK ACTIONS */}
+      <div className="space-y-4 border p-4 rounded-xl">
         <h2 className="font-semibold text-lg">Update Tracking</h2>
 
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="border p-2 w-full"
-        >
-          <option>PLACED</option>
-          <option>PAID</option>
-          <option>PROCESSING</option>
-          <option>PACKED</option>
-          <option>SHIPPED</option>
-          <option>IN_TRANSIT</option>
-          <option>OUT_FOR_DELIVERY</option>
-          <option>DELIVERED</option>
-        </select>
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          className="border p-2 w-full"
-        >
-          <option>STATUS_CHANGE</option>
-          <option>COURIER_UPDATE</option>
-          <option>SYSTEM</option>
-          <option>NOTE</option>
-        </select>
-
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
-          className="border p-2 w-full"
-        />
-
-        <input
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Message"
-          className="border p-2 w-full"
-        />
-
+        {/* LOCATION INPUT */}
         <input
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          placeholder="Location (optional)"
-          className="border p-2 w-full"
+          placeholder="Location (e.g. Ikeja, Lagos)"
+          className="border p-2 w-full rounded"
         />
 
-        <button
-          onClick={addTracking}
-          className="bg-black text-white px-4 py-2 rounded"
-        >
-          Add Update
-        </button>
+        {/* 🔥 ONE CLICK BUTTONS */}
+        <div className="grid grid-cols-2 gap-3">
+          {Object.keys(STATUS_CONFIG).map((status) => (
+            <button
+              key={status}
+              onClick={() => handleQuickUpdate(status)}
+              disabled={submitting}
+              className={`p-3 rounded text-sm font-medium border transition
+                ${
+                  submitting
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "bg-black text-white hover:bg-gray-800"
+                }
+              `}
+            >
+              {submitting ? "Updating..." : STATUS_CONFIG[status].title}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* RIGHT: TIMELINE */}
       <div className="border p-4 rounded-xl">
         <h2 className="font-semibold text-lg mb-4">Tracking Timeline</h2>
 
-        <div className="border-l pl-4 space-y-6">
-          {events.map((event) => (
-            <div key={event.id} className="relative">
-              <div className="absolute -left-[9px] top-1 w-3 h-3 bg-black rounded-full" />
+        {loading ? (
+          <div className="text-gray-500 text-sm">Loading timeline...</div>
+        ) : (
+          <div className="border-l pl-4 space-y-6">
+            {events.map((event, index) => (
+              <div key={event.id} className="relative">
+                <div
+                  className={`absolute -left-[9px] top-1 w-3 h-3 rounded-full ${
+                    index === 0 ? "bg-black" : "bg-gray-300"
+                  }`}
+                />
 
-              <p className="font-semibold">{event.status}</p>
-              <p className="text-sm text-gray-600">{event.description}</p>
-              <p className="text-xs text-gray-500">{event.location}</p>
-              <p className="text-xs text-gray-400">
-                {new Date(event.createdAt).toLocaleString()}
-              </p>
-            </div>
-          ))}
-        </div>
+                <p className="font-semibold">{event.title || event.status}</p>
+
+                {event.message && (
+                  <p className="text-sm text-gray-600">{event.message}</p>
+                )}
+
+                {event.location && (
+                  <p className="text-xs text-gray-500">📍 {event.location}</p>
+                )}
+
+                <p className="text-xs text-gray-400">
+                  {new Date(event.createdAt).toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
