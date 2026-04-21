@@ -166,6 +166,8 @@ model Tenant {
   storeType          StoreType      @default(SINGLE_VENDOR)
   returnPolicy       String?
   shippingPolicy     String?
+  aboutTitle         String?
+  aboutText          String?
   address            Address[]
   cartItem           CartItem[]
   categories         Category[]
