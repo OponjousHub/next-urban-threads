@@ -6,8 +6,9 @@ import toast from "react-hot-toast";
 import { GetToast } from "@/components/ui/adminToast";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ReviewForm } from "@/components/reviews/reviewForm";
-// import { OrderStatus } from "@prisma/client";
+import CustomerTrackingTimeline from "@/components/order/CustomerTrackingTimeline";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
+import { DialogTitle } from "@/components/ui/dialog";
 
 type OrderItem = {
   id: string;
@@ -222,6 +223,8 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
           </p>
         </div>
 
+        <CustomerTrackingTimeline orderId={order.id} />
+
         <h2 className="text-2xl font-semibold mb-3">Items</h2>
 
         <ul className="border rounded-lg p-4 space-y-4">
@@ -250,11 +253,13 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                   {order.status === "DELIVERED" && (
                     <Dialog open={open} onOpenChange={setOpen}>
                       <DialogTrigger asChild>
-                        <button className="text-[var(--color-primary)] text-sm font-medium hover:underline">
-                          {userReviews[item.product.id]
-                            ? "Edit Review"
-                            : "Write Review"}
-                        </button>
+                        <DialogTitle className="text-lg font-semibold">
+                          <button className="text-[var(--color-primary)] text-sm font-medium hover:underline">
+                            {userReviews[item.product.id]
+                              ? "Edit Review"
+                              : "Write Review"}
+                          </button>
+                        </DialogTitle>
                       </DialogTrigger>
 
                       <DialogContent className="[&>button]:hidden sm:max-w-lg">

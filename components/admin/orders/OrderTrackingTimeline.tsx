@@ -6,7 +6,7 @@ type Event = {
   id: string;
   status: string;
   title: string;
-  message?: string;
+  description?: string;
   location?: string;
   createdAt: string;
 };
@@ -50,8 +50,8 @@ export default function OrderTrackingTimeline({
 
           <p className="font-semibold">{event.title}</p>
 
-          {event.message && (
-            <p className="text-sm text-gray-600">{event.message}</p>
+          {event.description && (
+            <p className="text-sm text-gray-600">{event.description}</p>
           )}
 
           {event.location && (

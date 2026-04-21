@@ -7,7 +7,7 @@ type Event = {
   id: string;
   status: string;
   title: string;
-  message?: string;
+  description?: string;
   location?: string;
   createdAt: string;
 };
@@ -16,6 +16,7 @@ export default function AdminOrderTrackingPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [status, setStatus] = useState("SHIPPED");
   const [title, setTitle] = useState("");
+  const [type, setType] = useState("");
   const [message, setMessage] = useState("");
   const [location, setLocation] = useState("");
 
@@ -41,8 +42,9 @@ export default function AdminOrderTrackingPage() {
       body: JSON.stringify({
         status,
         title,
-        message,
+        description: message,
         location,
+        type,
       }),
     });
 
@@ -72,6 +74,16 @@ export default function AdminOrderTrackingPage() {
           <option>IN_TRANSIT</option>
           <option>OUT_FOR_DELIVERY</option>
           <option>DELIVERED</option>
+        </select>
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          className="border p-2 w-full"
+        >
+          <option>STATUS_CHANGE</option>
+          <option>COURIER_UPDATE</option>
+          <option>SYSTEM</option>
+          <option>NOTE</option>
         </select>
 
         <input
@@ -112,8 +124,8 @@ export default function AdminOrderTrackingPage() {
             <div key={event.id} className="relative">
               <div className="absolute -left-[9px] top-1 w-3 h-3 bg-black rounded-full" />
 
-              <p className="font-semibold">{event.title}</p>
-              <p className="text-sm text-gray-600">{event.message}</p>
+              <p className="font-semibold">{event.status}</p>
+              <p className="text-sm text-gray-600">{event.description}</p>
               <p className="text-xs text-gray-500">{event.location}</p>
               <p className="text-xs text-gray-400">
                 {new Date(event.createdAt).toLocaleString()}

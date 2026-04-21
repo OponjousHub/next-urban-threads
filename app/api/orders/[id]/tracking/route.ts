@@ -6,6 +6,7 @@ export async function GET(
   req: Request,
   { params }: { params: { id: string } },
 ) {
+  const param = await params;
   const tenant = await getDefaultTenant();
   if (!tenant) {
     return NextResponse.json(
@@ -16,7 +17,7 @@ export async function GET(
 
   try {
     const events = await prisma.orderTrackingEvent.findMany({
-      where: { orderId: params.id, tenantId: tenant.id },
+      where: { orderId: param.id, tenantId: tenant.id },
       orderBy: { createdAt: "asc" },
     });
 
