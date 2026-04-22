@@ -8,7 +8,6 @@ import ManageCategory from "@/components/admin/settings/category-setting";
 import NewsletterAdminPage from "@/components/admin/settings/manage-subscription";
 import PolicyForm from "@/components/admin/settings/policy-form";
 import FAQForm from "@/components/admin/settings/FAQForm/faq-form";
-// import { AdminOrderTrackingPage } from "../orders/[id]/tracking/page";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");

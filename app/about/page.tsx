@@ -19,65 +19,86 @@ export default async function AboutPage() {
       };
 
   return (
-    <div className="bg-white text-gray-800">
-      <div className="max-w-5xl mx-auto px-6 py-20">
-        {/* HERO SECTION */}
-        <div className="text-center mb-16">
-          {/* TENANT BRANDING */}
+    <div className="bg-white text-gray-900">
+      <div className="max-w-6xl mx-auto px-6 lg:px-8 py-24 space-y-24">
+        {/* HERO */}
+        <section className="text-center space-y-6">
           {about.logo && (
             <img
               src={about.logo}
               alt="Brand Logo"
-              className="h-16 mx-auto mb-6 object-contain"
+              className="h-16 mx-auto object-contain"
             />
           )}
 
-          <h1 className="text-4xl font-bold mb-4">{about.title}</h1>
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
+            {about.title}
+          </h1>
 
-          <p className="text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
             {about.description}
           </p>
-        </div>
+        </section>
 
-        {/* PLATFORM HIGHLIGHTS */}
-        <div className="grid md:grid-cols-3 gap-8 mb-20">
-          {platformContent.about.highlights.map((item) => (
-            <div
-              key={item.title}
-              className="border rounded-xl p-6 hover:shadow-md transition"
-            >
-              <h3 className="font-semibold mb-2 text-lg">{item.title}</h3>
-              <p className="text-sm text-gray-600">{item.description}</p>
-            </div>
-          ))}
-        </div>
+        {/* DIVIDER */}
+        <div className="border-t border-gray-100" />
 
-        {/* PLATFORM STORY SECTION */}
-        <div className="bg-gray-50 rounded-2xl p-10 border">
-          <h2 className="text-2xl font-semibold mb-4">
+        {/* PLATFORM FEATURES */}
+        <section className="space-y-12">
+          <div className="text-center space-y-3">
+            <h2 className="text-2xl md:text-3xl font-semibold">
+              Built for Modern Commerce
+            </h2>
+            <p className="text-gray-500 max-w-2xl mx-auto">
+              A flexible engine that scales from a single store to a full SaaS
+              ecosystem.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-10">
+            {platformContent.about.highlights.map((item) => (
+              <div
+                key={item.title}
+                className="p-8 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-sm transition"
+              >
+                <h3 className="font-semibold text-lg mb-3">{item.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* STORY SECTION */}
+        <section className="bg-gray-50 rounded-3xl p-10 md:p-16 space-y-6 border border-gray-100">
+          <h2 className="text-2xl md:text-3xl font-semibold">
             Why We Built This Platform
           </h2>
 
-          <p className="text-gray-600 leading-relaxed mb-4">
-            Most ecommerce systems are either too simple or too rigid. We wanted
-            to build something that scales from a single store to a full
-            marketplace without rebuilding everything.
+          <p className="text-gray-600 leading-relaxed text-lg">
+            Most ecommerce platforms force businesses into rigid systems. We
+            built a flexible engine that adapts to your business model instead.
           </p>
 
-          <p className="text-gray-600 leading-relaxed">
-            This engine is designed to evolve with your business—from startup
-            store → marketplace → full SaaS ecosystem.
+          <p className="text-gray-600 leading-relaxed text-lg">
+            Whether you're running a single store, a marketplace, or a SaaS
+            ecosystem, the architecture evolves with you — not against you.
           </p>
-        </div>
+        </section>
 
-        {/* TENANT SECTION (ONLY IF MULTI-VENDOR) */}
+        {/* TENANT SECTION */}
         {tenant && (
-          <div className="mt-16 border-t pt-10">
-            <h3 className="text-lg font-semibold mb-2">About This Store</h3>
-            <p className="text-gray-600 text-sm">
-              You are currently viewing a store powered by our platform.
+          <section className="space-y-4 text-center">
+            <div className="inline-block px-4 py-2 rounded-full bg-gray-100 text-sm text-gray-600">
+              Powered by our ecommerce engine
+            </div>
+
+            <p className="text-gray-500 text-sm max-w-xl mx-auto">
+              This store is independently managed and powered by a scalable
+              multi-tenant infrastructure.
             </p>
-          </div>
+          </section>
         )}
       </div>
     </div>
