@@ -120,7 +120,6 @@ export default function OrdersTable({
                 <OrderRow
                   key={order.id}
                   order={order}
-                  query={query}
                   onAction={(action, order) => {
                     // Only CANCEL needs confirmation
                     if (
