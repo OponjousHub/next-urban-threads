@@ -168,6 +168,8 @@ model Tenant {
   shippingPolicy     String?
   aboutTitle         String?
   aboutText          String?
+  aboutStory         String?
+  aboutImage         String?
   address            Address[]
   cartItem           CartItem[]
   categories         Category[]
