@@ -100,7 +100,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // ---------------------------
     const updatedOrder = await prisma.order.update({
       where: { id: order.id, tenantId: tenant.id },
-      data: { status: "PAID" },
+      data: { paymentStatus: "PAID", status: "PROCESSING" },
       include: {
         items: {
           include: {
@@ -109,6 +109,19 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         },
       },
     });
+
+    await prisma.orderTrackingEvent.create({
+      data: {
+        orderId: order.id,
+        tenantId: tenant.id,
+        status: "PROCESSING",
+        type: "STATUS_CHANGE",
+        title: "Payment confirmed",
+        description:
+          "Your payment was successful. We are now processing your order.",
+      },
+    });
+
     return NextResponse.json(updatedOrder);
   } catch (error) {
     console.error("Verify order error:", error);

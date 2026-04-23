@@ -171,3 +171,110 @@ export default function CustomerTrackingTimeline({
     </div>
   );
 }
+
+// type Event = {
+//  // id: string;
+//   status: string;
+//   title: string;
+//   description?: string;
+//   location?: string;
+//   createdAt: string;
+// };
+
+// export function CustomerTrackingTimeline({
+//   events,
+//   currentStatus,
+// }: {
+//   events: Event[];
+//   currentStatus: string;
+// }) {
+//   /* ---------------- EMPTY STATE ---------------- */
+//   if (!events || events.length === 0) {
+//     return (
+//       <div className="bg-white border rounded-xl p-6 text-center">
+//         <h2 className="text-lg font-semibold mb-2">Tracking</h2>
+
+//         <p className="text-sm text-gray-500 mb-2">
+//           No tracking updates yet
+//         </p>
+
+//         <p className="text-xs text-gray-400">
+//           Your order is currently <b>{currentStatus}</b> and will be updated soon.
+//         </p>
+//       </div>
+//     );
+//   }
+
+//   /* ---------------- SORT (latest first) ---------------- */
+//   const sorted = [...events].sort(
+//     (a, b) =>
+//       new Date(b.createdAt).getTime() -
+//       new Date(a.createdAt).getTime()
+//   );
+
+//   /* ---------------- CURRENT STATUS ---------------- */
+//   const latest = sorted[0];
+
+//   return (
+//     <div className="bg-white border rounded-xl p-6">
+//       {/* HEADER */}
+//       <div className="mb-6">
+//         <h2 className="text-lg font-semibold">Tracking</h2>
+
+//         <div className="mt-2 flex items-center gap-2">
+//           <span className="text-sm text-gray-500">Current status:</span>
+
+//           <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium">
+//             {latest?.status || currentStatus}
+//           </span>
+//         </div>
+//       </div>
+
+//       {/* TIMELINE */}
+//       <div className="relative border-l pl-5 space-y-6">
+//         {sorted.map((event, index) => {
+//           const isLatest = index === 0;
+
+//           return (
+//             <div key={event.id} className="relative">
+//               {/* DOT */}
+//               <div
+//                 className={`absolute -left-[10px] top-1 w-3 h-3 rounded-full ${
+//                   isLatest ? "bg-black" : "bg-gray-300"
+//                 }`}
+//               />
+
+//               {/* STATUS */}
+//               <p
+//                 className={`text-sm font-semibold ${
+//                   isLatest ? "text-black" : "text-gray-600"
+//                 }`}
+//               >
+//                 {event.title || event.status}
+//               </p>
+
+//               {/* MESSAGE */}
+//               {event.description && (
+//                 <p className="text-sm text-gray-600">
+//                   {event.description}
+//                 </p>
+//               )}
+
+//               {/* LOCATION */}
+//               {event.location && (
+//                 <p className="text-xs text-gray-500 mt-1">
+//                   📍 {event.location}
+//                 </p>
+//               )}
+
+//               {/* TIME */}
+//               <p className="text-xs text-gray-400 mt-1">
+//                 {new Date(event.createdAt).toLocaleString()}
+//               </p>
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   );
+// }

@@ -139,6 +139,19 @@ export async function POST(req: NextRequest) {
       data: { paymentReference },
     });
 
+    // INITIALIZE TRACKING WITH STATUS = PENDING
+    await prisma.orderTrackingEvent.create({
+      data: {
+        orderId: order.id,
+        tenantId: tenant.id,
+        status: "PENDING",
+        type: "SYSTEM",
+        title: "Order placed",
+        description: "Your order has been received and is awaiting processing",
+        location: "Online",
+      },
+    });
+
     // 6️⃣ Initialize payment (factory → provider instance)
     const provider = getPaymentProvider(order.paymentProvider);
 
