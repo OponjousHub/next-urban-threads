@@ -170,6 +170,7 @@ model Tenant {
   aboutText          String?
   aboutStory         String?
   aboutImage         String?
+  aboutDescription   String?
   address            Address[]
   cartItem           CartItem[]
   categories         Category[]

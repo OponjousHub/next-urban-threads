@@ -1,5 +1,4 @@
 import { platformContent } from "@/lib/content/platform-content";
-import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export default async function AboutPage() {
@@ -9,36 +8,60 @@ export default async function AboutPage() {
   const about = tenant?.aboutTitle
     ? {
         title: tenant.aboutTitle,
-        description: tenant.aboutText,
-        logo: tenant.logo,
+        description: tenant.aboutDescription,
+        story: tenant.aboutStory,
+        image: tenant.aboutImage,
       }
     : {
         title: platformContent.about.title,
         description: platformContent.about.description,
-        logo: null,
+        story: "",
+        image: null,
       };
 
   return (
     <div className="bg-white text-gray-900">
       <div className="max-w-6xl mx-auto px-6 lg:px-8 py-24 space-y-24">
-        {/* HERO */}
-        <section className="text-center space-y-6">
-          {about.logo && (
-            <img
-              src={about.logo}
-              alt="Brand Logo"
-              className="h-16 mx-auto object-contain"
-            />
-          )}
+        {/* 🔥 PAGE HEADER */}
+        <section className="text-center space-y-4">
+          <p className="text-sm text-gray-500 uppercase tracking-widest">
+            About Us
+          </p>
 
           <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
-            {about.title}
+            {about.title || "About Our Store"}
           </h1>
 
-          <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
-            {about.description}
-          </p>
+          {about.description && (
+            <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
+              {about.description}
+            </p>
+          )}
         </section>
+
+        {/* HERO IMAGE */}
+        {about.image && (
+          <div className="rounded-3xl overflow-hidden border border-gray-100">
+            <img
+              src={about.image}
+              alt="About"
+              className="w-full h-[300px] md:h-[420px] object-cover"
+            />
+          </div>
+        )}
+
+        {/* FULL STORY (🔥 THIS WAS MISSING) */}
+        {about.story && (
+          <section className="max-w-3xl mx-auto space-y-6">
+            <h2 className="text-2xl md:text-3xl font-semibold">Our Story</h2>
+
+            <div className="text-gray-700 leading-relaxed text-lg space-y-4">
+              {about.story.split("\n").map((paragraph, i) => (
+                <p key={i}>{paragraph}</p>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* DIVIDER */}
         <div className="border-t border-gray-100" />
@@ -70,36 +93,17 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* STORY SECTION */}
-        <section className="bg-gray-50 rounded-3xl p-10 md:p-16 space-y-6 border border-gray-100">
-          <h2 className="text-2xl md:text-3xl font-semibold">
-            Why We Built This Platform
-          </h2>
+        {/* TENANT FOOTER */}
+        <section className="space-y-4 text-center">
+          <div className="inline-block px-4 py-2 rounded-full bg-gray-100 text-sm text-gray-600">
+            Powered by our ecommerce engine
+          </div>
 
-          <p className="text-gray-600 leading-relaxed text-lg">
-            Most ecommerce platforms force businesses into rigid systems. We
-            built a flexible engine that adapts to your business model instead.
-          </p>
-
-          <p className="text-gray-600 leading-relaxed text-lg">
-            Whether you're running a single store, a marketplace, or a SaaS
-            ecosystem, the architecture evolves with you — not against you.
+          <p className="text-gray-500 text-sm max-w-xl mx-auto">
+            This store is independently managed and powered by a scalable
+            multi-tenant infrastructure.
           </p>
         </section>
-
-        {/* TENANT SECTION */}
-        {tenant && (
-          <section className="space-y-4 text-center">
-            <div className="inline-block px-4 py-2 rounded-full bg-gray-100 text-sm text-gray-600">
-              Powered by our ecommerce engine
-            </div>
-
-            <p className="text-gray-500 text-sm max-w-xl mx-auto">
-              This store is independently managed and powered by a scalable
-              multi-tenant infrastructure.
-            </p>
-          </section>
-        )}
       </div>
     </div>
   );
