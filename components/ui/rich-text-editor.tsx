@@ -8,7 +8,7 @@ export default function RichTextEditor({
   value,
   onChange,
 }: {
-  value: string;
+  value: string | undefined;
   onChange: (val: string) => void;
 }) {
   const editor = useEditor({

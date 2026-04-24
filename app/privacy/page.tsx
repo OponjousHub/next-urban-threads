@@ -2,6 +2,7 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export default async function PrivacyPage() {
   const tenant = await getDefaultTenant();
+  if (!tenant) throw new Error("Defaul tenant not found!");
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-20">

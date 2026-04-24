@@ -9,6 +9,7 @@ import NewsletterAdminPage from "@/components/admin/settings/manage-subscription
 import PolicyForm from "@/components/admin/settings/policy-form";
 import FAQForm from "@/components/admin/settings/FAQForm/faq-form";
 import AboutSettings from "../content/about/page";
+import LegalSettings from "../content/legal/page";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -21,6 +22,7 @@ export default function SettingsPage() {
     { id: "newsletter", label: "Manage Newsletter" },
     { id: "policies", label: "Shipping & Return" },
     { id: "about", label: "Manage About Us" },
+    { id: "legal", label: "Legal setting" },
     { id: "faqs", label: "FAQs" },
   ];
 
@@ -66,6 +68,7 @@ export default function SettingsPage() {
         {activeTab === "policies" && <PolicyForm />}
         {activeTab === "faqs" && <FAQForm />}
         {activeTab === "about" && <AboutSettings />}
+        {activeTab === "legal" && <LegalSettings />}
       </main>
     </div>
   );
