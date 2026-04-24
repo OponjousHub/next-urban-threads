@@ -124,6 +124,7 @@ export async function POST(req: NextRequest) {
         tenantId: tenant.id,
         shippingAddressId,
         totalAmount,
+        customerEmail: email,
         currency,
         paymentProvider: providerKey,
         paymentMethod,

@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
 
     const order = await prisma.order.findFirst({
       where: {
-        id: orderId,
+        id: orderId.trim(),
         tenantId: tenant.id,
-        customerEmail: email, // 👈 IMPORTANT
+        customerEmail: email.toLowerCase().trim(),
       },
       include: {
         orderTrackingEvent: {

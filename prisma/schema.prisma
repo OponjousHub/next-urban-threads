@@ -172,6 +172,8 @@ model Tenant {
   aboutStory         String?
   aboutImage         String?
   aboutDescription   String?
+  termsOfService     String?
+  privacyPolicy      String?
   address            Address[]
   cartItem           CartItem[]
   categories         Category[]
