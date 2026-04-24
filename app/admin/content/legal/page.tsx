@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import RichTextEditor from "@/components/ui/rich-text-editor";
+import toast from "react-hot-toast";
+import { AdminToast } from "@/components/ui/adminToast";
 
 type FormData = {
   termsOfService?: string;
@@ -11,6 +13,7 @@ type FormData = {
 
 export default function LegalSettings() {
   const { handleSubmit, setValue, watch } = useForm<FormData>();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -27,17 +30,43 @@ export default function LegalSettings() {
   const terms = watch("termsOfService");
   const privacy = watch("privacyPolicy");
 
-  //   if (!terms || !privacy)
-  //     return <p>Terms of service or Privacy policy not found</p>;
+  // if (!terms || !privacy)
+  //   return <p>Terms of service or Privacy policy not found</p>;
 
   async function onSubmit(data: FormData) {
-    await fetch("/api/admin/legal", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+    try {
+      setLoading(true);
 
-    alert("Saved");
+      const res = await fetch("/api/admin/legal", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) throw new Error();
+
+      toast.custom(
+        <AdminToast
+          type="success"
+          title="Legal pages updated"
+          description="Terms & Privacy saved successfully"
+        />,
+        { duration: 4000 },
+      );
+    } catch {
+      toast.custom(
+        <AdminToast
+          type="error"
+          title="Update failed"
+          description="Something went wrong"
+        />,
+        { duration: 6000 },
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -58,8 +87,25 @@ export default function LegalSettings() {
         />
       </div>
 
-      <button className="bg-black text-white px-6 py-2 rounded-md">
-        Save Changes
+      <button
+        type="submit"
+        disabled={loading}
+        className={`px-5 py-2 rounded-md text-white text-sm transition
+    ${
+      loading
+        ? "bg-gray-400 cursor-not-allowed opacity-70"
+        : "bg-[var(--color-primary)] hover:opacity-90"
+    }
+  `}
+      >
+        {loading ? (
+          <span className="flex items-center gap-2 justify-center">
+            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            Saving...
+          </span>
+        ) : (
+          "Save changes"
+        )}
       </button>
     </form>
   );
