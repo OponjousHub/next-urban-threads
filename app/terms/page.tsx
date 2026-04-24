@@ -2,6 +2,7 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export default async function TermsPage() {
   const tenant = await getDefaultTenant();
+  if (!tenant) throw new Error("Default tenant not found!");
 
   const content =
     tenant?.termsOfService || "Default Terms of Service will go here...";

@@ -1,5 +1,8 @@
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+
 export default async function PrivacyPage() {
   const tenant = await getDefaultTenant();
+  if (!tenant) throw new Error("Default tenant not found!");
 
   const content =
     tenant?.privacyPolicy || "Default Privacy Policy will go here...";
