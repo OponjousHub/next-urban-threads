@@ -49,3 +49,12 @@ export async function approveRefund(refundId: string) {
     },
   });
 }
+
+export async function rejectRefund(refundId: string) {
+  return prisma.refundRequest.update({
+    where: { id: refundId },
+    data: {
+      status: "REJECTED",
+    },
+  });
+}
