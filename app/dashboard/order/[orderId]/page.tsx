@@ -9,6 +9,7 @@ import { ReviewForm } from "@/components/reviews/reviewForm";
 import CustomerTrackingTimeline from "@/components/order/CustomerTrackingTimeline";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { DialogTitle } from "@/components/ui/dialog";
+import RefundModal from "@/components/refunds/RefundModal";
 
 type OrderItem = {
   id: string;
@@ -16,7 +17,7 @@ type OrderItem = {
     id: string;
     name: string;
     price: number;
-    images: string;
+    images: string[];
   };
   quantity: number;
 };
