@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DialogTitle } from "@/components/ui/dialog";
+import toast from "react-hot-toast";
 
 type Props = {
   order: any;
@@ -54,10 +55,18 @@ export default function RefundModal({ order, onClose }: Props) {
   );
 
   async function handleSubmit() {
-    if (!reason) return alert("Please select a reason");
+    if (!reason) {
+      toast.error("Please select a reason");
+      return;
+    }
+
+    if (Object.keys(selectedItems).length === 0) {
+      toast.error("Please select at least one item");
+      return;
+    }
 
     setLoading(true);
-
+    const toastId = toast.loading("Submitting refund...");
     try {
       await fetch("/api/refunds/request", {
         method: "POST",
@@ -72,12 +81,12 @@ export default function RefundModal({ order, onClose }: Props) {
         }),
       });
 
-      alert("Refund request submitted");
+      toast.success("Refund request submitted", { id: toastId });
 
       onClose();
       router.refresh();
     } catch (err) {
-      alert("Failed to submit refund");
+      toast.error("Failed to submit refund", { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -161,8 +170,8 @@ export default function RefundModal({ order, onClose }: Props) {
       {/* ACTION */}
       <button
         onClick={handleSubmit}
-        disabled={loading}
-        className="w-full bg-black text-white py-3 rounded-xl"
+        disabled={loading || Object.keys(selectedItems).length === 0}
+        className="w-full bg-black text-white py-3 rounded-xl disabled:opacity-50"
       >
         {loading ? "Submitting..." : "Submit Refund Request"}
       </button>

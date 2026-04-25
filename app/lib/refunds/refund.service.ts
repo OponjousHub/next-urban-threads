@@ -1,4 +1,6 @@
 import { prisma } from "@/utils/prisma";
+import { getLoggedInUserId } from "@/lib/auth";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function createRefundRequest(data: {
   orderId: string;
@@ -12,23 +14,72 @@ export async function createRefundRequest(data: {
     priceAtPurchase: number;
   }[];
 }) {
-  const requestedAmount = data.items.reduce(
-    (sum, item) => sum + item.priceAtPurchase * item.quantity,
-    0,
-  );
+  const userId = await getLoggedInUserId();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const tenant = await getDefaultTenant();
+  if (!tenant) {
+    throw new Error("Default tenant not found");
+  }
+
+  // Fetch order from DB (SOURCE OF TRUTH)
+  const order = await prisma.order.findUnique({
+    where: { id: data.orderId },
+    include: {
+      items: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  });
+
+  if (!order) throw new Error("Order not found");
+
+  //  Validate ownership
+  if (order.userId !== userId) {
+    throw new Error("Not your order");
+  }
+
+  //  Calculate refund safely from DB
+  let requestedAmount = 0;
+
+  const refundItems = data.items.map((reqItem) => {
+    const orderItem = order.items.find(
+      (i) => i.productId === reqItem.productId,
+    );
+
+    if (!orderItem) throw new Error("Invalid item");
+
+    if (reqItem.quantity > orderItem.quantity) {
+      throw new Error("Invalid quantity");
+    }
+
+    const price = Number(orderItem.product.price);
+
+    requestedAmount += +price * reqItem.quantity;
+
+    return {
+      productId: reqItem.productId,
+      quantity: reqItem.quantity,
+      priceAtPurchase: price,
+    };
+  });
 
   return prisma.refundRequest.create({
     data: {
-      tenantId: data.tenantId,
-      orderId: data.orderId,
-      userId: data.userId,
+      tenantId: order.tenantId,
+      orderId: order.id,
+      userId: userId,
       reason: data.reason,
       description: data.description,
       requestedAmount,
-      currency: "NGN", // adjust later per tenant
+      currency: tenant.currency, // adjust later per tenant
 
       items: {
-        create: data.items,
+        create: refundItems,
       },
     },
   });
