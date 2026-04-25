@@ -45,6 +45,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   const hasVerified = useRef(false);
   const [userReviews, setUserReviews] = useState<Record<string, any>>({});
   const [open, setOpen] = useState(false);
+  const [refundOpen, setRefundOpen] = useState(false);
 
   useEffect(() => {
     if (!orderId || hasVerified.current) return;
@@ -185,104 +186,123 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
      ✅ NORMAL PAGE CONTENT
   ------------------------------------- */
   return (
-    <main className="px-4 py-10">
-      {/* <Toaster position="top-right" /> */}
+    <>
+      <Dialog open={refundOpen} onOpenChange={setRefundOpen}>
+        <DialogContent className="max-w-2xl">
+          <RefundModal order={order} onClose={() => setRefundOpen(false)} />
+        </DialogContent>
+      </Dialog>
+      <main className="px-4 py-10">
+        {/* <Toaster position="top-right" /> */}
 
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Order Details</h1>
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold">Order Details</h1>
 
-        <div className="mb-6 space-y-1">
-          <p>
-            <span className="font-semibold">Order ID:</span> {order.id}
-          </p>
-          <p>
-            <span className="font-semibold">Status:</span>{" "}
-            <span
-              className={`font-bold ${
-                order.paymentStatus === PaymentStatus.PAID
-                  ? "text-green-600"
-                  : order.status === "CANCELLED"
-                    ? "text-red-600"
-                    : "text-yellow-600"
-              }`}
-            >
-              {order.status}
-            </span>
-          </p>
-          <p>
-            <span className="font-semibold">Total Amount:</span> $
-            {order.totalAmount}
-          </p>
-          <p>
-            <span className="font-semibold">Payment Reference:</span>{" "}
-            {order.paymentReference || "N/A"}
-          </p>
-          <p>
-            <span className="font-semibold">Created At:</span>{" "}
-            {new Date(order.createdAt).toLocaleString()}
-          </p>
+            {order.paymentStatus === PaymentStatus.PAID &&
+              order.status === "DELIVERED" && (
+                <button
+                  onClick={() => setRefundOpen(true)}
+                  className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition"
+                >
+                  Request Refund
+                </button>
+              )}
+          </div>
+
+          <div className="mb-6 space-y-1">
+            <p>
+              <span className="font-semibold">Order ID:</span> {order.id}
+            </p>
+            <p>
+              <span className="font-semibold">Status:</span>{" "}
+              <span
+                className={`font-bold ${
+                  order.paymentStatus === PaymentStatus.PAID
+                    ? "text-green-600"
+                    : order.status === "CANCELLED"
+                      ? "text-red-600"
+                      : "text-yellow-600"
+                }`}
+              >
+                {order.status}
+              </span>
+            </p>
+            <p>
+              <span className="font-semibold">Total Amount:</span> $
+              {order.totalAmount}
+            </p>
+            <p>
+              <span className="font-semibold">Payment Reference:</span>{" "}
+              {order.paymentReference || "N/A"}
+            </p>
+            <p>
+              <span className="font-semibold">Created At:</span>{" "}
+              {new Date(order.createdAt).toLocaleString()}
+            </p>
+          </div>
+
+          <CustomerTrackingTimeline orderId={order.id} />
+
+          <h2 className="text-2xl font-semibold mb-3">Items</h2>
+
+          <ul className="border rounded-lg p-4 space-y-4">
+            {order?.items?.map((item) => {
+              return (
+                <li key={item.id} className="flex items-center gap-4">
+                  <img
+                    src={item.product.images[0]}
+                    alt={item.product.name}
+                    className="w-16 h-16 rounded-md object-cover"
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold">{item.product.name}</p>
+                    <p className="text-sm text-gray-600">
+                      Quantity: {item.quantity}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Price: ${item.product.price}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-bold">
+                      ${item.product.price * item.quantity}
+                    </p>
+
+                    {order.status === "DELIVERED" && (
+                      <Dialog open={open} onOpenChange={setOpen}>
+                        <DialogTrigger asChild>
+                          <DialogTitle className="text-lg font-semibold">
+                            <button className="text-[var(--color-primary)] text-sm font-medium hover:underline">
+                              {userReviews[item.product.id]
+                                ? "Edit Review"
+                                : "Write Review"}
+                            </button>
+                          </DialogTitle>
+                        </DialogTrigger>
+
+                        <DialogContent className="[&>button]:hidden sm:max-w-lg">
+                          <ReviewForm
+                            productId={item.product.id}
+                            existingReview={userReviews[item.product.id]}
+                            onSuccess={() => setOpen(false)}
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+
+          {verifying && (
+            <p className="mt-6 text-center text-yellow-600 text-sm">
+              Verifying payment…
+            </p>
+          )}
         </div>
-
-        <CustomerTrackingTimeline orderId={order.id} />
-
-        <h2 className="text-2xl font-semibold mb-3">Items</h2>
-
-        <ul className="border rounded-lg p-4 space-y-4">
-          {order?.items?.map((item) => {
-            return (
-              <li key={item.id} className="flex items-center gap-4">
-                <img
-                  src={item.product.images[0]}
-                  alt={item.product.name}
-                  className="w-16 h-16 rounded-md object-cover"
-                />
-                <div className="flex-1">
-                  <p className="font-semibold">{item.product.name}</p>
-                  <p className="text-sm text-gray-600">
-                    Quantity: {item.quantity}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Price: ${item.product.price}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-bold">
-                    ${item.product.price * item.quantity}
-                  </p>
-
-                  {order.status === "DELIVERED" && (
-                    <Dialog open={open} onOpenChange={setOpen}>
-                      <DialogTrigger asChild>
-                        <DialogTitle className="text-lg font-semibold">
-                          <button className="text-[var(--color-primary)] text-sm font-medium hover:underline">
-                            {userReviews[item.product.id]
-                              ? "Edit Review"
-                              : "Write Review"}
-                          </button>
-                        </DialogTitle>
-                      </DialogTrigger>
-
-                      <DialogContent className="[&>button]:hidden sm:max-w-lg">
-                        <ReviewForm
-                          productId={item.product.id}
-                          existingReview={userReviews[item.product.id]}
-                          onSuccess={() => setOpen(false)}
-                        />
-                      </DialogContent>
-                    </Dialog>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-
-        {verifying && (
-          <p className="mt-6 text-center text-yellow-600 text-sm">
-            Verifying payment…
-          </p>
-        )}
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
