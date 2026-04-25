@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { StatusBadge } from "@/lib/status-badge";
 
 type Refund = {
   id: string;
