@@ -167,7 +167,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               {[
                 { label: "About Us", href: "/about" },
-                { label: "Careers", href: "/careers" },
+                // { label: "Careers", href: "/careers" },
                 { label: "Privacy Policy", href: "/privacy" },
                 { label: "Terms of Service", href: "/terms" },
               ].map((item) => (
@@ -222,8 +222,8 @@ export default function Footer() {
             <div className="flex md:justify-end gap-3 mt-3 text-xs text-gray-500">
               <span>Visa</span>
               <span>Mastercard</span>
-              <span>PayPal</span>
-              <span>Apple Pay</span>
+              {/* <span>PayPal</span>
+              <span>Apple Pay</span> */}
             </div>
           </div>
         </div>
@@ -241,9 +241,9 @@ export default function Footer() {
             <Link href="/terms" className="hover:text-white">
               Terms
             </Link>
-            <Link href="/cookies" className="hover:text-white">
+            {/* <Link href="/cookies" className="hover:text-white">
               Cookies
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

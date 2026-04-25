@@ -44,6 +44,7 @@ model User {
   session                      Session[]
   tenant                       Tenant         @relation(fields: [tenantId], references: [id])
   wishlistItem                 WishlistItem[]
+  refundRequest                RefundRequest[]
 }
 
 model Product {
@@ -113,6 +114,7 @@ model Order {
   orderStatusHistory OrderStatusHistory[]
   orderTrackingEvent OrderTrackingEvent[]
   review             Review[]
+  refundRequest      RefundRequest[]
 
   @@index([tenantId, createdAt, status])
 }
@@ -335,6 +337,56 @@ model OrderTrackingEvent {
   order       Order             @relation(fields: [orderId], references: [id])
 }
 
+model RefundRequest {
+  id              String   @id @default(cuid())
+  tenantId        String
+  orderId         String
+  userId          String
+  vendorId        String?   // null for single vendor
+
+  status          RefundStatus @default(REQUESTED)
+
+  reason          String
+  description     String?
+
+  requestedAmount Float
+  approvedAmount  Float?
+
+  currency        String
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  order           Order    @relation(fields: [orderId], references: [id])
+  user            User     @relation(fields: [userId], references: [id])
+
+  items           RefundItem[]
+  transactions    RefundTransaction[]
+}
+
+model RefundItem {
+  id               String   @id @default(cuid())
+  refundRequestId  String
+  productId        String
+  quantity         Int
+  priceAtPurchase  Float
+
+  refundRequest    RefundRequest @relation(fields: [refundRequestId], references: [id])
+}
+
+model RefundTransaction {
+  id               String   @id @default(cuid())
+  refundRequestId  String
+
+  provider         String   // paystack, stripe, flutterwave
+  transactionRef   String?
+  status           String
+
+  createdAt        DateTime @default(now())
+
+  refundRequest    RefundRequest @relation(fields: [refundRequestId], references: [id])
+}
+
 enum Priority {
   LOW
   NORMAL
@@ -410,4 +462,14 @@ enum TrackingEventType {
   COURIER_UPDATE
   NOTE
   SYSTEM
+}
+
+enum RefundStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  PROCESSING
+  REFUNDED
+  FAILED
 }
