@@ -10,6 +10,7 @@ import PolicyForm from "@/components/admin/settings/policy-form";
 import FAQForm from "@/components/admin/settings/FAQForm/faq-form";
 import AboutSettings from "../content/about/page";
 import LegalSettings from "../content/legal/page";
+import RefundsPage from "../refunds/page";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -23,6 +24,7 @@ export default function SettingsPage() {
     { id: "policies", label: "Shipping & Return" },
     { id: "about", label: "Manage About Us" },
     { id: "legal", label: "Legal setting" },
+    { id: "refund", label: "Manage Refund" },
     { id: "faqs", label: "FAQs" },
   ];
 
@@ -69,6 +71,7 @@ export default function SettingsPage() {
         {activeTab === "faqs" && <FAQForm />}
         {activeTab === "about" && <AboutSettings />}
         {activeTab === "legal" && <LegalSettings />}
+        {activeTab === "refund" && <RefundsPage />}
       </main>
     </div>
   );

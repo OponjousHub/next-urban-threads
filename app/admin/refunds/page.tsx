@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { StatusBadge } from "@/lib/status-badge";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import RefundReviewModal from "@/components/refunds/refundReviewModal";
 
 type Refund = {
   id: string;
@@ -15,6 +17,7 @@ type Refund = {
 export default function RefundsPage() {
   const [refunds, setRefunds] = useState<Refund[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRefund, setSelectedRefund] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRefunds();
@@ -56,6 +59,7 @@ export default function RefundsPage() {
             {refunds.map((r) => (
               <tr
                 key={r.id}
+                onClick={() => setSelectedRefund(r.id)}
                 className="border-t hover:bg-gray-50 cursor-pointer"
               >
                 <td className="p-3">{r.orderId}</td>
@@ -71,6 +75,20 @@ export default function RefundsPage() {
             ))}
           </tbody>
         </table>
+        <Dialog
+          open={!!selectedRefund}
+          onOpenChange={() => setSelectedRefund(null)}
+        >
+          <DialogContent className="max-w-3xl">
+            {selectedRefund && (
+              <RefundReviewModal
+                refundId={selectedRefund}
+                onClose={() => setSelectedRefund(null)}
+                onActionComplete={fetchRefunds}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </main>
   );

@@ -370,7 +370,7 @@ model RefundItem {
   productId        String
   quantity         Int
   priceAtPurchase  Float
-
+  product          Product @relation(fields: [productId], references: [id])
   refundRequest    RefundRequest @relation(fields: [refundRequestId], references: [id])
 }
 
