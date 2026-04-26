@@ -43,7 +43,7 @@ export default function RefundReviewModal({
     );
 
     try {
-      await fetch(`/api/refunds/${refundId}/${type}`, {
+      await fetch(`/api/admin/refunds/${refundId}/${type}`, {
         method: "POST",
       });
 

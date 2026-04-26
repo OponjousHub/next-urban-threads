@@ -1,3 +1,4 @@
+import { refundPayment } from "../payments/refundPayment";
 import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
@@ -88,17 +89,67 @@ export async function createRefundRequest(data: {
 export async function approveRefund(refundId: string) {
   const refund = await prisma.refundRequest.findUnique({
     where: { id: refundId },
+    include: {
+      order: true,
+    },
   });
 
   if (!refund) throw new Error("Refund not found");
 
-  return prisma.refundRequest.update({
+  // ✅ PREVENT DOUBLE / INVALID REFUNDS
+  if (refund.status !== "REQUESTED") {
+    throw new Error("Invalid refund state");
+  }
+
+  // STEP 1: mark as processing
+  await prisma.refundRequest.update({
     where: { id: refundId },
     data: {
-      status: "APPROVED",
+      status: "PROCESSING",
       approvedAmount: refund.requestedAmount,
     },
   });
+
+  // STEP 2: call payment gateway
+  const paymentResult = await refundPayment({
+    amount: refund.requestedAmount,
+    reference: refund.order.paymentReference!,
+  });
+
+  if (!paymentResult.success) {
+    await prisma.refundRequest.update({
+      where: { id: refundId },
+      data: { status: "FAILED" },
+    });
+
+    throw new Error("Refund failed");
+  }
+
+  // STEP 3: save transaction
+  await prisma.refundTransaction.create({
+    data: {
+      refundRequestId: refundId,
+      provider: paymentResult.provider,
+      transactionRef: paymentResult.reference,
+      status: "SUCCESS",
+    },
+  });
+
+  // STEP 4: mark refunded
+  await prisma.refundRequest.update({
+    where: { id: refundId },
+    data: { status: "REFUNDED" },
+  });
+
+  // STEP 5: update order
+  await prisma.order.update({
+    where: { id: refund.orderId },
+    data: {
+      refundStatus: "REFUNDED",
+    },
+  });
+
+  return { success: true };
 }
 
 export async function rejectRefund(refundId: string) {

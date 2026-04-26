@@ -108,6 +108,7 @@ model Order {
   paymentStatus      PaymentStatus        @default(PENDING)
   tenantId           String
   vendorId           String?
+  refundStatus       RefundStatus         @default(NONE)
   shippingAddress    Address              @relation(fields: [shippingAddressId], references: [id])
   tenant             Tenant               @relation(fields: [tenantId], references: [id])
   user               User                 @relation(fields: [userId], references: [id])
@@ -162,7 +163,8 @@ model Tenant {
   updatedAt          DateTime       @updatedAt
   autoApproveReviews Boolean        @default(false)
   reviewPolicy       ReviewPolicy   @default(AFTER_PAYMENT)
-  currency           String         @default("USD")
+  currency           String        
+  currencyEnum       currencyEnum? 
   email              String?
   logo               String?
   timezone           String         @default("UTC")
@@ -435,7 +437,7 @@ enum StoreType {
   MULTI_VENDOR
 }
 
-enum Currency {
+enum currencyEnum {
   NGN
   USD
 }
@@ -466,6 +468,7 @@ enum TrackingEventType {
 }
 
 enum RefundStatus {
+  NONE
   REQUESTED
   UNDER_REVIEW
   APPROVED
