@@ -87,6 +87,7 @@ model Product {
   tenant          Tenant         @relation(fields: [tenantId], references: [id])
   reviews         Review[]
   wishlistItem    WishlistItem[]
+  refundItem      RefundItem[]
 
   @@unique([tenantId, slug])
   @@index([tenantId])
