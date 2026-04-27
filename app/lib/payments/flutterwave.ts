@@ -1,6 +1,12 @@
 import axios from "axios";
 import { PaymentProvider } from "@/types/payment";
 
+type VerifyResponse = {
+  success: boolean;
+  transactionId?: number;
+  txRef?: string;
+};
+
 export class FlutterwaveProvider implements PaymentProvider {
   private baseUrl = "https://api.flutterwave.com/v3";
 
@@ -15,20 +21,14 @@ export class FlutterwaveProvider implements PaymentProvider {
     reference: string;
     callbackUrl: string;
   }) {
-    if (!email) {
-      throw new Error("Customer email is required for payment");
-    }
-
     const res = await axios.post(
       `${this.baseUrl}/payments`,
       {
         tx_ref: reference,
         amount: Math.round(amount),
-        currency: "NGN", // change dynamically if needed
+        currency: "NGN",
         redirect_url: callbackUrl,
-        customer: {
-          email,
-        },
+        customer: { email },
         payment_options: "card,banktransfer",
         customizations: {
           title: "Urban Threads",
@@ -49,7 +49,8 @@ export class FlutterwaveProvider implements PaymentProvider {
     };
   }
 
-  async verifyPayment(reference: string): Promise<boolean> {
+  // ✅ FIXED RETURN TYPE
+  async verifyPayment(reference: string): Promise<VerifyResponse> {
     const res = await axios.get(
       `${this.baseUrl}/transactions/verify_by_reference?tx_ref=${reference}`,
       {
@@ -59,6 +60,12 @@ export class FlutterwaveProvider implements PaymentProvider {
       },
     );
 
-    return res.data.data.status === "successful";
+    const data = res.data?.data;
+
+    return {
+      success: data?.status === "successful",
+      transactionId: data?.id, // 🔥 REQUIRED FOR REFUNDS
+      txRef: data?.tx_ref,
+    };
   }
 }

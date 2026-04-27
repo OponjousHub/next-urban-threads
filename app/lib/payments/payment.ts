@@ -1,4 +1,4 @@
-import { Currency, PaymentProvider } from "@prisma/client";
+import { currencyEnum, PaymentProvider } from "@prisma/client";
 
 export function resolvePaymentConfig(country: string) {
   const code = country.toUpperCase();
@@ -6,12 +6,12 @@ export function resolvePaymentConfig(country: string) {
   switch (code) {
     case "NG":
       return {
-        currency: Currency.NGN,
+        currency: currencyEnum.NGN,
         provider: PaymentProvider.PAYSTACK,
       };
     default:
       return {
-        currency: Currency.USD,
+        currency: currencyEnum.USD,
         provider: PaymentProvider.FLUTTERWAVE,
       };
   }

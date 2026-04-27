@@ -28,5 +28,11 @@ export interface PaymentProvider {
     reference: string;
   }>;
 
-  verifyPayment(reference: string): Promise<boolean>;
+  verifyPayment(reference: string): Promise<VerifyPaymentResult>;
 }
+
+export type VerifyPaymentResult = {
+  success: boolean;
+  transactionId?: number | string;
+  txRef?: string;
+};

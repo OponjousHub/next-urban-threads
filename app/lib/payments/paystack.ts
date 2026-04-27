@@ -1,4 +1,5 @@
 import axios from "axios";
+import { VerifyPaymentResult } from "@/types/payment";
 
 export type InitializePaymentParams = {
   email: string; // Customer email
@@ -16,23 +17,28 @@ export class PaystackProvider {
   private baseUrl = "https://api.paystack.co";
 
   // Verify payment by reference
-  async verifyPayment(reference: string): Promise<boolean> {
+  async verifyPayment(reference: string): Promise<VerifyPaymentResult> {
     const res = await axios.get(
       `${this.baseUrl}/transaction/verify/${reference}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
         },
-      }
+      },
     );
-
+    const data = res.data?.data;
     // Paystack returns status = 'success' if payment is completed
-    return res.data.data.status === "success";
+    // return res.data.data.status === "success";
+    return {
+      success: data?.status === "success",
+      transactionId: data?.id, // optional but good
+      txRef: data?.reference,
+    };
   }
 
   // Initialize payment
   async initializePayment(
-    params: InitializePaymentParams
+    params: InitializePaymentParams,
   ): Promise<InitializePaymentResponse> {
     const { email, amount, reference, callbackUrl } = params;
 
@@ -49,7 +55,7 @@ export class PaystackProvider {
           Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     const data = res.data.data;

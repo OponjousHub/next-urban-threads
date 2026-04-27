@@ -80,17 +80,23 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // ---------------------------
     // 5️⃣ Verify with Paystack
     // ---------------------------
-    let provider;
+    // let provider;
 
-    if (order.paymentProvider === "PAYSTACK") {
-      provider = new PaystackProvider();
-    } else {
-      provider = new FlutterwaveProvider();
-    }
+    // if (order.paymentProvider === "PAYSTACK") {
+    //   provider = new PaystackProvider();
+    // } else {
+    //   provider = new FlutterwaveProvider();
+    // }
 
-    const isPaid = await provider.verifyPayment(order.paymentReference);
+    const provider =
+      order.paymentProvider === "PAYSTACK"
+        ? new PaystackProvider()
+        : new FlutterwaveProvider();
 
-    if (!isPaid) {
+    // const isPaid = await provider.verifyPayment(order.paymentReference);
+    const result = await provider.verifyPayment(order.paymentReference);
+
+    if (!result) {
       // Still pending → return order as-is
       return NextResponse.json(order);
     }
@@ -98,17 +104,53 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // ---------------------------
     // 6️⃣ Mark as PAID (idempotent)
     // ---------------------------
+    if (!result.success) {
+      return NextResponse.json(order);
+    }
+    // const updatedOrder = await prisma.order.update({
+    //   where: { id: order.id, tenantId: tenant.id },
+    //   data: { paymentStatus: "PAID", status: "PROCESSING" },
+    //   include: {
+    //     items: {
+    //       include: {
+    //         product: true,
+    //       },
+    //     },
+    //   },
+    // });
+
     const updatedOrder = await prisma.order.update({
       where: { id: order.id, tenantId: tenant.id },
-      data: { paymentStatus: "PAID", status: "PROCESSING" },
+      data: {
+        paymentStatus: "PAID",
+        status: "PROCESSING",
+
+        // 🔥 CRITICAL FIX
+        paymentReference: String(result.transactionId), // for refunds
+        paymentTxRef: result.txRef, // optional tracking
+      },
       include: {
         items: {
-          include: {
-            product: true,
-          },
+          include: { product: true },
         },
       },
     });
+    // const updatedOrder = await prisma.order.update({
+    //   where: { id: order.id, tenantId: tenant.id },
+    //   data: {
+    //     paymentStatus: "PAID",
+    //     status: "PROCESSING",
+
+    //     // ✅ CRITICAL FIX
+    //     paymentReference: String(result.transactionId), // FOR REFUNDS
+    //     paymentTxRef: result.txRef, // OPTIONAL
+    //   },
+    //   include: {
+    //     items: {
+    //       include: { product: true },
+    //     },
+    //   },
+    // });
 
     await prisma.orderTrackingEvent.create({
       data: {

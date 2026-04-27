@@ -4,6 +4,7 @@ export async function POST(
   req: Request,
   { params }: { params: { id: string } },
 ) {
-  const result = await approveRefund(params.id);
+  const param = await params;
+  const result = await approveRefund(param.id);
   return Response.json(result);
 }

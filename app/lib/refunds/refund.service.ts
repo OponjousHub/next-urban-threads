@@ -87,6 +87,7 @@ export async function createRefundRequest(data: {
 }
 
 export async function approveRefund(refundId: string) {
+  console.log("rrrrrrrrrrrrrrr APPROVE REFUND");
   const refund = await prisma.refundRequest.findUnique({
     where: { id: refundId },
     include: {
@@ -98,24 +99,25 @@ export async function approveRefund(refundId: string) {
 
   // ✅ PREVENT DOUBLE / INVALID REFUNDS
   if (refund.status !== "REQUESTED") {
-    throw new Error("Invalid refund state");
+    return { error: "Refund already processed or invalid state" };
   }
 
   // STEP 1: mark as processing
-  await prisma.refundRequest.update({
+  const refundStatus = await prisma.refundRequest.update({
     where: { id: refundId },
     data: {
       status: "PROCESSING",
       approvedAmount: refund.requestedAmount,
     },
   });
-
+  console.log("sssssssssssss", refundStatus);
+  console.log("REFERENCE BEING SENT:", refund.order.paymentReference);
   // STEP 2: call payment gateway
   const paymentResult = await refundPayment({
     amount: refund.requestedAmount,
     reference: refund.order.paymentReference!,
   });
-
+  console.log("PAYMENT RESULT", paymentResult);
   if (!paymentResult.success) {
     await prisma.refundRequest.update({
       where: { id: refundId },

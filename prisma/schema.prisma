@@ -96,6 +96,8 @@ model Product {
 model Order {
   id                 String               @id @default(cuid())
   userId             String
+  paymentTxRef       String?   // tx_ref (tracking)
+  // paymentReference   String?   // transaction_id (refunds)
   customerEmail      String
   createdAt          DateTime             @default(now())
   status             OrderStatus          @default(PENDING)
@@ -103,7 +105,7 @@ model Order {
   totalAmount        Decimal
   currency           String
   paymentProvider    PaymentProvider
-  paymentReference   String               @unique
+  paymentReference   String              @unique
   shippingAddressId  String
   paymentStatus      PaymentStatus        @default(PENDING)
   tenantId           String
@@ -163,8 +165,7 @@ model Tenant {
   updatedAt          DateTime       @updatedAt
   autoApproveReviews Boolean        @default(false)
   reviewPolicy       ReviewPolicy   @default(AFTER_PAYMENT)
-  currency           String        
-  currencyEnum       currencyEnum? 
+  currency           currencyEnum @default(NGN)      
   email              String?
   logo               String?
   timezone           String         @default("UTC")
