@@ -45,35 +45,46 @@ export async function createRefundRequest(data: {
   }
 
   //  Calculate refund safely from DB
-  let requestedAmount = 0;
+  const refundItems = data.items.map((item) => ({
+    productId: item.productId,
+    quantity: item.quantity,
+    priceAtPurchase: item.priceAtPurchase,
+  }));
 
-  const refundItems = data.items.map((reqItem) => {
-    const orderItem = order.items.find(
-      (i) => i.productId === reqItem.productId,
-    );
+  const requestedAmount = refundItems.reduce(
+    (sum, item) => sum + item.priceAtPurchase * item.quantity,
+    0,
+  );
+  // let requestedAmount = 0;
 
-    if (!orderItem) throw new Error("Invalid item");
+  // const refundItems = data.items.map((reqItem) => {
+  //   const orderItem = order.items.find(
+  //     (i) => i.productId === reqItem.productId,
+  //   );
 
-    if (reqItem.quantity > orderItem.quantity) {
-      throw new Error("Invalid quantity");
-    }
+  //   if (!orderItem) throw new Error("Invalid item");
 
-    const price = Number(orderItem.product.price);
+  //   if (reqItem.quantity > orderItem.quantity) {
+  //     throw new Error("Invalid quantity");
+  //   }
 
-    requestedAmount += +price * reqItem.quantity;
+  //   const price = Number(orderItem.product.price);
 
-    return {
-      productId: reqItem.productId,
-      quantity: reqItem.quantity,
-      priceAtPurchase: price,
-    };
-  });
+  //   requestedAmount += +price * reqItem.quantity;
+
+  //   return {
+  //     productId: reqItem.productId,
+  //     quantity: reqItem.quantity,
+  //     priceAtPurchase: price,
+  //   };
+  // });
 
   return prisma.refundRequest.create({
     data: {
       tenantId: order.tenantId,
       orderId: order.id,
       userId: userId,
+      vendorId: null,
       reason: data.reason,
       description: data.description,
       requestedAmount,
@@ -112,7 +123,7 @@ export async function approveRefund(refundId: string) {
 
   // STEP 2: call payment gateway
   const paymentResult = await refundPayment({
-    amount: refund.requestedAmount,
+    amount: refund.approvedAmount ?? refund.requestedAmount,
     reference: refund.order.paymentReference!,
   });
 
