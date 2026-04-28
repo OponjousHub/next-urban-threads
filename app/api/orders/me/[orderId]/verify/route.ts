@@ -46,7 +46,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
             product: true,
           },
         },
-        refundRequests: {
+        refundRequest: {
           include: {
             items: true,
           },

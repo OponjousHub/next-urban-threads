@@ -10,6 +10,7 @@ import CustomerTrackingTimeline from "@/components/order/CustomerTrackingTimelin
 import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { DialogTitle } from "@/components/ui/dialog";
 import RefundModal from "@/components/refunds/RefundModal";
+import { RefundRequest } from "@prisma/client";
 
 type OrderItem = {
   id: string;
@@ -30,6 +31,7 @@ type Order = {
   paymentReference: string | null;
   items: OrderItem[];
   createdAt: string;
+  refundRequest: RefundRequest[];
 };
 
 export default function OrderPage({ params }: { params: { orderId: string } }) {
@@ -47,6 +49,8 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   const [userReviews, setUserReviews] = useState<Record<string, any>>({});
   const [open, setOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
+
+  const steps = ["REQUESTED", "PROCESSING", "REFUNDED", "FAILED"];
 
   useEffect(() => {
     if (!orderId || hasVerified.current) return;
