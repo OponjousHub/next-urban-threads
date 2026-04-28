@@ -11,6 +11,7 @@ import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { DialogTitle } from "@/components/ui/dialog";
 import RefundModal from "@/components/refunds/RefundModal";
 import { RefundRequest } from "@prisma/client";
+import RefundRequestStatus from "@/components/refunds/refundRequestStatusCard";
 
 type OrderItem = {
   id: string;
@@ -49,8 +50,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   const [userReviews, setUserReviews] = useState<Record<string, any>>({});
   const [open, setOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
-
-  const steps = ["REQUESTED", "PROCESSING", "REFUNDED", "FAILED"];
 
   useEffect(() => {
     if (!orderId || hasVerified.current) return;
@@ -145,7 +144,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
     fetchReviews();
   }, [order]);
-
   /* ------------------------------------
      ✅ CENTERED LOADING STATE
   ------------------------------------- */
@@ -184,6 +182,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
       </div>
     );
   }
+  console.log("CUSTOMER'S ODER ------ ", order);
 
   /* ------------------------------------
      ✅ NORMAL PAGE CONTENT
@@ -201,7 +200,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold">Order Details</h1>
-
             {order.paymentStatus === PaymentStatus.PAID &&
               order.status === "DELIVERED" && (
                 <button
@@ -246,8 +244,9 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
           </div>
 
           <CustomerTrackingTimeline orderId={order.id} />
+          <RefundRequestStatus order={order} />
 
-          <h2 className="text-2xl font-semibold mb-3">Items</h2>
+          <h2 className="text-2xl font-semibold mb-3 mt-6">Items</h2>
 
           <ul className="border rounded-lg p-4 space-y-4">
             {order?.items?.map((item) => {

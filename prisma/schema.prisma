@@ -184,6 +184,11 @@ model Tenant {
   privacyPolicy    String?
   aboutContent     String?  // full rich about page
 
+  heroImage        String?
+  heroTitle        String?
+  heroSubtitle     String?
+  heroCTA          String?
+
   // Optional
   termsUpdatedAt   DateTime?
   privacyUpdatedAt DateTime?
