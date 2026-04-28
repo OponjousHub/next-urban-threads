@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { DialogTitle } from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Props = {
   refundId: string;
@@ -28,7 +28,7 @@ export default function RefundReviewModal({
       const res = await fetch(`/api/admin/refunds/${refundId}`);
       const data = await res.json();
       setRefund(data);
-    } catch (err) {
+    } catch {
       toast.error("Failed to load refund");
     } finally {
       setLoading(false);
@@ -61,76 +61,79 @@ export default function RefundReviewModal({
     }
   }
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (!refund) {
-    return <p>Refund not found</p>;
-  }
-
   return (
-    <div className="space-y-6">
-      <DialogTitle className="text-xl font-semibold">Refund Review</DialogTitle>
+    <>
+      {/* ✅ Title required by Radix */}
+      <DialogHeader>
+        <DialogTitle>Refund Review</DialogTitle>
+      </DialogHeader>
 
-      {/* ORDER INFO */}
-      <div className="text-sm space-y-1">
-        <p>
-          <strong>Order:</strong> {refund.orderId}
-        </p>
-        <p>
-          <strong>Status:</strong> {refund.status}
-        </p>
-        <p>
-          <strong>Amount:</strong> ₦{refund.requestedAmount}
-        </p>
-      </div>
+      {loading ? (
+        <p>Loading...</p>
+      ) : !refund ? (
+        <p>Refund not found</p>
+      ) : (
+        <>
+          {/* ORDER INFO */}
+          <div className="text-sm space-y-1">
+            <p>
+              <strong>Order:</strong> {refund.orderId}
+            </p>
+            <p>
+              <strong>Status:</strong> {refund.status}
+            </p>
+            <p>
+              <strong>Amount:</strong> ₦{refund.requestedAmount}
+            </p>
+          </div>
 
-      {/* ITEMS */}
-      <div>
-        <h3 className="font-semibold mb-2">Items</h3>
-        <div className="space-y-2">
-          {refund.items.map((item: any) => (
-            <div
-              key={item.id}
-              className="flex justify-between border p-2 rounded"
-            >
-              <span>{item.product.name}</span>
-              <span>
-                {item.quantity} × ₦{item.priceAtPurchase}
-              </span>
+          {/* ITEMS */}
+          <div>
+            <h3 className="font-semibold mb-2">Items</h3>
+            <div className="space-y-2">
+              {refund.items.map((item: any) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between border p-2 rounded"
+                >
+                  <span>{item.product.name}</span>
+                  <span>
+                    {item.quantity} × ₦{item.priceAtPurchase}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* REASON */}
-      <div>
-        <h3 className="font-semibold">Reason</h3>
-        <p className="text-sm text-gray-600">{refund.reason}</p>
-        {refund.description && (
-          <p className="text-sm mt-1">{refund.description}</p>
-        )}
-      </div>
+          {/* REASON */}
+          <div>
+            <h3 className="font-semibold">Reason</h3>
+            <p className="text-sm text-gray-600">{refund.reason}</p>
+            {refund.description && (
+              <p className="text-sm mt-1">{refund.description}</p>
+            )}
+          </div>
 
-      {/* ACTIONS */}
-      <div className="flex gap-3 justify-end">
-        <button
-          disabled={actionLoading}
-          onClick={() => handleAction("reject")}
-          className="px-4 py-2 rounded-lg border text-red-600"
-        >
-          Reject
-        </button>
+          {/* ACTIONS */}
+          <div className="flex gap-3 justify-end">
+            <button
+              disabled={actionLoading}
+              onClick={() => handleAction("reject")}
+              className="px-4 py-2 rounded-lg border text-red-600"
+            >
+              Reject
+            </button>
 
-        <button
-          disabled={actionLoading}
-          onClick={() => handleAction("approve")}
-          className="px-4 py-2 rounded-lg bg-black text-white"
-        >
-          Approve Refund
-        </button>
-      </div>
-    </div>
+            <button
+              disabled={actionLoading}
+              onClick={() => handleAction("approve")}
+              className="px-4 py-2 rounded-lg bg-black text-white"
+            >
+              Approve Refund
+            </button>
+          </div>
+        </>
+      )}
+    </>
   );
 }
