@@ -87,7 +87,6 @@ export async function createRefundRequest(data: {
 }
 
 export async function approveRefund(refundId: string) {
-  console.log("rrrrrrrrrrrrrrr APPROVE REFUND");
   const refund = await prisma.refundRequest.findUnique({
     where: { id: refundId },
     include: {
@@ -110,21 +109,22 @@ export async function approveRefund(refundId: string) {
       approvedAmount: refund.requestedAmount,
     },
   });
-  console.log("sssssssssssss", refundStatus);
-  console.log("REFERENCE BEING SENT:", refund.order.paymentReference);
+
   // STEP 2: call payment gateway
   const paymentResult = await refundPayment({
     amount: refund.requestedAmount,
     reference: refund.order.paymentReference!,
   });
-  console.log("PAYMENT RESULT", paymentResult);
-  if (!paymentResult.success) {
+
+  if (paymentResult.reference === "already_refunded") {
+    console.log("Refund already processed externally");
+
     await prisma.refundRequest.update({
       where: { id: refundId },
-      data: { status: "FAILED" },
+      data: { status: "REFUNDED" },
     });
 
-    throw new Error("Refund failed");
+    return { success: true };
   }
 
   // STEP 3: save transaction

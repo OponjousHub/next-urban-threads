@@ -27,8 +27,7 @@ export class PaystackProvider {
       },
     );
     const data = res.data?.data;
-    // Paystack returns status = 'success' if payment is completed
-    // return res.data.data.status === "success";
+
     return {
       success: data?.status === "success",
       transactionId: data?.id, // optional but good

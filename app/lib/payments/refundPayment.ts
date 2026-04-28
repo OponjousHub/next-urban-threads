@@ -24,7 +24,7 @@ async function refundPaystack(amount: number, reference: string) {
     const res = await fetch("https://api.paystack.co/refund", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET}`,
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -52,7 +52,7 @@ async function refundFlutterwave(amount: number, reference: string) {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
+          Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -62,13 +62,19 @@ async function refundFlutterwave(amount: number, reference: string) {
     );
 
     const data = await res.json();
+    console.log("FLW REFUND FULL RESPONSE:", data);
+
+    const isAlreadyRefunded =
+      typeof data?.data === "string" &&
+      data.data.toLowerCase().includes("already fully refunded");
 
     return {
-      success: data.status === "success",
+      success: data.status === "success" || isAlreadyRefunded,
       provider: "flutterwave",
-      reference: data.data?.id,
+      reference: data?.data?.id ?? "already_refunded",
     };
-  } catch {
+  } catch (error) {
+    console.error("FLW REFUND ERROR:", error);
     return { success: false, provider: "flutterwave" };
   }
 }

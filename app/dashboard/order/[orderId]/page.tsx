@@ -127,12 +127,10 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
     if (!order) return;
 
     async function fetchReviews() {
-      // const res = await fetch(`/api/reviews/me`);
       const res = await fetch(`/api/reviews/me?orderId=${orderId}`);
       if (!res.ok) return;
 
       const reviewData = await res.json();
-      // convert to lookup map by productId
       const map: Record<string, any> = {};
       reviewData.forEach((review: any) => {
         map[review.productId] = review;

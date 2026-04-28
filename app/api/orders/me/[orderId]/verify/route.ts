@@ -48,7 +48,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         },
       },
     });
-    // console.log("ORDERSSS", order);
 
     if (!order) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
@@ -80,20 +79,12 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // ---------------------------
     // 5️⃣ Verify with Paystack
     // ---------------------------
-    // let provider;
-
-    // if (order.paymentProvider === "PAYSTACK") {
-    //   provider = new PaystackProvider();
-    // } else {
-    //   provider = new FlutterwaveProvider();
-    // }
 
     const provider =
       order.paymentProvider === "PAYSTACK"
         ? new PaystackProvider()
         : new FlutterwaveProvider();
 
-    // const isPaid = await provider.verifyPayment(order.paymentReference);
     const result = await provider.verifyPayment(order.paymentReference);
 
     if (!result) {
@@ -107,17 +98,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     if (!result.success) {
       return NextResponse.json(order);
     }
-    // const updatedOrder = await prisma.order.update({
-    //   where: { id: order.id, tenantId: tenant.id },
-    //   data: { paymentStatus: "PAID", status: "PROCESSING" },
-    //   include: {
-    //     items: {
-    //       include: {
-    //         product: true,
-    //       },
-    //     },
-    //   },
-    // });
 
     const updatedOrder = await prisma.order.update({
       where: { id: order.id, tenantId: tenant.id },
@@ -135,22 +115,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         },
       },
     });
-    // const updatedOrder = await prisma.order.update({
-    //   where: { id: order.id, tenantId: tenant.id },
-    //   data: {
-    //     paymentStatus: "PAID",
-    //     status: "PROCESSING",
-
-    //     // ✅ CRITICAL FIX
-    //     paymentReference: String(result.transactionId), // FOR REFUNDS
-    //     paymentTxRef: result.txRef, // OPTIONAL
-    //   },
-    //   include: {
-    //     items: {
-    //       include: { product: true },
-    //     },
-    //   },
-    // });
 
     await prisma.orderTrackingEvent.create({
       data: {
