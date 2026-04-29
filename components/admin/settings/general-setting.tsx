@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ImageUpload } from "./tenant-images";
 import { z } from "zod";
 
 /* ---------------- Schema ---------------- */
@@ -110,46 +111,17 @@ export default function GeneralSettings() {
   }
 
   // Upload logo to cloudinary
-  const logo = watch("logo");
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("image", file); // same key your backend expects
-
-    try {
-      setUploading(true);
-
-      const res = await fetch("/api/upload/image-upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Upload failed");
-
-      const data = await res.json();
-
-      setValue("logo", data.url, { shouldDirty: true });
-      toast.success("Logo uploaded!");
-    } catch (err) {
-      toast.error("Logo upload failed");
-      console.error(err);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // Upload Hero Image to cloudinary
   const heroImage = watch("heroImage");
-  const handleHeroImageUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const logo = watch("logo");
 
+  async function uploadImage(file: File, field: "logo" | "heroImage") {
     const formData = new FormData();
-    formData.append("heroImage", file); // same key your backend expects
+    formData.append("image", file); // ✅ FIXED
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be under 2MB");
+      return;
+    }
 
     try {
       setUploading(true);
@@ -163,15 +135,16 @@ export default function GeneralSettings() {
 
       const data = await res.json();
 
-      setValue("heroImage", data.url, { shouldDirty: true });
-      toast.success("Hero image uploaded!");
+      setValue(field, data.url, { shouldDirty: true });
+
+      toast.success(`${field === "logo" ? "Logo" : "Hero image"} uploaded!`);
     } catch (err) {
-      toast.error("Hero image upload failed");
+      toast.error("Upload failed");
       console.error(err);
     } finally {
       setUploading(false);
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -225,142 +198,46 @@ export default function GeneralSettings() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
-          {/* Primary Color */}
-          <div>
-            <label className="text-sm font-medium">Hero title</label>
-            <input
-              type="text"
-              {...register("heroTitle")}
-              className="mt-1 w-full h-[42px] border rounded-lg"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Hero subtitle</label>
-            <input
-              type="text"
-              {...register("heroSubtitle")}
-              className="mt-1 w-full h-[42px] border rounded-lg"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Hero CTA text</label>
-            <input
-              type="text"
-              {...register("heroCTA")}
-              className="mt-1 w-full h-[42px] border rounded-lg"
-            />
-          </div>
-        </div>
-
         <div className="grid md:grid-cols-2 gap-4">
-          {/* Logo */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Hero image</label>
+          {/* Primary Color */}
+          <Input label="Hero title" {...register("heroTitle")} />
 
-            <div className="border-2 border-dashed rounded-xl p-4 text-center hover:bg-gray-50 transition">
-              {uploading ? (
-                <p className="text-sm text-gray-500">Uploading...</p>
-              ) : heroImage ? (
-                <div className="flex flex-col items-center gap-3">
-                  <img
-                    src={heroImage}
-                    alt="heroImage"
-                    className="h-16 object-contain rounded border"
-                  />
-                  <div className="flex gap-3">
-                    {/* Change */}
-                    <label className="cursor-pointer text-sm text-[var(--color-primary)]hover:underline">
-                      Change
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleHeroImageUpload}
-                        className="hidden"
-                      />
-                    </label>
+          {/* <Input label="Hero subtitle" {...register("heroSubtitle")} /> */}
 
-                    {/* Remove */}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setValue("heroImage", "", { shouldDirty: true })
-                      }
-                      className="text-sm text-red-500 hover:underline"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <label className="cursor-pointer block text-sm text-gray-500">
-                  Click to upload hero image
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleHeroImageUpload}
-                    className="hidden"
-                  />
-                </label>
-              )}
-            </div>
-          </div>
-          {/* Logo */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Logo</label>
-
-            <div className="border-2 border-dashed rounded-xl p-4 text-center hover:bg-gray-50 transition">
-              {uploading ? (
-                <p className="text-sm text-gray-500">Uploading...</p>
-              ) : logo ? (
-                <div className="flex flex-col items-center gap-3">
-                  <img
-                    src={logo}
-                    alt="logo"
-                    className="h-16 object-contain rounded border"
-                  />
-                  <div className="flex gap-3">
-                    {/* Change */}
-                    <label className="cursor-pointer text-sm text-[var(--color-primary)]hover:underline">
-                      Change
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                      />
-                    </label>
-
-                    {/* Remove */}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setValue("logo", "", { shouldDirty: true })
-                      }
-                      className="text-sm text-red-500 hover:underline"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <label className="cursor-pointer block text-sm text-gray-500">
-                  Click to upload logo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
-              )}
-            </div>
-          </div>
+          <Input label="Hero CTA text" {...register("heroCTA")} />
         </div>
 
-        {/* Address */}
+        {/* Address & Sub Title*/}
+        <TextArea label="Hero subtitle" {...register("heroSubtitle")} />
         <TextArea label="Address" {...register("address")} />
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <ImageUpload
+            label="Hero Image"
+            value={heroImage}
+            uploading={uploading}
+            onChange={(file) => {
+              if (!file) {
+                setValue("heroImage", "", { shouldDirty: true });
+                return;
+              }
+              uploadImage(file, "heroImage");
+            }}
+          />
+
+          <ImageUpload
+            label="Logo"
+            value={logo}
+            uploading={uploading}
+            onChange={(file) => {
+              if (!file) {
+                setValue("logo", "", { shouldDirty: true });
+                return;
+              }
+              uploadImage(file, "logo");
+            }}
+          />
+        </div>
 
         <div className="flex justify-end">
           <button

@@ -1,4 +1,4 @@
-function ImageUpload({
+export function ImageUpload({
   label,
   value,
   onChange,
