@@ -9,8 +9,19 @@ export async function PATCH(req: Request) {
 
     const body = await req.json();
 
-    const { name, email, currency, logo, primaryColor, timezone, address } =
-      body;
+    const {
+      name,
+      email,
+      currency,
+      logo,
+      primaryColor,
+      timezone,
+      address,
+      heroTitle,
+      heroSubtitle,
+      heroCTA,
+      heroImage,
+    } = body;
 
     const updated = await prisma.tenant.update({
       where: { id: tenant.id },
@@ -21,6 +32,10 @@ export async function PATCH(req: Request) {
         logo,
         primaryColor,
         timezone,
+        heroCTA,
+        heroImage,
+        heroSubtitle,
+        heroTitle,
         address: {
           updateMany: {
             where: { id: tenant.id },
@@ -61,31 +76,13 @@ export async function GET() {
       logo: tenant.logo,
       primaryColor: tenant.primaryColor,
       timezone: tenant.timezone,
+      heroImage: tenant.heroImage,
+      heroCTA: tenant.heroCTA,
+      heroSubtitle: tenant.heroSubtitle,
+      heroTitle: tenant.heroTitle,
       address: tenant.address?.[0] // pick the first address if only one is used
         ? `${tenant.address[0].street}, ${tenant.address[0].city}, ${tenant.address[0].state}`
         : "",
     }),
   );
 }
-
-// export async function GET() {
-//   const tenant = await getDefaultTenant();
-
-//   if (!tenant) {
-//     return new Response(JSON.stringify({ error: "Tenant not found" }), {
-//       status: 404,
-//     });
-//   }
-
-//   return new Response(
-//     JSON.stringify({
-//       name: tenant.name,
-//       email: tenant.email,
-//       currency: tenant.currency,
-//       logo: tenant.logo,
-//       primaryColor: tenant.primaryColor,
-//       timezone: tenant.timezone,
-//       addresses: tenant.address,
-//     }),
-//   );
-// }
