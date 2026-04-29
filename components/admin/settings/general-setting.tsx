@@ -27,8 +27,9 @@ type FormData = z.infer<typeof settingSchema>;
 
 export default function GeneralSettings() {
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-
+  const [uploadingField, setUploadingField] = useState<
+    "logo" | "heroImage" | null
+  >(null);
   const currencies = [
     { code: "USD", label: "US Dollar ($)" },
     { code: "NGN", label: "Nigerian Naira (₦)" },
@@ -124,8 +125,7 @@ export default function GeneralSettings() {
     }
 
     try {
-      setUploading(true);
-
+      setUploadingField(field);
       const res = await fetch("/api/upload/image-upload", {
         method: "POST",
         body: formData,
@@ -142,7 +142,7 @@ export default function GeneralSettings() {
       toast.error("Upload failed");
       console.error(err);
     } finally {
-      setUploading(false);
+      setUploadingField(null);
     }
   }
 
@@ -215,7 +215,7 @@ export default function GeneralSettings() {
           <ImageUpload
             label="Hero Image"
             value={heroImage}
-            uploading={uploading}
+            uploading={uploadingField === "heroImage"}
             onChange={(file) => {
               if (!file) {
                 setValue("heroImage", "", { shouldDirty: true });
@@ -228,7 +228,7 @@ export default function GeneralSettings() {
           <ImageUpload
             label="Logo"
             value={logo}
-            uploading={uploading}
+            uploading={uploadingField === "logo"}
             onChange={(file) => {
               if (!file) {
                 setValue("logo", "", { shouldDirty: true });

@@ -10,7 +10,8 @@ export default function Hero() {
   return (
     <section className="relative h-[70vh] flex items-center justify-center text-white">
       <Image
-        src="/img/featured-img.jpg"
+        // src="/img/featured-img.jpg"
+        src={tenant.heroImage}
         alt="Hero"
         fill
         className="object-cover"
@@ -20,15 +21,13 @@ export default function Hero() {
       <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative text-center max-w-3xl px-6">
-        <h1 className="text-5xl font-bold mb-4">{tenant.name}</h1>
+        <h1 className="text-5xl font-bold mb-4">{tenant.heroTitle}</h1>
 
-        <p className="text-lg mb-6 text-gray-200">
-          Discover products from multiple vendors in one place
-        </p>
+        <p className="text-lg mb-6 text-gray-200">{tenant.heroSubtitle}</p>
 
         <Link href="/products">
           <button className="bg-primary hover:bg-primary-dark px-8 py-3 rounded-lg font-semibold transition">
-            Shop Now
+            {tenant.heroCTA}
           </button>
         </Link>
       </div>
