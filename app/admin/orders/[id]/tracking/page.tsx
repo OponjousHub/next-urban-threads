@@ -39,6 +39,14 @@ const STATUS_CONFIG: Record<string, { title: string; message: string }> = {
   },
 };
 
+const ORDER_FLOW = [
+  "PENDING",
+  "PROCESSING",
+  "SHIPPED",
+  "OUT_FOR_DELIVERY",
+  "DELIVERED",
+];
+
 /* ---------------- COMPONENT ---------------- */
 
 export default function AdminOrderTrackingPage() {
@@ -47,7 +55,7 @@ export default function AdminOrderTrackingPage() {
 
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [activeStatus, setActiveStatus] = useState<string | null>(null);
   const [location, setLocation] = useState("");
 
   if (!orderId) return null;
@@ -83,10 +91,9 @@ export default function AdminOrderTrackingPage() {
 
   const handleQuickUpdate = async (status: string) => {
     const config = STATUS_CONFIG[status];
-
     if (!config) return;
 
-    setSubmitting(true);
+    setActiveStatus(status); // 🔥 locks UI instantly
 
     try {
       await fetch(`/api/admin/orders/${orderId}/tracking`, {
@@ -108,7 +115,7 @@ export default function AdminOrderTrackingPage() {
     } catch (err) {
       console.error(err);
     } finally {
-      setSubmitting(false);
+      setActiveStatus(null);
     }
   };
 
@@ -130,22 +137,39 @@ export default function AdminOrderTrackingPage() {
 
         {/* 🔥 ONE CLICK BUTTONS */}
         <div className="grid grid-cols-2 gap-3">
-          {Object.keys(STATUS_CONFIG).map((status) => (
-            <button
-              key={status}
-              onClick={() => handleQuickUpdate(status)}
-              disabled={submitting}
-              className={`p-3 rounded text-sm font-medium border transition
-                ${
-                  submitting
-                    ? "bg-gray-200 cursor-not-allowed"
-                    : "bg-black text-white hover:bg-gray-800"
-                }
-              `}
-            >
-              {submitting ? "Updating..." : STATUS_CONFIG[status].title}
-            </button>
-          ))}
+          {ORDER_FLOW.map((status) => {
+            const config = STATUS_CONFIG[status];
+            const statusIndex = ORDER_FLOW.indexOf(status);
+
+            const currentStatus = events[0]?.status;
+            const currentIndex = ORDER_FLOW.indexOf(currentStatus);
+
+            const isLoading = activeStatus === status;
+
+            // ❌ Disable if:
+            const isDisabled =
+              activeStatus !== null || // something is being submitted
+              statusIndex <= currentIndex; // already reached or passed
+
+            return (
+              <button
+                key={status}
+                onClick={() => handleQuickUpdate(status)}
+                disabled={isDisabled}
+                className={`p-3 rounded text-sm font-medium border transition
+          ${
+            isLoading
+              ? "bg-gray-200 cursor-not-allowed"
+              : isDisabled
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-black text-white hover:bg-gray-800"
+          }
+        `}
+              >
+                {isLoading ? "Updating..." : config.title}
+              </button>
+            );
+          })}
         </div>
       </div>
 
