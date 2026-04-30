@@ -6,6 +6,7 @@ import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi";
 import { useCart } from "@/store/cart-context";
 import UserMenu from "./header-userMenu";
 import { MobileDrawer } from "./header-mobiledrawer";
+import { useRouter } from "next/navigation";
 
 type User = {
   id: string;
@@ -32,8 +33,10 @@ const HeaderClient = ({
   const { cartItems } = useCart();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const [search, setSearch] = useState("");
   const [scrolled, setScrolled] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,6 +65,13 @@ const HeaderClient = ({
 
     loadUser();
   }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!search.trim()) return;
+
+    router.push(`/products?search=${encodeURIComponent(search)}`);
+  };
 
   const handleReloadHeader = () => {
     setUser(null);
