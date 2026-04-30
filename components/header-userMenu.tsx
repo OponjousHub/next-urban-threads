@@ -39,18 +39,19 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
       {/* Avatar */}
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-black text-2xl font-extrabold text-white"
+        className="h-9 w-9 rounded-full overflow-hidden border hover:ring-2 hover:ring-[var(--color-primary)] transition"
       >
-        <img
-          src={avatarUrl}
-          alt={user.name}
-          className="h-8 w-8 rounded-full bg-slate-400 object-cover "
-        />
+        <img src={avatarUrl} alt={user.name} className="w-full h-full" />
       </button>
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-48 rounded-md border bg-white shadow-lg">
+        <div className="absolute right-0 mt-2 w-52 rounded-xl border bg-white shadow-xl overflow-hidden">
+          {" "}
+          <div className="px-4 py-3 border-b">
+            <p className="text-sm font-medium">{user.name}</p>
+            <p className="text-xs text-gray-500">{role}</p>
+          </div>
           <Link
             href="/dashboard"
             className="block px-4 py-2 text-sm hover:bg-gray-100"
@@ -58,7 +59,6 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
           >
             Dashboard
           </Link>
-
           <Link
             href="/dashboard/order"
             className="block px-4 py-2 text-sm hover:bg-gray-100"
@@ -66,7 +66,6 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
           >
             Orders
           </Link>
-
           {role === "ADMIN" && (
             <Link
               href="/admin"
@@ -76,7 +75,6 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
               Admin Dashboard
             </Link>
           )}
-
           <button
             className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
             onClick={async () => {

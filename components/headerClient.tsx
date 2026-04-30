@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi";
-import { useEffect } from "react";
 import { useCart } from "@/store/cart-context";
 import UserMenu from "./header-userMenu";
+import { MobileDrawer } from "./header-mobiledrawer";
 
 type User = {
   id: string;
@@ -13,17 +13,35 @@ type User = {
   role: "ADMIN" | "USER";
 };
 
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 const HeaderClient = ({
   role,
   tenantName,
+  categories,
 }: {
   role: string | null;
   tenantName: string;
+  categories: Category[];
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { cartItems } = useCart();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     async function loadUser() {
@@ -76,118 +94,137 @@ const HeaderClient = ({
     }
   };
 
-  // if (loading) {
-  //   return <header className="bg-white border-b-2 border-[#eee] h-[72px]" />;
-  // }
   return (
-    <header className="bg-white border-b-2 border-[#eee] sticky top-0 z-[1000]">
-      <div className="flex items-center justify-between max-w-[1200px] mx-auto px-4 py-4">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="text-[#222] text-[2.4rem] font-bold no-underline"
+    <>
+      <header className="sticky top-0 z-[1000] backdrop-blur bg-white/80 border-b border-gray-200 transition-all">
+        <div
+          className={`flex items-center justify-between max-w-[1200px] mx-auto px-4 transition-all duration-300 ${
+            scrolled ? "py-2" : "py-4"
+          }`}
         >
-          <RenderStoreName />
-        </Link>
+          {/* LOGO */}
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-2xl font-bold tracking-tight text-gray-900">
+              <RenderStoreName />
+            </span>
+          </Link>
 
-        {/* Navigation */}
-        <nav
-          className={`${
-            menuOpen ? "flex" : "hidden"
-          } absolute md:static top-[60px] left-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row md:flex gap-6 text-[1.8rem] px-4 py-4 md:py-0 border-t md:border-none border-[#eee]`}
-        >
-          <Link className="hover:text-[var(--color-primary)]" href="/">
-            Home
-          </Link>
-          <Link
-            className="hover:text-[var(--color-primary)]"
-            href={`/products?category=men`}
-          >
-            Men
-          </Link>
-          <Link
-            className="hover:text-[var(--color-primary)]"
-            href="/products?category=women"
-          >
-            Women
-          </Link>
-          <Link
-            className="hover:text-[var(--color-primary)]"
-            href="/products?category=accessories"
-          >
-            Accessories
-          </Link>
-          <Link
-            className="hover:text-[var(--color-primary)]"
-            href="/products?flash=true"
-          >
-            Sales
-          </Link>
-        </nav>
+          {/* DESKTOP NAV */}
+          <nav className="hidden md:flex items-center gap-8 text-base font-medium">
+            <Link
+              href="/"
+              className="hover:text-[var(--color-primary)] transition"
+            >
+              Home
+            </Link>
 
-        {/* Search (desktop only) */}
-        <div className="hidden md:flex items-center border border-[#bdb6b6] bg-[#f9f9f9] transition-all duration-[2000ms] rounded-[6px] overflow-hidden">
-          <input
-            type="text"
-            placeholder="Search product..."
-            className="focus:bg-white border-0 outline-0 py-2 px-3 text-[1.6rem] bg-transparent"
-          />
-          <button className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] px-4 py-2 border-0 text-amber-50 font-medium transition-colors duration-200 cursor-pointer text-[1.6rem]">
-            Search
-          </button>
-        </div>
+            <div className="group relative">
+              <span className="cursor-pointer hover:text-[var(--color-primary)]">
+                Shop
+              </span>
 
-        {/* Auth + Cart */}
-        <div className=" flex items-center gap-10">
-          <Link
-            href="/cart"
-            className="ml-4 text-[#333] transition-colors duration-200 hover:text-[var(--color-primary)]"
-          >
-            {/* <FiShoppingBag size={22} /> */}
-            <p className="flex items-center text-xl font-semibold gap-2 relative">
-              <FiShoppingCart size={20} /> <span>Cart</span>
-              {/* Show count only when there is something in the cart*/}
+              <div className="absolute top-full left-0 hidden group-hover:block bg-white border shadow-lg p-6 w-[420px] rounded-xl">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat.id}
+                      href={`/products?category=${cat.slug}`}
+                      className="group flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 transition"
+                      // className="relative px-3 py-2 rounded-md transition hover:bg-gray-100"
+                      // className="group flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 transition"
+                    >
+                      <span className="transition group-hover:translate-x-1 group-hover:text-[var(--color-primary)]">
+                        {cat.name}
+                      </span>
+
+                      {/* 👉 subtle arrow animation */}
+                      <span className="opacity-0 translate-x-[-5px] group-hover:opacity-100 group-hover:translate-x-0 transition text-xs">
+                        →
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </nav>
+
+          {/* SEARCH */}
+          <div className="hidden md:flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 bg-white shadow-sm hover:shadow-md transition focus-within:ring-2 focus-within:ring-[var(--color-primary)] duration-300 focus-within:w-[260px]">
+            {/* Icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4 text-gray-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
+              />
+            </svg>
+
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="outline-none text-sm w-[180px] bg-transparent placeholder:text-gray-400"
+            />
+          </div>
+
+          {/* RIGHT SIDE */}
+          <div className="flex items-center gap-6">
+            {/* CART */}
+            <Link href="/cart" className="relative">
+              <FiShoppingCart size={24} />
               {cartCount > 0 && (
-                <span className="absolute -top-3 -right-7 w-5 h-5 text-[10px] bg-[var(--color-primary)] text-white rounded-full p-4 flex items-center justify-center font-semibold ">
+                <span className="absolute -top-2 -right-2 bg-[var(--color-primary)] text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}
-            </p>
-          </Link>
+            </Link>
 
-          {user ? (
-            <UserMenu
-              user={user}
-              onRemoveAvater={handleReloadHeader}
-              role={role}
-            />
-          ) : (
-            <div className="flex gap-4 ml-8">
-              <Link
-                className="text-[1.6rem] hover:text-[var(--color-primary)]"
-                href="/login"
-              >
-                Login
-              </Link>
-              <span className="text-[#666]">|</span>
-              <Link
-                className="hidden sm:block text-[1.6rem] hover:text-[var(--color-primary)]"
-                href="/signup"
-              >
-                Signup
-              </Link>
-            </div>
-          )}
+            {/* USER */}
+            {user ? (
+              <UserMenu
+                user={user}
+                onRemoveAvater={handleReloadHeader}
+                role={role}
+              />
+            ) : (
+              <div className="hidden md:flex gap-4">
+                <Link
+                  className="text-base hover:text-[var(--color-primary)]"
+                  href="/login"
+                >
+                  Login
+                </Link>
+                <Link
+                  className="text-base hover:text-[var(--color-primary)]"
+                  href="/signup"
+                >
+                  Signup
+                </Link>
+              </div>
+            )}
+
+            {/* MOBILE MENU BUTTON */}
+            <button
+              className="md:hidden text-gray-700 ml-6"
+              onClick={() => setMenuOpen(true)}
+            >
+              <FiMenu size={26} />
+            </button>
+          </div>
         </div>
-        {/* Menu Button (mobile only) */}
-        <button
-          className="block md:hidden text-[var(--color-primary)]"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-        </button>
-      </div>
-    </header>
+      </header>
+      <MobileDrawer
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+        categories={categories}
+      />
+    </>
   );
 };
 

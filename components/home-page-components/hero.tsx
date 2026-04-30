@@ -18,9 +18,9 @@ export default function Hero() {
       />
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50" />
-
-      <div className="relative text-center max-w-3xl px-6">
+      {/* <div className="absolute inset-0 bg-black/50 z-10" /> */}
+      <div className="absolute inset-0 bg-black/40 z-10" />
+      <div className="relative text-center max-w-3xl px-6 z-20">
         <h1 className="text-5xl font-bold mb-4">{tenant.heroTitle}</h1>
 
         <p className="text-lg mb-6 text-gray-200">{tenant.heroSubtitle}</p>
