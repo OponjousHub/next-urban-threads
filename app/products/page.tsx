@@ -33,6 +33,7 @@ export default function AllProductsPage() {
   const category = searchParams.get("category");
   const featured = searchParams.get("featured");
   const flash = searchParams.get("flash");
+  const search = searchParams.get("search");
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -51,6 +52,7 @@ export default function AllProductsPage() {
         if (category) params.append("category", category);
         if (featured === "true") params.append("featured", "true");
         if (flash === "true") params.append("flash", "true");
+        if (search) params.append("search", search);
 
         if (params.toString()) {
           url += `?${params.toString()}`;
@@ -68,7 +70,7 @@ export default function AllProductsPage() {
     }
 
     loadProducts();
-  }, [category, featured, flash]);
+  }, [category, featured, flash, search]);
 
   /* ---------------- Fetch Categories ---------------- */
   useEffect(() => {

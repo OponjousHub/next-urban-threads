@@ -91,6 +91,7 @@ export default class ProductController {
     const category = searchParams.get("category") ?? undefined;
     const featured = searchParams.get("featured") === "true";
     const flash = searchParams.get("flash") === "true";
+    const search = searchParams.get("search");
 
     if (!tenant) {
       throw new Error("Default tenant not found");
@@ -113,6 +114,24 @@ export default class ProductController {
       filters.category = {
         slug: category.toLowerCase(),
       };
+    }
+
+    //Search filter
+    if (search) {
+      filters.OR = [
+        {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      ];
     }
 
     const products = await ProductService.getProducts(filters);

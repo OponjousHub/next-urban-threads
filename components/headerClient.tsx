@@ -159,7 +159,10 @@ const HeaderClient = ({
           </nav>
 
           {/* SEARCH */}
-          <div className="hidden md:flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 bg-white shadow-sm hover:shadow-md transition focus-within:ring-2 focus-within:ring-[var(--color-primary)] duration-300 focus-within:w-[260px]">
+          <form
+            onSubmit={handleSearch}
+            className="hidden md:flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 bg-white shadow-sm hover:shadow-md transition focus-within:ring-2 focus-within:ring-[var(--color-primary)] duration-300 focus-within:w-[260px]"
+          >
             {/* Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -179,9 +182,14 @@ const HeaderClient = ({
             <input
               type="text"
               placeholder="Search products..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="outline-none text-sm w-[180px] bg-transparent placeholder:text-gray-400"
             />
-          </div>
+            <button type="submit" className="text-sm text-gray-600">
+              Search
+            </button>
+          </form>
 
           {/* RIGHT SIDE */}
           <div className="flex items-center gap-6">
