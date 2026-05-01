@@ -93,6 +93,10 @@ export default class ProductController {
     const flash = searchParams.get("flash") === "true";
     const search = searchParams.get("search");
 
+    const page = Number(searchParams.get("page") || 1);
+    const limit = Number(searchParams.get("limit") || 12);
+    const skip = (page - 1) * limit;
+
     if (!tenant) {
       throw new Error("Default tenant not found");
     }
@@ -134,10 +138,19 @@ export default class ProductController {
       ];
     }
 
-    const products = await ProductService.getProducts(filters);
+    const [products, total] = await Promise.all([
+      ProductService.getProducts({
+        where: filters,
+        skip,
+        take: limit,
+      }),
+      ProductService.countProducts(filters),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
 
     return NextResponse.json(
-      { result: products.length, products },
+      { result: products.length, products, total, page, totalPages },
       { status: 200 },
     );
   }

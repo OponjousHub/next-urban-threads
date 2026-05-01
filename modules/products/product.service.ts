@@ -8,11 +8,21 @@ export default class ProductService {
     return ProductRepository.create(data, tenantId);
   }
 
-  static async getProducts(filters: any) {
+  // static async getProducts(filters: any) {
+  //   return ProductRepository.findAll({
+  //     where: filters,
+  //     include: { category: true },
+  //   });
+  // }
+  static async getProducts(options: any) {
     return ProductRepository.findAll({
-      where: filters,
+      ...options,
       include: { category: true },
     });
+  }
+
+  static async countProducts(where: any) {
+    return prisma.product.count({ where });
   }
 
   static async getProduct(id: string) {
