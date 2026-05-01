@@ -7,6 +7,7 @@ import { useCart } from "@/store/cart-context";
 import UserMenu from "./header-userMenu";
 import { MobileDrawer } from "./header-mobiledrawer";
 import { useRouter } from "next/navigation";
+import { FiSearch } from "react-icons/fi";
 
 type User = {
   id: string;
@@ -35,6 +36,7 @@ const HeaderClient = ({
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const router = useRouter();
 
@@ -193,6 +195,14 @@ const HeaderClient = ({
 
           {/* RIGHT SIDE */}
           <div className="flex items-center gap-6">
+            {/* SEARCH ICON */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="md:hidden text-gray-700"
+            >
+              <FiSearch size={20} />
+            </button>
+
             {/* CART */}
             <Link href="/cart" className="relative">
               <FiShoppingCart size={24} />
@@ -237,6 +247,38 @@ const HeaderClient = ({
           </div>
         </div>
       </header>
+      {searchOpen && (
+        <div className="fixed inset-0 bg-black/40 z-[2000] flex items-start justify-center pt-20">
+          <div className="bg-white w-[90%] max-w-md rounded-xl p-4 shadow-lg">
+            <form
+              onSubmit={handleSearch}
+              className="flex items-center gap-2 border rounded-full px-4 py-2"
+            >
+              <FiSearch className="text-gray-500" />
+
+              <input
+                autoFocus
+                type="text"
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1 outline-none text-sm"
+              />
+
+              <button type="submit" className="text-sm text-gray-600">
+                Search
+              </button>
+            </form>
+
+            <button
+              onClick={() => setSearchOpen(false)}
+              className="mt-4 text-sm text-gray-500"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       <MobileDrawer
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
