@@ -8,6 +8,7 @@ import UserMenu from "./header-userMenu";
 import { MobileDrawer } from "./header-mobiledrawer";
 import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
+import HeaderSearch from "./headerSearch";
 
 type User = {
   id: string;
@@ -73,6 +74,7 @@ const HeaderClient = ({
     if (!search.trim()) return;
 
     router.push(`/products?search=${encodeURIComponent(search)}`);
+    setSearchOpen(false);
   };
 
   const handleReloadHeader = () => {
@@ -188,7 +190,10 @@ const HeaderClient = ({
               onChange={(e) => setSearch(e.target.value)}
               className="outline-none text-sm w-[180px] bg-transparent placeholder:text-gray-400"
             />
-            <button type="submit" className="text-sm text-gray-600">
+            <button
+              type="submit"
+              className="text-sm text-[var(--color-primary)]"
+            >
               Search
             </button>
           </form>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { FiShoppingCart } from "react-icons/fi";
+import { FiShoppingCart, FiSearch } from "react-icons/fi";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
 import { ProductRating } from "@/utils/product-rating";
 
@@ -33,12 +33,13 @@ export default function AllProductsPage() {
   const category = searchParams.get("category");
   const featured = searchParams.get("featured");
   const flash = searchParams.get("flash");
-  const search = searchParams.get("search");
+  const searchQuery = searchParams.get("search");
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [search, setSearch] = useState("");
 
   /* ---------------- Fetch Products ---------------- */
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function AllProductsPage() {
         if (category) params.append("category", category);
         if (featured === "true") params.append("featured", "true");
         if (flash === "true") params.append("flash", "true");
-        if (search) params.append("search", search);
+        if (searchQuery) params.append("search", searchQuery);
 
         if (params.toString()) {
           url += `?${params.toString()}`;
@@ -70,7 +71,7 @@ export default function AllProductsPage() {
     }
 
     loadProducts();
-  }, [category, featured, flash, search]);
+  }, [category, featured, flash, searchQuery]);
 
   /* ---------------- Fetch Categories ---------------- */
   useEffect(() => {
@@ -110,11 +111,42 @@ export default function AllProductsPage() {
     return "All Products";
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!search?.trim()) return;
+
+    router.push(`/products?search=${encodeURIComponent(search)}`);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      {/* <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"> */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <h1 className="text-3xl font-bold text-gray-800">{getTitle()}</h1>
+
+        {/* RIGHT: SEARCH (mobile + desktop) */}
+        <div className="md:hidden px-4 mb-4">
+          <form
+            onSubmit={handleSearch}
+            className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white"
+          >
+            <FiSearch className="text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 outline-none text-sm"
+            />
+            <button
+              type="submit"
+              className="font-bold text-sm text-white bg-[var(--color-primary)]"
+            >
+              Search
+            </button>
+          </form>
+        </div>
 
         {/* Category Filters */}
         <div className="flex flex-wrap gap-2">
