@@ -211,11 +211,11 @@ export default function AllProductsPage() {
                 router.push(`/products?category=${cat.slug}&page=1`)
               }
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all
-  ${
-    category === cat.slug
-      ? "bg-black text-white shadow"
-      : "bg-gray-100 hover:bg-gray-200"
-  }`}
+      ${
+        category === cat.slug
+          ? "bg-black text-white shadow"
+          : "bg-gray-100 hover:bg-gray-200"
+      }`}
             >
               {cat.name}
             </button>
@@ -237,10 +237,7 @@ export default function AllProductsPage() {
       {products.length === 0 ? (
         <p className="text-gray-500 text-center mt-20">No products found.</p>
       ) : (
-        <div
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 hover:-translate-y-1
-transition-all duration-300"
-        >
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 hover:-translate-y-1 transition-all duration-300">
           {products.map((product) => {
             const imageUrl =
               product.images?.length > 0
@@ -314,49 +311,6 @@ transition-all duration-300"
                   </button>
                 </div>
               </div>
-              // <div
-              //   key={product.id}
-              //   className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group"
-              //   // className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition"
-              // >
-              //   {/* Badge */}
-              //   {flash === "true" && (
-              //     <span className="absolute m-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-              //       SALE
-              //     </span>
-              //   )}
-
-              //   <div className="relative w-full h-44">
-              //     <Image
-              //       src={imageUrl}
-              //       alt={product.name}
-              //       fill
-              //       className="object-cover group-hover:scale-105 transition duration-500"
-              //     />
-              //   </div>
-
-              //   <div className="p-3">
-              //     <h3 className="text-sm font-medium line-clamp-2">
-              //       {product.name}
-              //     </h3>
-
-              //     <ProductRating
-              //       rating={product.averageRating}
-              //       count={product.reviewCount}
-              //     />
-
-              //     <p className="text-[var(--color-primary)] font-bold mt-1">
-              //       ₦{product.price.toLocaleString()}
-              //     </p>
-
-              //     <Link href={`/products/details/${product.id}`}>
-              //       <button className="mt-3 w-full text-sm bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition-all duration-200 flex items-center justify-center gap-2">
-              //         <FiShoppingCart size={14} />
-              //         Add to Cart
-              //       </button>
-              //     </Link>
-              //   </div>
-              // </div>
             );
           })}
         </div>
@@ -381,57 +335,10 @@ transition-all duration-300"
         </div>
       )}
 
-      {/*pagination*/}
-      {/* <div className="flex justify-center items-center gap-2 mt-10 flex-wrap">
-        <button
-          disabled={Number(page) <= 1}
-          onClick={() =>
-            router.push(
-              `/products?${new URLSearchParams({
-                ...Object.fromEntries(searchParams.entries()),
-                page: String(Number(page) - 1),
-              })}`,
-            )
-          }
-          className="px-4 py-2 border rounded disabled:opacity-50"
-        >
-          Prev
-        </button>
-
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-          <button
-            key={p}
-            onClick={() =>
-              router.push(
-                `/products?${new URLSearchParams({
-                  ...Object.fromEntries(searchParams.entries()),
-                  page: String(p),
-                })}`,
-              )
-            }
-            className={`px-4 py-2 border rounded ${
-              Number(page) === p ? "bg-black text-white" : "hover:bg-gray-100"
-            }`}
-          >
-            {p}
-          </button>
-        ))}
-
-        <button
-          disabled={Number(page) >= totalPages}
-          onClick={() =>
-            router.push(
-              `/products?${new URLSearchParams({
-                ...Object.fromEntries(searchParams.entries()),
-                page: String(Number(page) + 1),
-              })}`,
-            )
-          }
-          className="px-4 py-2 border rounded disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div> */}
+      <QuickViewModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      />
     </div>
   );
 }
