@@ -8,6 +8,7 @@ import { FiShoppingCart, FiSearch } from "react-icons/fi";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
 import { ProductRating } from "@/utils/product-rating";
 import { ProductSkeleton } from "@/components/products/productSkeleton";
+import QuickViewModal from "@/components/products/quickViewModal";
 
 type Category = {
   id: string;
@@ -47,6 +48,7 @@ export default function AllProductsPage() {
   const [page, setPage] = useState(pageParam);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   if (category) params.append("category", category);
   if (featured === "true") params.append("featured", "true");
@@ -264,7 +266,10 @@ transition-all duration-300"
                     <button className="bg-white p-2 rounded-full shadow hover:bg-gray-100">
                       ❤️
                     </button>
-                    <button className="bg-white p-2 rounded-full shadow hover:bg-gray-100">
+                    <button
+                      onClick={() => setSelectedProduct(product)}
+                      className="bg-white p-2 rounded-full shadow hover:bg-gray-100"
+                    >
                       👁️
                     </button>
                   </div>
