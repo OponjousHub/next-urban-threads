@@ -7,6 +7,7 @@ import Link from "next/link";
 import { FiShoppingCart, FiSearch } from "react-icons/fi";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
 import { ProductRating } from "@/utils/product-rating";
+import { ProductSkeleton } from "@/components/products/productSkeleton";
 
 type Category = {
   id: string;
@@ -34,44 +35,88 @@ export default function AllProductsPage() {
   const featured = searchParams.get("featured");
   const flash = searchParams.get("flash");
   const searchQuery = searchParams.get("search");
+  const pageParam = Number(searchParams.get("page") || "1");
+  const params = new URLSearchParams();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [search, setSearch] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(pageParam);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  if (category) params.append("category", category);
+  if (featured === "true") params.append("featured", "true");
+  if (flash === "true") params.append("flash", "true");
+  if (searchQuery) params.append("search", searchQuery);
+
+  // ✅ ADD PAGINATION
+  params.append("page", String(page));
+  params.append("limit", "12");
 
   /* ---------------- Fetch Products ---------------- */
-  useEffect(() => {
-    async function loadProducts() {
-      try {
-        setLoadingProducts(true);
 
-        let url = "/api/products";
-        const params = new URLSearchParams();
+  const loadProducts = async (nextPage = 1, replace = false) => {
+    try {
+      if (nextPage === 1) setLoadingProducts(true);
+      else setLoadingMore(true);
 
-        if (category) params.append("category", category);
-        if (featured === "true") params.append("featured", "true");
-        if (flash === "true") params.append("flash", "true");
-        if (searchQuery) params.append("search", searchQuery);
+      const params = new URLSearchParams();
 
-        if (params.toString()) {
-          url += `?${params.toString()}`;
-        }
+      if (category) params.append("category", category);
+      if (featured === "true") params.append("featured", "true");
+      if (flash === "true") params.append("flash", "true");
+      if (searchQuery) params.append("search", searchQuery);
 
-        const res = await fetch(url);
-        const data = await res.json();
+      params.append("page", String(nextPage));
+      params.append("limit", "12");
 
-        setProducts(data.products || []);
-      } catch (err) {
-        console.error("Failed to load products", err);
-      } finally {
-        setLoadingProducts(false);
-      }
+      const res = await fetch(`/api/products?${params.toString()}`);
+      const data = await res.json();
+
+      setProducts((prev) =>
+        replace ? data.products : [...prev, ...data.products],
+      );
+
+      setHasMore(nextPage < data.totalPages);
+      setPage(nextPage);
+
+      const newParams = new URLSearchParams(window.location.search);
+      newParams.set("page", String(nextPage));
+
+      window.history.replaceState(null, "", `?${newParams.toString()}`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingProducts(false);
+      setLoadingMore(false);
     }
+  };
 
-    loadProducts();
+  // Initial load + filter reset
+  useEffect(() => {
+    loadProducts(1, true); // reset products
   }, [category, featured, flash, searchQuery]);
+
+  /* --------------- Infinite scroll - auto trigger --------------*/
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingMore || !hasMore) return;
+
+      const nearBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+
+      if (nearBottom) {
+        loadProducts(page + 1);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [page, hasMore, loadingMore]);
 
   /* ---------------- Fetch Categories ---------------- */
   useEffect(() => {
@@ -94,8 +139,10 @@ export default function AllProductsPage() {
   /* ---------------- Loading ---------------- */
   if (loadingProducts || loadingCategories) {
     return (
-      <div className="min-h-screen flex justify-center items-center">
-        <p className="text-gray-500">Loading...</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <ProductSkeleton key={i} />
+        ))}
       </div>
     );
   }
@@ -115,16 +162,21 @@ export default function AllProductsPage() {
     e.preventDefault();
     if (!search?.trim()) return;
 
-    router.push(`/products?search=${encodeURIComponent(search)}`);
+    router.push(`/products?search=${encodeURIComponent(search)}&page=1`);
   };
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 min-h-screen bg-gray-50">
       {/* Header */}
-      {/* <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"> */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">{getTitle()}</h1>
-
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 tracking-tight mb-2">
+            {getTitle()}
+          </h1>
+          <p className="text-sm text-gray-500">
+            Showing {products.length} products
+          </p>{" "}
+        </div>
         {/* RIGHT: SEARCH (mobile + desktop) */}
         <div className="md:hidden px-4 mb-4">
           <form
@@ -153,12 +205,15 @@ export default function AllProductsPage() {
           {categories.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => router.push(`/products?category=${cat.slug}`)}
-              className={`px-4 py-2 rounded-full font-medium transition ${
-                category === cat.slug
-                  ? "bg-[var(--color-primary)] text-white"
-                  : "bg-[var(--color-primary-lightest)] text-[var(--color-primary-dark)] hover:bg-gray-200"
-              }`}
+              onClick={() =>
+                router.push(`/products?category=${cat.slug}&page=1`)
+              }
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all
+  ${
+    category === cat.slug
+      ? "bg-black text-white shadow"
+      : "bg-gray-100 hover:bg-gray-200"
+  }`}
             >
               {cat.name}
             </button>
@@ -180,7 +235,10 @@ export default function AllProductsPage() {
       {products.length === 0 ? (
         <p className="text-gray-500 text-center mt-20">No products found.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 hover:-translate-y-1
+transition-all duration-300"
+        >
           {products.map((product) => {
             const imageUrl =
               product.images?.length > 0
@@ -190,50 +248,185 @@ export default function AllProductsPage() {
             return (
               <div
                 key={product.id}
-                className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition"
+                className="group bg-white rounded-2xl overflow-hidden border hover:shadow-xl transition-all duration-300"
               >
-                {/* Badge */}
-                {flash === "true" && (
-                  <span className="absolute m-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                    SALE
-                  </span>
-                )}
-
-                <div className="relative w-full h-44">
+                {/* IMAGE */}
+                <div className="relative w-full h-56 overflow-hidden">
                   <Image
                     src={imageUrl}
                     alt={product.name}
                     fill
-                    className="object-cover"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
+
+                  {/* HOVER ACTIONS */}
+                  <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
+                    <button className="bg-white p-2 rounded-full shadow hover:bg-gray-100">
+                      ❤️
+                    </button>
+                    <button className="bg-white p-2 rounded-full shadow hover:bg-gray-100">
+                      👁️
+                    </button>
+                  </div>
+
+                  {/* BADGE */}
+                  {flash === "true" && (
+                    <span className="absolute top-3 left-3 bg-red-500 text-white text-xs px-3 py-1 rounded-full shadow">
+                      Sale
+                    </span>
+                  )}
                 </div>
 
-                <div className="p-3">
-                  <h3 className="text-sm font-medium line-clamp-2">
+                {/* CONTENT */}
+                <div className="p-4 flex flex-col gap-2">
+                  {/* CATEGORY */}
+                  <span className="text-xs text-gray-400 uppercase tracking-wide">
+                    {product.category?.name}
+                  </span>
+
+                  {/* TITLE */}
+                  <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-[var(--color-primary)] transition">
                     {product.name}
                   </h3>
 
+                  {/* RATING */}
                   <ProductRating
                     rating={product.averageRating}
                     count={product.reviewCount}
                   />
 
-                  <p className="text-[var(--color-primary)] font-bold mt-1">
-                    ₦{product.price.toLocaleString()}
-                  </p>
+                  {/* PRICE */}
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-lg font-bold text-[var(--color-primary)]">
+                      ₦{product.price.toLocaleString()}
+                    </p>
+                  </div>
 
-                  <Link href={`/products/details/${product.id}`}>
-                    <button className="mt-2 w-full text-sm bg-black text-white py-2 rounded hover:bg-gray-800 transition flex items-center justify-center gap-2">
-                      <FiShoppingCart size={14} />
-                      Add to Cart
-                    </button>
-                  </Link>
+                  {/* ADD TO CART */}
+                  <button className="mt-3 w-full bg-black text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2">
+                    <FiShoppingCart size={14} />
+                    Add to Cart
+                  </button>
                 </div>
               </div>
+              // <div
+              //   key={product.id}
+              //   className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group"
+              //   // className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition"
+              // >
+              //   {/* Badge */}
+              //   {flash === "true" && (
+              //     <span className="absolute m-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+              //       SALE
+              //     </span>
+              //   )}
+
+              //   <div className="relative w-full h-44">
+              //     <Image
+              //       src={imageUrl}
+              //       alt={product.name}
+              //       fill
+              //       className="object-cover group-hover:scale-105 transition duration-500"
+              //     />
+              //   </div>
+
+              //   <div className="p-3">
+              //     <h3 className="text-sm font-medium line-clamp-2">
+              //       {product.name}
+              //     </h3>
+
+              //     <ProductRating
+              //       rating={product.averageRating}
+              //       count={product.reviewCount}
+              //     />
+
+              //     <p className="text-[var(--color-primary)] font-bold mt-1">
+              //       ₦{product.price.toLocaleString()}
+              //     </p>
+
+              //     <Link href={`/products/details/${product.id}`}>
+              //       <button className="mt-3 w-full text-sm bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition-all duration-200 flex items-center justify-center gap-2">
+              //         <FiShoppingCart size={14} />
+              //         Add to Cart
+              //       </button>
+              //     </Link>
+              //   </div>
+              // </div>
             );
           })}
         </div>
       )}
+
+      {loadingMore && (
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Loading more products...
+        </p>
+      )}
+
+      {/*Load more button*/}
+      {hasMore && (
+        <div className="flex justify-center mt-10">
+          <button
+            onClick={() => loadProducts(page + 1)}
+            disabled={loadingMore}
+            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+          >
+            {loadingMore ? "Loading..." : "Load More"}
+          </button>
+        </div>
+      )}
+
+      {/*pagination*/}
+      {/* <div className="flex justify-center items-center gap-2 mt-10 flex-wrap">
+        <button
+          disabled={Number(page) <= 1}
+          onClick={() =>
+            router.push(
+              `/products?${new URLSearchParams({
+                ...Object.fromEntries(searchParams.entries()),
+                page: String(Number(page) - 1),
+              })}`,
+            )
+          }
+          className="px-4 py-2 border rounded disabled:opacity-50"
+        >
+          Prev
+        </button>
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+          <button
+            key={p}
+            onClick={() =>
+              router.push(
+                `/products?${new URLSearchParams({
+                  ...Object.fromEntries(searchParams.entries()),
+                  page: String(p),
+                })}`,
+              )
+            }
+            className={`px-4 py-2 border rounded ${
+              Number(page) === p ? "bg-black text-white" : "hover:bg-gray-100"
+            }`}
+          >
+            {p}
+          </button>
+        ))}
+
+        <button
+          disabled={Number(page) >= totalPages}
+          onClick={() =>
+            router.push(
+              `/products?${new URLSearchParams({
+                ...Object.fromEntries(searchParams.entries()),
+                page: String(Number(page) + 1),
+              })}`,
+            )
+          }
+          className="px-4 py-2 border rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div> */}
     </div>
   );
 }

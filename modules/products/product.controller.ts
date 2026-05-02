@@ -94,7 +94,7 @@ export default class ProductController {
     const search = searchParams.get("search");
 
     const page = Number(searchParams.get("page") || 1);
-    const limit = Number(searchParams.get("limit") || 12);
+    const limit = Number(searchParams.get("limit") || 2);
     const skip = (page - 1) * limit;
 
     if (!tenant) {
