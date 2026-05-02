@@ -260,9 +260,9 @@ export default function AllProductsPage() {
 
                   {/* HOVER ACTIONS */}
                   <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
-                    <button className="bg-white p-2 rounded-full shadow hover:bg-gray-100">
+                    {/* <button className="bg-white p-2 rounded-full shadow hover:bg-gray-100">
                       ❤️
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => setSelectedProduct(product)}
                       className="bg-white p-2 rounded-full shadow hover:bg-gray-100"

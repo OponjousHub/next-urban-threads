@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FiX, FiShoppingCart } from "react-icons/fi";
 import { ProductRating } from "@/utils/product-rating";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
+// import { getTenant } from "@/lib/tenant/getTenant";
 
 type Product = {
   id: string;
@@ -20,11 +21,13 @@ type Props = {
 };
 
 export default function QuickViewModal({ product, onClose }: Props) {
+  //   const tenant = getTenant();
   if (!product) return null;
 
   const imageUrl =
     product.images?.length > 0
-      ? cloudinaryImage(product.images[0], "large")
+      ? //   cloudinaryImage(product.images[0], "large")
+        cloudinaryImage(product.images[0], "detail")
       : "/placeholder.png";
 
   return (
@@ -47,12 +50,12 @@ export default function QuickViewModal({ product, onClose }: Props) {
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* IMAGE */}
-          <div className="relative w-full h-[300px] md:h-[400px] rounded-xl overflow-hidden">
+          <div className="relative w-full h-[300px] md:h-[450px] bg-gray-50 flex items-center justify-center rounded-lg overflow-hidden">
             <Image
-              src={imageUrl}
+              src={cloudinaryImage(product.images[0], "detail")}
               alt={product.name}
               fill
-              className="object-cover"
+              className="object-contain p-4 transition-transform duration-300 hover:scale-105 bg-gradient-to-b from-gray-50 to-white"
             />
           </div>
 
