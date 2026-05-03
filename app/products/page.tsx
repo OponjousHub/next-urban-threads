@@ -49,6 +49,7 @@ export default function AllProductsPage() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
 
   if (category) params.append("category", category);
   if (featured === "true") params.append("featured", "true");
@@ -138,6 +139,21 @@ export default function AllProductsPage() {
     loadCategories();
   }, []);
 
+  useEffect(() => {
+    if (!search.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const delay = setTimeout(async () => {
+      const res = await fetch(`/api/products?search=${search}&limit=5`);
+      const data = await res.json();
+      setSuggestions(data.products || []);
+    }, 300);
+
+    return () => clearTimeout(delay);
+  }, [search]);
+
   /* ---------------- Loading ---------------- */
   if (loadingProducts || loadingCategories) {
     return (
@@ -179,31 +195,53 @@ export default function AllProductsPage() {
             Showing {products.length} products
           </p>{" "}
         </div>
+
         {/* RIGHT: SEARCH (mobile + desktop) */}
-        <div className="md:hidden px-4 mb-4">
+        <div className="md:hidden px-4 mb-8">
           <form
             onSubmit={handleSearch}
-            className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white"
+            className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-2 bg-white shadow-sm focus-within:ring-2 focus-within:ring-[var(--color-primary)] transition"
           >
-            <FiSearch className="text-gray-400" />
+            {/* Icon */}
+            <FiSearch className="text-gray-400 text-lg" />
+
+            {/* Input */}
             <input
               type="text"
               placeholder="Search products..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 outline-none text-sm"
+              className="flex-1 outline-none text-sm bg-transparent placeholder:text-gray-400"
             />
+
+            {/* 🔥 Premium Button */}
             <button
               type="submit"
-              className="font-bold text-sm text-white bg-[var(--color-primary)]"
+              className="flex items-center justify-center bg-[var(--color-primary)] text-white text-sm font-medium px-4 py-1.5 rounded-full shadow hover:scale-105 active:scale-95 transition"
             >
-              Search
+              Go
             </button>
           </form>
+
+          {suggestions.length > 0 && (
+            <div className="mt-2 bg-white rounded-xl shadow-lg border p-2 space-y-2">
+              {suggestions.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/products/details/${item.id}`}
+                  onClick={() => setSuggestions([])}
+                  className="block px-3 py-2 text-sm hover:bg-gray-100 rounded"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Category Filters */}
-        <div className="flex flex-wrap gap-2">
+        <div className="hidden md:flex flex-wrap gap-2">
+          {" "}
           {categories.map((cat) => (
             <button
               key={cat.id}
@@ -220,16 +258,17 @@ export default function AllProductsPage() {
               {cat.name}
             </button>
           ))}
-
           {/* Reset */}
-          {(category || featured || flash) && (
-            <button
-              onClick={() => router.push("/products")}
-              className="px-4 py-2 rounded-full bg-gray-300 hover:bg-gray-400"
-            >
-              All
-            </button>
-          )}
+          <button
+            onClick={() => router.push("/products")}
+            className={`px-4 py-2 rounded-full font-medium transition ${
+              !category && !featured && !flash && !searchQuery
+                ? "bg-black text-white"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
+          >
+            All
+          </button>
         </div>
       </div>
 
@@ -305,10 +344,12 @@ export default function AllProductsPage() {
                   </div>
 
                   {/* ADD TO CART */}
-                  <button className="mt-3 w-full bg-black text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2">
-                    <FiShoppingCart size={14} />
-                    Add to Cart
-                  </button>
+                  <Link href={`/products/details/${product.id}`}>
+                    <button className="mt-3 w-full bg-black text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2">
+                      <FiShoppingCart size={14} />
+                      View Product
+                    </button>
+                  </Link>
                 </div>
               </div>
             );

@@ -22,6 +22,16 @@ type Category = {
   slug: string;
 };
 
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  images: string[];
+  averageRating: number;
+  reviewCount: number;
+  category: Category;
+};
+
 const HeaderClient = ({
   role,
   tenantName,
@@ -38,6 +48,7 @@ const HeaderClient = ({
   const [search, setSearch] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
 
   const router = useRouter();
 
@@ -68,6 +79,21 @@ const HeaderClient = ({
 
     loadUser();
   }, []);
+
+  useEffect(() => {
+    if (!search.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const delay = setTimeout(async () => {
+      const res = await fetch(`/api/products?search=${search}&limit=5`);
+      const data = await res.json();
+      setSuggestions(data.products || []);
+    }, 300);
+
+    return () => clearTimeout(delay);
+  }, [search]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -222,8 +248,14 @@ const HeaderClient = ({
         </div>
       </header>
       {searchOpen && (
-        <div className="fixed inset-0 bg-black/40 z-[2000] flex items-start justify-center pt-20">
-          <div className="bg-white w-[90%] max-w-md rounded-xl p-4 shadow-lg">
+        <div
+          onClick={() => setSearchOpen(false)}
+          className="fixed inset-0 bg-black/40 z-[2000] flex items-start justify-center pt-20"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white w-[90%] max-w-md rounded-xl p-4 shadow-lg"
+          >
             <form
               onSubmit={handleSearch}
               className="flex items-center gap-2 border rounded-full px-4 py-2"
@@ -239,8 +271,11 @@ const HeaderClient = ({
                 className="flex-1 outline-none text-sm"
               />
 
-              <button type="submit" className="text-sm text-gray-600">
-                Search
+              <button
+                type="submit"
+                className="flex items-center justify-center bg-[var(--color-primary)] text-white text-sm font-medium px-4 py-1.5 rounded-full shadow hover:scale-105 active:scale-95 transition"
+              >
+                Go
               </button>
             </form>
 
@@ -250,6 +285,23 @@ const HeaderClient = ({
             >
               Cancel
             </button>
+            {suggestions.length > 0 && (
+              <div className="mt-2 bg-white rounded-xl shadow-lg border p-2 space-y-2">
+                {suggestions.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/products/details/${item.id}`}
+                    onClick={() => {
+                      setSuggestions([]);
+                      setSearchOpen(false);
+                    }}
+                    className="block px-3 py-2 text-sm hover:bg-gray-100 rounded"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
