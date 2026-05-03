@@ -4,7 +4,7 @@ import Image from "next/image";
 import { FiX, FiShoppingCart } from "react-icons/fi";
 import { ProductRating } from "@/utils/product-rating";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
-// import { getTenant } from "@/lib/tenant/getTenant";
+import Link from "next/link";
 
 type Product = {
   id: string;
@@ -81,10 +81,12 @@ export default function QuickViewModal({ product, onClose }: Props) {
             </div>
 
             {/* ACTION */}
-            <button className="mt-6 w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition flex items-center justify-center gap-2">
-              <FiShoppingCart />
-              Add to Cart
-            </button>
+            <Link href={`/products/details/${product.id}`}>
+              <button className="mt-6 w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition flex items-center justify-center gap-2">
+                <FiShoppingCart />
+                Add to Cart
+              </button>
+            </Link>
           </div>
         </div>
       </div>
