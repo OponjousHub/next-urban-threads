@@ -164,21 +164,35 @@ const HeaderClient = ({
               </span>
 
               <div className="absolute top-full left-0 hidden group-hover:block bg-white border shadow-lg p-6 w-[420px] rounded-xl">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-2 text-sm ">
+                  {/* ALL PRODUCTS */}
+                  <Link
+                    href="/products"
+                    className="group flex items-center justify-between px-3 py-2 rounded-md !text-gray-900 no-underline hover:bg-gray-100 transition"
+                    // className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 no-underline hover:bg-gray-100 transition"
+                    // className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100 transition"
+                  >
+                    <span className="text-gray-900 transition group-hover:translate-x-1 group-hover:text-[var(--color-primary)]">
+                      All Products
+                    </span>
+
+                    <span className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition text-xs">
+                      →
+                    </span>
+                  </Link>
+
+                  {/* CATEGORIES */}
                   {categories.map((cat) => (
                     <Link
                       key={cat.id}
                       href={`/products?category=${cat.slug}`}
-                      className="group flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 transition"
-                      // className="relative px-3 py-2 rounded-md transition hover:bg-gray-100"
-                      // className="group flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 transition"
+                      className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100 transition"
                     >
                       <span className="transition group-hover:translate-x-1 group-hover:text-[var(--color-primary)]">
                         {cat.name}
                       </span>
 
-                      {/* 👉 subtle arrow animation */}
-                      <span className="opacity-0 translate-x-[-5px] group-hover:opacity-100 group-hover:translate-x-0 transition text-xs">
+                      <span className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition text-xs">
                         →
                       </span>
                     </Link>
