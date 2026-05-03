@@ -52,7 +52,7 @@ export async function getUserRole() {
   const tenant = await getDefaultTenant();
 
   if (!userId || !tenant) {
-    throw new Error("Unauthorized!");
+    return null;
   }
 
   const user = await prisma.user.findFirst({

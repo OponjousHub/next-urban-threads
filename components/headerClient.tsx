@@ -186,7 +186,8 @@ const HeaderClient = ({
                     <Link
                       key={cat.id}
                       href={`/products?category=${cat.slug}`}
-                      className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100 transition"
+                      className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 no-underline hover:bg-gray-100 transition"
+                      // className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100 transition"
                     >
                       <span className="transition group-hover:translate-x-1 group-hover:text-[var(--color-primary)]">
                         {cat.name}
