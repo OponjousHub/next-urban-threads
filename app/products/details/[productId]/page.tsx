@@ -22,6 +22,9 @@ export default async function ProductDetailPage({
 }: {
   params: Promise<{ productId: string }>;
 }) {
+  const auth = await getAuthPayload();
+  const role = auth?.role || "GUEST";
+
   const { productId } = await params;
   const product = await getProduct(productId);
 
@@ -79,6 +82,7 @@ export default async function ProductDetailPage({
         reviews={reviews}
         canReview={canReview}
         userReview={userReview}
+        role={role}
       />
     </Suspense>
   );
