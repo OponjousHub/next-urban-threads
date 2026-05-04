@@ -80,6 +80,7 @@ model Product {
   vendorId        String?
   categoryId      String
   isFlashDeal     Boolean        @default(false)
+  variants        ProductVariant[] 
   cartItems       CartItem[]
   orderItems      OrderItem[]
   category        Category       @relation(fields: [categoryId], references: [id])
@@ -394,6 +395,22 @@ model RefundTransaction {
   createdAt        DateTime @default(now())
 
   refundRequest    RefundRequest @relation(fields: [refundRequestId], references: [id])
+}
+
+model ProductVariant {
+  id        String   @id @default(cuid())
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  color     String?   // e.g. "Black"
+  size      String?   // e.g. "42"
+
+  price     Float     // variant price
+  image     String?   // specific image for this variant
+  stock     Int       @default(0)
+
+  createdAt DateTime  @default(now())
 }
 
 enum Priority {

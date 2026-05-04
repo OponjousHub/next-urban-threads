@@ -42,7 +42,15 @@ export default class ProductRepository {
 
   static findById(id: string, tenantId: string) {
     return prisma.product.findUnique({
-      where: { id, deletedAt: null, tenantId },
+      where: {
+        id,
+        deletedAt: null,
+        tenantId,
+        include: {
+          category: true,
+          variants: true,
+        },
+      },
     });
   }
 
