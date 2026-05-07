@@ -403,9 +403,10 @@ model ProductVariant {
   productId String
   product   Product  @relation(fields: [productId], references: [id])
 
-  color     String?   // e.g. "Black"
-  size      String?   // e.g. "42"
+  color     String?   
+  size      String?   
 
+  colorHex  String?   
   price     Float     // variant price
   image     String?   // specific image for this variant
   stock     Int       @default(0)
