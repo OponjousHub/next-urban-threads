@@ -41,8 +41,7 @@ export default class ProductController {
       price,
       images,
       description,
-      sizes,
-      colours,
+      variants,
       stock,
       featured,
       flash,
@@ -73,8 +72,7 @@ export default class ProductController {
         isFlashDeal: flash,
         images,
         description,
-        // sizes,
-        // colours,
+        // variants,
         user: user?.id ? { connect: { id: user.id } } : undefined,
         createdByName: user?.name,
       },
@@ -82,24 +80,36 @@ export default class ProductController {
     );
 
     // CREATE VARIANT
-    const variants = [];
+    // const variants = [];
 
-    if (!colours || !sizes) return null;
-
-    for (const color of colours) {
-      for (const size of sizes) {
-        variants.push({
+    // if (!colours || !sizes) return null;
+    if (variants?.length) {
+      await prisma.productVariant.createMany({
+        data: variants.map((v) => ({
           productId: product.id,
-          color,
-          size,
-          price: Number(product.price),
-          stock: 10,
-        });
-      }
+          color: v.color,
+          size: v.size,
+          colorHex: v.colorHex,
+          stock: v.stock,
+          price: v.price,
+          image: v.image || product.images?.[0] || "",
+        })),
+      });
     }
 
-    await prisma.productVariant.createMany({ data: variants });
-
+    if (variants?.length) {
+      await prisma.productVariant.createMany({
+        data: variants.map((v) => ({
+          productId: product.id,
+          color: v.color,
+          colorHex: v.colorHex,
+          size: v.size,
+          stock: v.stock,
+          price: v.price,
+          image: v.image || product.images?.[0] || "",
+        })),
+      });
+    }
     return NextResponse.json(product, { status: 201 });
   }
 

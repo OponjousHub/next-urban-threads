@@ -32,10 +32,6 @@ export default class ProductRepository {
     });
   }
 
-  // static findAll(args: Prisma.ProductFindManyArgs) {
-  //   return prisma.product.findMany(args);
-  // }
-
   static findAll(filters: Prisma.ProductFindManyArgs) {
     return prisma.product.findMany(filters);
   }
@@ -53,20 +49,6 @@ export default class ProductRepository {
       },
     });
   }
-
-  // static findById(id: string, tenantId: string) {
-  //   return prisma.product.findUnique({
-  //     where: {
-  //       id,
-  //       deletedAt: null,
-  //       tenantId,
-  //       include: {
-  //         category: true,
-  //         variants: true,
-  //       },
-  //     },
-  //   });
-  // }
 
   static update(id: string, data: Prisma.ProductUpdateInput, tenantId: string) {
     return prisma.product.update({

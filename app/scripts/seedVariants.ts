@@ -1,21 +1,29 @@
 import { prisma } from "@/utils/prisma";
 
+const COLOR_MAP: Record<string, string> = {
+  Black: "#000000",
+  White: "#FFFFFF",
+  Blue: "#2563eb",
+  Red: "#dc2626",
+  Green: "#16a34a",
+  Beige: "#d6c1a3",
+};
+
 async function main() {
   const products = await prisma.product.findMany();
 
   for (const product of products) {
-    const sizes: string[] = product.sizes || [];
-    const colors: string[] = product.colours || [];
-
-    // Skip if already has variants
     const existing = await prisma.productVariant.count({
       where: { productId: product.id },
     });
 
     if (existing > 0) {
-      console.log(`Skipping ${product.name} (already has variants)`);
+      console.log(`Skipping ${product.name}`);
       continue;
     }
+
+    const sizes = product.sizes || [];
+    const colors = product.colours || [];
 
     const variants = [];
 
@@ -25,19 +33,19 @@ async function main() {
           productId: product.id,
           color,
           size,
+          colorHex: COLOR_MAP[color] || "#000000",
           price: Number(product.price),
           image: product.images?.[0] || "",
-          stock: 10,
+          stock: Math.floor(Math.random() * 15) + 1,
         });
       }
     }
 
-    if (variants.length > 0) {
-      await prisma.productVariant.createMany({ data: variants });
-      console.log(`✅ Created variants for ${product.name}`);
-    } else {
-      console.log(`⚠️ No sizes/colors for ${product.name}`);
-    }
+    await prisma.productVariant.createMany({
+      data: variants,
+    });
+
+    console.log(`✅ ${product.name} variants created`);
   }
 }
 

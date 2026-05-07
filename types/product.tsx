@@ -26,4 +26,5 @@ export type ProductVariant = {
   price: number;
   image?: string | null;
   stock: number;
+  colorHex: string;
 };

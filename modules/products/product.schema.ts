@@ -15,6 +15,23 @@ export const CreateProductSchema = z.object({
   seoDescription: z.number().optional(),
   colours: z.array(z.string()).optional(),
   sizes: z.array(z.string()).optional(),
+  variants: z
+    .array(
+      z.object({
+        color: z.string(),
+
+        colorHex: z.string(),
+
+        size: z.string(),
+
+        stock: z.number(),
+
+        price: z.number(),
+
+        image: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 export const UpdateProductSchema = CreateProductSchema.partial();
