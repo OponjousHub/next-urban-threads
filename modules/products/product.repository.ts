@@ -44,15 +44,29 @@ export default class ProductRepository {
     return prisma.product.findUnique({
       where: {
         id,
-        deletedAt: null,
         tenantId,
-        include: {
-          category: true,
-          variants: true,
-        },
+        deletedAt: null,
+      },
+      include: {
+        category: true,
+        variants: true,
       },
     });
   }
+
+  // static findById(id: string, tenantId: string) {
+  //   return prisma.product.findUnique({
+  //     where: {
+  //       id,
+  //       deletedAt: null,
+  //       tenantId,
+  //       include: {
+  //         category: true,
+  //         variants: true,
+  //       },
+  //     },
+  //   });
+  // }
 
   static update(id: string, data: Prisma.ProductUpdateInput, tenantId: string) {
     return prisma.product.update({

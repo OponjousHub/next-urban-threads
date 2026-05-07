@@ -3,7 +3,7 @@ export interface Product {
   name: string;
   price: number;
   images: string[];
-  category: "MEN" | "WOMEN" | "ACCESSORIES";
+  // category: "MEN" | "WOMEN" | "ACCESSORIES";
   rating: number;
   reviews: number;
   description: string;
@@ -13,4 +13,17 @@ export interface Product {
   featured: boolean;
   averageRating?: number;
   reviewCount?: number;
+  variants?: ProductVariant[];
+  category?: {
+    name: string;
+  };
 }
+
+export type ProductVariant = {
+  id: string;
+  color?: string | null;
+  size?: string | null;
+  price: number;
+  image?: string | null;
+  stock: number;
+};

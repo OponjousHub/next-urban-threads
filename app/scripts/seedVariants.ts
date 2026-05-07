@@ -1,35 +1,44 @@
 import { prisma } from "@/utils/prisma";
 
 async function main() {
-  const product = await prisma.product.findFirst();
+  const products = await prisma.product.findMany();
 
-  if (!product) {
-    console.log("No product found");
-    return;
+  for (const product of products) {
+    const sizes: string[] = product.sizes || [];
+    const colors: string[] = product.colours || [];
+
+    // Skip if already has variants
+    const existing = await prisma.productVariant.count({
+      where: { productId: product.id },
+    });
+
+    if (existing > 0) {
+      console.log(`Skipping ${product.name} (already has variants)`);
+      continue;
+    }
+
+    const variants = [];
+
+    for (const color of colors) {
+      for (const size of sizes) {
+        variants.push({
+          productId: product.id,
+          color,
+          size,
+          price: Number(product.price),
+          image: product.images?.[0] || "",
+          stock: 10,
+        });
+      }
+    }
+
+    if (variants.length > 0) {
+      await prisma.productVariant.createMany({ data: variants });
+      console.log(`✅ Created variants for ${product.name}`);
+    } else {
+      console.log(`⚠️ No sizes/colors for ${product.name}`);
+    }
   }
-
-  await prisma.productVariant.createMany({
-    data: [
-      {
-        productId: product.id,
-        color: "Black",
-        size: "42",
-        price: 140,
-        image: product.images[0],
-        stock: 10,
-      },
-      {
-        productId: product.id,
-        color: "Beige",
-        size: "41",
-        price: 123,
-        image: product.images[0],
-        stock: 5,
-      },
-    ],
-  });
-
-  console.log("Variants created!");
 }
 
 main()
