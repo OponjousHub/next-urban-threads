@@ -73,13 +73,32 @@ export default class ProductController {
         isFlashDeal: flash,
         images,
         description,
-        sizes,
-        colours,
+        // sizes,
+        // colours,
         user: user?.id ? { connect: { id: user.id } } : undefined,
         createdByName: user?.name,
       },
       tenant.id,
     );
+
+    // CREATE VARIANT
+    const variants = [];
+
+    if (!colours || !sizes) return null;
+
+    for (const color of colours) {
+      for (const size of sizes) {
+        variants.push({
+          productId: product.id,
+          color,
+          size,
+          price: Number(product.price),
+          stock: 10,
+        });
+      }
+    }
+
+    await prisma.productVariant.createMany({ data: variants });
 
     return NextResponse.json(product, { status: 201 });
   }
