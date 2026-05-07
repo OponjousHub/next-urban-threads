@@ -57,14 +57,14 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
             className="block px-4 py-2 text-sm hover:bg-gray-100"
             onClick={handleCloseUserMenu}
           >
-            Dashboard
+            My Dashboard
           </Link>
           <Link
             href="/dashboard/order"
             className="block px-4 py-2 text-sm hover:bg-gray-100"
             onClick={handleCloseUserMenu}
           >
-            Orders
+            My Orders
           </Link>
           {role === "ADMIN" && (
             <Link
