@@ -227,6 +227,28 @@ export function ProductForm({ initialData }: any) {
         />,
       );
 
+      if (!isEdit) {
+        setForm({
+          name: "",
+          description: "",
+          basePrice: "",
+          category: "",
+          subCategory: "",
+          featured: false,
+          flash: false,
+        });
+
+        setImages([]);
+
+        setSelectedSizes([]);
+
+        setSelectedColours([]);
+
+        setVariants([]);
+      } else {
+        router.push("/admin/products");
+      }
+
       router.push("/admin/products");
     } catch (err) {
       toast.custom(
