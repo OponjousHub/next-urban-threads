@@ -22,6 +22,9 @@ export async function GET() {
       where: {
         deletedAt: null,
       },
+      include: {
+        variants: true,
+      },
       orderBy: { createdAt: "desc" },
     });
 

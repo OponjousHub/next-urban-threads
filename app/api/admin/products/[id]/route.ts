@@ -13,7 +13,6 @@ export async function PATCH(
   }
   try {
     const body = await req.json();
-    console.log("ppppppppppppppppppp", body);
     const {
       name,
       category,

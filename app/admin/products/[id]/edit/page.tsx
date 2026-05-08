@@ -14,6 +14,9 @@ export default async function EditProductPage({
   }
   const product = await prisma.product.findUnique({
     where: { id: params.id, tenantId: tenant.id },
+    include: {
+      variants: true,
+    },
   });
 
   if (!product) return notFound();

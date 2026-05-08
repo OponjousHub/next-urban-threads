@@ -552,7 +552,7 @@ export function ProductForm({ initialData }: any) {
                       <tbody>
                         {variants.map((variant, index) => (
                           <tr
-                            key={`${variant.color}-${variant.size}`}
+                            key={`${variant.color}-${variant.size}-${index}`}
                             className="border-b"
                           >
                             <td className="py-4">

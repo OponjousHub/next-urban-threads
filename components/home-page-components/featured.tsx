@@ -16,7 +16,9 @@ function Featured() {
         const res = await fetch("/api/products?featured=true");
         const data = await res.json();
 
-        setProducts(data.products.slice(0, 8)); // 👈 show max 8
+        console.log(data);
+
+        setProducts(data.products.slice(0, 8));
       } catch (err) {
         console.error("Failed to load featured products");
       } finally {

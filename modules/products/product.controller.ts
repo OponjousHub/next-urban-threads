@@ -46,7 +46,6 @@ export default class ProductController {
       featured,
       flash,
     } = parsed.data;
-    console.log("CATEGORY IIII", category);
 
     const categoryExists = await prisma.category.findUnique({
       where: { id: category },
@@ -62,7 +61,6 @@ export default class ProductController {
     const product = await ProductService.createProduct(
       {
         name,
-        // categoryId: category,
         category: { connect: { id: category } },
         subCategory,
         price,
@@ -78,9 +76,6 @@ export default class ProductController {
       },
       tenant.id,
     );
-
-    // CREATE VARIANT
-    // const variants = [];
 
     // if (!colours || !sizes) return null;
     if (variants?.length) {
@@ -123,7 +118,7 @@ export default class ProductController {
     const search = searchParams.get("search");
 
     const page = Number(searchParams.get("page") || 1);
-    const limit = Number(searchParams.get("limit") || 2);
+    const limit = Number(searchParams.get("limit") || 8);
     const skip = (page - 1) * limit;
 
     if (!tenant) {
@@ -132,6 +127,7 @@ export default class ProductController {
 
     let filters: any = {
       tenantId: tenant.id,
+      isDeleted: false,
     };
 
     if (featured) {
