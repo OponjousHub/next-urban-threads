@@ -7,6 +7,15 @@ import { AdminToast } from "@/components/ui/adminToast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+type Variant = {
+  color: string;
+  colorHex: string;
+  size: string;
+  stock: number;
+  price: number;
+  image?: string;
+};
+
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const COLOURS = [
@@ -81,14 +90,12 @@ export function ProductForm({ initialData }: any) {
   });
 
   const [images, setImages] = useState<string[]>([]);
-
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColours, setSelectedColours] = useState<string[]>([]);
-
   const [variants, setVariants] = useState<VariantType[]>([]);
-
   const [loading, setLoading] = useState(false);
 
+  console.log("INITIAL DATA", initialData);
   /* -------------------------------- FETCH CATEGORIES -------------------------------- */
 
   useEffect(() => {
@@ -104,6 +111,40 @@ export function ProductForm({ initialData }: any) {
 
     loadCategories();
   }, []);
+
+  /* ----------------------------EDIT LOGIC---------------------------- */
+
+  useEffect(() => {
+    if (!initialData) return;
+
+    setForm({
+      name: initialData.name || "",
+      description: initialData.description || "",
+      basePrice: initialData.price?.toString() || "",
+      category: initialData.categoryId || "",
+      subCategory: initialData.subCategory || "",
+      featured: initialData.featured || false,
+      flash: initialData.isFlashDeal || false,
+    });
+
+    setImages(initialData.images || []);
+
+    if (initialData.variants?.length) {
+      setVariants(initialData.variants);
+
+      const uniqueSizes = [
+        ...new Set<string>(initialData.variants.map((v: any) => v.size)),
+      ];
+
+      const uniqueColours = [
+        ...new Set<string>(initialData.variants.map((v: any) => v.color)),
+      ];
+
+      setSelectedSizes(uniqueSizes);
+
+      setSelectedColours(uniqueColours);
+    }
+  }, [initialData]);
 
   /* -------------------------------- GENERATE VARIANTS -------------------------------- */
 

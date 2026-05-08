@@ -26,7 +26,7 @@ export function ProductImageUploader({
       for (const file of Array.from(files)) {
         const formData = new FormData();
 
-        formData.append("file", file);
+        formData.append("image", file);
 
         const response = await fetch("/api/upload/image-upload", {
           method: "POST",
