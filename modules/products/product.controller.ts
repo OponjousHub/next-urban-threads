@@ -127,7 +127,7 @@ export default class ProductController {
 
     let filters: any = {
       tenantId: tenant.id,
-      isDeleted: false,
+      deletedAt: null,
     };
 
     if (featured) {
