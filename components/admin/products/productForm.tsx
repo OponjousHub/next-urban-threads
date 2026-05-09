@@ -573,6 +573,7 @@ export function ProductForm({ initialData }: any) {
                           <th className="text-left py-3">Price</th>
 
                           <th className="text-left py-3">Stock</th>
+                          <th className="text-left py-3">Image</th>
                         </tr>
                       </thead>
 
@@ -627,6 +628,64 @@ export function ProductForm({ initialData }: any) {
                                   )
                                 }
                               />
+                            </td>
+                            <td className="py-4">
+                              <div className="flex items-center gap-3">
+                                {variant.image ? (
+                                  <img
+                                    src={variant.image}
+                                    alt=""
+                                    className="w-14 h-14 rounded-lg object-cover border"
+                                  />
+                                ) : (
+                                  <div className="w-14 h-14 rounded-lg border bg-gray-100" />
+                                )}
+
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+
+                                    if (!file) return;
+
+                                    const formData = new FormData();
+
+                                    formData.append("image", file);
+
+                                    const toastId =
+                                      toast.loading("Uploading...");
+
+                                    try {
+                                      const response = await fetch(
+                                        "/api/upload/image-upload",
+                                        {
+                                          method: "POST",
+                                          body: formData,
+                                        },
+                                      );
+
+                                      const data = await response.json();
+
+                                      if (!response.ok || data.error) {
+                                        throw new Error(
+                                          data.error || "Upload failed",
+                                        );
+                                      }
+
+                                      updateVariant(index, "image", data.url);
+
+                                      toast.success("Image uploaded", {
+                                        id: toastId,
+                                      });
+                                    } catch (err) {
+                                      toast.error("Upload failed", {
+                                        id: toastId,
+                                      });
+                                    }
+                                  }}
+                                />
+                              </div>
                             </td>
                           </tr>
                         ))}
