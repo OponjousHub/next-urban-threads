@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { ProductImageUploader } from "./productImageUploader";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
@@ -32,6 +32,21 @@ const COLOURS = [
   { name: "Silver", hex: "#C0C0C0" },
   { name: "Gold", hex: "#D4AF37" },
 ];
+
+const COLOR_MAP: Record<string, string> = {
+  Black: "#000000",
+  White: "#FFFFFF",
+  Red: "#dc2626",
+  Blue: "#2563eb",
+  Green: "#16a34a",
+  Yellow: "#eab308",
+  Brown: "#92400e",
+  Grey: "#6b7280",
+  Pink: "#ec4899",
+  Purple: "#9333ea",
+  Silver: "#c0c0c0",
+  Gold: "#d4af37",
+};
 
 type VariantType = {
   color: string;
@@ -95,7 +110,7 @@ export function ProductForm({ initialData }: any) {
   const [variants, setVariants] = useState<VariantType[]>([]);
   const [loading, setLoading] = useState(false);
 
-  console.log("INITIAL DATA", initialData);
+  const skipGenerateRef = useRef(false);
   /* -------------------------------- FETCH CATEGORIES -------------------------------- */
 
   useEffect(() => {
@@ -140,6 +155,7 @@ export function ProductForm({ initialData }: any) {
         ...new Set<string>(initialData.variants.map((v: any) => v.color)),
       ];
 
+      skipGenerateRef.current = true;
       setSelectedSizes(uniqueSizes);
 
       setSelectedColours(uniqueColours);
@@ -149,26 +165,37 @@ export function ProductForm({ initialData }: any) {
   /* -------------------------------- GENERATE VARIANTS -------------------------------- */
 
   useEffect(() => {
-    const generated: VariantType[] = [];
-
-    for (const color of selectedColours) {
-      for (const size of selectedSizes) {
-        const existing = variants.find(
-          (v) => v.color === color && v.size === size,
-        );
-
-        generated.push({
-          color,
-          size,
-          colorHex: COLOURS.find((c) => c.name === color)?.hex || "#000000",
-          stock: existing?.stock || 0,
-          price: existing?.price || Number(form.basePrice || 0),
-          image: existing?.image || "",
-        });
-      }
+    if (skipGenerateRef.current) {
+      skipGenerateRef.current = false;
+      return;
     }
 
-    setVariants(generated);
+    setVariants((prev) => {
+      const generated = [];
+
+      for (const color of selectedColours) {
+        for (const size of selectedSizes) {
+          const existing = prev.find(
+            (v) => v.color === color && v.size === size,
+          );
+
+          if (existing) {
+            generated.push(existing);
+          } else {
+            generated.push({
+              color,
+              size,
+              colorHex: COLOR_MAP[color as keyof typeof COLOR_MAP] || "#000000",
+              stock: 0,
+              price: Number(form.basePrice) || 0,
+              image: "",
+            });
+          }
+        }
+      }
+
+      return generated;
+    });
   }, [selectedColours, selectedSizes, form.basePrice]);
 
   /* -------------------------------- TOGGLES -------------------------------- */
@@ -233,7 +260,7 @@ export function ProductForm({ initialData }: any) {
         images,
         variants,
       };
-
+      console.log("PAYLOAD", payload);
       const response = await fetch(
         isEdit ? `/api/admin/products/${initialData.id}` : "/api/products",
         {
@@ -287,10 +314,10 @@ export function ProductForm({ initialData }: any) {
 
         setVariants([]);
       } else {
-        router.push("/admin/products");
+        // router.push("/admin/products");
       }
 
-      router.push("/admin/products");
+      // router.push("/admin/products");
     } catch (err) {
       toast.custom(
         <AdminToast

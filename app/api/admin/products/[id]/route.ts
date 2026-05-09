@@ -2,6 +2,16 @@ import { prisma } from "@/utils/prisma";
 import { NextResponse } from "next/server";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
+type Variant = {
+  id?: string;
+  color: string;
+  colorHex: string;
+  size: string;
+  stock: number;
+  price: number;
+  image?: string;
+};
+
 export async function PATCH(
   req: Request,
   { params }: { params: { id: string } },
@@ -25,6 +35,7 @@ export async function PATCH(
       stock,
       featured,
       flash,
+      variants,
     } = body;
 
     const updated = await prisma.product.update({
@@ -45,6 +56,47 @@ export async function PATCH(
         isFlashDeal: flash,
       },
     });
+
+    // Update variant
+
+    if (variants?.length) {
+      // Remove old variants
+      await prisma.productVariant.deleteMany({
+        where: {
+          productId: paramsId.id,
+        },
+      });
+
+      // Create updated variants
+      await prisma.productVariant.createMany({
+        data: variants.map((variant: Variant) => ({
+          productId: paramsId.id,
+          color: variant.color,
+          colorHex: variant.colorHex,
+          size: variant.size,
+          stock: variant.stock,
+          price: variant.price,
+          image: variant.image || "",
+        })),
+      });
+
+      // Recalculate total stock
+      const totalStock = variants.reduce(
+        (sum: any, variant: Variant) => sum + Number(variant.stock || 0),
+        0,
+      );
+
+      await prisma.product.update({
+        where: {
+          id: paramsId.id,
+        },
+
+        data: {
+          stock: totalStock,
+          instock: totalStock > 0,
+        },
+      });
+    }
 
     return Response.json(updated);
   } catch (err) {
