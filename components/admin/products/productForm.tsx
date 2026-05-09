@@ -260,7 +260,7 @@ export function ProductForm({ initialData }: any) {
         images,
         variants,
       };
-      console.log("PAYLOAD", payload);
+
       const response = await fetch(
         isEdit ? `/api/admin/products/${initialData.id}` : "/api/products",
         {
@@ -314,10 +314,10 @@ export function ProductForm({ initialData }: any) {
 
         setVariants([]);
       } else {
-        // router.push("/admin/products");
+        router.push("/admin/products");
       }
 
-      // router.push("/admin/products");
+      router.push("/admin/products");
     } catch (err) {
       toast.custom(
         <AdminToast
