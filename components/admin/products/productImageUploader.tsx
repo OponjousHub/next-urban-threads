@@ -14,6 +14,7 @@ import { SortableImage } from "./sortable-image";
 
 type Props = {
   images: string[];
+  public_id: string;
   setImages: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
@@ -29,50 +30,6 @@ type UploadItem = {
 
 export function ProductImageUploader({ images, setImages }: Props) {
   const [queue, setQueue] = useState<UploadItem[]>([]);
-
-  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files;
-
-    if (!files || files.length === 0) return;
-
-    const toastId = toast.loading("Uploading images...");
-
-    try {
-      const uploaded: string[] = [];
-
-      for (const file of Array.from(files)) {
-        const formData = new FormData();
-
-        formData.append("image", file);
-
-        const response = await fetch("/api/upload/image-upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await response.json();
-        console.log("UPLOAD RESPONSE", data);
-
-        uploaded.push(data.url);
-      }
-
-      setImages((prev) => [...prev, ...uploaded]);
-
-      // onUploadComplete(
-      //   [...initialImages, ...uploaded].filter(
-      //     (img) => img && img.trim() !== "",
-      //   ),
-      // );
-
-      toast.success("Images uploaded successfully", {
-        id: toastId,
-      });
-    } catch (err) {
-      toast.error("Upload failed", {
-        id: toastId,
-      });
-    }
-  }
 
   function handleSelectFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;

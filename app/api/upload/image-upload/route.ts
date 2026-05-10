@@ -12,5 +12,6 @@ export async function POST(req: Request) {
 
   return Response.json({
     url: result.secure_url,
+    public_id: result.public_id,
   });
 }
