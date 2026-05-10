@@ -6,15 +6,7 @@ import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-type Variant = {
-  color: string;
-  colorHex: string;
-  size: string;
-  stock: number;
-  price: number;
-  image?: string;
-};
+import imageCompression from "browser-image-compression";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
@@ -649,9 +641,19 @@ export function ProductForm({ initialData }: any) {
 
                                     if (!file) return;
 
+                                    {
+                                      /*Compress file*/
+                                    }
+                                    const compressedFile =
+                                      await imageCompression(file, {
+                                        maxSizeMB: 1,
+                                        maxWidthOrHeight: 1600,
+                                        useWebWorker: true,
+                                      });
+
                                     const formData = new FormData();
 
-                                    formData.append("image", file);
+                                    formData.append("image", compressedFile);
 
                                     const toastId =
                                       toast.loading("Uploading...");
@@ -703,10 +705,7 @@ export function ProductForm({ initialData }: any) {
               )}
 
               <Section title="Product Images">
-                <ProductImageUploader
-                  onUploadComplete={(imgs) => setImages(imgs)}
-                  initialImages={images}
-                />
+                <ProductImageUploader images={images} setImages={setImages} />
               </Section>
             </div>
 
