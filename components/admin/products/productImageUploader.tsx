@@ -12,11 +12,6 @@ import {
 } from "@dnd-kit/sortable";
 import { SortableImage } from "./sortable-image";
 
-// interface Props {
-//   initialImages?: string[];
-//   onUploadComplete: (urls: string[]) => void;
-// }
-
 type Props = {
   images: string[];
   setImages: React.Dispatch<React.SetStateAction<string[]>>;
@@ -48,6 +43,8 @@ export function ProductImageUploader({ images, setImages }: Props) {
 
         uploaded.push(data.url);
       }
+
+      setImages((prev) => [...prev, ...uploaded]);
 
       // onUploadComplete(
       //   [...initialImages, ...uploaded].filter(
@@ -108,32 +105,6 @@ export function ProductImageUploader({ images, setImages }: Props) {
             </div>
           </SortableContext>
         </DndContext>
-        // <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        //   {initialImages
-        //     .filter((img) => img && img.trim() !== "")
-        //     .map((img, index) => (
-        //       <div
-        //         key={index}
-        //         className="relative border rounded-2xl overflow-hidden bg-white"
-        //       >
-        //         <Image
-        //           src={img}
-        //           alt=""
-        //           width={300}
-        //           height={300}
-        //           className="w-full h-40 object-cover"
-        //         />
-
-        //         <button
-        //           type="button"
-        //           onClick={() => removeImage(index)}
-        //           className="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow"
-        //         >
-        //           ✕
-        //         </button>
-        //       </div>
-        //     ))}
-        // </div>
       )}
 
       {/* UPLOAD BUTTON */}

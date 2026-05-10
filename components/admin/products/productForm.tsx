@@ -236,7 +236,6 @@ export function ProductForm({ initialData }: any) {
       toast.error("Please upload product images");
       return;
     }
-
     if (!variants.length) {
       toast.error("Please create at least one variant");
       return;
