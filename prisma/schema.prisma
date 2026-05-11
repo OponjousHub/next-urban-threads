@@ -65,7 +65,7 @@ model Product {
   seoTitle        String?
   seoDescription  String?
   deletedAt       DateTime?
-  images          Json[]
+  images          String[]
   createdByName   String?
   featured        Boolean        @default(false)
   createdById     String?

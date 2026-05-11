@@ -40,6 +40,7 @@ export function ProductDetailUI({
   const [activeImage, setActiveImage] = useState(0);
   const [showSticky, setShowSticky] = useState(false);
   const [recent, setRecent] = useState<any[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { addToCart } = useCart();
   const router = useRouter();
@@ -78,13 +79,6 @@ export function ProductDetailUI({
       (v) => v.color === selectedColor && v.size === selectedSize,
     ) || null;
 
-  // const selectedVariant =
-  //   selectedColor && selectedSize
-  //     ? variants.find(
-  //         (v) => v.color === selectedColor && v.size === selectedSize,
-  //       )
-  //     : null;
-
   /* ---------------- filter sizes based on selected color ---------------- */
 
   const filteredSizes = selectedColor
@@ -102,7 +96,8 @@ export function ProductDetailUI({
     ? safePrice(selectedVariant.price)
     : safePrice(product.price);
 
-  const mainImage = selectedVariant?.image || product.images?.[activeImage];
+  const mainImage =
+    selectedImage || selectedVariant?.image || product.images?.[0];
 
   /* ---------------- CART ---------------- */
   const handleAddToCart = () => {
@@ -148,12 +143,12 @@ export function ProductDetailUI({
     const stored = JSON.parse(localStorage.getItem("recent") || "[]");
     setRecent(stored);
   }, []);
-  console.log("SELECTED VALIANT", {
-    product: product.name,
-    selectedColor,
-    selectedSize,
-    selectedVariant,
-  });
+
+  // RESET WHEN VARIANT CHANGES
+  useEffect(() => {
+    setSelectedImage(null);
+  }, [selectedVariant?.id]);
+
   return (
     <div className="bg-gray-50 min-h-screen py-12 px-4 md:px-8">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10">
@@ -161,8 +156,6 @@ export function ProductDetailUI({
         <div className="space-y-4">
           <div className="bg-white rounded-2xl p-4 shadow-sm overflow-hidden">
             <Image
-              // src={cloudinaryDetailImage(mainImage, "detail")}
-              key={selectedVariant?.id}
               src={cloudinaryDetailImage(
                 selectedVariant?.image || product.images?.[activeImage],
                 "detail",
@@ -178,7 +171,8 @@ export function ProductDetailUI({
             {product.images?.map((img, i) => (
               <button
                 key={i}
-                onClick={() => setActiveImage(i)}
+                // onClick={() => setActiveImage(i)}
+                onClick={() => setSelectedImage(img)}
                 className={`border rounded-lg overflow-hidden ${
                   activeImage === i ? "border-black" : "border-gray-200"
                 }`}
@@ -333,12 +327,6 @@ export function ProductDetailUI({
                   ? "Select options"
                   : "Add to Cart"}
               </button>
-              {/* <button
-                onClick={handleAddToCart}
-                className="w-full bg-black text-white py-3 rounded-lg"
-              >
-                Add to Cart
-              </button> */}
 
               <button
                 onClick={() => {

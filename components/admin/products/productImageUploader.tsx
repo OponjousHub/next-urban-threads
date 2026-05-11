@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Loader2, RefreshCcw, X, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import { DndContext, closestCenter } from "@dnd-kit/core";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   SortableContext,
   rectSortingStrategy,
@@ -14,7 +14,6 @@ import { SortableImage } from "./sortable-image";
 
 type Props = {
   images: string[];
-  public_id: string;
   setImages: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
@@ -30,6 +29,7 @@ type UploadItem = {
 
 export function ProductImageUploader({ images, setImages }: Props) {
   const [queue, setQueue] = useState<UploadItem[]>([]);
+  const uploadControllers = useRef<Record<string, AbortController>>({});
 
   function handleSelectFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
@@ -47,6 +47,21 @@ export function ProductImageUploader({ images, setImages }: Props) {
 
     uploadQueue(newItems);
   }
+
+  // Cloudinary Delete function
+  // async function deleteImage(img: ImageItem) {
+  //   await fetch("/api/upload/delete-image", {
+  //     method: "POST",
+  //     body: JSON.stringify({
+  //       public_id: img.public_id,
+  //     }),
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
+
+  //   setImages((prev) => prev.filter((i) => i.public_id !== img.public_id));
+  // }
 
   // Add single file upload function
   async function uploadSingle(item: UploadItem) {
@@ -149,6 +164,15 @@ export function ProductImageUploader({ images, setImages }: Props) {
     });
   }
 
+  // Cancel Upload function
+  function cancelUpload(id: string) {
+    uploadControllers.current[id]?.abort();
+
+    setQueue((prev) =>
+      prev.map((q) => (q.id === id ? { ...q, status: "failed" } : q)),
+    );
+  }
+
   return (
     <div className="space-y-5">
       {/* IMAGE GRID */}
@@ -206,9 +230,19 @@ export function ProductImageUploader({ images, setImages }: Props) {
                   </p>
                 </div>
 
+                {/*Upload Cancel button*/}
                 {item.status === "uploading" && (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <button
+                    onClick={() => cancelUpload(item.id)}
+                    className="text-red-500"
+                  >
+                    Cancel
+                  </button>
                 )}
+
+                {/* {item.status === "uploading" && (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                )} */}
                 {item.status === "failed" && (
                   <button
                     type="button"
