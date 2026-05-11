@@ -44,15 +44,21 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
 
   // ✅ Add to Cart
   const addToCart = (item: CartItem) => {
-    console.log(item);
     setCartItems((prevItems) => {
       const existing = prevItems.find((p) => p.id === item.id);
+
       if (existing) {
         return prevItems.map((p) =>
-          p.id === item.id ? { ...p, quantity: p.quantity + 1 } : p,
+          p.id === item.id
+            ? {
+                ...p,
+                quantity: p.quantity + item.quantity,
+              }
+            : p,
         );
       }
-      return [...prevItems, { ...item, quantity: 1 }];
+
+      return [...prevItems, item];
     });
   };
 
