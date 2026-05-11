@@ -152,6 +152,20 @@ export function ProductDetailUI({
     setSelectedImage(null);
   }, [selectedVariant?.id]);
 
+  const handleBuyButton = () => {
+    const buyNowItem = {
+      id: selectedVariant?.id || product.id,
+      name: product.name,
+      price: displayPrice,
+      image: mainImage || product.images[0],
+      quantity,
+    };
+
+    localStorage.setItem("buyNow", JSON.stringify([buyNowItem]));
+
+    router.push("/checkout?mode=buy-now");
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen py-12 px-4 md:px-8">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10">
@@ -333,10 +347,7 @@ export function ProductDetailUI({
               </button>
 
               <button
-                onClick={() => {
-                  handleAddToCart();
-                  router.push("/checkout");
-                }}
+                onClick={handleBuyButton}
                 className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg"
                 disabled={isOutOfStock}
               >

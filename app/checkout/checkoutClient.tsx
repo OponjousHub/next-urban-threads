@@ -5,6 +5,7 @@ import { useCart } from "@/store/cart-context";
 import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 type ShippingAddress = {
   id: string;
@@ -15,6 +16,14 @@ type ShippingAddress = {
   country: string;
   phone?: string | null;
   isDefault: boolean;
+};
+
+type CheckoutItem = {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
 };
 
 export default function CheckoutClient({
@@ -33,10 +42,6 @@ export default function CheckoutClient({
     null,
   );
 
-  const router = useRouter();
-
-  // SELECT DEFAULT ADDRESS
-
   // Form data
   const [formData, setFormData] = useState({
     fullName: "",
@@ -50,12 +55,26 @@ export default function CheckoutClient({
     paymentMethod: "credit-card",
   });
 
+  const router = useRouter();
+
+  const searchParams = useSearchParams();
+
+  const mode = searchParams.get("mode");
+
+  const buyNowItems: CheckoutItem[] =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("buyNow") || "[]")
+      : [];
+
+  const checkoutItems: CheckoutItem[] =
+    mode === "buy-now" ? buyNowItems : cartItems;
+
   useEffect(() => {
     const defaultAddress = addresses.find((a) => a.isDefault);
     if (defaultAddress) setSelectedAddressId(defaultAddress.id);
   }, [addresses]);
 
-  const subtotal = cartItems.reduce(
+  const subtotal = checkoutItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
@@ -87,7 +106,7 @@ export default function CheckoutClient({
     }
   };
 
-  const orderItems = cartItems.map((item) => ({
+  const orderItems = checkoutItems.map((item) => ({
     productId: String(item.id), // must match Product.id in DB
     quantity: item.quantity,
   }));
@@ -102,7 +121,7 @@ export default function CheckoutClient({
       return;
     }
 
-    if (cartItems.length === 0) {
+    if (checkoutItems.length === 0) {
       router.push("/cart");
       return;
     }
@@ -162,7 +181,6 @@ export default function CheckoutClient({
       }
 
       clearCart();
-      // router.push(`/orders/${order.id}`);
     } catch (err: any) {
       console.error(err);
 
@@ -452,7 +470,7 @@ export default function CheckoutClient({
         </h2>
 
         <div className="space-y-3 text-gray-700">
-          {cartItems.map((item) => (
+          {checkoutItems.map((item) => (
             <div
               key={item.id}
               className="flex justify-between items-center border-b border-gray-100 pb-2"
