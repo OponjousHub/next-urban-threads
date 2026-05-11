@@ -79,6 +79,9 @@ export function ProductDetailUI({
       (v) => v.color === selectedColor && v.size === selectedSize,
     ) || null;
 
+  const isOutOfStock =
+    selectedVariant?.stock !== undefined && selectedVariant.stock <= 0;
+
   /* ---------------- filter sizes based on selected color ---------------- */
 
   // const filteredSizes = selectedColor
@@ -313,16 +316,20 @@ export function ProductDetailUI({
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleAddToCart}
-                disabled={variants.length > 0 && !selectedVariant}
+                disabled={
+                  (variants.length > 0 && !selectedVariant) || isOutOfStock
+                }
                 className={`w-full py-3 rounded-lg font-medium transition ${
-                  variants.length > 0 && !selectedVariant
+                  (variants.length > 0 && !selectedVariant) || isOutOfStock
                     ? "bg-gray-300 cursor-not-allowed"
                     : "bg-black text-white hover:bg-gray-800"
                 }`}
               >
-                {variants.length > 0 && !selectedVariant
-                  ? "Select options"
-                  : "Add to Cart"}
+                {isOutOfStock
+                  ? "Out of Stock"
+                  : variants.length > 0 && !selectedVariant
+                    ? "Select options"
+                    : "Add to Cart"}
               </button>
 
               <button
@@ -331,6 +338,7 @@ export function ProductDetailUI({
                   router.push("/checkout");
                 }}
                 className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg"
+                disabled={isOutOfStock}
               >
                 Buy Now
               </button>
