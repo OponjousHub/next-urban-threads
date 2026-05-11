@@ -156,10 +156,7 @@ export function ProductDetailUI({
         <div className="space-y-4">
           <div className="bg-white rounded-2xl p-4 shadow-sm overflow-hidden">
             <Image
-              src={cloudinaryDetailImage(
-                selectedVariant?.image || product.images?.[activeImage],
-                "detail",
-              )}
+              src={cloudinaryDetailImage(mainImage, "detail")}
               alt={product.name}
               width={800}
               height={800}
@@ -171,10 +168,11 @@ export function ProductDetailUI({
             {product.images?.map((img, i) => (
               <button
                 key={i}
-                // onClick={() => setActiveImage(i)}
                 onClick={() => setSelectedImage(img)}
-                className={`border rounded-lg overflow-hidden ${
-                  activeImage === i ? "border-black" : "border-gray-200"
+                className={`border rounded-lg overflow-hidden transition-all ${
+                  mainImage === img
+                    ? "border-black ring-2 ring-black scale-105"
+                    : "border-gray-200 opacity-70 hover:opacity-100"
                 }`}
               >
                 <Image
@@ -187,7 +185,6 @@ export function ProductDetailUI({
             ))}
           </div>
         </div>
-
         {/* RIGHT: DETAILS */}
         <div className="space-y-6">
           <h1 className="text-3xl font-semibold">{product.name}</h1>
@@ -375,35 +372,74 @@ export function ProductDetailUI({
               </Dialog>
             )}
           </div>
+        </div>{" "}
+      </div>
 
-          {/* RECENT */}
-          {recent.length > 1 && (
-            <div className="mt-16">
-              <h2 className="text-xl font-semibold mb-4">Recently Viewed</h2>
+      {/* RECENT */}
+      {recent.length > 1 && (
+        <div className="mt-20 border-t pt-10">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-2xl font-semibold">Recently Viewed</h2>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {recent
-                  .filter((p) => p.id !== product.id)
-                  .map((p) => (
-                    <div
-                      key={p.id}
-                      className="bg-white p-3 rounded-lg shadow cursor-pointer"
-                      onClick={() => router.push(`/products/details/${p.id}`)}
-                    >
+            <p className="text-sm text-gray-500">Continue where you left off</p>
+          </div>
+
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex gap-5 min-w-max pb-2">
+              {recent
+                .filter((p) => p.id !== product.id)
+                .map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => router.push(`/products/details/${p.id}`)}
+                    className="
+                w-[220px]
+                flex-shrink-0
+                bg-white
+                rounded-2xl
+                overflow-hidden
+                shadow-sm
+                hover:shadow-xl
+                transition-all
+                duration-300
+                cursor-pointer
+                group
+              "
+                  >
+                    <div className="relative overflow-hidden bg-gray-100">
                       <Image
                         src={cloudinaryDetailImage(p.images?.[0], "thumb")}
-                        alt=""
-                        width={150}
-                        height={150}
+                        alt={p.name}
+                        width={220}
+                        height={220}
+                        className="
+                    w-full
+                    h-[220px]
+                    object-cover
+                    transition-transform
+                    duration-500
+                    group-hover:scale-105
+                  "
                       />
-                      <p className="text-sm mt-2">{p.name}</p>
                     </div>
-                  ))}
-              </div>
+
+                    <div className="p-4">
+                      <p className="text-sm text-gray-800 line-clamp-2">
+                        {p.name}
+                      </p>
+
+                      {p.price && (
+                        <p className="mt-2 font-semibold text-black">
+                          ₦{Number(p.price).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* STICKY BAR */}
       {showSticky && (
