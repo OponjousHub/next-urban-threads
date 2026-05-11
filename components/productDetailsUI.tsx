@@ -37,7 +37,7 @@ export function ProductDetailUI({
     product.variants?.[0]?.color || null,
   );
   const [open, setOpen] = useState(false);
-  const [activeImage, setActiveImage] = useState(0);
+  // const [activeImage, setActiveImage] = useState(0);
   const [showSticky, setShowSticky] = useState(false);
   const [recent, setRecent] = useState<any[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -81,16 +81,16 @@ export function ProductDetailUI({
 
   /* ---------------- filter sizes based on selected color ---------------- */
 
-  const filteredSizes = selectedColor
-    ? [
-        ...new Set(
-          variants
-            .filter((v) => v.color === selectedColor)
-            .map((v) => v.size)
-            .filter((s): s is string => Boolean(s)),
-        ),
-      ]
-    : sizes;
+  // const filteredSizes = selectedColor
+  //   ? [
+  //       ...new Set(
+  //         variants
+  //           .filter((v) => v.color === selectedColor)
+  //           .map((v) => v.size)
+  //           .filter((s): s is string => Boolean(s)),
+  //       ),
+  //     ]
+  //   : sizes;
 
   const displayPrice = selectedVariant
     ? safePrice(selectedVariant.price)
@@ -387,7 +387,7 @@ export function ProductDetailUI({
           <div className="overflow-x-auto scrollbar-hide">
             <div className="flex gap-5 min-w-max pb-2">
               {recent
-                .filter((p) => p.id !== product.id)
+                .filter((p) => p.id !== product.id && !p.deletedAt)
                 .map((p) => (
                   <div
                     key={p.id}
