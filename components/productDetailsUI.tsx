@@ -37,7 +37,7 @@ export function ProductDetailUI({
     product.variants?.[0]?.color || null,
   );
   const [open, setOpen] = useState(false);
-  // const [activeImage, setActiveImage] = useState(0);
+  const [activeImage, setActiveImage] = useState(0);
   const [showSticky, setShowSticky] = useState(false);
   const [recent, setRecent] = useState<any[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -82,26 +82,29 @@ export function ProductDetailUI({
   const isOutOfStock =
     selectedVariant?.stock !== undefined && selectedVariant.stock <= 0;
 
-  /* ---------------- filter sizes based on selected color ---------------- */
-
-  // const filteredSizes = selectedColor
-  //   ? [
-  //       ...new Set(
-  //         variants
-  //           .filter((v) => v.color === selectedColor)
-  //           .map((v) => v.size)
-  //           .filter((s): s is string => Boolean(s)),
-  //       ),
-  //     ]
-  //   : sizes;
-
   const displayPrice = selectedVariant
     ? safePrice(selectedVariant.price)
     : safePrice(product.price);
 
-  const mainImage =
-    selectedImage || selectedVariant?.image || product.images?.[0];
+  const mainImage = selectedVariant?.image || product.images?.[0];
 
+  const videos = (product.videos || []) as {
+    url: string;
+    public_id: string;
+  }[];
+
+  const media = [
+    ...product.images.map((img) => ({
+      type: "image",
+      url: img,
+    })),
+    ...videos.map((video) => ({
+      type: "video",
+      url: video.url,
+    })),
+  ];
+
+  const activeMedia = media[activeImage];
   /* ---------------- CART ---------------- */
   const handleAddToCart = () => {
     if (variants.length > 0 && !selectedVariant) {
@@ -172,32 +175,47 @@ export function ProductDetailUI({
         {/* LEFT: IMAGES */}
         <div className="space-y-4">
           <div className="bg-white rounded-2xl p-4 shadow-sm overflow-hidden">
-            <Image
-              src={cloudinaryDetailImage(mainImage, "detail")}
-              alt={product.name}
-              width={800}
-              height={800}
-              className="w-full h-[400px] object-contain transition-transform duration-500 hover:scale-110"
-            />
+            {activeMedia?.type === "image" ? (
+              <Image
+                src={cloudinaryDetailImage(activeMedia.url, "detail")}
+                alt={product.name}
+                width={800}
+                height={800}
+                className="w-full h-[400px] object-contain transition-transform duration-500 hover:scale-110"
+              />
+            ) : (
+              <video
+                src={activeMedia?.url}
+                controls
+                className="w-full h-[400px] rounded-2xl object-cover"
+              />
+            )}
           </div>
 
           <div className="flex gap-3">
-            {product.images?.map((img, i) => (
+            {media.map((item, i) => (
               <button
                 key={i}
-                onClick={() => setSelectedImage(img)}
-                className={`border rounded-lg overflow-hidden transition-all ${
-                  mainImage === img
-                    ? "border-black ring-2 ring-black scale-105"
-                    : "border-gray-200 opacity-70 hover:opacity-100"
+                onClick={() => setActiveImage(i)}
+                className={`border rounded-xl overflow-hidden relative ${
+                  activeImage === i
+                    ? "border-black ring-2 ring-black"
+                    : "border-gray-200"
                 }`}
               >
-                <Image
-                  src={cloudinaryDetailImage(img, "thumb")}
-                  alt=""
-                  width={80}
-                  height={80}
-                />
+                {item.type === "image" ? (
+                  <Image
+                    src={cloudinaryDetailImage(item.url, "thumb")}
+                    alt=""
+                    width={80}
+                    height={80}
+                    className="w-20 h-20 object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-black flex items-center justify-center text-white text-xs">
+                    VIDEO
+                  </div>
+                )}
               </button>
             ))}
           </div>

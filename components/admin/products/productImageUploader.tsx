@@ -240,9 +240,6 @@ export function ProductImageUploader({ images, setImages }: Props) {
                   </button>
                 )}
 
-                {/* {item.status === "uploading" && (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                )} */}
                 {item.status === "failed" && (
                   <button
                     type="button"

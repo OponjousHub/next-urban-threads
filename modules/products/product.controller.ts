@@ -45,6 +45,7 @@ export default class ProductController {
       stock,
       featured,
       flash,
+      videos,
     } = parsed.data;
 
     const categoryExists = await prisma.category.findUnique({
@@ -69,6 +70,7 @@ export default class ProductController {
         featured,
         isFlashDeal: flash,
         images,
+        videos,
         description,
         // variants,
         user: user?.id ? { connect: { id: user.id } } : undefined,

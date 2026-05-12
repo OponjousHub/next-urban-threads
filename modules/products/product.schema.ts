@@ -15,6 +15,14 @@ export const CreateProductSchema = z.object({
   seoDescription: z.number().optional(),
   colours: z.array(z.string()).optional(),
   sizes: z.array(z.string()).optional(),
+  videos: z
+    .array(
+      z.object({
+        url: z.string(),
+        public_id: z.string(),
+      }),
+    )
+    .optional(),
   variants: z
     .array(
       z.object({

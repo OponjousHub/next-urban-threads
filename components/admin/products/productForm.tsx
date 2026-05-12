@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { ProductImageUploader } from "./productImageUploader";
+import { ProductVideoUploader } from "./productVideoUploader";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import Link from "next/link";
@@ -95,7 +96,9 @@ export function ProductForm({ initialData }: any) {
     featured: false,
     flash: false,
   });
-
+  const [videos, setVideos] = useState<{ url: string; public_id: string }[]>(
+    [],
+  );
   const [images, setImages] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColours, setSelectedColours] = useState<string[]>([]);
@@ -249,6 +252,7 @@ export function ProductForm({ initialData }: any) {
         price: Number(form.basePrice),
         stock: totalStock,
         images,
+        videos,
         variants,
       };
 
@@ -298,7 +302,7 @@ export function ProductForm({ initialData }: any) {
         });
 
         setImages([]);
-
+        setVideos([]);
         setSelectedSizes([]);
 
         setSelectedColours([]);
@@ -706,6 +710,13 @@ export function ProductForm({ initialData }: any) {
               <Section title="Product Images">
                 <ProductImageUploader images={images} setImages={setImages} />
               </Section>
+              <section
+                className="bg-white p-6 rounded-xl"
+                title="Product Videos"
+              >
+                <p className="text-xl font-semibold pb-4">Product Videos</p>
+                <ProductVideoUploader videos={videos} setVideos={setVideos} />
+              </section>
             </div>
 
             {/* RIGHT */}

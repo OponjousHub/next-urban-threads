@@ -14,6 +14,10 @@ export interface Product {
   averageRating?: number;
   reviewCount?: number;
   variants?: ProductVariant[];
+  videos?: {
+    url: string;
+    public_id: string;
+  }[];
   category?: {
     name: string;
   };
