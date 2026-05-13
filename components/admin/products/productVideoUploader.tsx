@@ -140,7 +140,32 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
 
     if (!files || files.length === 0) return;
 
-    const newItems: UploadItem[] = Array.from(files).map((file) => ({
+    // Set video size and type
+    const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+
+    const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+
+    const validFiles = Array.from(files).filter((file) => {
+      if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
+        toast.error(`${file.name} is not supported`);
+        return false;
+      }
+
+      if (file.size > MAX_VIDEO_SIZE) {
+        toast.error(`${file.name} exceeds 50MB`);
+        return false;
+      }
+
+      return true;
+    });
+
+    // Limit number of videos
+    if (videos.length + validFiles.length > 3) {
+      toast.error("Maximum 3 videos allowed");
+      return;
+    }
+
+    const newItems: UploadItem[] = validFiles.map((file) => ({
       id: crypto.randomUUID(),
       file,
       progress: 0,

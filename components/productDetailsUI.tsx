@@ -22,6 +22,21 @@ interface Props {
   role: string;
 }
 
+const COLOR_MAP: Record<string, string> = {
+  Black: "#000000",
+  White: "#FFFFFF",
+  Blue: "#2563eb",
+  Brown: "#92400e",
+  Red: "#dc2626",
+  Green: "#16a34a",
+  Yellow: "#eab308",
+  Pink: "#ec4899",
+  Purple: "#9333ea",
+  Gray: "#6b7280",
+  Orange: "#ea580c",
+  Beige: "#d6c7a1",
+};
+
 export function ProductDetailUI({
   product,
   reviews,
@@ -37,11 +52,13 @@ export function ProductDetailUI({
     product.variants?.[0]?.color || null,
   );
   const [open, setOpen] = useState(false);
-  const [activeImage, setActiveImage] = useState(0);
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [showSticky, setShowSticky] = useState(false);
   const [recent, setRecent] = useState<any[]>([]);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
+  const [selectedMedia, setSelectedMedia] = useState<{
+    type: "image" | "video";
+    url: string;
+  } | null>(null);
   const { addToCart } = useCart();
   const router = useRouter();
 
@@ -79,6 +96,16 @@ export function ProductDetailUI({
       (v) => v.color === selectedColor && v.size === selectedSize,
     ) || null;
 
+  useEffect(() => {
+    if (selectedVariant?.image) {
+      const index = media.findIndex((m) => m.url === selectedVariant.image);
+
+      if (index !== -1) {
+        setActiveMediaIndex(index);
+      }
+    }
+  }, [selectedVariant?.image]);
+
   const isOutOfStock =
     selectedVariant?.stock !== undefined && selectedVariant.stock <= 0;
 
@@ -93,18 +120,30 @@ export function ProductDetailUI({
     public_id: string;
   }[];
 
-  const media = [
+  const media: {
+    type: "image" | "video";
+    url: string;
+  }[] = [
     ...product.images.map((img) => ({
-      type: "image",
+      type: "image" as const,
       url: img,
     })),
+
     ...videos.map((video) => ({
-      type: "video",
+      type: "video" as const,
       url: video.url,
     })),
   ];
 
-  const activeMedia = media[activeImage];
+  const displayMedia =
+    selectedMedia ||
+    (selectedVariant?.image
+      ? {
+          type: "image",
+          url: selectedVariant.image,
+        }
+      : media[activeMediaIndex]);
+
   /* ---------------- CART ---------------- */
   const handleAddToCart = () => {
     if (variants.length > 0 && !selectedVariant) {
@@ -152,8 +191,8 @@ export function ProductDetailUI({
 
   // RESET WHEN VARIANT CHANGES
   useEffect(() => {
-    setSelectedImage(null);
-  }, [selectedVariant?.id]);
+    setSelectedMedia(null);
+  }, [selectedVariant?.color, selectedVariant?.size]);
 
   const handleBuyButton = () => {
     const buyNowItem = {
@@ -175,9 +214,26 @@ export function ProductDetailUI({
         {/* LEFT: IMAGES */}
         <div className="space-y-4">
           <div className="bg-white rounded-2xl p-4 shadow-sm overflow-hidden">
-            {activeMedia?.type === "image" ? (
+            {displayMedia?.type === "image" ? (
               <Image
-                src={cloudinaryDetailImage(activeMedia.url, "detail")}
+                src={cloudinaryDetailImage(displayMedia.url, "detail")}
+                alt={product.name}
+                width={800}
+                height={800}
+                className="w-full h-[400px] object-contain transition-transform duration-500 hover:scale-105"
+              />
+            ) : displayMedia?.type === "video" ? (
+              <video
+                src={displayMedia.url}
+                controls
+                className="w-full h-[400px] rounded-2xl object-cover"
+              />
+            ) : null}
+          </div>
+          {/* <div className="bg-white rounded-2xl p-4 shadow-sm overflow-hidden">
+            {displayMedia?.type === "image" ? (
+              <Image
+                src={cloudinaryDetailImage(displayMedia.url, "detail")}
                 alt={product.name}
                 width={800}
                 height={800}
@@ -185,20 +241,23 @@ export function ProductDetailUI({
               />
             ) : (
               <video
-                src={activeMedia?.url}
+                src={displayMedia?.url}
                 controls
                 className="w-full h-[400px] rounded-2xl object-cover"
               />
             )}
-          </div>
+          </div> */}
 
           <div className="flex gap-3">
             {media.map((item, i) => (
               <button
                 key={i}
-                onClick={() => setActiveImage(i)}
+                onClick={() => {
+                  setSelectedMedia(item);
+                  setActiveMediaIndex(i);
+                }}
                 className={`border rounded-xl overflow-hidden relative ${
-                  activeImage === i
+                  activeMediaIndex === i
                     ? "border-black ring-2 ring-black"
                     : "border-gray-200"
                 }`}
@@ -276,7 +335,8 @@ export function ProductDetailUI({
                           : "border-gray-200"
                       }`}
                       style={{
-                        backgroundColor: variant?.colorHex || "#000",
+                        backgroundColor:
+                          variant?.colorHex || COLOR_MAP[color] || "#000",
                       }}
                       title={color}
                     >

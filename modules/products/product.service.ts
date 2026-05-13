@@ -1,5 +1,4 @@
 import ProductRepository from "./product.repository";
-import { Prisma } from "@prisma/client";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
 

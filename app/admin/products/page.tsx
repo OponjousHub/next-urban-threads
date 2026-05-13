@@ -21,7 +21,8 @@ export default async function ProductsPage({
     throw new Error("Default tenant not found");
   }
 
-  const query = searchParams.q || "";
+  const queryParams = await searchParams;
+  const query = queryParams.q || "";
   const category = searchParams.category;
   const { q, stock, featured, sort } = searchParams;
 

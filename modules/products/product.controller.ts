@@ -47,7 +47,7 @@ export default class ProductController {
       flash,
       videos,
     } = parsed.data;
-
+    console.log("CONTROLLER VIDEOS", videos);
     const categoryExists = await prisma.category.findUnique({
       where: { id: category },
     });
@@ -78,7 +78,7 @@ export default class ProductController {
       },
       tenant.id,
     );
-
+    console.log("CREATED PRODUCT WITH VIDEOS", product);
     // if (!colours || !sizes) return null;
     if (variants?.length) {
       await prisma.productVariant.createMany({

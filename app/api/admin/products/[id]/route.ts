@@ -35,6 +35,7 @@ export async function PATCH(
       stock,
       featured,
       flash,
+      videos,
       variants,
     } = body;
 
@@ -53,6 +54,7 @@ export async function PATCH(
         colours,
         stock,
         featured,
+        videos,
         isFlashDeal: flash,
       },
     });
