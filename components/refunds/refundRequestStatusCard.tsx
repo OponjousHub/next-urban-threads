@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   order: any;
@@ -9,6 +10,7 @@ type Props = {
 const steps = ["REQUESTED", "PROCESSING", "REFUNDED", "FAILED"];
 
 export default function RefundRequestStatus({ order }: Props) {
+  const { tenant } = useTenant();
   const refunds = order?.refundRequests ?? order?.refundRequest ?? [];
 
   if (!refunds.length) return null;
@@ -116,13 +118,15 @@ export default function RefundRequestStatus({ order }: Props) {
 
                 <div className="flex gap-4 text-sm text-gray-700">
                   <p>
-                    <span className="font-medium">Requested:</span> $
+                    <span className="font-medium">Requested:</span>
+                    {tenant.currency}
                     {refund.requestedAmount}
                   </p>
 
                   {refund.approvedAmount && (
                     <p>
-                      <span className="font-medium">Approved:</span> $
+                      <span className="font-medium">Approved:</span>
+                      {tenant.currency}
                       {refund.approvedAmount}
                     </p>
                   )}
