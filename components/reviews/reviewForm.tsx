@@ -131,7 +131,7 @@ export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
         <Button
           onClick={handleSubmit}
           disabled={loading}
-          className="min-w-[140px]"
+          className="min-w-[140px] text-white"
         >
           {loading
             ? existReview
