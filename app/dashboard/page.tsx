@@ -12,7 +12,6 @@ export default async function UserDashboard() {
   const userId = await getLoggedInUserId();
   const tenant = await getDefaultTenant();
   const currentSessionId = await getCurrentSessionId();
-  const auth = await getAuthPayload();
   if (currentSessionId) {
     await touchSession(currentSessionId);
   }

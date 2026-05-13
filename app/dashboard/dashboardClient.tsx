@@ -6,6 +6,7 @@ import { ShoppingBag, Package, CreditCard, User, MapPin } from "lucide-react";
 import type { DashboardStats } from "@/types/dashboard";
 import SecurityCard from "@/components/security/security-card";
 import Link from "next/link";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type ShippingAddress = {
   fullName: string;
@@ -31,7 +32,7 @@ function DashboardClient({
 }) {
   const hasOrders = stats.recentOrders.length > 0;
   const shippingAddress = stats.defaultAddress as ShippingAddress | null;
-
+  const { tenant } = useTenant();
   const { user } = stats;
 
   function escapeRegExp(value: string) {
@@ -75,7 +76,7 @@ function DashboardClient({
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
-        <p className="text-gray-600">Welcome back to Urban Threads 👋</p>
+        <p className="text-gray-600"> {`Welcome back to ${tenant.name} 👋`}</p>
       </div>
 
       {/* Stats */}
@@ -105,7 +106,10 @@ function DashboardClient({
             <CreditCard className="h-8 w-8 text-black" />
             <div>
               <p className="text-sm text-gray-500">Total Spent</p>
-              <p className="text-2xl font-bold">${+stats.totalSpent}</p>
+              <p className="text-2xl font-bold">
+                {tenant.currency}
+                {+stats.totalSpent}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -140,7 +144,6 @@ function DashboardClient({
             ) : (
               stats.recentOrders.map((order) => {
                 const previewItems = order.items.slice(0, 2);
-                // const remaining = order.items.length - previewItems.length;
 
                 return (
                   <div
@@ -152,7 +155,6 @@ function DashboardClient({
                       {/* Product previews */}
                       <div className="flex items-center gap-2">
                         {previewItems.map((item: any) => {
-                          console.log(item);
                           return (
                             <img
                               key={item.id}
@@ -193,7 +195,8 @@ function DashboardClient({
                     {/* Right section: amount + action */}
                     <div className="flex items-center justify-between sm:flex-col sm:items-end">
                       <p className="font-semibold">
-                        ${Number(order.totalAmount).toFixed(2)}
+                        {tenant.currency}
+                        {Number(order.totalAmount).toFixed(2)}
                       </p>
                       <Link href={`${`/dashboard/order/${order.id}`}`}>
                         <Button

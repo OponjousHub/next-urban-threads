@@ -12,6 +12,7 @@ import { DialogTitle } from "@/components/ui/dialog";
 import RefundModal from "@/components/refunds/RefundModal";
 import { RefundRequest } from "@prisma/client";
 import RefundRequestStatus from "@/components/refunds/refundRequestStatusCard";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type OrderItem = {
   id: string;
@@ -38,6 +39,8 @@ type Order = {
 export default function OrderPage({ params }: { params: { orderId: string } }) {
   const { orderId } = useParams<{ orderId: string }>();
   const searchParams = useSearchParams();
+  const { tenant } = useTenant();
+
   const reference =
     searchParams.get("reference") ?? // Paystack
     searchParams.get("tx_ref") ?? // Flutterwave
@@ -195,8 +198,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
         </DialogContent>
       </Dialog>
       <main className="px-4 py-10">
-        {/* <Toaster position="top-right" /> */}
-
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold">Order Details</h1>
@@ -230,7 +231,8 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
               </span>
             </p>
             <p>
-              <span className="font-semibold">Total Amount:</span> $
+              <span className="font-semibold">Total Amount: </span>
+              {tenant.currency}
               {order.totalAmount}
             </p>
             <p>
@@ -263,12 +265,14 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                       Quantity: {item.quantity}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Price: ${item.product.price}
+                      Price: {tenant.currency}
+                      {item.product.price}
                     </p>
                   </div>
                   <div>
                     <p className="font-bold">
-                      ${item.product.price * item.quantity}
+                      {tenant.currency}
+                      {item.product.price * item.quantity}
                     </p>
 
                     {order.status === "DELIVERED" && (

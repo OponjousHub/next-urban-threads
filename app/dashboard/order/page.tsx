@@ -62,7 +62,8 @@ export default async function OrdersPage() {
               <div>
                 <p className="text-gray-500">Total</p>
                 <p className="font-medium">
-                  {order.totalAmount.toString()} {order.currency}
+                  {tenant.currency}
+                  {order.totalAmount.toString()}
                 </p>
               </div>
 
@@ -70,7 +71,7 @@ export default async function OrdersPage() {
                 <p className="text-gray-500">Status</p>
                 <span
                   className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
-                    order.status === "PAID"
+                    order.paymentStatus === "PAID"
                       ? "bg-green-100 text-green-700"
                       : "bg-yellow-100 text-yellow-700"
                   }`}
@@ -117,7 +118,7 @@ export default async function OrdersPage() {
                   View order
                 </Link>
 
-                {order.status !== "PAID" && (
+                {order.paymentStatus !== "PAID" && (
                   <Link
                     href={`/dashboard/orders/${order.id}`}
                     className="px-4 py-2 text-sm rounded border border-black text-black hover:bg-gray-100 text-center"

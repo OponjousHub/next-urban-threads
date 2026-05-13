@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Disable2FAModal from "../delete-2FA-modal";
 import RecoveryCodesModal from "../RecoveryCodesModal";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default function TwoFactorSection({
   twoFAStatus,
 }: {
-  twoFAStatus: boolean | undefined;
+  twoFAStatus: Boolean | undefined;
 }) {
   // const [showDisableModal, setShowDisableModal] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -16,6 +17,7 @@ export default function TwoFactorSection({
   const [loading, setLoading] = useState(false);
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const { tenant } = useTenant();
 
   useEffect(() => {
     setStatus(twoFAStatus);
@@ -116,48 +118,6 @@ export default function TwoFactorSection({
     }
   };
 
-  // const disable2FA = async () => {
-  //   if (!otp.trim()) {
-  //     return toast.error("Enter OTP", {
-  //       duration: 6000, // 6 seconds
-  //       style: {
-  //         border: "1px solid #4f46e5",
-  //         padding: "12px",
-  //         color: "#333",
-  //       },
-  //       iconTheme: {
-  //         primary: "#4f46e5",
-  //         secondary: "#fff",
-  //       },
-  //     });
-  //   }
-
-  //   const res = await fetch("/api/auth/2FA/disable", {
-  //     method: "POST",
-  //     body: JSON.stringify({ token: otp }),
-  //   });
-
-  //   if (!res.ok) {
-  //     const data = await res.json();
-  //     toast.error(data.message, {
-  //       duration: 6000, // 6 seconds
-  //       style: {
-  //         border: "1px solid #4f46e5",
-  //         padding: "12px",
-  //         color: "#333",
-  //       },
-  //       iconTheme: {
-  //         primary: "#4f46e5",
-  //         secondary: "#fff",
-  //       },
-  //     });
-  //     return;
-  //   }
-
-  //   toast.success("2FA Disabled");
-  //   window.location.reload();
-  // };
-
   return (
     <div className="border-t pt-4">
       <h3 className="font-medium">Two-Factor Authentication</h3>
@@ -181,8 +141,8 @@ export default function TwoFactorSection({
         <div className="mt-4 space-y-4">
           <img src={qrCode} />
           <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
-            If you previously enabled 2FA, please remove the old UrbanThreads
-            entry from your authenticator app before scanning.
+            {`If you previously enabled 2FA, please remove the old ${tenant.name}
+            entry from your authenticator app before scanning.`}
           </p>
 
           <input
