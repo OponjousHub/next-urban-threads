@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DialogTitle } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   order: any;
@@ -12,6 +13,7 @@ type Props = {
 
 export default function RefundModal({ order, onClose }: Props) {
   const router = useRouter();
+  const { tenant } = useTenant();
 
   const [selectedItems, setSelectedItems] = useState<any>({});
   const [reason, setReason] = useState("");
@@ -118,7 +120,8 @@ export default function RefundModal({ order, onClose }: Props) {
               <div className="flex-1">
                 <p>{item.product.name}</p>
                 <p className="text-sm text-gray-500">
-                  ₦{item.product.price} × {item.quantity}
+                  {tenant.currency}
+                  {item.product.price} × {item.quantity}
                 </p>
               </div>
 
@@ -164,7 +167,10 @@ export default function RefundModal({ order, onClose }: Props) {
       {/* TOTAL */}
       <div className="flex justify-between items-center">
         <span className="font-medium">Refund Total:</span>
-        <span className="text-lg font-bold">₦{totalRefund}</span>
+        <span className="text-lg font-bold">
+          {tenant.currency}
+          {totalRefund}
+        </span>
       </div>
 
       {/* ACTION */}
