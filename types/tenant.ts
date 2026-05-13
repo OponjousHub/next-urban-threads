@@ -6,6 +6,7 @@ export type Tenant = {
   heroSubtitle: string;
   heroCTA: string;
   logo: string;
+  currency: string;
   heroImage: string;
   heroTitle: string;
 };

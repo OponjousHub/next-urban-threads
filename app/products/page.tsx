@@ -9,6 +9,7 @@ import { cloudinaryImage } from "@/utils/cloudinary-url";
 import { ProductRating } from "@/utils/product-rating";
 import { ProductSkeleton } from "@/components/products/productSkeleton";
 import QuickViewModal from "@/components/products/quickViewModal";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Category = {
   id: string;
@@ -38,6 +39,7 @@ export default function AllProductsPage() {
   const searchQuery = searchParams.get("search");
   const pageParam = Number(searchParams.get("page") || "1");
   const params = new URLSearchParams();
+  const { tenant } = useTenant();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -339,7 +341,8 @@ export default function AllProductsPage() {
                   {/* PRICE */}
                   <div className="flex items-center justify-between mt-1">
                     <p className="text-lg font-bold text-[var(--color-primary)]">
-                      ₦{product.price.toLocaleString()}
+                      {tenant.currency}
+                      {product.price.toLocaleString()}
                     </p>
                   </div>
 

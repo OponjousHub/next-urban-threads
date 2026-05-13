@@ -5,10 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
 import type { Product } from "@/types/product";
+import { useTenant } from "@/store/tenant-provider-context";
 
 function Featured() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { tenant } = useTenant();
 
   useEffect(() => {
     async function loadFeatured() {
@@ -75,7 +77,8 @@ function Featured() {
                   </h3>
 
                   <p className="text-[var(--color-primary)] font-bold">
-                    ₦{product.price.toLocaleString()}
+                    {tenant.currency}
+                    {product.price.toLocaleString()}
                   </p>
 
                   <Link href={`/products/details/${product.id}`}>

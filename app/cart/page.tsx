@@ -52,7 +52,10 @@ export default function CartPage() {
                     <h3 className="text-lg font-medium text-gray-800">
                       {item.name}
                     </h3>
-                    <p className="text-gray-500">${item.price}</p>
+                    <p className="text-gray-500">
+                      {tenant.currency}
+                      {item.price}
+                    </p>
                   </div>
                 </div>
 
@@ -76,7 +79,8 @@ export default function CartPage() {
                   </div>
 
                   <p className="text-gray-800 font-semibold">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {tenant.currency}
+                    {(item.price * item.quantity).toFixed(2)}
                   </p>
 
                   <button
@@ -101,16 +105,25 @@ export default function CartPage() {
         <div className="space-y-3 text-gray-700">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>
+              {tenant.currency}
+              {subtotal.toFixed(2)}
+            </span>
           </div>
           <div className="flex justify-between">
             <span>Shipping</span>
-            <span>${shipping.toFixed(2)}</span>
+            <span>
+              {tenant.currency}
+              {shipping.toFixed(2)}
+            </span>
           </div>
           <hr className="my-3" />
           <div className="flex justify-between font-semibold text-gray-900 text-lg">
             <span>Total</span>
-            <span>${total.toFixed(2)}</span>
+            <span>
+              {tenant.currency}
+              {total.toFixed(2)}
+            </span>
           </div>
         </div>
         <Link href={"/checkout"}>

@@ -13,6 +13,7 @@ import { RatingSummary } from "@/components/reviews/ratingSummary";
 import { useRouter } from "next/navigation";
 import { useRecentlyViewed } from "./products/useRecentlyViewed";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useTenant } from "@/store/tenant-provider-context";
 import { cloudinaryVideo } from "@/app/lib/cloudinayVideoHelper";
 
 interface Props {
@@ -62,6 +63,7 @@ export function ProductDetailUI({
   } | null>(null);
   const { addToCart } = useCart();
   const router = useRouter();
+  const { tenant } = useTenant();
 
   useRecentlyViewed(product);
 
@@ -289,7 +291,8 @@ export function ProductDetailUI({
           />
 
           <p className="text-2xl font-bold text-[var(--color-primary)]">
-            ₦{displayPrice.toLocaleString()}
+            {tenant.currency}
+            {displayPrice.toLocaleString()}
           </p>
 
           {selectedVariant && (
@@ -527,7 +530,8 @@ export function ProductDetailUI({
 
                       {p.price && (
                         <p className="mt-2 font-semibold text-black">
-                          ₦{Number(p.price).toLocaleString()}
+                          {tenant.currency}
+                          {Number(p.price).toLocaleString()}
                         </p>
                       )}
                     </div>
@@ -552,7 +556,8 @@ export function ProductDetailUI({
             <div>
               <p className="text-sm font-medium">{product.name}</p>
               <p className="text-sm text-gray-500">
-                ₦{safePrice(product.price).toLocaleString()}
+                {tenant.currency}
+                {safePrice(product.price).toLocaleString()}
               </p>
             </div>
           </div>
