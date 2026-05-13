@@ -135,29 +135,110 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
 
   /* -------------------------------- HANDLE SELECT -------------------------------- */
 
+  // async function handleSelect(e: React.ChangeEvent<HTMLInputElement>) {
+  //   const files = e.target.files;
+
+  //   if (!files || files.length === 0) return;
+
+  //   // Set video size and type
+  //   const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+
+  //   const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+
+  //   const validFiles = Array.from(files).filter((file) => {
+  //     if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
+  //       toast.error(`${file.name} is not supported`);
+  //       return false;
+  //     }
+
+  //     if (file.size > MAX_VIDEO_SIZE) {
+  //       toast.error(`${file.name} exceeds 50MB`);
+  //       return false;
+  //     }
+
+  //     return true;
+  //   });
+
+  //   // Limit number of videos
+  //   if (videos.length + validFiles.length > 3) {
+  //     toast.error("Maximum 3 videos allowed");
+  //     return;
+  //   }
+
+  //   //Check video length
+
+  //   const newItems: UploadItem[] = validFiles.map((file) => ({
+  //     id: crypto.randomUUID(),
+  //     file,
+  //     progress: 0,
+  //     status: "queued",
+  //   }));
+
+  //   setQueue((prev) => [...prev, ...newItems]);
+
+  //   for (const item of newItems) {
+  //     await uploadSingle(item);
+  //   }
+
+  //   e.target.value = "";
+  // }
   async function handleSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
 
     if (!files || files.length === 0) return;
 
-    // Set video size and type
     const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+    const MAX_DURATION = 60; // seconds
 
     const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
 
-    const validFiles = Array.from(files).filter((file) => {
+    const validateVideoDuration = (file: File) => {
+      return new Promise<boolean>((resolve) => {
+        const video = document.createElement("video");
+
+        video.preload = "metadata";
+
+        video.onloadedmetadata = () => {
+          window.URL.revokeObjectURL(video.src);
+
+          if (video.duration > MAX_DURATION) {
+            toast.error(`${file.name} must be under ${MAX_DURATION} seconds`);
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        };
+
+        video.onerror = () => {
+          toast.error(`Could not read ${file.name}`);
+          resolve(false);
+        };
+
+        video.src = URL.createObjectURL(file);
+      });
+    };
+
+    const filesArray = Array.from(files);
+
+    const validFiles: File[] = [];
+
+    for (const file of filesArray) {
       if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
         toast.error(`${file.name} is not supported`);
-        return false;
+        continue;
       }
 
       if (file.size > MAX_VIDEO_SIZE) {
         toast.error(`${file.name} exceeds 50MB`);
-        return false;
+        continue;
       }
 
-      return true;
-    });
+      const isValidDuration = await validateVideoDuration(file);
+
+      if (isValidDuration) {
+        validFiles.push(file);
+      }
+    }
 
     // Limit number of videos
     if (videos.length + validFiles.length > 3) {

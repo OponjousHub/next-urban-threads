@@ -13,6 +13,7 @@ import { RatingSummary } from "@/components/reviews/ratingSummary";
 import { useRouter } from "next/navigation";
 import { useRecentlyViewed } from "./products/useRecentlyViewed";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { cloudinaryVideo } from "@/app/lib/cloudinayVideoHelper";
 
 interface Props {
   product: Product;
@@ -220,7 +221,6 @@ export function ProductDetailUI({
                 alt={product.name}
                 width={800}
                 height={800}
-                className="w-full h-[400px] object-contain transition-transform duration-500 hover:scale-105"
               />
             ) : displayMedia?.type === "video" ? (
               <video
