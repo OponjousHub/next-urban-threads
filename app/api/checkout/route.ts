@@ -116,6 +116,34 @@ export async function POST(req: NextRequest) {
       };
     });
 
+    for (const item of items) {
+      const product = await prisma.product.findUnique({
+        where: {
+          id: item.productId,
+          tenantId: tenant.id,
+        },
+        include: {
+          variants: true,
+        },
+      });
+
+      if (!product) {
+        throw new Error("Product not found");
+      }
+
+      const variant = product.variants.find((v) => v.id === item.variantId);
+
+      if (variant) {
+        if (item.quantity > variant.stock) {
+          throw new Error(`${product.name} only has ${variant.stock} left`);
+        }
+      } else {
+        if (item.quantity > product.stock) {
+          throw new Error(`${product.name} only has ${product.stock} left`);
+        }
+      }
+    }
+
     const paymentReference = crypto.randomUUID();
 
     const order = await prisma.order.create({

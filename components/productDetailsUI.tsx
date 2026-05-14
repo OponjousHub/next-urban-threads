@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { useRecentlyViewed } from "./products/useRecentlyViewed";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useTenant } from "@/store/tenant-provider-context";
-import { cloudinaryVideo } from "@/app/lib/cloudinayVideoHelper";
+// import { cloudinaryVideo } from "@/app/lib/cloudinayVideoHelper";
 
 interface Props {
   product: Product;
@@ -154,15 +154,23 @@ export function ProductDetailUI({
       return;
     }
 
+    // ✅ STOCK SAFETY
+    if (selectedVariant && quantity > selectedVariant.stock) {
+      toast.error(`Only ${selectedVariant.stock} available`);
+      return;
+    }
     addToCart({
       id: selectedVariant?.id || product.id,
+      productId: product.id,
       name: product.name,
       price: displayPrice,
       image: mainImage || product.images[0],
       quantity,
+      variantId: selectedVariant?.id,
+      stock: selectedVariant?.stock || product.stock,
+      variantColor: selectedColor || undefined,
+      variantSize: selectedSize || undefined,
     });
-
-    toast.success("Added to cart");
   };
 
   /* ---------------- RESET STATE AFTER SWITCHING ---------------- */
@@ -232,23 +240,6 @@ export function ProductDetailUI({
               />
             ) : null}
           </div>
-          {/* <div className="bg-white rounded-2xl p-4 shadow-sm overflow-hidden">
-            {displayMedia?.type === "image" ? (
-              <Image
-                src={cloudinaryDetailImage(displayMedia.url, "detail")}
-                alt={product.name}
-                width={800}
-                height={800}
-                className="w-full h-[400px] object-contain transition-transform duration-500 hover:scale-110"
-              />
-            ) : (
-              <video
-                src={displayMedia?.url}
-                controls
-                className="w-full h-[400px] rounded-2xl object-cover"
-              />
-            )}
-          </div> */}
 
           <div className="flex gap-3">
             {media.map((item, i) => (
@@ -398,7 +389,12 @@ export function ProductDetailUI({
               </button>
               <span>{quantity}</span>
               <button
-                onClick={() => setQuantity((q) => q + 1)}
+                onClick={() => {
+                  if (!selectedVariant) return;
+
+                  setQuantity((q) => Math.min(selectedVariant.stock, q + 1));
+                }}
+                disabled={!selectedVariant || quantity >= selectedVariant.stock}
                 className="px-3 py-1 border rounded"
               >
                 +
@@ -430,7 +426,11 @@ export function ProductDetailUI({
               <button
                 onClick={handleBuyButton}
                 className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg"
-                disabled={isOutOfStock}
+                disabled={
+                  isOutOfStock ||
+                  !selectedVariant ||
+                  quantity > selectedVariant.stock
+                }
               >
                 Buy Now
               </button>
@@ -439,6 +439,7 @@ export function ProductDetailUI({
             <button
               onClick={() => router.push("/login")}
               className="w-full bg-black text-white py-3 rounded-lg"
+              disabled={!selectedVariant || quantity >= selectedVariant.stock}
             >
               Login to purchase
             </button>
@@ -565,6 +566,7 @@ export function ProductDetailUI({
           <button
             onClick={handleAddToCart}
             className="bg-black text-white px-5 py-2 rounded-lg"
+            disabled={!selectedVariant || quantity >= selectedVariant.stock}
           >
             Add to Cart
           </button>

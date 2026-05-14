@@ -4,4 +4,10 @@ export interface CartItem {
   image: string;
   quantity: number;
   price: number;
+  stock: number;
+  productId: string;
+  // VARIANT
+  variantId?: string;
+  variantColor?: string;
+  variantSize?: string;
 }

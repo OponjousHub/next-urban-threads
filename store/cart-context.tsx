@@ -7,6 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import { CartItem } from "@/types/cart";
+import toast from "react-hot-toast";
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -44,22 +45,50 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
 
   // ✅ Add to Cart
   const addToCart = (item: CartItem) => {
+    let errorMessage = "";
+    let successMessage = "";
+
     setCartItems((prevItems) => {
       const existing = prevItems.find((p) => p.id === item.id);
 
       if (existing) {
+        const newQty = existing.quantity + (item.quantity || 1);
+
+        if (newQty > item.stock) {
+          errorMessage = `Only ${item.stock} available`;
+          return prevItems;
+        }
+
+        successMessage = "Cart updated";
+
         return prevItems.map((p) =>
-          p.id === item.id
-            ? {
-                ...p,
-                quantity: p.quantity + item.quantity,
-              }
-            : p,
+          p.id === item.id ? { ...p, quantity: newQty } : p,
         );
       }
 
-      return [...prevItems, item];
+      if (item.stock < 1) {
+        errorMessage = "Out of stock";
+        return prevItems;
+      }
+
+      successMessage = "Added to cart";
+
+      return [
+        ...prevItems,
+        {
+          ...item,
+          quantity: item.quantity || 1,
+        },
+      ];
     });
+
+    if (errorMessage) {
+      toast.error(errorMessage);
+    }
+
+    if (successMessage) {
+      toast.success(successMessage);
+    }
   };
 
   // ✅ Clear cart
@@ -75,15 +104,30 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
 
   // ✅ Update quantity
   const updateQuantity = (id: string, delta: number) => {
+    let errorMessage = "";
     setCartItems((prev) =>
       prev
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-            : item,
-        )
+        .map((item) => {
+          if (item.id !== id) return item;
+
+          const newQty = item.quantity + delta;
+
+          if (newQty > item.stock) {
+            errorMessage = `Only ${item.stock} in stock`;
+            // toast.error(`Only ${item.stock} in stock`);
+            return item;
+          }
+
+          return {
+            ...item,
+            quantity: Math.max(1, newQty),
+          };
+        })
         .filter((item) => item.quantity > 0),
     );
+    if (errorMessage) {
+      toast.error(errorMessage);
+    }
   };
 
   // ✅ Calculate subtotal correctly
@@ -93,7 +137,7 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   );
 
   if (isLoading) return null; // Return nothing during load to avoid Hook mismatch
-
+  console.log("CART ITEMS---------", cartItems);
   return (
     <CartContext.Provider
       value={{

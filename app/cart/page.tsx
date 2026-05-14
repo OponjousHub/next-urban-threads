@@ -23,6 +23,7 @@ export default function CartPage() {
   );
   const shipping = subtotal > 0 ? 10 : 0;
   const total = subtotal + shipping;
+  console.log("CART ITEMS", cartItems);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -41,20 +42,40 @@ export default function CartPage() {
                 key={item.id}
                 className="flex flex-col sm:flex-row items-center justify-between bg-white rounded-2xl shadow-sm p-4 border mb-4xl border-gray-100"
               >
-                <div className="relative flex flex-shrink-0 h-24 w-32 items-center space-x-4">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    className="rounded-lg object-cover"
-                  />
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-800">
-                      {item.name}
-                    </h3>
-                    <p className="text-gray-500">
+                <div className="flex items-center gap-4 min-w-0">
+                  <Link href={`/products/details/${item.productId}`}>
+                    <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </Link>
+
+                  <div className="min-w-0">
+                    <Link href={`/products/details/${item.productId}`}>
+                      <h3 className="text-base md:text-lg font-semibold text-gray-900 truncate">
+                        {item.name}
+                      </h3>
+                    </Link>
+
+                    {item.variantColor && (
+                      <p className="text-sm text-gray-500">
+                        Color: {item.variantColor}
+                      </p>
+                    )}
+
+                    {item.variantSize && (
+                      <p className="text-sm text-gray-500">
+                        Size: {item.variantSize}
+                      </p>
+                    )}
+
+                    <p className="text-sm font-medium text-gray-700 mt-1">
                       {tenant.currency}
-                      {item.price}
+                      {item.price.toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -97,7 +118,7 @@ export default function CartPage() {
       </div>
 
       {/* ORDER SUMMARY */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit">
+      <div className="sticky top-24 bg-white rounded-2xl shadow-sm border border-gray-100 p-5 h-fit">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Order Summary
         </h2>

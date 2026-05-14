@@ -348,7 +348,12 @@ export default function AllProductsPage() {
 
                   {/* ADD TO CART */}
                   <Link href={`/products/details/${product.id}`}>
-                    <button className="mt-3 w-full bg-black text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2">
+                    <button
+                      // disabled={
+                      //   isOutOfStock || quantity >= selectedVariant.stock
+                      // }
+                      className="mt-3 w-full bg-black text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2"
+                    >
                       <FiShoppingCart size={14} />
                       View Product
                     </button>
