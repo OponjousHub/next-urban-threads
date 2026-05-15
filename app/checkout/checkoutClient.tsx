@@ -6,6 +6,7 @@ import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 type ShippingAddress = {
   id: string;
@@ -24,6 +25,8 @@ type CheckoutItem = {
   price: number;
   image: string;
   quantity: number;
+  variantColor?: string;
+  variantSize?: string;
 };
 
 export default function CheckoutClient({
@@ -133,6 +136,7 @@ export default function CheckoutClient({
     try {
       const address = {
         fullName: formData.fullName,
+        email: formData.email,
         street: formData.street,
         postalCode: formData.postalCode,
         state: formData.state,
@@ -140,15 +144,6 @@ export default function CheckoutClient({
         country: formData.country,
         phone: formData.phone,
       };
-      // console.log(address)
-
-      console.log("SHOW SAVED EMAIL", {
-        items: orderItems,
-        shippingAddress: selectedAddressId ? null : address,
-        addressId: selectedAddressId,
-        paymentMethod: formData.paymentMethod,
-        email: formData.email,
-      });
 
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -222,9 +217,9 @@ export default function CheckoutClient({
                 {addresses.map((address) => (
                   <label
                     key={address.id}
-                    className={`flex gap-3 rounded-lg border p-4 cursor-pointer ${
+                    className={`flex gap-3 rounded-xl border p-4 cursor-pointer transition-all ${
                       selectedAddressId === address.id
-                        ? "border-[var(--color-primary)] bg-indigo-50"
+                        ? "border-[var(--color-primary)] bg-indigo-50 shadow-sm"
                         : ""
                     }`}
                   >
@@ -365,7 +360,7 @@ export default function CheckoutClient({
                   className="mb-4 w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     City
@@ -394,7 +389,8 @@ export default function CheckoutClient({
                     className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                   />
                 </div>
-
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Postal Code
@@ -422,7 +418,7 @@ export default function CheckoutClient({
                     className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                   />
                 </div>
-              </div>{" "}
+              </div>
             </div>
           )}
 
@@ -458,13 +454,18 @@ export default function CheckoutClient({
             disabled={isLoading}
             className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-medium py-3 rounded-xl transition"
           >
-            Place Order
+            {isLoading ? "Processing..." : "Place Order"}
           </button>
+          <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
+            <span>🔒 Secure Checkout</span>
+            <span>💳 Encrypted Payment</span>
+            <span>🚚 Fast Delivery</span>
+          </div>
         </form>
       </div>
 
       {/* ORDER SUMMARY */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit sticky top-24">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Order Summary
         </h2>
@@ -473,12 +474,35 @@ export default function CheckoutClient({
           {checkoutItems.map((item) => (
             <div
               key={item.id}
-              className="flex justify-between items-center border-b border-gray-100 pb-2"
+              className="flex items-center justify-between gap-4 border-b border-gray-100 pb-4"
             >
-              <span>
-                {item.name} × {item.quantity}
-              </span>
-              <span>${(item.price * item.quantity).toFixed(2)}</span>
+              <div className="flex items-center gap-3">
+                <div className="relative w-16 h-16 rounded-xl overflow-hidden border bg-gray-50">
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+
+                <div>
+                  <p className="font-medium text-gray-800">{item.name}</p>
+
+                  {(item.variantColor || item.variantSize) && (
+                    <p className="text-sm text-gray-500">
+                      {item.variantColor}{" "}
+                      {item.variantSize && `• ${item.variantSize}`}
+                    </p>
+                  )}
+
+                  <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                </div>
+              </div>
+
+              <p className="font-semibold text-gray-800">
+                ${(item.price * item.quantity).toFixed(2)}
+              </p>
             </div>
           ))}
 
@@ -497,6 +521,11 @@ export default function CheckoutClient({
             <span>Total</span>
             <span>${total.toFixed(2)}</span>
           </div>
+        </div>
+        <div className="mt-6 space-y-2 text-sm text-gray-500 border-t pt-4">
+          <p>🚚 Estimated delivery: 2–5 business days</p>
+          <p>↩️ 7-day return policy</p>
+          <p>🔒 Secure SSL encrypted checkout</p>
         </div>
       </div>
     </div>

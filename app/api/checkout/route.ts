@@ -144,6 +144,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    if (!email) {
+      return NextResponse.json(
+        { message: "Email is required" },
+        { status: 400 },
+      );
+    }
+
     const paymentReference = crypto.randomUUID();
 
     const order = await prisma.order.create({
@@ -152,7 +159,7 @@ export async function POST(req: NextRequest) {
         tenantId: tenant.id,
         shippingAddressId,
         totalAmount,
-        customerEmail: email,
+        customerEmail: email || shippingAddress?.email || "",
         currency,
         paymentProvider: providerKey,
         paymentMethod,
