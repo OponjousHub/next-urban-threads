@@ -21,9 +21,23 @@ export default async function OrderDetailsPage({
       items: {
         select: {
           id: true,
+
           quantity: true,
+
           price: true,
-          product: { select: { name: true, images: true } }, // fetch product name & image
+
+          image: true,
+
+          variantColor: true,
+
+          variantSize: true,
+
+          product: {
+            select: {
+              name: true,
+              images: true,
+            },
+          },
         },
       },
     },
@@ -46,9 +60,12 @@ export default async function OrderDetailsPage({
     items: order.items.map((item) => ({
       id: item.id,
       name: item.product?.name ?? "Unknown product",
-      image: item.product?.images?.[0] ?? "/placeholder.png",
+      image: item.image || item.product?.images?.[0] || "/placeholder.png",
       quantity: Number(item.quantity),
       price: Number(item.price),
+      variantImage: item.image,
+      variantColor: item.variantColor,
+      variantSize: item.variantSize,
     })),
   };
 
