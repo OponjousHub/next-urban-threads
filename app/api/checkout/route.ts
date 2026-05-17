@@ -59,9 +59,11 @@ export async function POST(req: NextRequest) {
       }
 
       if (saveAddress) {
+        const { email: _email, ...addressData } = shippingAddress;
+
         const newAddress = await prisma.address.create({
           data: {
-            ...shippingAddress,
+            ...addressData,
             userId,
             tenantId: tenant.id,
             user: {
@@ -74,12 +76,14 @@ export async function POST(req: NextRequest) {
         shippingAddressId = newAddress.id;
       } else {
         // ❗ Create a TEMP address (not saved)
+        const { email: _email, ...addressData } = shippingAddress;
+
         const tempAddress = await prisma.address.create({
           data: {
-            ...shippingAddress,
+            ...addressData,
             userId,
             tenantId: tenant.id,
-            isTemporary: true, // optional but recommended
+            isTemporary: true,
           },
         });
 
@@ -94,8 +98,15 @@ export async function POST(req: NextRequest) {
     // 4️⃣ Fetch products
     const products = await prisma.product.findMany({
       where: {
-        id: { in: items.map((item: any) => item.productId) },
+        id: {
+          in: items.map((item: any) => item.productId).filter(Boolean),
+        },
+
         tenantId: tenant.id,
+      },
+
+      include: {
+        variants: true,
       },
     });
 
@@ -108,11 +119,24 @@ export async function POST(req: NextRequest) {
       const lineTotal = product.price.mul(item.quantity);
       totalAmount = totalAmount.plus(lineTotal);
 
+      const variant = product.variants.find((v) => v.id === item.variantId);
+
       return {
         productId: product.id,
+
         quantity: item.quantity,
+
         price: product.price,
+
         tenantId: tenant.id,
+
+        variantId: variant?.id,
+
+        variantColor: variant?.color,
+
+        variantSize: variant?.size,
+
+        image: variant?.image || product.images?.[0],
       };
     });
 

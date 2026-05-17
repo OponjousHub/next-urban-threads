@@ -23,6 +23,9 @@ type OrderItem = {
     images: string[];
   };
   quantity: number;
+  image: string | undefined;
+  variantColor: string | undefined;
+  variantSize: string | undefined;
 };
 
 type Order = {
@@ -255,12 +258,17 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
               return (
                 <li key={item.id} className="flex items-center gap-4">
                   <img
-                    src={item.product.images[0]}
+                    src={item.image || item.product.images[0]}
                     alt={item.product.name}
                     className="w-16 h-16 rounded-md object-cover"
                   />
                   <div className="flex-1">
                     <p className="font-semibold">{item.product.name}</p>
+                    {item.variantColor && item.variantSize && (
+                      <p className="text-sm text-gray-500">
+                        {item.variantColor} / {item.variantSize}
+                      </p>
+                    )}
                     <p className="text-sm text-gray-600">
                       Quantity: {item.quantity}
                     </p>

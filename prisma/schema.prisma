@@ -132,6 +132,12 @@ model OrderItem {
   quantity  Int
   price     Decimal @db.Decimal(10, 2)
   tenantId  String
+
+  variantId    String?
+  variantColor String?
+  variantSize  String?
+  image        String?
+
   order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
 }

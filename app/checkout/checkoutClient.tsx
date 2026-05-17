@@ -27,6 +27,8 @@ type CheckoutItem = {
   quantity: number;
   variantColor?: string;
   variantSize?: string;
+  productId: string;
+  variantId?: string;
 };
 
 export default function CheckoutClient({
@@ -110,7 +112,8 @@ export default function CheckoutClient({
   };
 
   const orderItems = checkoutItems.map((item) => ({
-    productId: String(item.id), // must match Product.id in DB
+    productId: item.productId,
+    variantId: item.variantId,
     quantity: item.quantity,
   }));
 

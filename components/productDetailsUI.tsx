@@ -14,7 +14,6 @@ import { useRouter } from "next/navigation";
 import { useRecentlyViewed } from "./products/useRecentlyViewed";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useTenant } from "@/store/tenant-provider-context";
-// import { cloudinaryVideo } from "@/app/lib/cloudinayVideoHelper";
 
 interface Props {
   product: Product;
@@ -160,14 +159,19 @@ export function ProductDetailUI({
       return;
     }
     addToCart({
-      id: selectedVariant?.id || product.id,
+      id: crypto.randomUUID(),
+
       productId: product.id,
+
+      variantId: selectedVariant?.id,
+
       name: product.name,
       price: displayPrice,
       image: mainImage || product.images[0],
       quantity,
-      variantId: selectedVariant?.id,
+
       stock: selectedVariant?.stock || product.stock,
+
       variantColor: selectedColor || undefined,
       variantSize: selectedSize || undefined,
     });
@@ -207,11 +211,25 @@ export function ProductDetailUI({
 
   const handleBuyButton = () => {
     const buyNowItem = {
-      id: selectedVariant?.id || product.id,
+      id: crypto.randomUUID(),
+
+      productId: product.id,
+
+      variantId: selectedVariant?.id,
+
       name: product.name,
-      price: displayPrice,
+
       image: mainImage || product.images[0],
+
+      price: displayPrice,
+
       quantity,
+
+      stock: selectedVariant?.stock || product.stock,
+
+      variantColor: selectedColor || undefined,
+
+      variantSize: selectedSize || undefined,
     };
 
     localStorage.setItem("buyNow", JSON.stringify([buyNowItem]));
