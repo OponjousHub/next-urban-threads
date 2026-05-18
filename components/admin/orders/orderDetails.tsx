@@ -83,7 +83,7 @@ export default function OrderDetails({ order }: { order: Order }) {
       <h1 className="text-2xl font-semibold">Order #{localOrder.id}</h1>
 
       <div className="flex flex-col md:flex-row md:justify-between gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 m-4">
           <div className="h-12 w-12 rounded-full bg-black text-white flex items-center justify-center font-semibold">
             {localOrder.customer?.name?.charAt(0)}
           </div>
@@ -162,65 +162,52 @@ export default function OrderDetails({ order }: { order: Order }) {
 
       <div className="bg-white rounded-xl shadow p-4">
         <h2 className="font-medium text-lg mb-3">Items</h2>
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="bg-gray-50 text-gray-600 uppercase text-sm">
-              <th className="py-2 px-3 text-left">Item</th>
-              <th className="py-2 px-3">Qty</th>
-              <th className="py-2 px-3">Price</th>
-              <th className="py-2 px-3">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            <div className="space-y-4">
-              {order.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
-                >
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={item.variantImage || item.image}
-                      alt={item.name}
-                      className="h-20 w-20 rounded-xl object-cover"
-                    />
 
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {item.name}
-                      </h3>
+        <div className="space-y-4">
+          {order.items.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+            >
+              <div className="flex items-center gap-4">
+                <img
+                  src={item.variantImage || item.image}
+                  alt={item.name}
+                  className="h-20 w-20 rounded-xl object-cover"
+                />
 
-                      {(item.variantColor || item.variantSize) && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
-                            {item.variantColor}
-                          </span>
+                <div>
+                  <h3 className="font-semibold text-gray-900">{item.name}</h3>
 
-                          {item.variantColor && item.variantSize && " / "}
-                          {item.variantSize}
-                        </p>
-                      )}
+                  {(item.variantColor || item.variantSize) && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                        {item.variantColor}
+                      </span>
 
-                      <p className="text-sm text-gray-400 mt-1">
-                        Qty: {item.quantity}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <p className="font-semibold">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {item.variantColor && item.variantSize && " / "}
+                      {item.variantSize}
                     </p>
+                  )}
 
-                    <p className="text-sm text-gray-500">
-                      ${item.price.toFixed(2)} each
-                    </p>
-                  </div>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Qty: {item.quantity}
+                  </p>
                 </div>
-              ))}
+              </div>
+
+              <div className="text-right">
+                <p className="font-semibold">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </p>
+
+                <p className="text-sm text-gray-500">
+                  ${item.price.toFixed(2)} each
+                </p>
+              </div>
             </div>
-          </tbody>
-        </table>
+          ))}
+        </div>
       </div>
     </div>
   );

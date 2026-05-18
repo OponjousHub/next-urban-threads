@@ -1,9 +1,8 @@
 import { prisma } from "@/utils/prisma";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { DashboardStats } from "@/types/dashboard";
 
-// export async function getUserDashboardStats(userId: string) {
 export async function getUserDashboardStats(
   userId: string,
 ): Promise<DashboardStats> {
@@ -39,7 +38,7 @@ export async function getUserDashboardStats(
       where: {
         userId,
         tenantId: tenant.id,
-        status: OrderStatus.PAID,
+        paymentStatus: PaymentStatus.PAID,
       },
       _sum: {
         totalAmount: true,
@@ -108,25 +107,32 @@ export async function getUserDashboardStats(
       createdAt: order.createdAt.toISOString(), // ✅ Date → string
       totalAmount: order.totalAmount.toNumber(), // ✅ Decimal → number
 
-      items: order.items.map((item) => ({
-        id: item.id,
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.price.toNumber(),
-        product: item.product
-          ? {
-              name: item.product.name,
-              images: item.product.images,
-            }
-          : null,
-      })),
+      items: order.items.map((item) => {
+        return {
+          id: item.id,
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.price.toNumber(),
+
+          variantImage: item.image || null,
+          variantColor: item.variantColor || null,
+          variantSize: item.variantSize || null,
+
+          product: item.product
+            ? {
+                name: item.product.name,
+                images: item.product.images,
+              }
+            : null,
+        };
+      }),
     };
   });
 
   return {
     totalOrders,
     pendingOrders,
-    totalSpent: totalSpentAgg._sum.totalAmount?.toNumber() ?? 0,
+    totalSpent: totalSpentAgg._sum?.totalAmount?.toNumber() ?? 0,
     recentOrders: serializedRecentOrders,
     defaultAddress,
     user,

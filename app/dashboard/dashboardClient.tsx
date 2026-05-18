@@ -158,7 +158,11 @@ function DashboardClient({
                           return (
                             <img
                               key={item.id}
-                              src={item.product.images?.[0]}
+                              src={
+                                item.variantImage ||
+                                item.product.images?.[0] ||
+                                "/placeholder.png"
+                              }
                               alt={item.product.name}
                               className="h-12 w-12 rounded-md object-cover border"
                             />
