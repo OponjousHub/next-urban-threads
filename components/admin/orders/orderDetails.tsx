@@ -96,14 +96,13 @@ export default function OrderDetails({ order }: { order: Order }) {
             </p>
           </div>
         </div>
-
         <div className="bg-white rounded-xl shadow p-4 w-full md:w-1/3">
           <h2 className="font-medium text-lg mb-2">Order Info</h2>
           <p>
             <span className="font-medium">Date:</span>{" "}
             {new Date(localOrder.createdAt).toLocaleString()}
           </p>
-          <p>
+          <div>
             <p className="font-medium">
               Status:
               <span
@@ -121,7 +120,7 @@ export default function OrderDetails({ order }: { order: Order }) {
                 {localOrder.status}
               </span>
             </p>
-          </p>
+          </div>
           <p>
             <span className="font-medium">Payment:</span>{" "}
             {localOrder.paymentStatus}
@@ -130,7 +129,6 @@ export default function OrderDetails({ order }: { order: Order }) {
             <span className="font-medium">Total:</span> $
             {localOrder.totalAmount.toFixed(2)}
           </p>
-
           <div className="mt-3 flex gap-2 flex-wrap">
             {localOrder.status !== "DELIVERED" && (
               <button
@@ -156,8 +154,51 @@ export default function OrderDetails({ order }: { order: Order }) {
             >
               Track Order
             </button>
-          </div>
+          </div>{" "}
+        </div>{" "}
+      </div>
+
+      {/* QUICK ACTIONS */}
+      <div className="bg-white rounded-xl shadow p-4">
+        <h2 className="font-medium text-lg mb-4">Quick Actions</h2>
+
+        <div className="flex flex-wrap gap-3">
+          {/* Copy Order ID */}
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(localOrder.id);
+
+              toast.custom(
+                <AdminToast
+                  type="success"
+                  title="Copied"
+                  description="Order ID copied to clipboard"
+                />,
+                { duration: 4000 },
+              );
+            }}
+            className="px-4 py-2 rounded-lg border hover:bg-gray-50 transition"
+          >
+            Copy Order ID
+          </button>
+
+          {/* Contact Customer */}
+          <a
+            href={`mailto:${localOrder.customer?.email}`}
+            className="px-4 py-2 rounded-lg border hover:bg-gray-50 transition"
+          >
+            Contact Customer
+          </a>
+
+          {/* Print Invoice */}
+          <button
+            onClick={() => window.print()}
+            className="px-4 py-2 rounded-lg border hover:bg-gray-50 transition"
+          >
+            Print Invoice
+          </button>
         </div>
+        {/* </div> */}
       </div>
 
       <div className="bg-white rounded-xl shadow p-4">
