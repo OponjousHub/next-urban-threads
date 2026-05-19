@@ -6,9 +6,9 @@ interface InvoiceItem {
   quantity: number;
   price: number;
   image?: string;
-  variantImage?: string;
-  variantColor?: string;
-  variantSize?: string;
+  variantImage?: string | null;
+  variantColor?: string | null;
+  variantSize?: string | null;
 }
 
 interface InvoiceData {
@@ -18,8 +18,8 @@ interface InvoiceData {
   totalAmount: number;
 
   customer: {
-    name: string;
-    email: string;
+    name: string | null;
+    email: string | null;
   } | null;
 
   items: InvoiceItem[];
@@ -85,7 +85,7 @@ export default function InvoiceTemplate({ order }: { order: InvoiceData }) {
             {order.items.map((item) => (
               <tr key={item.id} className="border-b">
                 <td className="py-5">
-                  <div className="flex gap-3 items-center">
+                  <div className="item">
                     <img
                       src={item.variantImage || item.image}
                       className="w-12 h-12 rounded object-cover"
@@ -95,7 +95,7 @@ export default function InvoiceTemplate({ order }: { order: InvoiceData }) {
                       <p className="font-medium">{item.name}</p>
 
                       {(item.variantColor || item.variantSize) && (
-                        <p className="text-sm text-gray-500">
+                        <p className="variant">
                           {item.variantColor}
                           {item.variantColor && item.variantSize && " / "}
                           {item.variantSize}
@@ -119,11 +119,12 @@ export default function InvoiceTemplate({ order }: { order: InvoiceData }) {
       </div>
 
       {/* TOTAL */}
-      <div className="flex justify-end mt-8">
+      <div className="summary">
+        {" "}
         <div className="w-72">
-          <div className="flex justify-between border-t pt-4">
+          <div className="summary-row total">
+            {" "}
             <span className="font-bold text-lg">Total</span>
-
             <span className="font-bold text-lg">
               ${order.totalAmount.toFixed(2)}
             </span>

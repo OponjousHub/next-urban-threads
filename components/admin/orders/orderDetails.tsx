@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
-import InvoiceTemplate from "@/components/admin/orders/invoice-template";
+import InvoiceTemplate from "./invoice-template";
 import { useState } from "react";
 
 interface OrderItem {
@@ -76,6 +76,122 @@ export default function OrderDetails({ order }: { order: Order }) {
       setLoading(false);
     }
   }
+
+  const printInvoice = () => {
+    const invoice = document.getElementById("invoice");
+
+    if (!invoice) return;
+
+    const printWindow = window.open("", "_blank", "width=1000,height=900");
+
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>Invoice</title>
+
+      <style>
+
+      body{
+        font-family: Inter, Arial, sans-serif;
+        padding:30px;
+        color:#111827;
+        background:white;
+      }
+
+      .invoice-container{
+        max-width:800px;
+        margin:auto;
+      }
+
+      h1,h2,h3,p{
+        margin:0;
+      }
+
+      img{
+        width:50px !important;
+        height:50px !important;
+        object-fit:cover;
+        border-radius:8px;
+      }
+
+      table{
+        width:100%;
+        border-collapse:collapse;
+        margin-top:30px;
+      }
+
+      th{
+        background:#f8fafc;
+        text-align:left;
+        padding:12px;
+        font-size:14px;
+      }
+
+      td{
+        padding:14px 12px;
+        border-bottom:1px solid #e5e7eb;
+        vertical-align:middle;
+      }
+
+      .item{
+        display:flex;
+        gap:12px;
+        align-items:center;
+      }
+
+      .variant{
+        font-size:12px;
+        color:#6b7280;
+      }
+
+      .summary{
+        width:300px;
+        margin-left:auto;
+        margin-top:30px;
+      }
+
+      .summary-row{
+        display:flex;
+        justify-content:space-between;
+        padding:8px 0;
+      }
+
+      .total{
+        font-size:18px;
+        font-weight:bold;
+        border-top:2px solid #111;
+        padding-top:15px;
+      }
+
+      .footer{
+        text-align:center;
+        margin-top:60px;
+        color:#6b7280;
+        font-size:13px;
+      }
+
+      </style>
+    </head>
+
+    <body>
+      <div class="invoice-container">
+      ${invoice.innerHTML}
+      </div>
+    </body>
+  </html>
+`);
+
+    printWindow.document.close();
+
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }, 300);
+  };
 
   if (!localOrder) return <p className="p-6 text-gray-500">Loading...</p>;
 
@@ -249,7 +365,7 @@ export default function OrderDetails({ order }: { order: Order }) {
 
                 {/* PRINT INVOICE */}
                 <button
-                  onClick={() => window.print()}
+                  onClick={printInvoice}
                   className="group rounded-2xl border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-gray-300 hover:shadow-md"
                 >
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 transition group-hover:bg-black group-hover:text-white">
@@ -432,181 +548,9 @@ export default function OrderDetails({ order }: { order: Order }) {
           </div>
         </div>
       </div>
+      <div className="hidden">
+        <InvoiceTemplate order={localOrder} />
+      </div>
     </div>
   );
-
-  // return (
-  //   <div className="p-6 space-y-6">
-  //     <h1 className="text-2xl font-semibold">Order #{localOrder.id}</h1>
-
-  //     <div className="flex flex-col md:flex-row md:justify-between gap-4">
-  //       <div className="flex items-center gap-3 m-4">
-  //         <div className="h-12 w-12 rounded-full bg-black text-white flex items-center justify-center font-semibold">
-  //           {localOrder.customer?.name?.charAt(0)}
-  //         </div>
-
-  //         <div>
-  //           <p className="font-semibold">{localOrder.customer?.name}</p>
-
-  //           <p className="text-sm text-gray-500">
-  //             {localOrder.customer?.email}
-  //           </p>
-  //         </div>
-  //       </div>
-  //       <div className="bg-white rounded-xl shadow p-4 w-full md:w-1/3">
-  //         <h2 className="font-medium text-lg mb-2">Order Info</h2>
-  //         <p>
-  //           <span className="font-medium">Date:</span>{" "}
-  //           {new Date(localOrder.createdAt).toLocaleString()}
-  //         </p>
-  //         <div>
-  //           <p className="font-medium">
-  //             Status:
-  //             <span
-  //               className={`px-3 py-1 rounded-full text-xs font-semibold
-  // ${
-  //   localOrder.status === "DELIVERED"
-  //     ? "bg-green-100 text-green-700"
-  //     : localOrder.status === "PENDING"
-  //       ? "bg-yellow-100 text-yellow-700"
-  //       : localOrder.status === "CANCELLED"
-  //         ? "bg-red-100 text-red-700"
-  //         : "bg-blue-100 text-blue-700"
-  // }`}
-  //             >
-  //               {localOrder.status}
-  //             </span>
-  //           </p>
-  //         </div>
-  //         <p>
-  //           <span className="font-medium">Payment:</span>{" "}
-  //           {localOrder.paymentStatus}
-  //         </p>
-  //         <p>
-  //           <span className="font-medium">Total:</span> $
-  //           {localOrder.totalAmount.toFixed(2)}
-  //         </p>
-  //         <div className="mt-3 flex gap-2 flex-wrap">
-  //           {localOrder.status !== "DELIVERED" && (
-  //             <button
-  //               onClick={() => updateStatus("DELIVERED")}
-  //               disabled={loading}
-  //               className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
-  //             >
-  //               Mark as Delivered
-  //             </button>
-  //           )}
-  //           {localOrder.status !== "CANCELLED" && (
-  //             <button
-  //               onClick={() => updateStatus("CANCELLED")}
-  //               disabled={loading}
-  //               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
-  //             >
-  //               Cancel Order
-  //             </button>
-  //           )}
-  //           <button
-  //             onClick={() => router.push(`/admin/orders/${order.id}/tracking`)}
-  //             className="bg-blue-600 text-white px-4 py-2 rounded mt-2 w-full"
-  //           >
-  //             Track Order
-  //           </button>
-  //         </div>{" "}
-  //       </div>{" "}
-  //     </div>
-
-  //     {/* QUICK ACTIONS */}
-  //     <div className="bg-white rounded-xl shadow p-4">
-  //       <h2 className="font-medium text-lg mb-4">Quick Actions</h2>
-
-  //       <div className="flex flex-wrap gap-3">
-  //         {/* Copy Order ID */}
-  //         <button
-  //           onClick={() => {
-  //             navigator.clipboard.writeText(localOrder.id);
-
-  //             toast.custom(
-  //               <AdminToast
-  //                 type="success"
-  //                 title="Copied"
-  //                 description="Order ID copied to clipboard"
-  //               />,
-  //               { duration: 4000 },
-  //             );
-  //           }}
-  //           className="px-4 py-2 rounded-lg border hover:bg-gray-50 transition"
-  //         >
-  //           Copy Order ID
-  //         </button>
-
-  //         {/* Contact Customer */}
-  //         <a
-  //           href={`mailto:${localOrder.customer?.email}`}
-  //           className="px-4 py-2 rounded-lg border hover:bg-gray-50 transition"
-  //         >
-  //           Contact Customer
-  //         </a>
-
-  //         {/* Print Invoice */}
-  //         <button
-  //           onClick={() => window.print()}
-  //           className="px-4 py-2 rounded-lg border hover:bg-gray-50 transition"
-  //         >
-  //           Print Invoice
-  //         </button>
-  //       </div>
-  //       {/* </div> */}
-  //     </div>
-
-  //     <div className="bg-white rounded-xl shadow p-4">
-  //       <h2 className="font-medium text-lg mb-3">Items</h2>
-
-  //       <div className="space-y-4">
-  //         {order.items.map((item) => (
-  //           <div
-  //             key={item.id}
-  //             className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
-  //           >
-  //             <div className="flex items-center gap-4">
-  //               <img
-  //                 src={item.variantImage || item.image}
-  //                 alt={item.name}
-  //                 className="h-20 w-20 rounded-xl object-cover"
-  //               />
-
-  //               <div>
-  //                 <h3 className="font-semibold text-gray-900">{item.name}</h3>
-
-  //                 {(item.variantColor || item.variantSize) && (
-  //                   <p className="text-sm text-gray-500 mt-1">
-  //                     <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
-  //                       {item.variantColor}
-  //                     </span>
-
-  //                     {item.variantColor && item.variantSize && " / "}
-  //                     {item.variantSize}
-  //                   </p>
-  //                 )}
-
-  //                 <p className="text-sm text-gray-400 mt-1">
-  //                   Qty: {item.quantity}
-  //                 </p>
-  //               </div>
-  //             </div>
-
-  //             <div className="text-right">
-  //               <p className="font-semibold">
-  //                 ${(item.price * item.quantity).toFixed(2)}
-  //               </p>
-
-  //               <p className="text-sm text-gray-500">
-  //                 ${item.price.toFixed(2)} each
-  //               </p>
-  //             </div>
-  //           </div>
-  //         ))}
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
 }
