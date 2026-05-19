@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
+import InvoiceTemplate from "@/components/admin/orders/invoice-template";
 import { useState } from "react";
 
 interface OrderItem {
