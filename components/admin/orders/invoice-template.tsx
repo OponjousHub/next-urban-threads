@@ -43,7 +43,7 @@ export default function InvoiceTemplate({ order }: { order: InvoiceData }) {
         <div className="text-right">
           <h2 className="font-bold text-xl">{tenant.name}</h2>
 
-          <p className="text-sm text-gray-500">support@urbanthreads.com</p>
+          <p className="text-sm text-gray-500">{tenant.email}</p>
         </div>
       </div>
 
