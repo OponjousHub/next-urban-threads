@@ -1,5 +1,7 @@
 "use client";
 
+import { useTenant } from "@/store/tenant-provider-context";
+
 interface InvoiceItem {
   id: string;
   name: string;
@@ -26,6 +28,8 @@ interface InvoiceData {
 }
 
 export default function InvoiceTemplate({ order }: { order: InvoiceData }) {
+  const { tenant } = useTenant();
+
   return (
     <div id="invoice" className="bg-white p-10 text-black max-w-4xl mx-auto">
       {/* HEADER */}
@@ -37,7 +41,7 @@ export default function InvoiceTemplate({ order }: { order: InvoiceData }) {
         </div>
 
         <div className="text-right">
-          <h2 className="font-bold text-xl">Urban Threads</h2>
+          <h2 className="font-bold text-xl">{tenant.name}</h2>
 
           <p className="text-sm text-gray-500">support@urbanthreads.com</p>
         </div>

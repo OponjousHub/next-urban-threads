@@ -62,7 +62,6 @@ function DashboardClient({
   }
 
   const previewItems = stats.recentOrders.slice(0, 2);
-  // const remaining = stats.recentOrders.length - previewItems.length;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 mx-24">
