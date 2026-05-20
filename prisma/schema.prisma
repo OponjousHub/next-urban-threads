@@ -312,6 +312,7 @@ model Contact {
   message   String
   tenantId  String
   createdAt DateTime    @default(now())
+  status    ContactStatus   @default(UNREAD)
   priority  Priority    @default(NORMAL)
   tag       ContactTag?
   updatedAt DateTime    @updatedAt
@@ -496,6 +497,12 @@ enum TrackingEventType {
   COURIER_UPDATE
   NOTE
   SYSTEM
+}
+
+enum ContactStatus {
+  UNREAD
+  READ
+  RESOLVED
 }
 
 enum RefundStatus {

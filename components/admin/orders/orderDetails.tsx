@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import InvoiceTemplate from "./invoice-template";
 import { useState } from "react";
+import { useTenant } from "@/store/tenant-provider-context";
 
 interface OrderItem {
   id: string;
@@ -43,6 +44,7 @@ export default function OrderDetails({ order }: { order: Order }) {
   const [localOrder, setLocalOrder] = useState(order);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { tenant } = useTenant();
 
   async function updateStatus(newStatus: string) {
     if (!localOrder) return;
@@ -271,7 +273,8 @@ export default function OrderDetails({ order }: { order: Order }) {
               </p>
 
               <p className="mt-1 text-2xl font-bold text-gray-900">
-                ${localOrder.totalAmount.toFixed(2)}
+                {tenant.currency}
+                {localOrder.totalAmount.toFixed(2)}
               </p>
             </div>
           </div>
@@ -441,7 +444,8 @@ export default function OrderDetails({ order }: { order: Order }) {
                 <span className="text-sm text-gray-500">Total</span>
 
                 <span className="text-xl font-bold text-gray-900">
-                  ${localOrder.totalAmount.toFixed(2)}
+                  {tenant.currency}
+                  {localOrder.totalAmount.toFixed(2)}
                 </span>
               </div>
             </div>
@@ -527,7 +531,8 @@ export default function OrderDetails({ order }: { order: Order }) {
                     )}
 
                     <p className="mt-3 text-sm text-gray-500">
-                      ${item.price.toFixed(2)} each
+                      {tenant.currency}
+                      {item.price.toFixed(2)} each
                     </p>
                   </div>
                 </div>
@@ -535,7 +540,8 @@ export default function OrderDetails({ order }: { order: Order }) {
                 {/* RIGHT */}
                 <div className="text-left sm:text-right">
                   <p className="text-2xl font-bold text-gray-900">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {tenant.currency}
+                    {(item.price * item.quantity).toFixed(2)}
                   </p>
 
                   <p className="mt-1 text-sm text-gray-500">

@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Order, Action } from "@/types/order";
 import { OrderStatus } from "@prisma/client";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   order: Order;
@@ -70,6 +71,7 @@ export function OrderRow({ order, onAction }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { tenant } = useTenant();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -133,7 +135,10 @@ export function OrderRow({ order, onAction }: Props) {
         {new Date(order.createdAt).toLocaleDateString()}
       </td>
 
-      <td className="py-3 px-4 font-medium">${order.total.toFixed(2)}</td>
+      <td className="py-3 px-4 font-medium">
+        {tenant.currency}
+        {order.total.toFixed(2)}
+      </td>
 
       <td className="py-3 px-4">
         <span

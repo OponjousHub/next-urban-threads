@@ -23,8 +23,8 @@ export default async function ProductsPage({
 
   const queryParams = await searchParams;
   const query = queryParams.q || "";
-  const category = searchParams.category;
-  const { q, stock, featured, sort } = searchParams;
+  const category = queryParams.category;
+  const { q, stock, featured, sort } = queryParams;
 
   // Building orderBy for sorting
   let orderBy: any = { createdAt: "desc" };
@@ -35,7 +35,7 @@ export default async function ProductsPage({
   if (sort === "newest") orderBy = { createdAt: "desc" };
 
   // PAGINATION
-  const page = Number(searchParams.page) || 1;
+  const page = Number(queryParams.page) || 1;
   const pageSize = 10;
 
   const skip = (page - 1) * pageSize;

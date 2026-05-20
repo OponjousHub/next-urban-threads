@@ -4,7 +4,7 @@ import { UpdateButtons } from "@/components/admin/support/update-buttons";
 import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Message = {
   id: string;
@@ -35,6 +35,13 @@ export default function SupportPageClient({
   const [localMessages, setLocalMessages] = useState(messages);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    setLocalMessages(messages);
+
+    // reset selected message if current filter changes
+    setSelected(null);
+  }, [messages]);
 
   // ✅ SEND REPLY
   const sendReply = async () => {
@@ -126,7 +133,7 @@ export default function SupportPageClient({
                 );
 
                 if (msg.status === "UNREAD") {
-                  await fetch("/api/contact4/update", {
+                  await fetch("/api/contact/update", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
