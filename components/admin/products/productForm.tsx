@@ -256,7 +256,6 @@ export function ProductForm({ initialData }: any) {
         videos,
         variants,
       };
-      console.log("VIDEOS", videos);
       const response = await fetch(
         isEdit ? `/api/admin/products/${initialData.id}` : "/api/products",
         {
@@ -278,6 +277,9 @@ export function ProductForm({ initialData }: any) {
             title="Failed"
             description={data?.message || "Unable to save"}
           />,
+          {
+            duration: 6000,
+          },
         );
 
         return;
@@ -286,9 +288,13 @@ export function ProductForm({ initialData }: any) {
       toast.custom(
         <AdminToast
           type="success"
-          title={isEdit ? "Product Updated" : "Product Created"}
-          description="Inventory saved successfully"
+          title="Order updated"
+          description="Status changed successfully"
+          duration={6000}
         />,
+        {
+          duration: 6000,
+        },
       );
 
       if (!isEdit) {
@@ -321,6 +327,9 @@ export function ProductForm({ initialData }: any) {
           title="Error"
           description="Something went wrong"
         />,
+        {
+          duration: 4000,
+        },
       );
     } finally {
       setLoading(false);

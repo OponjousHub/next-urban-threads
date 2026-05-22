@@ -1,93 +1,103 @@
+import { CheckCircle2, AlertCircle, AlertTriangle } from "lucide-react";
+
 type ToastType = "success" | "error" | "warning";
 
 interface AdminToastProps {
   title: string;
   description?: string;
   type?: ToastType;
+  duration?: number;
 }
 
 export function AdminToast({
   title,
   description,
   type = "success",
+  duration = 6000,
 }: AdminToastProps) {
   const styles = {
     success: {
-      bg: "#e6f2ee",
-      border: "#047857",
-      text: "#065f46",
+      accent: "var(--color-primary)",
+      bg: "#ffffff",
+      icon: CheckCircle2,
     },
+
     error: {
-      bg: "#f8e8e8",
-      border: "#B91C1C",
-      text: "#7f1d1d",
+      accent: "#dc2626",
+      bg: "#ffffff",
+      icon: AlertCircle,
     },
+
     warning: {
-      bg: "#f9e8b5",
-      border: "#CA8A04",
-      text: "#713f12",
+      accent: "#f59e0b",
+      bg: "#ffffff",
+      icon: AlertTriangle,
     },
   };
 
   const current = styles[type];
+  const Icon = current.icon;
 
   return (
     <div
+      className="
+        relative
+        overflow-hidden
+        flex
+        items-start
+        gap-4
+        w-[420px]
+        rounded-2xl
+        border
+        bg-white
+        p-5
+        shadow-xl
+        backdrop-blur
+      "
       style={{
-        backgroundColor: current.bg,
-        borderLeft: `6px solid ${current.border}`,
-        color: current.text,
+        borderColor: current.accent,
       }}
-      className="w-[420px] p-5 rounded-xl shadow-lg"
     >
-      <h4 className="text-2xl font-semibold">{title}</h4>
+      {/* Left accent */}
+      <div
+        className="absolute left-0 top-0 h-full w-1"
+        style={{
+          backgroundColor: current.accent,
+        }}
+      />
 
-      {description && (
-        <p className="mt-1 text-lg leading-relaxed opacity-90">{description}</p>
-      )}
-    </div>
-  );
-}
+      {/* Icon */}
+      <div
+        className="rounded-full p-2 shrink-0"
+        style={{
+          backgroundColor: `${current.accent}15`,
+        }}
+      >
+        <Icon
+          size={22}
+          style={{
+            color: current.accent,
+          }}
+        />
+      </div>
 
-export function GetToast({
-  title,
-  description,
-  type = "success",
-}: AdminToastProps) {
-  const styles = {
-    success: {
-      bg: "#e6f2ee",
-      border: "#047857",
-      text: "#065f46",
-    },
-    error: {
-      bg: "#f8e8e8",
-      border: "#B91C1C",
-      text: "#7f1d1d",
-    },
-    warning: {
-      bg: "#f9e8b5",
-      border: "#CA8A04",
-      text: "#713f12",
-    },
-  };
+      {/* Content */}
+      <div className="flex-1">
+        <h4 className="font-semibold text-gray-900 text-base">{title}</h4>
 
-  const current = styles[type];
+        {description && (
+          <p className="mt-1 text-sm text-gray-500">{description}</p>
+        )}
+      </div>
 
-  return (
-    <div
-      style={{
-        backgroundColor: current.bg,
-        borderLeft: `6px solid ${current.border}`,
-        color: current.text,
-      }}
-      className="w-[220px] p-5 rounded-xl shadow-lg border border-solid border-indigo-600"
-    >
-      <h4 className="text-lg font-semibold">{title}</h4>
-
-      {description && (
-        <p className="mt-1 text-sm leading-relaxed opacity-90">{description}</p>
-      )}
+      {/* Progress bar */}
+      <div
+        className="absolute bottom-0 left-0 h-1 bg-[var(--color-primary)]"
+        style={{
+          width: "100%",
+          animation: `shrink ${duration}ms linear forwards`,
+        }}
+      />
     </div>
   );
 }

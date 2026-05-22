@@ -71,6 +71,32 @@ html {
   }
 }
 
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
+
+/* <style jsx>{` */
+@keyframes shrink {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
+/* `}</style> */
+
+.animate-toast-progress {
+  animation: toast-progress 6s linear forwards;
+}
+
 a {
   color: inherit;
   text-decoration: none;
