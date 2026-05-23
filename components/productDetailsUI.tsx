@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useCart } from "@/store/cart-context";
 import { Product } from "@/types/product";
 import { useState, useEffect } from "react";
-// import toast from "react-hot-toast";
 import { cloudinaryDetailImage } from "@/utils/cloudinary-url";
 import { ProductDetailSkeleton } from "./products/productDetailSkeleton";
 import { ReviewForm } from "@/components/reviews/reviewForm";

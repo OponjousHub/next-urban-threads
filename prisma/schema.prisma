@@ -186,6 +186,7 @@ model Tenant {
   aboutStory         String?
   aboutImage         String?
   aboutDescription   String?
+  storeMode         StoreMode @default(SINGLE_VENDOR)
 
    // LEGAL CMS
   termsOfService   String?  // HTML (TipTap output)
@@ -478,6 +479,11 @@ enum ReviewStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum StoreMode {
+  SINGLE_VENDOR
+  MULTI_VENDOR
 }
 
 enum AccountStatus {
