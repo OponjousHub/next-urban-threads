@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { ProductImageUploader } from "./productImageUploader";
 import { ProductVideoUploader } from "./productVideoUploader";
 import toast from "react-hot-toast";
-import { AdminToast } from "@/components/ui/adminToast";
+import { appToast } from "@/utils/appToast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
@@ -237,11 +237,12 @@ export function ProductForm({ initialData }: any) {
     e.preventDefault();
 
     if (!images.length) {
-      toast.error("Please upload product images");
+      appToast.warning("Warning", "Please upload product images");
+
       return;
     }
     if (!variants.length) {
-      toast.error("Please create at least one variant");
+      appToast.warning("Warning", "Please create at least one variant");
       return;
     }
 
@@ -271,31 +272,11 @@ export function ProductForm({ initialData }: any) {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.custom(
-          <AdminToast
-            type="error"
-            title="Failed"
-            description={data?.message || "Unable to save"}
-          />,
-          {
-            duration: 6000,
-          },
-        );
-
+        appToast.success("Failed", `${data?.message || "Unable to save"}`);
         return;
       }
 
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Order updated"
-          description="Status changed successfully"
-          duration={6000}
-        />,
-        {
-          duration: 6000,
-        },
-      );
+      appToast.success("Order updated", "Product updated successfully");
 
       if (!isEdit) {
         setForm({
@@ -321,16 +302,7 @@ export function ProductForm({ initialData }: any) {
 
       router.push("/admin/products");
     } catch (err) {
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Error"
-          description="Something went wrong"
-        />,
-        {
-          duration: 4000,
-        },
-      );
+      appToast.error("Error", "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -344,7 +316,7 @@ export function ProductForm({ initialData }: any) {
     if (!value) return;
 
     if (selectedSizes.includes(value)) {
-      toast.error("Size already added");
+      appToast.warning("Warning", "Size already added");
       return;
     }
 
@@ -689,14 +661,12 @@ export function ProductForm({ initialData }: any) {
                                       }
 
                                       updateVariant(index, "image", data.url);
-
-                                      toast.success("Image uploaded", {
-                                        id: toastId,
-                                      });
+                                      appToast.success(
+                                        "Success",
+                                        "Image uploaded",
+                                      );
                                     } catch (err) {
-                                      toast.error("Upload failed", {
-                                        id: toastId,
-                                      });
+                                      appToast.error("Error", "Upload failed");
                                     }
                                   }}
                                 />

@@ -3,8 +3,7 @@
 import Row from "./row";
 import { useState } from "react";
 import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
-import toast from "react-hot-toast";
-import { AdminToast } from "@/components/ui/adminToast";
+import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
 
 export default function ProductsTable({
@@ -40,37 +39,22 @@ export default function ProductsTable({
       const data = await res.json();
 
       if (!res.ok) {
-        toast.custom(
-          <AdminToast
-            type="error"
-            title="Delete failed"
-            description={data?.message || "Something went wrong"}
-          />,
-          { duration: 6000 },
+        appToast.error(
+          "Delete failed",
+          `${data?.message || "Something went wrong"}`,
         );
+
         return;
       }
-
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Product deleted"
-          description="The product has been removed successfully"
-        />,
-        { duration: 4000 },
+      appToast.success(
+        "Product deleted",
+        "The product has been removed successfully",
       );
 
       setShowDeleteModal(false);
       router.refresh(); // 🔥 important
     } catch (err) {
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Delete failed"
-          description="Network error. Try again."
-        />,
-        { duration: 6000 },
-      );
+      appToast.error("Delete failed", "Network error. Try again.");
     } finally {
       setDeleting(false);
     }

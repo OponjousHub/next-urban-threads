@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Upload, Loader2, X, RefreshCcw, Video } from "lucide-react";
-import toast from "react-hot-toast";
+import { appToast } from "@/utils/appToast";
 
 type VideoItem = {
   url: string;
@@ -45,10 +45,9 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
       });
 
       setVideos((prev) => prev.filter((v) => v.public_id !== video.public_id));
-
-      toast.success("Video removed");
+      appToast.success("Success", "Video was removed successfully");
     } catch {
-      toast.error("Failed to delete video");
+      appToast.error("Failed", "Failed to delete video");
     }
   }
 
@@ -99,8 +98,7 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
             : q,
         ),
       );
-
-      toast.success(`${item.file.name} uploaded`);
+      appToast.success("Success", `${item.file.name} uploaded`);
     } catch (err: any) {
       if (err.name === "AbortError") {
         setQueue((prev) =>
@@ -113,8 +111,7 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
               : q,
           ),
         );
-
-        toast("Upload cancelled");
+        appToast.success("Cancelled", "Upload cancelled");
       } else {
         setQueue((prev) =>
           prev.map((q) =>
@@ -127,8 +124,7 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
               : q,
           ),
         );
-
-        toast.error(`${item.file.name} failed`);
+        appToast.error("Failed", `${item.file.name} failed`);
       }
     }
   }
@@ -202,7 +198,10 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
           window.URL.revokeObjectURL(video.src);
 
           if (video.duration > MAX_DURATION) {
-            toast.error(`${file.name} must be under ${MAX_DURATION} seconds`);
+            appToast.error(
+              "Error",
+              `${file.name} must be under ${MAX_DURATION} seconds`,
+            );
             resolve(false);
           } else {
             resolve(true);
@@ -210,7 +209,7 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
         };
 
         video.onerror = () => {
-          toast.error(`Could not read ${file.name}`);
+          appToast.error("Error", `Could not read ${file.name}`);
           resolve(false);
         };
 
@@ -224,12 +223,13 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
 
     for (const file of filesArray) {
       if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
-        toast.error(`${file.name} is not supported`);
+        appToast.warning("Warning", `${file.name} is not supported`);
         continue;
       }
 
       if (file.size > MAX_VIDEO_SIZE) {
-        toast.error(`${file.name} exceeds 50MB`);
+        appToast.warning("Warning", `${file.name} exceeds 50MB`);
+
         continue;
       }
 
@@ -242,7 +242,8 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
 
     // Limit number of videos
     if (videos.length + validFiles.length > 3) {
-      toast.error("Maximum 3 videos allowed");
+      appToast.warning("Warning", "Maximum 3 videos allowed");
+
       return;
     }
 

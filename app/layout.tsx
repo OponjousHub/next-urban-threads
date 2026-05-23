@@ -5,7 +5,7 @@ import { ProductContextProvider } from "@/store/products-context";
 import { TenantProvider } from "@/store/tenant-provider-context";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { getTenant } from "../lib/tenant/getTenant";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 import { darkenColor } from "@/utils/color-shades";
 import {
   lightenColor,
@@ -57,7 +57,12 @@ export default async function RootLayout({
             <CartContextProvider>
               <Header />
               {children}
-              <Toaster position="top-center" reverseOrder={false} />
+              <Toaster
+                position="top-center"
+                richColors
+                closeButton
+                duration={6000}
+              />{" "}
               <Footer />
             </CartContextProvider>
           </ProductContextProvider>

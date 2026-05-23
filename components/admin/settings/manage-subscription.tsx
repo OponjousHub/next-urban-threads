@@ -1,7 +1,7 @@
 "use client";
 
+import { appToast } from "@/utils/appToast";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
 type Subscriber = {
   id: string;
@@ -51,7 +51,7 @@ export default function NewsletterAdminPage() {
         const data = await res.json();
         setSubscribers(data);
       } catch {
-        toast.error("Failed to load subscribers");
+        appToast.error("Error", "Failed to load subscribers");
       }
     }
 
@@ -61,7 +61,7 @@ export default function NewsletterAdminPage() {
   // Send email
   async function sendNewsletter() {
     if (!subject || !message) {
-      toast.error("Subject & message required");
+      appToast.warning("Warning", "Subject & message required");
       return;
     }
 
@@ -75,12 +75,11 @@ export default function NewsletterAdminPage() {
       });
 
       if (!res.ok) throw new Error();
-
-      toast.success("Newsletter sent 🚀");
+      appToast.success("Success", "Newsletter sent 🚀");
       setSubject("");
       setMessage("");
     } catch {
-      toast.error("Failed to send newsletter");
+      appToast.error("Error", "Failed to send newsletter");
     } finally {
       setLoading(false);
     }

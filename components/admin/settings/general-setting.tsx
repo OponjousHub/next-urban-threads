@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
-import { AdminToast } from "@/components/ui/adminToast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageUpload } from "./tenant-images";
 import { z } from "zod";
+import { appToast } from "@/utils/appToast";
 
 /* ---------------- Schema ---------------- */
 export const settingSchema = z.object({
@@ -88,24 +87,9 @@ export default function GeneralSettings() {
       });
 
       if (!res.ok) throw new Error();
-
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Update settings"
-          description="Settings updated successfully"
-        />,
-        { duration: 6000 },
-      );
+      appToast.success("Update settings", "Settings updated successfully");
     } catch {
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Update failed"
-          description={"Failed to update store information!"}
-        />,
-        { duration: 6000 },
-      );
+      appToast.error("Error", "Failed to update store information!");
     } finally {
       setLoading(false);
     }
@@ -120,7 +104,7 @@ export default function GeneralSettings() {
     formData.append("image", file); // ✅ FIXED
 
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image must be under 2MB");
+      appToast.warning("Warning", "Image must be under 2MB");
       return;
     }
 
@@ -136,10 +120,12 @@ export default function GeneralSettings() {
       const data = await res.json();
 
       setValue(field, data.url, { shouldDirty: true });
-
-      toast.success(`${field === "logo" ? "Logo" : "Hero image"} uploaded!`);
+      appToast.success(
+        "Success",
+        `${field === "logo" ? "Logo" : "Hero image"} uploaded!`,
+      );
     } catch (err) {
-      toast.error("Upload failed");
+      appToast.error("Error", "Upload failed");
       console.error(err);
     } finally {
       setUploadingField(null);

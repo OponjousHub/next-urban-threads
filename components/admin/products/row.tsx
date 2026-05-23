@@ -2,7 +2,6 @@
 
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 
 export default function Row({

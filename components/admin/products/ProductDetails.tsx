@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
-import { AdminToast } from "@/components/ui/adminToast";
+import { appToast } from "@/utils/appToast";
 import { useState } from "react";
 import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 
@@ -24,36 +23,15 @@ export default function ProductDetails({ product }: { product: any }) {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.custom(
-          <AdminToast
-            type="error"
-            title="Delete failed"
-            description={data?.message || "Something went wrong"}
-          />,
-          { duration: 6000 },
-        );
+        appToast.error("error", `${data?.message || "Something went wrong"}`);
         return;
       }
 
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Product deleted"
-          description="The product has been removed successfully"
-        />,
-        { duration: 4000 },
-      );
+      appToast.success("success", "The product has been removed successfully");
       router.push("/admin/products");
     } catch (err) {
       setDeleting(false);
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Delete failed"
-          description="Network error. Try again."
-        />,
-        { duration: 6000 },
-      );
+      appToast.error("Delete failed", "Network error. Try again.");
     } finally {
       setDeleting(false);
     }

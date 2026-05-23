@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { AdminToast } from "@/components/ui/adminToast";
 import { Trash2 } from "lucide-react";
+import { appToast } from "@/utils/appToast";
 
 type Category = {
   id: string;
@@ -33,7 +33,7 @@ export default function CategoriesAdminPage() {
 
       setCategories(data);
     } catch (err) {
-      toast.error("Failed to load categories");
+      appToast.error("Error", "Failed to load categories");
     } finally {
       setLoadingCategories(false);
     }
@@ -63,22 +63,9 @@ export default function CategoriesAdminPage() {
 
       const data = await res.json();
       setImageUrl(data.url);
-
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Upload successful"
-          description="Category image uploaded"
-        />,
-      );
+      appToast.success("Success", "Category image uploaded");
     } catch {
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Upload failed"
-          description="Try again"
-        />,
-      );
+      appToast.error("Error", "Failed to upload category! Try again");
     } finally {
       setUploading(false);
     }
@@ -89,7 +76,7 @@ export default function CategoriesAdminPage() {
     e.preventDefault();
 
     if (!name) {
-      toast.error("Category name required");
+      appToast.warning("Warning", "Category name required");
       return;
     }
 
@@ -109,27 +96,14 @@ export default function CategoriesAdminPage() {
       });
 
       if (!res.ok) throw new Error();
-
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Category created"
-          description="Successfully added"
-        />,
-      );
+      appToast.success("Category created", "Successfully added");
 
       setName("");
       setImageUrl("");
       setIsFeatured(true); // reset
       loadCategories();
     } catch {
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Error"
-          description="Could not create category"
-        />,
-      );
+      appToast.error("Error", "Could not create category! Try again");
     } finally {
       setLoading(false);
     }
@@ -153,10 +127,9 @@ export default function CategoriesAdminPage() {
       setCategories((prev) =>
         prev.map((c) => (c.id === cat.id ? { ...c, isFeatured: updated } : c)),
       );
-
-      toast.success("Updated");
+      appToast.success("Success", "Category updated successfully");
     } catch {
-      toast.error("Failed to update");
+      appToast.error("Error", "Failed to update");
     }
   }
 
@@ -172,7 +145,6 @@ export default function CategoriesAdminPage() {
       if (!res.ok) throw new Error();
 
       setCategories((prev) => prev.filter((c) => c.id !== id));
-
       toast.success("Category deleted", { id: deletingToast });
     } catch {
       toast.error("Failed to delete category", { id: deletingToast });

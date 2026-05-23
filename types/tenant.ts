@@ -1,7 +1,7 @@
 export type Tenant = {
   id: string;
   name: string;
-  email: string;
+  email?: string | null;
   slug: string;
   domain?: string | null;
   heroSubtitle: string;

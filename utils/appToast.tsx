@@ -6,7 +6,7 @@ export const appToast = {
     const duration = 4000;
 
     toast.custom(
-      () => (
+      (id) => (
         <AdminToast
           type="success"
           title={title}
@@ -24,7 +24,7 @@ export const appToast = {
     const duration = 6000;
 
     toast.custom(
-      () => (
+      (id) => (
         <AdminToast
           type="error"
           title={title}
@@ -42,7 +42,7 @@ export const appToast = {
     const duration = 5000;
 
     toast.custom(
-      () => (
+      (id) => (
         <AdminToast
           type="warning"
           title={title}

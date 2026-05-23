@@ -1,7 +1,7 @@
 "use client";
 
+import { appToast } from "@/utils/appToast";
 import { useState } from "react";
-import toast from "react-hot-toast";
 
 interface Props {
   onClose: () => void;
@@ -85,46 +85,13 @@ export default function ChangePasswordAdmin() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(`${data.message}`, {
-          duration: 8000,
-          style: {
-            border: "1px solid #4f46e5",
-            padding: "12px",
-            color: "#333",
-          },
-          iconTheme: {
-            primary: "#4f46e5",
-            secondary: "#fff",
-          },
-        });
+        appToast.error("Error", `${data.message}`);
+
         return;
       }
-
-      toast.success("Password updated successfully", {
-        duration: 8000,
-        style: {
-          border: "1px solid #4f46e5",
-          padding: "12px",
-          color: "#333",
-        },
-        iconTheme: {
-          primary: "#4f46e5",
-          secondary: "#fff",
-        },
-      });
+      appToast.success("Success", "Password updated successfully");
     } catch (err) {
-      toast.error("Something went wrong", {
-        duration: 8000,
-        style: {
-          border: "1px solid #4f46e5",
-          padding: "12px",
-          color: "#333",
-        },
-        iconTheme: {
-          primary: "#4f46e5",
-          secondary: "#fff",
-        },
-      });
+      appToast.error("Error", "Something went wrong");
     } finally {
       setLoading(false);
     }

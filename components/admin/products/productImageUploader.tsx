@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Loader2, RefreshCcw, X, Upload } from "lucide-react";
+import { RefreshCcw, X, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { useState, useEffect, useRef } from "react";
@@ -11,6 +11,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { SortableImage } from "./sortable-image";
+import { appToast } from "@/utils/appToast";
 
 type Props = {
   images: string[];

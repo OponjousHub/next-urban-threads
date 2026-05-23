@@ -18,6 +18,7 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
+import { appToast } from "@/utils/appToast";
 
 type FAQ = {
   id: string;
@@ -89,45 +90,14 @@ export default function FAQForm() {
       setFaqs((prev) => [newFaq, ...prev]);
       setQuestion("");
       setAnswer("");
-
-      toast.success("FAQ added ✅");
+      appToast.success("Success", "FAQ added ✅");
     } catch (err) {
-      toast.error("Failed to add FAQ ❌");
+      appToast.error("Failed", "Failed to add FAQ ❌");
     } finally {
       setLoading(false);
     }
   };
 
-  // Edit FAQ
-  // const saveEdit = async (id: string) => {
-  //   console.log("SAVING FAG", id);
-  //   try {
-  //     setLoadingEdit(true);
-  //     await fetch(`/api/admin/faqs/${id}`, {
-  //       method: "PATCH",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         question: editQuestion,
-  //         answer: editAnswer,
-  //         category,
-  //       }),
-  //     });
-
-  //     setFaqs((prev) =>
-  //       prev.map((f) =>
-  //         f.id === id
-  //           ? { ...f, question: editQuestion, answer: editAnswer }
-  //           : f,
-  //       ),
-  //     );
-
-  //     setEditingId(null);
-  //   } catch (err) {
-  //     toast.error("Failed to add FAQ ❌");
-  //   } finally {
-  //     setLoadingEdit(false);
-  //   }
-  // };
   const saveEdit = async () => {
     if (!editId) return;
 
@@ -168,10 +138,10 @@ export default function FAQForm() {
       });
 
       setFaqs((prev) => prev.filter((f) => f.id !== id));
-      toast.success("Deleted");
+      appToast.success("Success", "FAQ deleted successfully");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete FAQ ❌");
+      appToast.error("Error", "Failed to delete FAQ ❌");
     } finally {
       setDeletingId(null);
     }
