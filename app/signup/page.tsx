@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AdminToast } from "@/components/ui/adminToast";
+// import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import {
@@ -13,6 +13,7 @@ import {
   FiGlobe,
   FiHome,
 } from "react-icons/fi";
+import { appToast } from "@/utils/appToast";
 
 const initialState = {
   name: "",
@@ -52,30 +53,18 @@ export default function SignupPage() {
       !form.confirmPassword
     ) {
       toast.dismiss(toastId);
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Some fields are required"
-          description="Please fill in all the required fields."
-        />,
-        {
-          duration: 6000, // ⏱️ 8 seconds
-        },
+      appToast.warning(
+        "Some fields are required",
+        "Please fill in all the required fields.",
       );
       return;
     }
 
     if (form.password !== form.confirmPassword) {
       toast.dismiss(toastId);
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Passwords do not match"
-          description="Password and password confirm must match."
-        />,
-        {
-          duration: 6000, // ⏱️ 8 seconds
-        },
+      appToast.warning(
+        "Passwords do not match",
+        "Password and password confirm must match.",
       );
       return;
     }
@@ -106,33 +95,19 @@ export default function SignupPage() {
         throw new Error(data.message || "Signup failed");
       }
       toast.dismiss(toastId);
-      toast.custom(
-        <AdminToast
-          title="Signup sucessfull"
-          description={`${data?.name} your registration was successful.`}
-        />,
-        {
-          duration: 6000, // ⏱️ 6 seconds
-        },
+      appToast.success(
+        "Signup sucessfull",
+        `${data?.name} your registration was successful.`,
       );
+
       setForm(initialState);
-      // router.replace("/dashboard");
-      // router.refresh();
+
       window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("SIGN UP ERROR:", err);
 
       toast.dismiss(toastId);
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Signup failed!"
-          description={err.message || "Please try again."}
-        />,
-        {
-          duration: 6000, // ⏱️ 8 seconds
-        },
-      );
+      appToast.error("Signup failed!", `${err.message || "Please try again."}`);
     } finally {
       setIsLoading(false);
     }

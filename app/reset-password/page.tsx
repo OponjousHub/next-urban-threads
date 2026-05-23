@@ -1,8 +1,9 @@
 "use client";
 
+import { appToast } from "@/utils/appToast";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { toastSuccess } from "@/utils/toast-notification";
+// import { toastSuccess } from "@/utils/toast-notification";
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
@@ -93,7 +94,7 @@ export default function ResetPasswordPage() {
       });
 
       if (res.ok) {
-        toastSuccess("Password reset successful");
+        appToast.success("Success", "Password reset successful");
 
         setTimeout(() => {
           router.push("/login");

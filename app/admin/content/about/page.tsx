@@ -2,8 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { AdminToast } from "@/components/ui/adminToast";
+import { appToast } from "@/utils/appToast";
 
 type FormData = {
   aboutTitle?: string;
@@ -43,10 +42,9 @@ export default function AboutSettings() {
       });
 
       if (!res.ok) throw new Error();
-
-      toast.success("About page updated");
+      appToast.success("Success", "About page updated");
     } catch {
-      toast.error("Failed to update About page");
+      appToast.error("Error", "Failed to update About page");
     } finally {
       setLoading(false);
     }
@@ -73,22 +71,9 @@ export default function AboutSettings() {
 
       // ✅ IMPORTANT: store in form
       setValue("aboutImage", data.url, { shouldDirty: true });
-
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Upload successful"
-          description="Image uploaded"
-        />,
-      );
+      appToast.success("Upload successful", "Image uploaded succesfully");
     } catch {
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Upload failed"
-          description="Try again"
-        />,
-      );
+      appToast.error("Error", "Upload failed! Try again");
     } finally {
       setUploading(false);
     }

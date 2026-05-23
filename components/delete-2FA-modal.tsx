@@ -1,4 +1,3 @@
-import toast from "react-hot-toast";
 import { useState } from "react";
 import {
   Dialog,
@@ -6,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { appToast } from "@/utils/appToast";
 
 type Props = {
   open: boolean;
@@ -33,50 +33,18 @@ export default function Disable2FAModal({ open, onClose, onSetStatus }: Props) {
 
       if (!res.ok) {
         const data = await res.json();
-        toast.error(data.message, {
-          duration: 6000, // 6 seconds
-          style: {
-            border: "1px solid #4f46e5",
-            padding: "12px",
-            color: "#333",
-          },
-          iconTheme: {
-            primary: "#4f46e5",
-            secondary: "#fff",
-          },
-        });
+        appToast.error("Error", data.message);
         return;
       }
       onClose();
-      toast.success("2FA Disabled", {
-        duration: 6000, // 6 seconds
-        style: {
-          border: "1px solid #4f46e5",
-          padding: "12px",
-          color: "#333",
-        },
-        iconTheme: {
-          primary: "#4f46e5",
-          secondary: "#fff",
-        },
-      });
+      appToast.success("Success", "2FA Disabled");
+
       onSetStatus();
       setOtp("");
       window.location.reload();
     } catch (err: any) {
       console.error(err.message);
-      toast.error("Server error", {
-        duration: 6000, // 6 seconds
-        style: {
-          border: "1px solid #4f46e5",
-          padding: "12px",
-          color: "#333",
-        },
-        iconTheme: {
-          primary: "#4f46e5",
-          secondary: "#fff",
-        },
-      });
+      appToast.error("Error", "Server error");
     } finally {
       setLoading(false);
     }

@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import RichTextEditor from "@/components/ui/rich-text-editor";
-import toast from "react-hot-toast";
-import { AdminToast } from "@/components/ui/adminToast";
+import { appToast } from "@/utils/appToast";
 
 type FormData = {
   termsOfService?: string;
@@ -46,24 +45,12 @@ export default function LegalSettings() {
       });
 
       if (!res.ok) throw new Error();
-
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Legal pages updated"
-          description="Terms & Privacy saved successfully"
-        />,
-        { duration: 4000 },
+      appToast.success(
+        "Legal pages updated",
+        "Terms & Privacy saved successfully",
       );
     } catch {
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Update failed"
-          description="Something went wrong"
-        />,
-        { duration: 6000 },
-      );
+      appToast.error("Update failed", "Something went wrong");
     } finally {
       setLoading(false);
     }

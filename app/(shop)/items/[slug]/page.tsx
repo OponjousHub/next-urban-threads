@@ -2,7 +2,7 @@ import { prisma } from "@/utils/prisma";
 import { ReviewForm } from "@/components/reviews/reviewForm";
 import { ReviewList } from "@/components/reviews/reviewList";
 import { RatingSummary } from "@/components/reviews/ratingSummary";
-import { notFound, unauthorized } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getTenant } from "@/lib/tenant/getTenant";
 
 interface Props {

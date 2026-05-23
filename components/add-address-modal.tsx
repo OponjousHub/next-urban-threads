@@ -11,8 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 import { useTenant } from "@/store/tenant-provider-context";
+import { appToast } from "@/utils/appToast";
 
 type Props = {
   open: boolean;
@@ -71,9 +72,11 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
     setLoading(false);
 
     if (!res.ok) {
-      toast.error(`Failed to ${address ? "update" : "add"} address ❌`, {
-        duration: 5000, // 5 seconds
-      });
+      appToast.error(
+        "Error",
+        `${`Failed to ${address ? "update" : "add"} address ❌`}`,
+      );
+
       return;
     }
 
@@ -87,9 +90,11 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
       postalCode: "",
       isDefault: false,
     });
-    toast.success(`Address ${address ? "update" : "add"} successfully`, {
-      duration: 5000, // 5 seconds
-    });
+    appToast.success(
+      "Success",
+      `${`Address ${address ? "update" : "add"} successfully`}`,
+    );
+
     onClose();
     router.refresh();
   };

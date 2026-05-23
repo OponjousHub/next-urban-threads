@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useCart } from "@/store/cart-context";
-import { AdminToast } from "@/components/ui/adminToast";
-import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import toast from "react-hot-toast";
+import { appToast } from "@/utils/appToast";
 
 type ShippingAddress = {
   id: string;
@@ -183,15 +183,9 @@ export default function CheckoutClient({
       console.error(err);
 
       toast.dismiss(toastId);
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Order failed"
-          description={err.message || "Something went wrong"}
-        />,
-        {
-          duration: 6000, // ⏱️ 8 seconds
-        },
+      appToast.error(
+        "Order failed",
+        `${err.message || "Something went wrong"}`,
       );
     } finally {
       setIsLoading(false);

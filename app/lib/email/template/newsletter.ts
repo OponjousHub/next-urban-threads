@@ -1,5 +1,3 @@
-// import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-
 export async function NewsletterEmail({
   subject,
   message,

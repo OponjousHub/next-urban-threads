@@ -1,4 +1,3 @@
-import { prisma } from "@/utils/prisma";
 import { getRecentOrders } from "../data/orders";
 import { getRecentUsers } from "../data/users";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";

@@ -1,7 +1,6 @@
 "use client";
-import "@/app/globals.css";
+// import "@/app/globals.css";
 
-// import { FiMenu, FiX } from "react-icons/fi";
 import { useState } from "react";
 
 const BuyButton = () => {

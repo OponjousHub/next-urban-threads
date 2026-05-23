@@ -1,5 +1,3 @@
-// app/admin/products/[id]/page.tsx
-
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { notFound } from "next/navigation";

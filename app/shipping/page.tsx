@@ -1,7 +1,5 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-// import DOMPurify from "dompurify";
-import DOMPurify from "isomorphic-dompurify";
 
 export default async function ShippingPage() {
   const tenant = await getDefaultTenant();

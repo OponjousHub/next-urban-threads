@@ -2,10 +2,10 @@ import axios from "axios";
 import { VerifyPaymentResult } from "@/types/payment";
 
 export type InitializePaymentParams = {
-  email: string; // Customer email
-  amount: number; // Amount in Naira
-  reference: string; // Unique payment reference (UUID)
-  callbackUrl: string; // URL Paystack redirects to after payment
+  email: string;
+  amount: number;
+  reference: string;
+  callbackUrl: string;
 };
 
 export type InitializePaymentResponse = {

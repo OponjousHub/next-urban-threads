@@ -1,4 +1,3 @@
-import toast from "react-hot-toast";
 import { useState } from "react";
 import {
   Dialog,
@@ -6,8 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AdminToast } from "@/components/ui/adminToast";
 import { useTenant } from "@/store/tenant-provider-context";
+import { appToast } from "@/utils/appToast";
 
 type Props = {
   open: boolean;
@@ -38,32 +37,19 @@ export default function ChangEmailModal({ open, onClose, address }: Props) {
       if (!res.ok) {
         throw new Error(data.error || "Failed");
       }
-
-      toast.custom(
-        <AdminToast
-          title="Check your Email"
-          description={`We just sent a token to ${newEmail}`}
-        />,
-        {
-          duration: 6000, // ⏱️ 6 seconds
-        },
+      appToast.success(
+        "Check your Email",
+        `${`We just sent a token to ${newEmail}`}`,
       );
+
       onClose();
 
       setNewEmail("");
       setPassword("");
     } catch (err: any) {
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Failed!"
-          description={
-            err.message || "Could not change email! Please try again."
-          }
-        />,
-        {
-          duration: 6000, // ⏱️ 8 seconds
-        },
+      appToast.error(
+        "Error",
+        `${err.message || "Could not change email! Please try again."}`,
       );
     } finally {
       setLoading(false);

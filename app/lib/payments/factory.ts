@@ -1,4 +1,3 @@
-import { PaystackProvider } from "./paystack";
 import { FlutterwaveProvider } from "./flutterwave";
 
 export function getPaymentProvider(currency: string) {

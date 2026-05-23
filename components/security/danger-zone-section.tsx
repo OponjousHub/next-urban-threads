@@ -1,7 +1,9 @@
-import { toastSuccess, toastError } from "@/utils/toast-notification";
+// import { toastSuccess, toastError } from "@/utils/toast-notification";
 import { useRouter } from "next/navigation";
 import DelSessionsModal from "../del-sessions-modal";
 import { useState } from "react";
+import { appToast } from "@/utils/appToast";
+// import { appendErrors } from "react-hook-form";
 
 type ModalType = "logout" | "deactivate-confirm" | "deactivate-password" | null;
 
@@ -17,19 +19,19 @@ export default function DangerZoneSection() {
     });
 
     if (res.ok) {
-      toastSuccess("Logged out from all devices");
+      appToast.success("Success", "Logged out from all devices");
 
       setTimeout(() => {
         window.location.href = "/login";
       }, 8000);
     } else {
-      toastError("Failed to logout everywhere");
+      appToast.error("Error", "Failed to logout everywhere");
     }
   };
 
   const handleDeactivateWithPassword = async () => {
     if (!password) {
-      toastError("Password is required");
+      appToast.warning("Warning", "Password is required");
       return;
     }
 
@@ -42,14 +44,14 @@ export default function DangerZoneSection() {
     });
 
     if (res.ok) {
-      toastSuccess("Account deactivated");
+      appToast.success("Success", "Account deactivated");
 
       setTimeout(() => {
         window.location.href = "/";
       }, 8000);
     } else {
       const data = await res.json();
-      toastError(data.message || "Invalid password");
+      appToast.error("Error", `${data.message || "Invalid password"}`);
     }
 
     setLoading(false);

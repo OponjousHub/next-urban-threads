@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCart } from "@/store/cart-context";
 import { Product } from "@/types/product";
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 import { cloudinaryDetailImage } from "@/utils/cloudinary-url";
 import { ProductDetailSkeleton } from "./products/productDetailSkeleton";
 import { ReviewForm } from "@/components/reviews/reviewForm";
@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useRecentlyViewed } from "./products/useRecentlyViewed";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useTenant } from "@/store/tenant-provider-context";
+import { appToast } from "@/utils/appToast";
 
 interface Props {
   product: Product;
@@ -149,13 +150,13 @@ export function ProductDetailUI({
   /* ---------------- CART ---------------- */
   const handleAddToCart = () => {
     if (variants.length > 0 && !selectedVariant) {
-      toast.error("Please select color & size");
+      appToast.warning("Warning", "Please select color & size");
       return;
     }
 
     // ✅ STOCK SAFETY
     if (selectedVariant && quantity > selectedVariant.stock) {
-      toast.error(`Only ${selectedVariant.stock} available`);
+      appToast.warning("Warning", `Only ${selectedVariant.stock} available`);
       return;
     }
     addToCart({

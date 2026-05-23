@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 import { useTenant } from "@/store/tenant-provider-context";
+import { appToast } from "@/utils/appToast";
 
 export default function OrderPage() {
   const { orderId } = useParams();
@@ -28,12 +29,12 @@ export default function OrderPage() {
 
       if (data.status === "PAID") {
         clearInterval(interval);
-        toast.success("Payment successful 🎉");
+        appToast.success("Success", "Payment successful 🎉");
       }
 
       if (data.status === "FAILED") {
         clearInterval(interval);
-        toast.error("Payment failed ❌");
+        appToast.error("Error", "Payment failed ❌");
       }
     }, 3000);
 

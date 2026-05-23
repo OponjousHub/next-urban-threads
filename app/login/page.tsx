@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { toastSuccess, toastError } from "@/utils/toast-notification";
 import Link from "next/link";
+import { appToast } from "@/utils/appToast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -57,7 +57,10 @@ export default function LoginPage() {
         return;
       }
       if (data.reactivated) {
-        toastSuccess("Your account has been restored. Welcome back!");
+        appToast.success(
+          "Success",
+          "Your account has been restored. Welcome back!",
+        );
       }
       // ⭐ LOGIN SUCCESS WITHOUT 2FA
       setTimeout(() => {
@@ -102,7 +105,10 @@ export default function LoginPage() {
       }
 
       if (data.reactivated) {
-        toastSuccess("Your account has been restored. Welcome back!");
+        appToast.success(
+          "Success",
+          "Your account has been restored. Welcome back!",
+        );
       }
       window.location.href = "/dashboard";
     } catch (err: any) {

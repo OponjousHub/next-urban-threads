@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi";
+import { FiShoppingCart, FiMenu } from "react-icons/fi";
 import { useCart } from "@/store/cart-context";
 import UserMenu from "./header-userMenu";
 import { MobileDrawer } from "./header-mobiledrawer";

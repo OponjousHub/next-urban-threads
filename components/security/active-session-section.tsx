@@ -2,8 +2,8 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
-import { toastSuccess, toastError } from "@/utils/toast-notification";
 import DelSessionsModal from "../del-sessions-modal";
+import { appToast } from "@/utils/appToast";
 
 type Session = {
   id: string;
@@ -30,11 +30,11 @@ export default function ActiveSessionsSection({
     });
 
     if (res.ok) {
-      toastSuccess("Logged out of other devices");
+      appToast.success("Success", "Logged out of other devices");
 
       setSessionsState((prev) => prev.filter((s) => s.id === currentSessionId));
     } else {
-      toastError("Failed to logout other devices");
+      appToast.error("Error", "Failed to logout other devices");
     }
 
     setShowLogoutOthersModal(false);
@@ -86,14 +86,14 @@ export default function ActiveSessionsSection({
                   });
 
                   if (res.ok) {
-                    toastSuccess("Session logged out");
+                    appToast.success("Success", "Session logged out");
 
                     // remove from UI immediately
                     setSessionsState((prev) =>
                       prev.filter((s) => s.id !== session.id),
                     );
                   } else {
-                    toastError("Failed to logout session");
+                    appToast.error("Error", "Failed to logout session");
                   }
 
                   setLoadingSessionId(null);

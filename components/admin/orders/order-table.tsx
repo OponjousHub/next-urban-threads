@@ -4,10 +4,10 @@ import { OrderRow } from "./order-row";
 import { Order } from "@/types/order";
 import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 import { useState } from "react";
-import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import { useRouter } from "next/navigation";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
+import { appToast } from "@/utils/appToast";
 
 export type Action =
   | { type: "status"; value: OrderStatus }
@@ -52,29 +52,18 @@ export default function OrdersTable({
       });
 
       if (!res.ok) throw new Error();
-
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Order updated"
-          description={
-            action.type === "payment"
-              ? "Payment marked as paid"
-              : `Order marked as ${action.value.toLowerCase()}`
-          }
-        />,
-        { duration: 4000 },
+      appToast.success(
+        "Order updated",
+        action.type === "payment"
+          ? "Payment marked as paid"
+          : `Order marked as ${action.value.toLowerCase()}`,
       );
 
       router.refresh();
     } catch (err: any) {
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Update failed"
-          description={err?.message || "Could not update order"}
-        />,
-        { duration: 4000 },
+      appToast.error(
+        "Update failed",
+        `${err?.message || "Could not update order"}`,
       );
     } finally {
       setLoading(false);

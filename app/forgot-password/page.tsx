@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { toastSuccess } from "@/utils/toast-notification";
-
+import { appToast } from "@/utils/appToast";
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +44,8 @@ export default function ForgotPasswordPage() {
       });
 
       if (res.ok) {
-        toastSuccess(
+        appToast.success(
+          "Success",
           "If an account exists for this email, a reset link has been sent.",
         );
         setEmail(""); // optional reset

@@ -1,6 +1,6 @@
 import { ProductDetailUI } from "@/components/productDetailsUI";
 import { notFound } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { ProductDetailSkeleton } from "@/components/products/productDetailSkeleton";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";

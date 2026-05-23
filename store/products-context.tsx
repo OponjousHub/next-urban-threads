@@ -1,9 +1,9 @@
 "use client";
 
 import { createContext, useState, useContext, useEffect } from "react";
-import { menProducts as menData } from "@/data/products";
-import { womenProducts as womenData } from "@/data/products";
-import { AccessoryItems as accessoryData } from "@/data/products";
+// import { menProducts as menData } from "@/data/products";
+// import { womenProducts as womenData } from "@/data/products";
+// import { AccessoryItems as accessoryData } from "@/data/products";
 import { Product } from "@/types/product";
 
 interface ProductContextType {
@@ -28,11 +28,11 @@ export function ProductContextProvider({
   const [womenProducts, setWomenProducts] = useState<Product[]>([]);
   const [otherProducts, setOtherProducts] = useState<Product[]>([]);
 
-  useEffect(() => {
-    setMenProducts(menData);
-    setWomenProducts(womenData);
-    setOtherProducts(accessoryData);
-  }, []);
+  // useEffect(() => {
+  //   setMenProducts(menData);
+  //   setWomenProducts(womenData);
+  //   setOtherProducts(accessoryData);
+  // }, []);
 
   return (
     <ProductContext.Provider

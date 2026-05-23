@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 import { AdminToast } from "@/components/ui/adminToast";
 import InvoiceTemplate from "./invoice-template";
 import { useState } from "react";
 import { useTenant } from "@/store/tenant-provider-context";
+import { appToast } from "@/utils/appToast";
 
 interface OrderItem {
   id: string;
@@ -56,24 +56,10 @@ export default function OrderDetails({ order }: { order: Order }) {
       });
       if (!res.ok) throw new Error("Failed to update status");
       setLocalOrder({ ...localOrder, status: newStatus });
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Order updated"
-          description={`Order status updated to ${newStatus}`}
-        />,
-        { duration: 6000 },
-      );
+      appToast.success("Order updated", `Order status updated to ${newStatus}`);
     } catch (err) {
       console.error(err);
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Update failed"
-          description="Could not update order status"
-        />,
-        { duration: 6000 },
-      );
+      appToast.error("Update failed", "Could not update order status");
     } finally {
       setLoading(false);
     }
@@ -325,15 +311,7 @@ export default function OrderDetails({ order }: { order: Order }) {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(localOrder.id);
-
-                    toast.custom(
-                      <AdminToast
-                        type="success"
-                        title="Copied"
-                        description="Order ID copied to clipboard"
-                      />,
-                      { duration: 4000 },
-                    );
+                    appToast.success("Copied", "Order ID copied to clipboard");
                   }}
                   className="group rounded-2xl border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-gray-300 hover:shadow-md"
                 >

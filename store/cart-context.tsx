@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import { CartItem } from "@/types/cart";
-import toast from "react-hot-toast";
+import { appToast } from "@/utils/appToast";
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -83,11 +83,11 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
     });
 
     if (errorMessage) {
-      toast.error(errorMessage);
+      appToast.error("Error", errorMessage);
     }
 
     if (successMessage) {
-      toast.success(successMessage);
+      appToast.success("Success", successMessage);
     }
   };
 
@@ -126,7 +126,7 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
         .filter((item) => item.quantity > 0),
     );
     if (errorMessage) {
-      toast.error(errorMessage);
+      appToast.error("Error", errorMessage);
     }
   };
 

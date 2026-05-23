@@ -1,7 +1,6 @@
 import { getLoggedInUserId } from "@/lib/auth";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import DisableTwoFARepository from "./2FADisable.repository";
-import CryptoJS from "crypto-js";
 import speakeasy from "speakeasy";
 import { decrypt2FASecret } from "@/lib/decrypt";
 
