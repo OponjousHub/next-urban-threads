@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRatingInput } from "./starRatingInput";
-import { toastError, toastSuccess } from "@/utils/toast-notification";
 import { useRouter } from "next/navigation";
 import { DialogClose } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { updateProductRating } from "@/lib/calProduct-rating";
+import { appToast } from "@/utils/appToast";
 
 interface Props {
   productId: string;
@@ -35,7 +35,7 @@ export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
 
   async function handleSubmit() {
     if (!rating) {
-      toastError("Please select a rating");
+      appToast.warning("Warning", "Please select a rating");
       return;
     }
 
@@ -61,13 +61,13 @@ export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
       const data = await res.json();
 
       if (!res.ok) {
-        toastError(data.message || "Failed to submit review");
+        appToast.error("Error", `${data.message || "Failed to submit review"}`);
         return;
       }
 
       setExistReview(data.review ?? data);
-
-      toastSuccess(
+      appToast.success(
+        "SUccess",
         isEditing
           ? "Review updated successfully"
           : "Review submitted successfully",
@@ -79,7 +79,7 @@ export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
       router.refresh();
       onSuccess?.();
     } catch {
-      toastError("Something went wrong");
+      appToast.error("Error", "Something went wrong");
     } finally {
       setLoading(false);
     }

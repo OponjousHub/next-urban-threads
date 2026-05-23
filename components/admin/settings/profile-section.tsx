@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import toast from "react-hot-toast";
-import { AdminToast } from "@/components/ui/adminToast";
 import ChangEmailModal from "@/components/change-email-modal";
+import { appToast } from "@/utils/appToast";
 
 /* ---------------- Schema ---------------- */
 export const profileSchema = z.object({
@@ -37,17 +36,13 @@ export function ProfileSection() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.custom(
-          <AdminToast
-            type="error"
-            title="Fetch profile failed"
-            description={data?.message || "Something went wrong"}
-          />,
-          { duration: 6000 },
+        appToast.error(
+          "Fetch profile failed",
+          `${data?.message || "Something went wrong"}`,
         );
+
         return;
       }
-      console.log(data);
       reset({
         name: data.name || "",
         email: data.email || "",
@@ -69,25 +64,9 @@ export function ProfileSection() {
       });
 
       if (!res.ok) throw new Error();
-
-      toast.custom(
-        <AdminToast
-          type="success"
-          title="Update profile"
-          description="Profile updated successfully"
-        />,
-        { duration: 4000 },
-      );
+      appToast.success("Update profile", "Profile updated successfully");
     } catch {
-      toast.error("Update failed");
-      toast.custom(
-        <AdminToast
-          type="error"
-          title="Profile update failed"
-          description="Network error. Try again."
-        />,
-        { duration: 6000 },
-      );
+      appToast.error("Profile update failed", "Network error. Try again.");
     } finally {
       setLoading(false);
     }

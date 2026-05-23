@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+import { appToast } from "@/utils/appToast";
 import RichTextEditor from "@/components/ui/rich-text-editor";
 
 export default function PolicyForm() {
@@ -35,7 +35,7 @@ export default function PolicyForm() {
       }),
     });
 
-    toast.success("Policies updated ✅");
+    appToast.success("Success", "Policies updated ✅");
     setLoading(false);
   };
   if (loadingData) {

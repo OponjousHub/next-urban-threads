@@ -1,8 +1,7 @@
 "use client";
 
 import { UpdateButtons } from "@/components/admin/support/update-buttons";
-import toast from "react-hot-toast";
-import { AdminToast } from "@/components/ui/adminToast";
+import { appToast } from "@/utils/appToast";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
@@ -63,9 +62,9 @@ export default function SupportPageClient({
       });
 
       setReply("");
-      toast.success("Reply sent ✅");
+      appToast.success("Success", "Reply sent ✅");
     } catch (err) {
-      toast.error("Failed to send reply ❌");
+      appToast.error("Error", "Failed to send reply ❌");
     } finally {
       setSending(false);
     }

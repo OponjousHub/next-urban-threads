@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-// import "@/app/globals.css";
 
 function Newsletter() {
   const [email, setEmail] = useState("");

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { appToast } from "@/utils/appToast";
 
 type Props = {
   refundId: string;
@@ -29,7 +30,7 @@ export default function RefundReviewModal({
       const data = await res.json();
       setRefund(data);
     } catch {
-      toast.error("Failed to load refund");
+      appToast.error("Error", "Failed to load refund");
     } finally {
       setLoading(false);
     }

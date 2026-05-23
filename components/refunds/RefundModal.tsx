@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { DialogTitle } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
 import { useTenant } from "@/store/tenant-provider-context";
+import { appToast } from "@/utils/appToast";
 
 type Props = {
   order: any;
@@ -58,12 +59,13 @@ export default function RefundModal({ order, onClose }: Props) {
 
   async function handleSubmit() {
     if (!reason) {
-      toast.error("Please select a reason");
+      appToast.warning("Warning", "Please select a reason");
       return;
     }
 
     if (Object.keys(selectedItems).length === 0) {
-      toast.error("Please select at least one item");
+      appToast.warning("Warning", "Please select at least one item");
+
       return;
     }
 

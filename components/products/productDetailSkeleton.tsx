@@ -1,4 +1,3 @@
-// components/product/ProductDetailSkeleton.tsx
 export function ProductDetailSkeleton() {
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-6 animate-pulse">
