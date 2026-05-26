@@ -10,5 +10,5 @@ export type Tenant = {
   currency: string;
   heroImage: string;
   heroTitle: string;
-  storeMode: string;
+  storeMode: "SINGLE" | "MULTI";
 };
