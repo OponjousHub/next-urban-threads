@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default function FlashDeals() {
   const [products, setProducts] = useState([]);
+  const { tenant } = useTenant();
 
   useEffect(() => {
     async function load() {
@@ -52,7 +54,8 @@ export default function FlashDeals() {
                   <h3 className="font-medium">{product.name}</h3>
 
                   <p className="text-red-500 text-xl font-bold mt-2">
-                    ₦{Number(product.price).toLocaleString()}
+                    {tenant.currency}
+                    {Number(product.price).toLocaleString()}
                   </p>
                 </div>
               </div>

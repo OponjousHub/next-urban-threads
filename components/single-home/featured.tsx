@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default function FeaturedProducts() {
   const [products, setProducts] = useState([]);
+  const { tenant } = useTenant();
 
   useEffect(() => {
     async function load() {
@@ -42,7 +44,8 @@ export default function FeaturedProducts() {
                   <h3 className="font-medium line-clamp-2">{product.name}</h3>
 
                   <p className="font-bold text-xl mt-2 text-[var(--color-primary)]">
-                    ₦{Number(product.price).toLocaleString()}
+                    {tenant.currency}
+                    {Number(product.price).toLocaleString()}
                   </p>
                 </div>
               </div>
