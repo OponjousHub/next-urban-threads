@@ -1,7 +1,7 @@
-import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export async function getStoreMode() {
-  const tenant = await getDefaultTenant();
+  const { tenant } = useTenant();
 
   return tenant?.storeMode || "SINGLE_VENDOR";
 }

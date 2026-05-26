@@ -19,6 +19,7 @@ export async function PATCH(req: Request) {
       address,
       heroTitle,
       heroSubtitle,
+      // storeMode,
       heroCTA,
       heroImage,
     } = body;
@@ -33,6 +34,7 @@ export async function PATCH(req: Request) {
         primaryColor,
         timezone,
         heroCTA,
+        // storeMode,
         heroImage,
         heroSubtitle,
         heroTitle,
@@ -74,6 +76,7 @@ export async function GET() {
       email: tenant.email,
       currency: tenant.currency,
       logo: tenant.logo,
+      storeMode: tenant.storeMode,
       primaryColor: tenant.primaryColor,
       timezone: tenant.timezone,
       heroImage: tenant.heroImage,
