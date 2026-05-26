@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function StoreModeToggle({
   initialMode,
@@ -8,50 +9,73 @@ export default function StoreModeToggle({
   initialMode: "SINGLE" | "MULTI";
 }) {
   const [mode, setMode] = useState(initialMode);
+  const [loading, setLoading] = useState(false);
 
-  async function handleChange(newMode: "SINGLE" | "MULTI") {
-    setMode(newMode);
+  // Sync state whenever prop changes
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
-    await fetch("/api/admin/store-mode", {
-      method: "PATCH",
+  async function updateMode(newMode: "SINGLE" | "MULTI") {
+    try {
+      setLoading(true);
 
-      headers: {
-        "Content-Type": "application/json",
-      },
+      const res = await fetch("/api/admin/store-mode", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mode: newMode,
+        }),
+      });
 
-      body: JSON.stringify({
-        storeMode: newMode,
-      }),
-    });
+      if (!res.ok) {
+        throw new Error();
+      }
+
+      setMode(newMode);
+
+      toast.success(`Store switched to ${newMode}`);
+
+      // refresh server components/homepage
+      window.location.reload();
+    } catch {
+      toast.error("Failed to update store mode");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border">
-      <h3 className="font-semibold text-lg mb-5">Store Type</h3>
+    <div className="bg-white rounded-2xl border p-6 shadow-sm">
+      <h2 className="font-semibold text-lg mb-2">Store Mode</h2>
 
-      <div className="bg-gray-100 rounded-full p-1 flex">
+      <p className="text-sm text-gray-500 mb-6">
+        Switch between single vendor and marketplace mode
+      </p>
+
+      <div className="flex gap-4">
         <button
-          onClick={() => handleChange("SINGLE")}
-          className={`flex-1 py-3 rounded-full font-medium transition
-${mode === "SINGLE" ? "bg-black text-white shadow" : "text-gray-500"}
-`}
+          disabled={loading}
+          onClick={() => updateMode("SINGLE")}
+          className={`flex-1 py-3 rounded-full font-medium transition ${
+            mode === "SINGLE" ? "bg-black text-white" : "bg-white"
+          }`}
         >
           🏬 Single Vendor
         </button>
 
         <button
-          onClick={() => handleChange("MULTI")}
-          className={`flex-1 py-3 rounded-full font-medium transition
-${mode === "MULTI" ? "bg-black text-white shadow" : "text-gray-500"}
-`}
+          disabled={loading}
+          onClick={() => updateMode("MULTI")}
+          className={`flex-1 py-3 rounded-full font-medium transition ${
+            mode === "MULTI" ? "bg-black text-white" : "bg-white"
+          }`}
         >
           🛍 Multi Vendor
         </button>
       </div>
-
-      <p className="text-sm text-gray-500 mt-4">
-        Single = one store Multi = marketplace with vendors
-      </p>
     </div>
   );
 }
