@@ -3,8 +3,14 @@
 import { createContext, useContext } from "react";
 import { Tenant } from "@/types/tenant";
 
+type StoreMode = "SINGLE_VENDOR" | "MULTI_VENDOR";
+
 type TenantContextType = {
   tenant: Tenant;
+
+  storeMode: StoreMode;
+  isSingleVendor: boolean;
+  isMultiVendor: boolean;
 };
 
 const TenantContext = createContext<TenantContextType | null>(null);
@@ -16,8 +22,19 @@ export function TenantProvider({
   tenant: Tenant;
   children: React.ReactNode;
 }) {
+  // Use DB value ONLY
+  const storeMode = tenant.storeMode || "SINGLE_VENDOR";
+
   return (
-    <TenantContext.Provider value={{ tenant }}>
+    <TenantContext.Provider
+      value={{
+        tenant,
+        storeMode,
+        isSingleVendor: storeMode === "SINGLE_VENDOR",
+
+        isMultiVendor: storeMode === "MULTI_VENDOR",
+      }}
+    >
       {children}
     </TenantContext.Provider>
   );

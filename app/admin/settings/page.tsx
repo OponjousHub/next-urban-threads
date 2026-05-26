@@ -7,13 +7,16 @@ import GeneralSettings from "@/components/admin/settings/general-setting";
 import ManageCategory from "@/components/admin/settings/category-setting";
 import NewsletterAdminPage from "@/components/admin/settings/manage-subscription";
 import PolicyForm from "@/components/admin/settings/policy-form";
+import StoreModeToggle from "@/components/admin/settings/storeModeToggle";
 import FAQForm from "@/components/admin/settings/FAQForm/faq-form";
 import AboutSettings from "../content/about/page";
 import LegalSettings from "../content/legal/page";
 import RefundsPage from "../refunds/page";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
+  const { tenant, storeMode } = useTenant();
 
   const tabs = [
     { id: "general", label: "General" },
@@ -25,6 +28,7 @@ export default function SettingsPage() {
     { id: "about", label: "Manage About Us" },
     { id: "legal", label: "Legal setting" },
     { id: "refund", label: "Manage Refund" },
+    { id: "storeMode", label: "Manage store mode" },
     { id: "faqs", label: "FAQs" },
   ];
 
@@ -72,6 +76,11 @@ export default function SettingsPage() {
         {activeTab === "about" && <AboutSettings />}
         {activeTab === "legal" && <LegalSettings />}
         {activeTab === "refund" && <RefundsPage />}
+        {activeTab === "storeMode" && (
+          <StoreModeToggle
+            initialMode={storeMode === "SINGLE_VENDOR" ? "SINGLE" : "MULTI"}
+          />
+        )}
       </main>
     </div>
   );

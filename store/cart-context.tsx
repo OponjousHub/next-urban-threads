@@ -137,7 +137,6 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   );
 
   if (isLoading) return null; // Return nothing during load to avoid Hook mismatch
-  console.log("CART ITEMS---------", cartItems);
   return (
     <CartContext.Provider
       value={{

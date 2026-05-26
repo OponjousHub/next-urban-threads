@@ -20,14 +20,23 @@ export default function AdminLayout({
 
   useEffect(() => {
     const getUser = async () => {
-      const user = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/users/me`,
-        {
+      try {
+        const res = await fetch("/api/users/me", {
           cache: "no-store",
-        },
-      ).then((res) => res.json());
-      setUser(user);
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to get user");
+        }
+
+        const data = await res.json();
+
+        console.log(data);
+      } catch (error) {
+        console.error("User fetch error:", error);
+      }
     };
+
     getUser();
   }, []);
 

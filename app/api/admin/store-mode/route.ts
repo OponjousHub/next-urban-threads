@@ -1,27 +1,39 @@
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import { NextResponse } from "next/server";
 
-export async function PATCH(req: Request) {
-  const body = await req.json();
+export async function PATCH(req: NextRequest) {
+  try {
+    const tenant = await getDefaultTenant();
 
-  const tenant = await getDefaultTenant();
+    if (!tenant) {
+      return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
+    }
 
-  if (!tenant) {
-    return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
+    const { mode } = await req.json();
+
+    // Convert UI value → DB enum value
+    const storeMode = mode === "SINGLE" ? "SINGLE_VENDOR" : "MULTI_VENDOR";
+
+    await prisma.tenant.update({
+      where: {
+        id: tenant.id,
+      },
+      data: {
+        storeMode,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      storeMode,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "Failed to update store mode" },
+      { status: 500 },
+    );
   }
-
-  await prisma.tenant.update({
-    where: {
-      id: tenant.id,
-    },
-
-    data: {
-      storeMode: body.storeMode,
-    },
-  });
-
-  return NextResponse.json({
-    success: true,
-  });
 }
