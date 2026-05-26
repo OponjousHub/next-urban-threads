@@ -6,7 +6,7 @@ import TopVendors from "@/components/multi-home/top-vendors";
 import PromoBanner from "@/components/multi-home/promo-banner";
 import Newsletter from "@/components/multi-home/newsletter";
 
-export default function Home() {
+export default function MultiVendorHome() {
   return (
     <>
       <Hero />
