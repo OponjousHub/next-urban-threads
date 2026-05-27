@@ -17,6 +17,7 @@ type MobileDrawerProps = {
   setMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
   categories: Category[];
   user?: User | null;
+  isMultiVendor: boolean;
 };
 
 export function MobileDrawer({
@@ -24,6 +25,7 @@ export function MobileDrawer({
   setMenuOpen,
   categories,
   user,
+  isMultiVendor,
 }: MobileDrawerProps) {
   return (
     <>
@@ -90,6 +92,16 @@ export function MobileDrawer({
               Home
             </Link>
 
+            {isMultiVendor && (
+              <Link
+                href="/vendors"
+                onClick={() => setMenuOpen(false)}
+                className="block py-2 text-base hover:text-[var(--color-primary)] transition"
+              >
+                Vendors
+              </Link>
+            )}
+
             <div className="mt-4 text-xs uppercase text-gray-400 tracking-wide">
               Shop
             </div>
@@ -112,6 +124,15 @@ export function MobileDrawer({
                 {cat.name}
               </Link>
             ))}
+            {isMultiVendor && (
+              <Link
+                href="/seller/register"
+                onClick={() => setMenuOpen(false)}
+                className="block py-2 font-medium text-[var(--color-primary)]"
+              >
+                Become Seller
+              </Link>
+            )}
           </div>
 
           {/* 🔥 FOOTER (optional but premium feel) */}

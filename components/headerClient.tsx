@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiShoppingCart, FiMenu } from "react-icons/fi";
+import { useTenant } from "@/store/tenant-provider-context";
 import { useCart } from "@/store/cart-context";
 import UserMenu from "./header-userMenu";
 import { MobileDrawer } from "./header-mobiledrawer";
@@ -36,10 +37,12 @@ const HeaderClient = ({
   role,
   tenantName,
   categories,
+  storeMode,
 }: {
   role: string | null;
   tenantName: string;
   categories: Category[];
+  storeMode: string;
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { cartItems } = useCart();
@@ -49,6 +52,7 @@ const HeaderClient = ({
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const { isMultiVendor } = useTenant();
 
   const router = useRouter();
 
@@ -157,6 +161,14 @@ const HeaderClient = ({
             >
               Home
             </Link>
+            {isMultiVendor && (
+              <Link
+                href="/vendors"
+                className="hover:text-[var(--color-primary)] transition"
+              >
+                Vendors
+              </Link>
+            )}
 
             <div className="group relative">
               <span className="cursor-pointer hover:text-[var(--color-primary)]">
@@ -169,8 +181,6 @@ const HeaderClient = ({
                   <Link
                     href="/products"
                     className="group flex items-center justify-between px-3 py-2 rounded-md !text-gray-900 no-underline hover:bg-gray-100 transition"
-                    // className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 no-underline hover:bg-gray-100 transition"
-                    // className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100 transition"
                   >
                     <span className="text-gray-900 transition group-hover:translate-x-1 group-hover:text-[var(--color-primary)]">
                       All Products
@@ -201,6 +211,14 @@ const HeaderClient = ({
                 </div>
               </div>
             </div>
+            {isMultiVendor && (
+              <Link
+                href="/seller/register"
+                className="hover:text-[var(--color-primary)] transition"
+              >
+                Become Seller
+              </Link>
+            )}
           </nav>
 
           {/* SEARCH */}
@@ -324,6 +342,8 @@ const HeaderClient = ({
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
         categories={categories}
+        user={user}
+        isMultiVendor={isMultiVendor}
       />
     </>
   );
