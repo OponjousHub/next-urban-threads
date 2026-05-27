@@ -25,44 +25,57 @@ type Product = {
   images: string[];
   averageRating: number;
   reviewCount: number;
+
   category: Category;
+
+  // optional for marketplace mode
+  vendor?: {
+    id: string;
+    storeName: string;
+  };
 };
 
 export default function AllProductsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // 🔥 Read URL params
+  const { tenant } = useTenant();
+
+  const isMultiVendor = tenant.storeMode === "MULTI_VENDOR";
+
+  const isSingleVendor = tenant.storeMode === "SINGLE_VENDOR";
+
+  /* Dynamic grid */
+  const gridClass = isSingleVendor
+    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
+
   const category = searchParams.get("category");
   const featured = searchParams.get("featured");
   const flash = searchParams.get("flash");
   const searchQuery = searchParams.get("search");
   const pageParam = Number(searchParams.get("page") || "1");
-  const params = new URLSearchParams();
-  const { tenant } = useTenant();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+
   const [loadingProducts, setLoadingProducts] = useState(true);
+
   const [loadingCategories, setLoadingCategories] = useState(true);
+
   const [search, setSearch] = useState("");
-  const [totalPages, setTotalPages] = useState(1);
+
   const [page, setPage] = useState(pageParam);
+
   const [hasMore, setHasMore] = useState(true);
+
   const [loadingMore, setLoadingMore] = useState(false);
+
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const [suggestions, setSuggestions] = useState<Product[]>([]);
 
-  if (category) params.append("category", category);
-  if (featured === "true") params.append("featured", "true");
-  if (flash === "true") params.append("flash", "true");
-  if (searchQuery) params.append("search", searchQuery);
-
-  // ✅ ADD PAGINATION
-  params.append("page", String(page));
-  params.append("limit", "12");
-
-  /* ---------------- Fetch Products ---------------- */
+  /* FETCH PRODUCTS */
 
   const loadProducts = async (nextPage = 1, replace = false) => {
     try {
@@ -72,14 +85,19 @@ export default function AllProductsPage() {
       const params = new URLSearchParams();
 
       if (category) params.append("category", category);
+
       if (featured === "true") params.append("featured", "true");
+
       if (flash === "true") params.append("flash", "true");
+
       if (searchQuery) params.append("search", searchQuery);
 
       params.append("page", String(nextPage));
+
       params.append("limit", "12");
 
-      const res = await fetch(`/api/products?${params.toString()}`);
+      const res = await fetch(`/api/products?${params}`);
+
       const data = await res.json();
 
       setProducts((prev) =>
@@ -87,52 +105,34 @@ export default function AllProductsPage() {
       );
 
       setHasMore(nextPage < data.totalPages);
+
       setPage(nextPage);
-
-      const newParams = new URLSearchParams(window.location.search);
-      newParams.set("page", String(nextPage));
-
-      window.history.replaceState(null, "", `?${newParams.toString()}`);
-    } catch (err) {
-      console.error(err);
     } finally {
       setLoadingProducts(false);
       setLoadingMore(false);
     }
   };
 
-  // Initial load + filter reset
   useEffect(() => {
-    loadProducts(1, true); // reset products
-  }, [category, featured, flash, searchQuery]);
+    loadProducts(1, true);
+  }, [
+    category,
+    featured,
+    flash,
+    searchQuery,
+    tenant.storeMode, // 🔥 reacts immediately
+  ]);
 
-  /* --------------- Infinite scroll - auto trigger --------------*/
-  useEffect(() => {
-    const handleScroll = () => {
-      if (loadingMore || !hasMore) return;
+  /* CATEGORIES */
 
-      const nearBottom =
-        window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
-
-      if (nearBottom) {
-        loadProducts(page + 1);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [page, hasMore, loadingMore]);
-
-  /* ---------------- Fetch Categories ---------------- */
   useEffect(() => {
     async function loadCategories() {
       try {
-        setLoadingCategories(true);
         const res = await fetch("/api/admin/category");
+
         const data = await res.json();
-        setCategories(data || []);
-      } catch (err) {
-        console.error("Failed to load categories");
+
+        setCategories(data);
       } finally {
         setLoadingCategories(false);
       }
@@ -140,6 +140,8 @@ export default function AllProductsPage() {
 
     loadCategories();
   }, []);
+
+  /* SEARCH SUGGESTIONS */
 
   useEffect(() => {
     if (!search.trim()) {
@@ -149,101 +151,56 @@ export default function AllProductsPage() {
 
     const delay = setTimeout(async () => {
       const res = await fetch(`/api/products?search=${search}&limit=5`);
+
       const data = await res.json();
+
       setSuggestions(data.products || []);
     }, 300);
 
     return () => clearTimeout(delay);
   }, [search]);
 
-  /* ---------------- Loading ---------------- */
   if (loadingProducts || loadingCategories) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-        {Array.from({ length: 8 }).map((_, i) => (
+        {Array.from({
+          length: 8,
+        }).map((_, i) => (
           <ProductSkeleton key={i} />
         ))}
       </div>
     );
   }
 
-  /* ---------------- Dynamic Title ---------------- */
   const getTitle = () => {
     if (flash === "true") return "⚡ Flash Deals";
+
     if (featured === "true") return "Featured Products";
+
     if (category) {
       const cat = categories.find((c) => c.slug === category);
+
       return cat ? `${cat.name} Products` : "Products";
     }
-    return "All Products";
-  };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!search?.trim()) return;
-
-    router.push(`/products?search=${encodeURIComponent(search)}&page=1`);
+    return isMultiVendor ? "Marketplace Products" : "All Products";
   };
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 tracking-tight mb-2">
             {getTitle()}
           </h1>
+
           <p className="text-sm text-gray-500">
             Showing {products.length} products
-          </p>{" "}
-        </div>
-
-        {/* RIGHT: SEARCH (mobile + desktop) */}
-        <div className="md:hidden px-4 mb-8">
-          <form
-            onSubmit={handleSearch}
-            className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-2 bg-white shadow-sm focus-within:ring-2 focus-within:ring-[var(--color-primary)] transition"
-          >
-            {/* Icon */}
-            <FiSearch className="text-gray-400 text-lg" />
-
-            {/* Input */}
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 outline-none text-sm bg-transparent placeholder:text-gray-400"
-            />
-
-            {/* 🔥 Premium Button */}
-            <button
-              type="submit"
-              className="flex items-center justify-center bg-[var(--color-primary)] text-white text-sm font-medium px-4 py-1.5 rounded-full shadow hover:scale-105 active:scale-95 transition"
-            >
-              Go
-            </button>
-          </form>
-
-          {suggestions.length > 0 && (
-            <div className="mt-2 bg-white rounded-xl shadow-lg border p-2 space-y-2">
-              {suggestions.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/products/details/${item.id}`}
-                  onClick={() => setSuggestions([])}
-                  className="block px-3 py-2 text-sm hover:bg-gray-100 rounded"
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          )}
+          </p>
         </div>
 
         {/* Category Filters */}
         <div className="hidden md:flex flex-wrap gap-2">
-          {" "}
           {categories.map((cat) => (
             <button
               key={cat.id}
@@ -251,16 +208,18 @@ export default function AllProductsPage() {
                 router.push(`/products?category=${cat.slug}&page=1`)
               }
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all
-      ${
-        category === cat.slug
-          ? "bg-black text-white shadow"
-          : "bg-gray-100 hover:bg-gray-200"
-      }`}
+        ${
+          category === cat.slug
+            ? "bg-black text-white shadow"
+            : "bg-gray-100 hover:bg-gray-200"
+        }`}
             >
               {cat.name}
             </button>
           ))}
+
           {/* Reset */}
+
           <button
             onClick={() => router.push("/products")}
             className={`px-4 py-2 rounded-full font-medium transition ${
@@ -274,11 +233,13 @@ export default function AllProductsPage() {
         </div>
       </div>
 
-      {/* Products */}
       {products.length === 0 ? (
         <p className="text-gray-500 text-center mt-20">No products found.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 hover:-translate-y-1 transition-all duration-300">
+        <div
+          className={`grid ${gridClass} gap-6 hover:-translate-y-1 transition-all duration-300`}
+        >
+          {" "}
           {products.map((product) => {
             const imageUrl =
               product.images?.length > 0
@@ -290,7 +251,6 @@ export default function AllProductsPage() {
                 key={product.id}
                 className="group bg-white rounded-2xl overflow-hidden border hover:shadow-xl transition-all duration-300"
               >
-                {/* IMAGE */}
                 <div className="relative w-full h-56 overflow-hidden">
                   <Image
                     src={imageUrl}
@@ -298,62 +258,43 @@ export default function AllProductsPage() {
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-
-                  {/* HOVER ACTIONS */}
-                  <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
-                    {/* <button className="bg-white p-2 rounded-full shadow hover:bg-gray-100">
-                      ❤️
-                    </button> */}
-                    <button
-                      onClick={() => setSelectedProduct(product)}
-                      className="bg-white p-2 rounded-full shadow hover:bg-gray-100"
-                    >
-                      👁️
-                    </button>
-                  </div>
-
-                  {/* BADGE */}
-                  {flash === "true" && (
-                    <span className="absolute top-3 left-3 bg-red-500 text-white text-xs px-3 py-1 rounded-full shadow">
-                      Sale
-                    </span>
-                  )}
                 </div>
 
-                {/* CONTENT */}
                 <div className="p-4 flex flex-col gap-2">
-                  {/* CATEGORY */}
                   <span className="text-xs text-gray-400 uppercase tracking-wide">
                     {product.category?.name}
                   </span>
 
-                  {/* TITLE */}
                   <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-[var(--color-primary)] transition">
                     {product.name}
                   </h3>
 
-                  {/* RATING */}
+                  {/* ONLY FOR MULTI-VENDOR */}
+
+                  {isMultiVendor && product.vendor && (
+                    <p className="text-xs text-gray-500">
+                      Sold by{" "}
+                      <span className="font-medium">
+                        {product.vendor.storeName}
+                      </span>
+                    </p>
+                  )}
+
                   <ProductRating
                     rating={product.averageRating}
                     count={product.reviewCount}
                   />
 
-                  {/* PRICE */}
                   <div className="flex items-center justify-between mt-1">
                     <p className="text-lg font-bold text-[var(--color-primary)]">
                       {tenant.currency}
+
                       {product.price.toLocaleString()}
                     </p>
                   </div>
 
-                  {/* ADD TO CART */}
                   <Link href={`/products/details/${product.id}`}>
-                    <button
-                      // disabled={
-                      //   isOutOfStock || quantity >= selectedVariant.stock
-                      // }
-                      className="mt-3 w-full bg-black text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2"
-                    >
+                    <button className="mt-3 w-full bg-black text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2">
                       <FiShoppingCart size={14} />
                       View Product
                     </button>
@@ -371,7 +312,6 @@ export default function AllProductsPage() {
         </p>
       )}
 
-      {/*Load more button*/}
       {hasMore && (
         <div className="flex justify-center mt-10">
           <button

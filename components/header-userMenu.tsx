@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useTenant } from "@/store/tenant-provider-context";
 import { useRouter } from "next/navigation";
 
 type User = {
@@ -22,6 +23,8 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
 
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isMultiVendor } = useTenant();
+
   useClickOutside(dropdownRef, () => setOpen(false));
   if (!user) return null; // ✅ guard
 
@@ -73,6 +76,15 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
               onClick={handleCloseUserMenu}
             >
               Admin Dashboard
+            </Link>
+          )}
+          {isMultiVendor && role === "USER" && (
+            <Link
+              href="/seller/apply"
+              className="block px-4 py-2 text-sm hover:bg-gray-100"
+              onClick={handleCloseUserMenu}
+            >
+              Become Seller
             </Link>
           )}
           <button

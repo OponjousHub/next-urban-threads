@@ -52,7 +52,7 @@ const HeaderClient = ({
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<Product[]>([]);
-  const { isMultiVendor } = useTenant();
+  const { isMultiVendor, isSingleVendor } = useTenant();
 
   const router = useRouter();
 
@@ -155,12 +155,15 @@ const HeaderClient = ({
 
           {/* DESKTOP NAV */}
           <nav className="hidden md:flex items-center gap-8 text-base font-medium">
+            {/* HOME */}
             <Link
               href="/"
               className="hover:text-[var(--color-primary)] transition"
             >
               Home
             </Link>
+
+            {/* MULTI VENDOR ONLY */}
             {isMultiVendor && (
               <Link
                 href="/vendors"
@@ -170,13 +173,14 @@ const HeaderClient = ({
               </Link>
             )}
 
+            {/* SHOP DROPDOWN */}
             <div className="group relative">
               <span className="cursor-pointer hover:text-[var(--color-primary)]">
                 Shop
               </span>
 
               <div className="absolute top-full left-0 hidden group-hover:block bg-white border shadow-lg p-6 w-[420px] rounded-xl">
-                <div className="grid grid-cols-2 gap-2 text-sm ">
+                <div className="grid grid-cols-2 gap-2 text-sm">
                   {/* ALL PRODUCTS */}
                   <Link
                     href="/products"
@@ -191,13 +195,40 @@ const HeaderClient = ({
                     </span>
                   </Link>
 
+                  {/* NEW ARRIVALS */}
+                  <Link
+                    href="/products?sort=newest"
+                    className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100 transition"
+                  >
+                    <span className="transition group-hover:translate-x-1 group-hover:text-[var(--color-primary)]">
+                      New Arrivals
+                    </span>
+
+                    <span className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition text-xs">
+                      →
+                    </span>
+                  </Link>
+
+                  {/* FLASH DEALS */}
+                  <Link
+                    href="/products?flash=true"
+                    className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100 transition"
+                  >
+                    <span className="transition group-hover:translate-x-1 group-hover:text-[var(--color-primary)]">
+                      Flash Deals
+                    </span>
+
+                    <span className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition text-xs">
+                      →
+                    </span>
+                  </Link>
+
                   {/* CATEGORIES */}
                   {categories.map((cat) => (
                     <Link
                       key={cat.id}
                       href={`/products?category=${cat.slug}`}
                       className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 no-underline hover:bg-gray-100 transition"
-                      // className="group flex items-center justify-between px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100 transition"
                     >
                       <span className="transition group-hover:translate-x-1 group-hover:text-[var(--color-primary)]">
                         {cat.name}
@@ -211,6 +242,18 @@ const HeaderClient = ({
                 </div>
               </div>
             </div>
+
+            {/* SINGLE VENDOR ONLY */}
+            {isSingleVendor && (
+              <Link
+                href="/contact"
+                className="hover:text-[var(--color-primary)] transition"
+              >
+                Contact
+              </Link>
+            )}
+
+            {/* MULTI VENDOR ONLY */}
             {isMultiVendor && (
               <Link
                 href="/seller/register"
