@@ -5,6 +5,7 @@ import { FiX, FiShoppingCart } from "react-icons/fi";
 import { ProductRating } from "@/utils/product-rating";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
 import Link from "next/link";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Product = {
   id: string;
@@ -21,13 +22,12 @@ type Props = {
 };
 
 export default function QuickViewModal({ product, onClose }: Props) {
-  //   const tenant = getTenant();
+  const { tenant } = useTenant();
   if (!product) return null;
 
   const imageUrl =
     product.images?.length > 0
-      ? //   cloudinaryImage(product.images[0], "large")
-        cloudinaryImage(product.images[0], "detail")
+      ? cloudinaryImage(product.images[0], "detail")
       : "/placeholder.png";
 
   return (
@@ -72,7 +72,8 @@ export default function QuickViewModal({ product, onClose }: Props) {
               />
 
               <p className="text-2xl font-bold text-[var(--color-primary)] mt-4">
-                ₦{product.price.toLocaleString()}
+                {tenant.currency}
+                {product.price.toLocaleString()}
               </p>
 
               <p className="text-sm text-gray-500 mt-3">

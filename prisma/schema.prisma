@@ -110,6 +110,7 @@ model Order {
   paymentReference   String              @unique
   shippingAddressId  String
   paymentStatus      PaymentStatus        @default(PENDING)
+  storeMode StoreMode @default(SINGLE_VENDOR)
   tenantId           String
   vendorId           String?
   refundStatus       RefundStatus         @default(NONE)
@@ -129,6 +130,7 @@ model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
   productId String
+  vendorId  String?
   quantity  Int
   price     Decimal @db.Decimal(10, 2)
   tenantId  String

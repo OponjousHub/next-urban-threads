@@ -14,6 +14,7 @@ import { useRecentlyViewed } from "./products/useRecentlyViewed";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
+import { generateId } from "@/utils/generateId";
 
 interface Props {
   product: Product;
@@ -159,7 +160,7 @@ export function ProductDetailUI({
       return;
     }
     addToCart({
-      id: crypto.randomUUID(),
+      id: generateId(),
 
       productId: product.id,
 
@@ -211,7 +212,7 @@ export function ProductDetailUI({
 
   const handleBuyButton = () => {
     const buyNowItem = {
-      id: crypto.randomUUID(),
+      id: generateId(),
 
       productId: product.id,
 
