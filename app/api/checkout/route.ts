@@ -181,6 +181,7 @@ export async function POST(req: NextRequest) {
       data: {
         userId,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         shippingAddressId,
         totalAmount,
         customerEmail: email || shippingAddress?.email || "",
