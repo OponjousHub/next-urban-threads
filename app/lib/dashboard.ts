@@ -21,13 +21,14 @@ export async function getUserDashboardStats(
     addresses,
   ] = await Promise.all([
     prisma.order.count({
-      where: { userId, tenantId: tenant.id },
+      where: { userId, tenantId: tenant.id, storeMode: tenant.storeMode },
     }),
 
     prisma.order.count({
       where: {
         userId,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         status: {
           in: [OrderStatus.PENDING, OrderStatus.PROCESSING],
         },
@@ -38,6 +39,7 @@ export async function getUserDashboardStats(
       where: {
         userId,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         paymentStatus: PaymentStatus.PAID,
       },
       _sum: {
@@ -46,7 +48,7 @@ export async function getUserDashboardStats(
     }),
 
     prisma.order.findMany({
-      where: { userId, tenantId: tenant.id },
+      where: { userId, tenantId: tenant.id, storeMode: tenant.storeMode },
       orderBy: { createdAt: "desc" },
       take: 5,
 
@@ -66,7 +68,11 @@ export async function getUserDashboardStats(
     }),
 
     prisma.address.findFirst({
-      where: { userId, tenantId: tenant.id, isDefault: true },
+      where: {
+        userId,
+        tenantId: tenant.id,
+        isDefault: true,
+      },
     }),
 
     prisma.user.findUnique({
