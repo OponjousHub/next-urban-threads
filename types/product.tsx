@@ -15,6 +15,7 @@ export interface Product {
   reviewCount?: number;
   variants?: ProductVariant[];
   stock: number;
+  storeMode: string;
   videos?: {
     url: string;
     public_id: string;

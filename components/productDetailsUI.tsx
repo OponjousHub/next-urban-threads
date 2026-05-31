@@ -163,7 +163,6 @@ export function ProductDetailUI({
       id: generateId(),
 
       productId: product.id,
-
       variantId: selectedVariant?.id,
 
       name: product.name,

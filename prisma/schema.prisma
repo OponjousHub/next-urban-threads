@@ -127,18 +127,19 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  productId String
-  vendorId  String?
-  quantity  Int
-  price     Decimal @db.Decimal(10, 2)
-  tenantId  String
+  id            String  @id @default(cuid())
+  orderId       String
+  productId     String
+  vendorId      String?
+  quantity      Int
+  price         Decimal @db.Decimal(10, 2)
+  storeMode     StoreMode @default(SINGLE_VENDOR)
+  tenantId      String
 
-  variantId    String?
-  variantColor String?
-  variantSize  String?
-  image        String?
+  variantId     String?
+  variantColor  String?
+  variantSize   String?
+  image         String?
 
   order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id])

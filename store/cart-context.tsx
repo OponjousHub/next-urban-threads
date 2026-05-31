@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { CartItem } from "@/types/cart";
 import { appToast } from "@/utils/appToast";
+import { useTenant } from "@/store/tenant-provider-context";
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -24,22 +25,43 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { tenant } = useTenant();
+  const cartKey = `cart_${tenant.storeMode}`;
+
   // ✅ Load Cart from localStorage
+  // useEffect(() => {
+  //   try {
+  //     // const stored = localStorage.getItem("cart");
+  //     const stored = localStorage.getItem(cartKey);
+  //     if (stored) setCartItems(JSON.parse(stored));
+  //   } catch (err) {
+  //     console.error("Error reading cart from localStorage:", err);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, []);
+
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("cart");
-      if (stored) setCartItems(JSON.parse(stored));
+      const stored = localStorage.getItem(cartKey);
+
+      if (stored) {
+        setCartItems(JSON.parse(stored));
+      } else {
+        setCartItems([]);
+      }
     } catch (err) {
       console.error("Error reading cart from localStorage:", err);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [cartKey]);
 
   // ✅ Save cart to localStorage
   useEffect(() => {
     if (!isLoading) {
-      localStorage.setItem("cart", JSON.stringify(cartItems));
+      // localStorage.setItem("cart", JSON.stringify(cartItems));
+      localStorage.setItem(cartKey, JSON.stringify(cartItems));
     }
   }, [cartItems, isLoading]);
 
@@ -93,7 +115,8 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
 
   // ✅ Clear cart
   const clearCart = () => {
-    localStorage.removeItem("cart");
+    localStorage.removeItem(cartKey);
+    // localStorage.removeItem("cart");
     setCartItems([]);
   };
 
