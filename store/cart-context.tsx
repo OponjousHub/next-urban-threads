@@ -29,17 +29,6 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   const cartKey = `cart_${tenant.storeMode}`;
 
   // ✅ Load Cart from localStorage
-  // useEffect(() => {
-  //   try {
-  //     // const stored = localStorage.getItem("cart");
-  //     const stored = localStorage.getItem(cartKey);
-  //     if (stored) setCartItems(JSON.parse(stored));
-  //   } catch (err) {
-  //     console.error("Error reading cart from localStorage:", err);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }, []);
 
   useEffect(() => {
     try {
@@ -60,7 +49,6 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   // ✅ Save cart to localStorage
   useEffect(() => {
     if (!isLoading) {
-      // localStorage.setItem("cart", JSON.stringify(cartItems));
       localStorage.setItem(cartKey, JSON.stringify(cartItems));
     }
   }, [cartItems, isLoading]);
@@ -116,7 +104,6 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   // ✅ Clear cart
   const clearCart = () => {
     localStorage.removeItem(cartKey);
-    // localStorage.removeItem("cart");
     setCartItems([]);
   };
 
@@ -137,7 +124,6 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
 
           if (newQty > item.stock) {
             errorMessage = `Only ${item.stock} in stock`;
-            // toast.error(`Only ${item.stock} in stock`);
             return item;
           }
 

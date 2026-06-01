@@ -38,6 +38,7 @@ export default async function OrdersPage({ searchParams }: Props) {
       orderBy: { createdAt: "desc" },
       where: {
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
 
         ...(status &&
           status !== "ALL" && {
