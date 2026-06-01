@@ -317,6 +317,7 @@ model Contact {
   message   String
   tenantId  String
   createdAt DateTime    @default(now())
+  storeMode StoreMode   @default(SINGLE_VENDOR)
   status    ContactStatus   @default(UNREAD)
   priority  Priority    @default(NORMAL)
   tag       ContactTag?

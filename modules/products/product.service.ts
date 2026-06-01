@@ -29,7 +29,7 @@ export default class ProductService {
     if (!tenant) {
       throw new Error("Default tenant not found");
     }
-    return ProductRepository.findById(id, tenant.id);
+    return ProductRepository.findById(id, tenant.id, tenant.storeMode);
   }
 
   static async updateProduct(id: string, data: any) {

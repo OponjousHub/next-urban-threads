@@ -13,8 +13,12 @@ export default async function ProductDetailPage({
     throw new Error("Default tenant not found");
   }
 
-  const product = await prisma.product.findUnique({
-    where: { id: params.id, tenantId: tenant.id },
+  const product = await prisma.product.findFirst({
+    where: {
+      id: params.id,
+      tenantId: tenant.id,
+      storeMode: tenant.storeMode,
+    },
   });
 
   if (!product) return notFound();

@@ -130,6 +130,7 @@ export default class ProductController {
     let filters: any = {
       tenantId: tenant.id,
       deletedAt: null,
+      storeMode: tenant.storeMode,
     };
 
     if (featured) {
@@ -168,7 +169,6 @@ export default class ProductController {
     const [products, total] = await Promise.all([
       ProductService.getProducts({
         where: filters,
-        // storeMode: tenant.storeMode,
         skip,
         take: limit,
       }),

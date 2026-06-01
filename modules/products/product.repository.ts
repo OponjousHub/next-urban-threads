@@ -38,11 +38,12 @@ export default class ProductRepository {
     return prisma.product.findMany(filters);
   }
 
-  static findById(id: string, tenantId: string) {
-    return prisma.product.findUnique({
+  static findById(id: string, tenantId: string, storeMode: StoreMode) {
+    return prisma.product.findFirst({
       where: {
         id,
         tenantId,
+        storeMode,
         deletedAt: null,
       },
       include: {
