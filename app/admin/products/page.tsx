@@ -44,6 +44,7 @@ export default async function ProductsPage({
     where: {
       deletedAt: null,
       tenantId: tenant.id,
+      storeMode: tenant.storeMode,
 
       ...(q && {
         OR: [
@@ -73,6 +74,7 @@ export default async function ProductsPage({
     where: {
       deletedAt: null,
       tenantId: tenant.id,
+      storeMode: tenant.storeMode,
 
       ...(q && {
         OR: [

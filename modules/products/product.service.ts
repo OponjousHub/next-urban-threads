@@ -1,10 +1,15 @@
 import ProductRepository from "./product.repository";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
+import { StoreMode } from "@prisma/client";
 
 export default class ProductService {
-  static async createProduct(data: any, tenantId: string) {
-    return ProductRepository.create(data, tenantId);
+  static async createProduct(
+    data: any,
+    tenantId: string,
+    storeMode: StoreMode,
+  ) {
+    return ProductRepository.create(data, tenantId, storeMode);
   }
 
   static async getProducts(options: any) {

@@ -1,11 +1,12 @@
 import { prisma } from "@/utils/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, StoreMode } from "@prisma/client";
 import slugify from "slugify";
 
 export default class ProductRepository {
   static create(
     data: Omit<Prisma.ProductCreateInput, "tenant">,
     tenantId: string,
+    storeMode: StoreMode | undefined,
   ) {
     const slug = slugify(data.name, { lower: true, strict: true });
 
@@ -22,6 +23,7 @@ export default class ProductRepository {
         tenant: {
           connect: { id: tenantId },
         },
+        storeMode: storeMode,
         slug,
         thumbnail,
         images: imagesArray.length ? { set: imagesArray } : undefined,

@@ -72,14 +72,14 @@ export default class ProductController {
         images,
         videos,
         description,
-        // variants,
+
         user: user?.id ? { connect: { id: user.id } } : undefined,
         createdByName: user?.name,
       },
       tenant.id,
+      tenant.storeMode,
     );
-    console.log("CREATED PRODUCT WITH VIDEOS", product);
-    // if (!colours || !sizes) return null;
+
     if (variants?.length) {
       await prisma.productVariant.createMany({
         data: variants.map((v) => ({
@@ -168,6 +168,7 @@ export default class ProductController {
     const [products, total] = await Promise.all([
       ProductService.getProducts({
         where: filters,
+        // storeMode: tenant.storeMode,
         skip,
         take: limit,
       }),
