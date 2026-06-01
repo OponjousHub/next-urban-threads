@@ -87,6 +87,7 @@ model Product {
   category        Category       @relation(fields: [categoryId], references: [id])
   user            User?          @relation("UserProduct", fields: [createdById], references: [id])
   tenant          Tenant         @relation(fields: [tenantId], references: [id])
+  storeMode       StoreMode @default(SINGLE_VENDOR)
   reviews         Review[]
   wishlistItem    WishlistItem[]
   refundItem      RefundItem[]
