@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useParams } from "next/navigation";
+import { appToast } from "@/utils/appToast";
 import toast from "react-hot-toast";
-import { GetToast } from "@/components/ui/adminToast";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ReviewForm } from "@/components/reviews/reviewForm";
 import CustomerTrackingTimeline from "@/components/order/CustomerTrackingTimeline";
@@ -80,26 +80,13 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
         toast.dismiss(toastId);
 
         if (data.status === "PAID") {
-          toast.custom(
-            <GetToast title="Payment verified!" description="Status: Paid" />,
-            { duration: 4000 },
-          );
+          appToast.success("Payment verified", "Status: Paid");
         } else if (data.status === "FAILED") {
-          toast.custom(
-            <GetToast title="Payment failed!" description="Status: Failed" />,
-            { duration: 4000 },
-          );
+          appToast.error("Payment failed!", "Status: Failed");
         }
       } catch (err) {
         toast.dismiss(toastId);
-        toast.custom(
-          <GetToast
-            type="error"
-            title="Verification failed"
-            description="Could not verify payment"
-          />,
-          { duration: 4000 },
-        );
+        appToast.error("Verification failed", "Could not verify payment");
       } finally {
         setLoading(false);
       }
