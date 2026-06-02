@@ -53,6 +53,7 @@ export async function POST(req: Request) {
         tenant: {
           connect: { id: tenant.id },
         },
+        storeMode: tenant.storeMode,
       },
     });
 

@@ -23,25 +23,38 @@ export default async function SupportPage({
   const [unreadCount, urgentCount, allCount, resolvedCount] = await Promise.all(
     [
       prisma.contact.count({
-        where: { tenantId: tenant.id, status: ContactStatus.UNREAD },
+        where: {
+          tenantId: tenant.id,
+          status: ContactStatus.UNREAD,
+          storeMode: tenant.storeMode,
+        },
       }),
 
       prisma.contact.count({
-        where: { tenantId: tenant.id, priority: "HIGH" },
+        where: {
+          tenantId: tenant.id,
+          priority: "HIGH",
+          storeMode: tenant.storeMode,
+        },
       }),
 
       prisma.contact.count({
-        where: { tenantId: tenant.id },
+        where: { tenantId: tenant.id, storeMode: tenant.storeMode },
       }),
 
       prisma.contact.count({
-        where: { tenantId: tenant.id, status: "RESOLVED" },
+        where: {
+          tenantId: tenant.id,
+          status: "RESOLVED",
+          storeMode: tenant.storeMode,
+        },
       }),
     ],
   );
 
   const whereClause: any = {
     tenantId: tenant.id,
+    storeMode: tenant.storeMode,
   };
 
   if (statusParam) {
