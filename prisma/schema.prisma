@@ -100,7 +100,6 @@ model Order {
   id                 String               @id @default(cuid())
   userId             String
   paymentTxRef       String?   // tx_ref (tracking)
-  // paymentReference   String?   // transaction_id (refunds)
   customerEmail      String
   createdAt          DateTime             @default(now())
   status             OrderStatus          @default(PENDING)

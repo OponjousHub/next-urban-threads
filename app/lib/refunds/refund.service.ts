@@ -55,33 +55,11 @@ export async function createRefundRequest(data: {
     (sum, item) => sum + item.priceAtPurchase * item.quantity,
     0,
   );
-  // let requestedAmount = 0;
-
-  // const refundItems = data.items.map((reqItem) => {
-  //   const orderItem = order.items.find(
-  //     (i) => i.productId === reqItem.productId,
-  //   );
-
-  //   if (!orderItem) throw new Error("Invalid item");
-
-  //   if (reqItem.quantity > orderItem.quantity) {
-  //     throw new Error("Invalid quantity");
-  //   }
-
-  //   const price = Number(orderItem.product.price);
-
-  //   requestedAmount += +price * reqItem.quantity;
-
-  //   return {
-  //     productId: reqItem.productId,
-  //     quantity: reqItem.quantity,
-  //     priceAtPurchase: price,
-  //   };
-  // });
 
   return prisma.refundRequest.create({
     data: {
       tenantId: order.tenantId,
+      storeMode: order.storeMode,
       orderId: order.id,
       userId: userId,
       vendorId: null,
@@ -89,7 +67,6 @@ export async function createRefundRequest(data: {
       description: data.description,
       requestedAmount,
       currency: tenant.currency, // adjust later per tenant
-
       items: {
         create: refundItems,
       },
