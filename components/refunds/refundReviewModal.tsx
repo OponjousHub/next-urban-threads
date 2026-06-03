@@ -39,7 +39,7 @@ export default function RefundReviewModal({
   async function handleAction(type: "approve" | "reject") {
     setActionLoading(true);
 
-    const toastId = toast.loading(
+    const loadingToast = appToast.loading(
       type === "approve" ? "Approving..." : "Rejecting...",
     );
 
@@ -48,19 +48,33 @@ export default function RefundReviewModal({
         method: "POST",
       });
 
-      toast.success(
+      appToast.dismiss(loadingToast);
+
+      appToast.success(
+        "Success",
         type === "approve" ? "Refund approved" : "Refund rejected",
-        { id: toastId },
       );
 
       onActionComplete();
       onClose();
     } catch {
-      toast.error("Action failed", { id: toastId });
+      appToast.dismiss(loadingToast);
+
+      appToast.error(
+        "Error",
+        type === "approve"
+          ? "Failed to approve refund"
+          : "Failed to reject refund",
+      );
     } finally {
       setActionLoading(false);
     }
   }
+
+  const isProcessed =
+    refund?.status === "REFUNDED" || refund?.status === "REJECTED";
+
+  const isProcessing = refund?.status === "PROCESSING";
 
   return (
     <>
@@ -117,21 +131,43 @@ export default function RefundReviewModal({
 
           {/* ACTIONS */}
           <div className="flex gap-3 justify-end">
-            <button
-              disabled={actionLoading}
-              onClick={() => handleAction("reject")}
-              className="px-4 py-2 rounded-lg border text-red-600"
-            >
-              Reject
-            </button>
+            {refund.status === "REQUESTED" && (
+              <div className="flex gap-3 justify-end">
+                <button
+                  disabled={actionLoading}
+                  onClick={() => handleAction("reject")}
+                  className="px-4 py-2 rounded-lg border text-red-600"
+                >
+                  Reject
+                </button>
 
-            <button
-              disabled={actionLoading}
-              onClick={() => handleAction("approve")}
-              className="px-4 py-2 rounded-lg bg-black text-white"
-            >
-              Approve Refund
-            </button>
+                <button
+                  disabled={actionLoading}
+                  onClick={() => handleAction("approve")}
+                  className="px-4 py-2 rounded-lg bg-black text-white"
+                >
+                  Approve Refund
+                </button>
+              </div>
+            )}
+
+            {refund.status === "PROCESSING" && (
+              <div className="text-center py-3 text-yellow-600 font-medium">
+                Refund Processing...
+              </div>
+            )}
+
+            {refund.status === "REFUNDED" && (
+              <div className="text-center py-3 text-green-600 font-medium">
+                ✓ Refund Approved & Processed
+              </div>
+            )}
+
+            {refund.status === "REJECTED" && (
+              <div className="text-center py-3 text-red-600 font-medium">
+                ✕ Refund Rejected
+              </div>
+            )}
           </div>
         </>
       )}

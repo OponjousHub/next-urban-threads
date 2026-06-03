@@ -85,12 +85,16 @@ export default function RefundModal({ order, onClose }: Props) {
         }),
       });
 
-      toast.success("Refund request submitted", { id: toastId });
-
+      // toast.success("Refund request submitted", { id: toastId });
+      appToast.success(
+        "Refund request",
+        "Refund request submitted successfully",
+      );
       onClose();
       router.refresh();
     } catch (err) {
-      toast.error("Failed to submit refund", { id: toastId });
+      // toast.error("Failed to submit refund", { id: toastId });
+      appToast.error("Refund request", "Failed to submit refund!");
     } finally {
       setLoading(false);
     }

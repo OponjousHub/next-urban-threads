@@ -2,11 +2,31 @@ import { toast } from "sonner";
 import { AdminToast } from "@/components/ui/adminToast";
 
 export const appToast = {
+  loading: (title: string, description?: string) => {
+    return toast.custom(
+      () => (
+        <AdminToast
+          type="warning"
+          title={title}
+          description={description}
+          duration={999999}
+        />
+      ),
+      {
+        duration: Infinity,
+      },
+    );
+  },
+
+  dismiss: (id?: string | number) => {
+    toast.dismiss(id);
+  },
+
   success: (title: string, description?: string) => {
     const duration = 4000;
 
     toast.custom(
-      (id) => (
+      () => (
         <AdminToast
           type="success"
           title={title}
@@ -14,9 +34,7 @@ export const appToast = {
           duration={duration}
         />
       ),
-      {
-        duration,
-      },
+      { duration },
     );
   },
 
@@ -24,7 +42,7 @@ export const appToast = {
     const duration = 6000;
 
     toast.custom(
-      (id) => (
+      () => (
         <AdminToast
           type="error"
           title={title}
@@ -32,9 +50,7 @@ export const appToast = {
           duration={duration}
         />
       ),
-      {
-        duration,
-      },
+      { duration },
     );
   },
 
@@ -42,7 +58,7 @@ export const appToast = {
     const duration = 5000;
 
     toast.custom(
-      (id) => (
+      () => (
         <AdminToast
           type="warning"
           title={title}
@@ -50,9 +66,7 @@ export const appToast = {
           duration={duration}
         />
       ),
-      {
-        duration,
-      },
+      { duration },
     );
   },
 };
