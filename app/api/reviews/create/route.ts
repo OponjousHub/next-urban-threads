@@ -20,6 +20,7 @@ export async function POST(req: Request) {
       where: {
         userId,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         paymentStatus: "PAID",
         status: "DELIVERED",
         items: {
@@ -43,6 +44,7 @@ export async function POST(req: Request) {
         userId,
         productId,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         orderId: hasPurchased.id,
         verifiedPurchase: true,
         status: "APPROVED", // or PENDING depending on tenant policy
@@ -54,6 +56,7 @@ export async function POST(req: Request) {
       where: {
         productId,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         status: "APPROVED",
       },
       _avg: { rating: true },

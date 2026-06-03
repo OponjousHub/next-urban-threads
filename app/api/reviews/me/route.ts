@@ -6,7 +6,6 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const orderId = searchParams.get("orderId");
-    console.log("-------------ORDERID-----------", orderId);
     if (!orderId) {
       return NextResponse.json(
         { message: "Order ID required" },
@@ -26,6 +25,7 @@ export async function GET(req: Request) {
         id: orderId,
         userId,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
       },
       include: {
         items: {
@@ -48,6 +48,7 @@ export async function GET(req: Request) {
       where: {
         userId,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         productId: {
           in: productIds,
         },
