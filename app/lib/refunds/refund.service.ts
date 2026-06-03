@@ -16,6 +16,8 @@ export async function createRefundRequest(data: {
   }[];
 }) {
   const userId = await getLoggedInUserId();
+
+  console.log("DATA DATA DATA", data);
   if (!userId) {
     throw new Error("Unauthorized");
   }
@@ -45,33 +47,79 @@ export async function createRefundRequest(data: {
   }
 
   //  Calculate refund safely from DB
+
   const refundItems = data.items.map((item) => ({
     productId: item.productId,
-    quantity: item.quantity,
-    priceAtPurchase: item.priceAtPurchase,
+    quantity: Number(item.quantity),
+    priceAtPurchase: Number(item.priceAtPurchase),
   }));
+
+  if (
+    refundItems.some(
+      (item) => Number.isNaN(item.priceAtPurchase) || item.priceAtPurchase <= 0,
+    )
+  ) {
+    throw new Error("Invalid refund item price");
+  }
 
   const requestedAmount = refundItems.reduce(
     (sum, item) => sum + item.priceAtPurchase * item.quantity,
     0,
   );
 
+  console.log("requestedAmount", requestedAmount);
+  console.log("refundItems", refundItems);
+
   return prisma.refundRequest.create({
     data: {
       tenantId: order.tenantId,
       storeMode: order.storeMode,
-      orderId: order.id,
-      userId: userId,
+
+      order: {
+        connect: {
+          id: order.id,
+        },
+      },
+
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+
       vendorId: null,
       reason: data.reason,
       description: data.description,
       requestedAmount,
-      currency: tenant.currency, // adjust later per tenant
+      currency: tenant.currency,
+
       items: {
         create: refundItems,
       },
     },
   });
+
+  // return prisma.refundRequest.create({
+  //   data: {
+  //     tenantId: order.tenantId,
+  //     storeMode: order.storeMode,
+  //     // orderId: order.id,
+  //     order: {
+  //       connect: {
+  //         id: order.id,
+  //       },
+  //     },
+  //     userId: userId,
+  //     vendorId: null,
+  //     reason: data.reason,
+  //     description: data.description,
+  //     requestedAmount,
+  //     currency: tenant.currency, // adjust later per tenant
+  //     items: {
+  //       create: refundItems,
+  //     },
+  //   },
+  // });
 }
 
 export async function approveRefund(refundId: string) {

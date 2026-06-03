@@ -9,7 +9,7 @@ export async function GET() {
   }
 
   const refunds = await prisma.refundRequest.findMany({
-    where: { tenantId: tenant.id },
+    where: { tenantId: tenant.id, storeMode: tenant.storeMode },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,

@@ -36,7 +36,7 @@ export default function RefundModal({ order, onClose }: Props) {
         [item.id]: {
           productId: item.product.id,
           quantity: 1,
-          price: item.product.price,
+          priceAtPurchase: item.price,
         },
       };
     });
@@ -53,7 +53,7 @@ export default function RefundModal({ order, onClose }: Props) {
   }
 
   const totalRefund = Object.values(selectedItems).reduce(
-    (sum: number, item: any) => sum + item.price * item.quantity,
+    (sum: number, item: any) => sum + item.priceAtPurchase * item.quantity,
     0,
   );
 

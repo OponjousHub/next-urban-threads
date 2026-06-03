@@ -366,7 +366,7 @@ model RefundRequest {
   orderId         String
   userId          String
   vendorId        String?   // null for single vendor
-
+  storeMode       StoreMode 
   status          RefundStatus @default(REQUESTED)
 
   reason          String
