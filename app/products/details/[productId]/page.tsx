@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { ProductDetailSkeleton } from "@/components/products/productDetailSkeleton";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 async function getProduct(id: string) {
   const res = await fetch(
@@ -23,6 +24,9 @@ export default async function ProductDetailPage({
   params: Promise<{ productId: string }>;
 }) {
   const auth = await getAuthPayload();
+  const tenant = await getDefaultTenant();
+  if (!tenant) throw new Error("Default tenant not found");
+
   const role = auth?.role || "GUEST";
 
   const { productId } = await params;
@@ -33,6 +37,8 @@ export default async function ProductDetailPage({
   const reviews = await prisma.review.findMany({
     where: {
       productId,
+      tenantId: tenant.id,
+      storeMode: tenant.storeMode,
       status: "APPROVED",
     },
     include: { user: true },
