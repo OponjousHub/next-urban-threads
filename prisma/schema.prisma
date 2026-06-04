@@ -9,6 +9,7 @@ datasource db {
 
 model User {
   id                           String         @id @default(cuid())
+  vendorId                     String?
   email                        String         @unique
   createdAt                    DateTime       @default(now())
   address                      String?
@@ -36,6 +37,7 @@ model User {
   deactivatedAt                DateTime?
   resetToken                   String?        @unique
   resetTokenExpiry             DateTime?
+  vendor                       Vendor? @relation(fields:[vendorId], references:[id])
   addresses                    Address[]
   cartItems                    CartItem[]
   orders                       Order[]
@@ -79,6 +81,7 @@ model Product {
   rating4Count    Int            @default(0)
   rating5Count    Int            @default(0)
   vendorId        String?
+  vendor          Vendor? @relation(fields: [vendorId], references: [id])
   categoryId      String
   isFlashDeal     Boolean        @default(false)
   variants        ProductVariant[] 
@@ -94,6 +97,26 @@ model Product {
 
   @@unique([tenantId, slug])
   @@index([tenantId])
+}
+
+model Vendor {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  logo        String?
+  banner      String?
+  description String?
+
+  email       String?
+  phone       String?
+
+  status      VendorStatus @default(PENDING)
+
+  products    Product[]
+  orders      Order[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Order {
@@ -283,11 +306,7 @@ model WishlistItem {
   @@index([tenantId])
 }
 
-model Vendor {
-  id       String @id @default(cuid())
-  name     String
-  tenantId String
-}
+
 
 model Category {
   id         String    @id @default(cuid())
@@ -444,6 +463,7 @@ enum ContactTag {
 enum Role {
   USER
   ADMIN
+  Vendor
   OWNER
 }
 
@@ -525,4 +545,10 @@ enum RefundStatus {
   PROCESSING
   REFUNDED
   FAILED
+}
+
+enum VendorStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
 }

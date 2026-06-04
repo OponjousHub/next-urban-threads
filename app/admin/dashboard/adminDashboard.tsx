@@ -6,6 +6,7 @@ import DashboardAnalytics from "../../../components/admin/dashboard/dashboardAna
 import DashboardOrders from "../../../components/admin/dashboard/dashboardOrders";
 import DashboardInventory from "../../../components/admin/dashboard/dashboardInventory";
 import DashboardSalesByCategory from "../../../components/admin/dashboard/dashboardSalesByCategory";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export default function AdminDashboard() {
   const [data, setData] = useState({
@@ -28,6 +29,7 @@ export default function AdminDashboard() {
     activities: [],
   });
   const [loading, setLoading] = useState(true);
+  const { tenant } = useTenant();
 
   useEffect(() => {
     async function loadDashboard() {
@@ -50,10 +52,14 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="px-6">
           <h1 className="text-3xl font-bold text-gray-900">
-            Dashboard Overview
+            {tenant.storeMode === "SINGLE_VENDOR"
+              ? "Dashboard Overview."
+              : "Marketplace Overview."}
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Welcome back. Here's what's happening in Urban Threads.
+            {tenant.storeMode === "SINGLE_VENDOR"
+              ? "Here's what's happening in your store."
+              : "Here's what's happening across all vendors."}
           </p>
         </div>
 
