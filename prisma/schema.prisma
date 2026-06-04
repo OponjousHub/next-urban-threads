@@ -492,7 +492,7 @@ enum ContactTag {
 enum Role {
   USER
   ADMIN
-  Vendor
+  VENDOR
   OWNER
 }
 

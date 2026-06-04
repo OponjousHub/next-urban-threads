@@ -12,6 +12,39 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
+    // Block application from user whose application is pending
+    const existing = await prisma.vendorApplication.findFirst({
+      where: {
+        userId,
+        status: "PENDING",
+      },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        {
+          message: "You already have a pending application",
+        },
+        { status: 400 },
+      );
+    }
+
+    // block users who are already vendors
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (user?.role === "VENDOR") {
+      return NextResponse.json(
+        {
+          message: "You are already a vendor",
+        },
+        { status: 400 },
+      );
+    }
+
     // Create review (default PENDING if moderation enabled)
     const vendorApply = await prisma.vendorApplication.create({
       data: {
