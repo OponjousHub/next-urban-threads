@@ -239,7 +239,7 @@ model Review {
   createdAt        DateTime     @default(now())
   productId        String
   tenantId         String
-  storeMode        StoreMode 
+  storeMode        StoreMode    @default(SINGLE_VENDOR)
   orderId          String?
   updatedAt        DateTime     @updatedAt
   status           ReviewStatus @default(PENDING)

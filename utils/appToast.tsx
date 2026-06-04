@@ -3,13 +3,14 @@ import { AdminToast } from "@/components/ui/adminToast";
 
 export const appToast = {
   loading: (title: string, description?: string) => {
+    const duration = 20000;
     return toast.custom(
       () => (
         <AdminToast
           type="warning"
           title={title}
           description={description}
-          duration={999999}
+          duration={duration}
         />
       ),
       {

@@ -133,7 +133,8 @@ export default function CheckoutClient({
     }
 
     // 🔄 Loading toast
-    const toastId = toast.loading("Placing your order...");
+    // const toastId = toast.loading("Placing your order...");
+    appToast.loading("Placing your order...");
     setIsLoading(true);
 
     try {
@@ -167,8 +168,10 @@ export default function CheckoutClient({
       }
 
       // //SHOW TOAST NOTIFICATION
-      toast.dismiss(toastId);
-      toast.loading("Redirecting to secure payment...");
+      appToast.dismiss();
+      appToast.loading("Redirecting to secure payment...");
+      // toast.dismiss(toastId);
+      // toast.loading("Redirecting to secure payment...");
 
       const data = await res.json();
 
@@ -182,13 +185,14 @@ export default function CheckoutClient({
     } catch (err: any) {
       console.error(err);
 
-      toast.dismiss(toastId);
+      // toast.dismiss(toastId);
       appToast.error(
         "Order failed",
         `${err.message || "Something went wrong"}`,
       );
     } finally {
       setIsLoading(false);
+      appToast.dismiss();
     }
   };
 
