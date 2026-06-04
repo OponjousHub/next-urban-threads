@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
 import { generateId } from "@/utils/generateId";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface Props {
   product: Product;
@@ -476,9 +477,11 @@ export function ProductDetailUI({
             {(canReview || userReview) && (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                  <button className="mt-4 text-sm underline">
-                    {userReview ? "Edit Review" : "Write Review"}
-                  </button>
+                  <DialogTitle>
+                    <button className="mt-4 text-sm underline">
+                      {userReview ? "Edit Review" : "Write Review"}
+                    </button>
+                  </DialogTitle>
                 </DialogTrigger>
 
                 <DialogContent>
