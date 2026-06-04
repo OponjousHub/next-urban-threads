@@ -37,6 +37,7 @@ model User {
   deactivatedAt                DateTime?
   resetToken                   String?        @unique
   resetTokenExpiry             DateTime?
+  vendorApplications           VendorApplication[]
   vendor                       Vendor? @relation(fields:[vendorId], references:[id])
   addresses                    Address[]
   cartItems                    CartItem[]
@@ -113,10 +114,37 @@ model Vendor {
   status      VendorStatus @default(PENDING)
 
   products    Product[]
+  users       User[]
   orders      Order[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model VendorApplication {
+  id String @id @default(cuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  businessName String
+  businessEmail String?
+  businessPhone String?
+
+  description String?
+
+  status VendorApplicationStatus @default(PENDING)
+
+  reviewedAt DateTime?
+  reviewedBy String?
+
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }
 
 model Order {
@@ -133,9 +161,10 @@ model Order {
   paymentReference   String              @unique
   shippingAddressId  String
   paymentStatus      PaymentStatus        @default(PENDING)
-  storeMode StoreMode @default(SINGLE_VENDOR)
+  storeMode          StoreMode @default(SINGLE_VENDOR)
   tenantId           String
   vendorId           String?
+  vendor             Vendor? @relation(fields: [vendorId], references: [id])
   refundStatus       RefundStatus         @default(NONE)
   shippingAddress    Address              @relation(fields: [shippingAddressId], references: [id])
   tenant             Tenant               @relation(fields: [tenantId], references: [id])
@@ -551,4 +580,10 @@ enum VendorStatus {
   PENDING
   APPROVED
   SUSPENDED
+}
+
+enum VendorApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
