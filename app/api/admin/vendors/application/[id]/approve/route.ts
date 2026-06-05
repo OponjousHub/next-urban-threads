@@ -27,10 +27,17 @@ export async function POST(
       );
     }
 
+    const slug = application.businessName
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+
     await prisma.$transaction(async (tx) => {
       const vendor = await tx.vendor.create({
         data: {
           name: application.businessName,
+          slug,
           email: application.businessEmail,
           phone: application.businessPhone,
           status: VendorStatus.APPROVED,
