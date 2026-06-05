@@ -1,0 +1,103 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { StatusBadge } from "@/lib/status-badge";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import RefundReviewModal from "@/components/refunds/refundReviewModal";
+
+type Refund = {
+  id: string;
+  orderId: string;
+  status: string;
+  requestedAmount: number;
+  createdAt: string;
+  reason: string;
+};
+
+type VendorApplication = {
+  id: string;
+  businessName: String;
+  businessEmail?: String;
+  businessPhone?: String;
+  description?: String;
+};
+
+export default function VendorAprovalPage() {
+  const [vendors, setVendors] = useState<VendorApplication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchVendors();
+  }, []);
+
+  async function fetchVendors() {
+    try {
+      const res = await fetch("/api/admin/refunds");
+      const data = await res.json();
+      setVendors(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return <p className="p-6">Loading refunds...</p>;
+  }
+
+  return (
+    <main className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Refund Requests</h1>
+
+      <div className="bg-white border rounded-xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+            <tr>
+              <th className="p-3 text-left">Order</th>
+              <th className="p-3 text-left">Reason</th>
+              <th className="p-3 text-left">Amount</th>
+              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left">Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {refunds.map((r) => (
+              <tr
+                key={r.id}
+                onClick={() => setSelectedRefund(r.id)}
+                className="border-t hover:bg-gray-50 cursor-pointer"
+              >
+                <td className="p-3">{r.orderId}</td>
+                <td className="p-3">{r.reason}</td>
+                <td className="p-3 font-medium">₦{r.requestedAmount}</td>
+                <td className="p-3">
+                  <StatusBadge status={r.status} />
+                </td>
+                <td className="p-3">
+                  {new Date(r.createdAt).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <Dialog
+          open={!!selectedRefund}
+          onOpenChange={() => setSelectedRefund(null)}
+        >
+          <DialogContent className="max-w-3xl">
+            {selectedRefund && (
+              <RefundReviewModal
+                refundId={selectedRefund}
+                onClose={() => setSelectedRefund(null)}
+                onActionComplete={fetchRefunds}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
+    </main>
+  );
+}
