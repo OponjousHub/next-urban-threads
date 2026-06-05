@@ -1,22 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { ProfileSection } from "@/components/admin/settings/profile-section";
-import ChangePasswordAdmin from "@/components/admin/settings/change-password-setting";
 import VendorAprovalPage from "@/components/admin/vendors/vendorApprovalPage";
-
 import { useTenant } from "@/store/tenant-provider-context";
 import { Label } from "recharts";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
-  const { tenant, storeMode } = useTenant();
+  //   const { tenant, storeMode } = useTenant();
 
-  const tabs = [
-    { id: "application", label: "Applications" },
-    { id: "profile", label: "Profile" },
-    { id: "password", label: "Change password" },
-  ];
+  const tabs = [{ id: "application", label: "Applications" }];
 
   return (
     <div className="flex gap-8 max-w-6xl mx-auto p-6">
@@ -53,8 +46,6 @@ export default function SettingsPage() {
 
         {/* Tab Content */}
         {activeTab === "application" && <VendorAprovalPage />}
-        {activeTab === "profile" && <ProfileSection />}
-        {activeTab === "password" && <ChangePasswordAdmin />}
       </main>
     </div>
   );

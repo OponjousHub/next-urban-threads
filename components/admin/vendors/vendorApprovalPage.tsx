@@ -2,17 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { StatusBadge } from "@/lib/status-badge";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import RefundReviewModal from "@/components/refunds/refundReviewModal";
-
-type Refund = {
-  id: string;
-  orderId: string;
-  status: string;
-  requestedAmount: number;
-  createdAt: string;
-  reason: string;
-};
+import { FaChevronRight } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type VendorApplication = {
   id: string;
@@ -28,7 +20,10 @@ type VendorApplication = {
 export default function VendorAprovalPage() {
   const [vendors, setVendors] = useState<VendorApplication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
+  const router = useRouter();
+  //   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
+  const [selectedVendor, setSelectedVendor] =
+    useState<VendorApplication | null>(null);
 
   useEffect(() => {
     fetchVendors();
@@ -71,9 +66,10 @@ export default function VendorAprovalPage() {
           <tbody>
             {vendors.map((r) => {
               return (
+                // <Link key={r.id} href={`/admin/vendors/${r.id}`}>
                 <tr
                   key={r.id}
-                  onClick={() => setSelectedVendor(r.id)}
+                  onClick={() => router.push(`/admin/vendors/${r.id}`)}
                   className="border-t hover:bg-gray-50 cursor-pointer"
                 >
                   <td className="p-3">{r.user.name}</td>
@@ -86,26 +82,15 @@ export default function VendorAprovalPage() {
                   <td className="p-3">
                     {new Date(r.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="p-3">view</td>
+                  <td className=" align-middle ">
+                    <FaChevronRight size={8} className="align-middle" />
+                  </td>
                 </tr>
+                // </Link>
               );
             })}
           </tbody>
         </table>
-        <Dialog
-          open={!!selectedVendor}
-          onOpenChange={() => setSelectedVendor(null)}
-        >
-          <DialogContent className="max-w-3xl">
-            {selectedVendor && (
-              <RefundReviewModal
-                refundId={selectedVendor}
-                onClose={() => setSelectedVendor(null)}
-                onActionComplete={fetchVendors}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     </main>
   );
