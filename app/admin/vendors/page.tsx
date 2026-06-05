@@ -3,14 +3,17 @@
 import { useState } from "react";
 import { ProfileSection } from "@/components/admin/settings/profile-section";
 import ChangePasswordAdmin from "@/components/admin/settings/change-password-setting";
+import VendorAprovalPage from "@/components/admin/vendors/vendorApprovalPage";
 
 import { useTenant } from "@/store/tenant-provider-context";
+import { Label } from "recharts";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
   const { tenant, storeMode } = useTenant();
 
   const tabs = [
+    { id: "application", label: "Applications" },
     { id: "profile", label: "Profile" },
     { id: "password", label: "Change password" },
   ];
@@ -44,11 +47,12 @@ export default function SettingsPage() {
         <div>
           <h1 className="text-2xl font-semibold capitalize">{activeTab}</h1>
           <p className="text-sm text-gray-500">
-            Manage your {activeTab} settings
+            Manage vendor {activeTab} settings
           </p>
         </div>
 
         {/* Tab Content */}
+        {activeTab === "application" && <VendorAprovalPage />}
         {activeTab === "profile" && <ProfileSection />}
         {activeTab === "password" && <ChangePasswordAdmin />}
       </main>

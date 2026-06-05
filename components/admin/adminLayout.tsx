@@ -30,8 +30,6 @@ export default function AdminLayout({
         }
 
         const data = await res.json();
-
-        console.log(data);
       } catch (error) {
         console.error("User fetch error:", error);
       }

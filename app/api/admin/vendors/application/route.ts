@@ -12,8 +12,8 @@ export async function GET() {
   const application = await prisma.vendorApplication.findMany({
     include: {
       user: { select: { id: true, name: true, email: true } },
-      orderBy: { createdAt: "desc" },
     },
+    orderBy: { createdAt: "desc" },
   });
 
   return NextResponse.json(

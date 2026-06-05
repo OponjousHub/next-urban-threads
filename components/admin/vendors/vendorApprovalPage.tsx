@@ -16,10 +16,13 @@ type Refund = {
 
 type VendorApplication = {
   id: string;
+  user: { id: string; name: string; email: string };
   businessName: String;
   businessEmail?: String;
   businessPhone?: String;
   description?: String;
+  status: string;
+  createdAt: string;
 };
 
 export default function VendorAprovalPage() {
@@ -33,9 +36,9 @@ export default function VendorAprovalPage() {
 
   async function fetchVendors() {
     try {
-      const res = await fetch("/api/admin/refunds");
+      const res = await fetch("/api/admin/vendors/application");
       const data = await res.json();
-      setVendors(data);
+      setVendors(data.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -44,55 +47,61 @@ export default function VendorAprovalPage() {
   }
 
   if (loading) {
-    return <p className="p-6">Loading refunds...</p>;
+    return <p className="p-6">Loading vendors applications...</p>;
   }
 
   return (
     <main className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Refund Requests</h1>
+      <h1 className="text-2xl font-bold mb-6">Vendor applications</h1>
 
       <div className="bg-white border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
             <tr>
-              <th className="p-3 text-left">Order</th>
-              <th className="p-3 text-left">Reason</th>
-              <th className="p-3 text-left">Amount</th>
+              <th className="p-3 text-left">Applicant</th>
+              <th className="p-3 text-left">Business name</th>
+              <th className="p-3 text-left">Business email</th>
+              <th className="p-3 text-left">Phone</th>
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Date</th>
+              <th className="p-3 text-left">Action</th>
             </tr>
           </thead>
 
           <tbody>
-            {refunds.map((r) => (
-              <tr
-                key={r.id}
-                onClick={() => setSelectedRefund(r.id)}
-                className="border-t hover:bg-gray-50 cursor-pointer"
-              >
-                <td className="p-3">{r.orderId}</td>
-                <td className="p-3">{r.reason}</td>
-                <td className="p-3 font-medium">₦{r.requestedAmount}</td>
-                <td className="p-3">
-                  <StatusBadge status={r.status} />
-                </td>
-                <td className="p-3">
-                  {new Date(r.createdAt).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
+            {vendors.map((r) => {
+              return (
+                <tr
+                  key={r.id}
+                  onClick={() => setSelectedVendor(r.id)}
+                  className="border-t hover:bg-gray-50 cursor-pointer"
+                >
+                  <td className="p-3">{r.user.name}</td>
+                  <td className="p-3">{r.businessName}</td>
+                  <td className="p-3">{r.businessEmail}</td>
+                  <td className="p-3">{r.businessPhone}</td>
+                  <td className="p-3">
+                    <StatusBadge status={r.status} />
+                  </td>
+                  <td className="p-3">
+                    {new Date(r.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="p-3">view</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         <Dialog
-          open={!!selectedRefund}
-          onOpenChange={() => setSelectedRefund(null)}
+          open={!!selectedVendor}
+          onOpenChange={() => setSelectedVendor(null)}
         >
           <DialogContent className="max-w-3xl">
-            {selectedRefund && (
+            {selectedVendor && (
               <RefundReviewModal
-                refundId={selectedRefund}
-                onClose={() => setSelectedRefund(null)}
-                onActionComplete={fetchRefunds}
+                refundId={selectedVendor}
+                onClose={() => setSelectedVendor(null)}
+                onActionComplete={fetchVendors}
               />
             )}
           </DialogContent>
