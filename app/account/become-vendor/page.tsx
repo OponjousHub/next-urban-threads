@@ -153,7 +153,7 @@ export default function VendorApplicationForm() {
               type="submit"
               size="lg"
               disabled={loading}
-              className="w-full"
+              className="w-full text-stone-50"
             >
               {loading ? (
                 <>
