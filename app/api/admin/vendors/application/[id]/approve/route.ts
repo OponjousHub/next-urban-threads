@@ -1,0 +1,70 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/utils/prisma";
+import { getAuthPayload } from "@/lib/server/auth";
+import { VendorStatus, Role } from "@prisma/client";
+
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const auth = await getAuthPayload();
+
+    if (!auth?.userId) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    const application = await prisma.vendorApplication.findUnique({
+      where: { id },
+    });
+
+    if (!application) {
+      return NextResponse.json(
+        { message: "Application not found" },
+        { status: 404 },
+      );
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const vendor = await tx.vendor.create({
+        data: {
+          name: application.businessName,
+          email: application.businessEmail,
+          phone: application.businessPhone,
+          status: VendorStatus.APPROVED,
+        },
+      });
+
+      await tx.user.update({
+        where: {
+          id: application.userId,
+        },
+        data: {
+          role: Role.VENDOR,
+          vendorId: vendor.id,
+        },
+      });
+
+      await tx.vendorApplication.update({
+        where: {
+          id: application.id,
+        },
+        data: {
+          status: "APPROVED",
+          reviewedAt: new Date(),
+          reviewedBy: auth.userId,
+        },
+      });
+    });
+
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json({ message: "Approval failed" }, { status: 500 });
+  }
+}
