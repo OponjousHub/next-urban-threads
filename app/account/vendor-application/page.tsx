@@ -1,9 +1,12 @@
+import { prisma } from "@/utils/prisma";
+import { getAuthPayload } from "@/lib/server/auth";
 import { redirect } from "next/navigation";
 import {
   Pending,
   Approved,
   Rejected,
 } from "@/components/vendor/application-status";
+import { getVendorApplication } from "@/app/lib/getVendorApplication";
 
 export default async function VendorApplicationPage() {
   const auth = await getAuthPayload();
@@ -12,15 +15,7 @@ export default async function VendorApplicationPage() {
     redirect("/login");
   }
 
-  const application = await prisma.vendorApplication.findFirst({
-    where: {
-      userId: auth.userId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
+  const application = await getVendorApplication(auth.userId);
   if (!application) {
     redirect("/account/become-vendor");
   }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTenant } from "@/store/tenant-provider-context";
 import {
   FiHome,
   FiShoppingBag,
@@ -23,6 +24,7 @@ export default function AdminSidebar({
   isMobile = false,
 }: Props) {
   const pathname = usePathname();
+  const { tenant, storeMode } = useTenant();
 
   // On mobile, always full width
   const width = isMobile ? "w-64" : collapsed ? "w-20" : "w-64";
@@ -79,6 +81,15 @@ export default function AdminSidebar({
           collapsed={collapsed}
           pathname={pathname}
         />
+        {tenant.storeMode === "MULTI_VENDOR" && (
+          <SidebarItem
+            href="/admin/vendors"
+            icon={<FiUsers size={20} />}
+            label="Vendors"
+            collapsed={collapsed}
+            pathname={pathname}
+          />
+        )}
         <SidebarItem
           href="/admin/settings"
           icon={<FiSettings size={20} />}

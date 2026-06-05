@@ -1,4 +1,11 @@
 import Link from "next/link";
+
+type RejectedProps = {
+  application: {
+    rejectionReason?: string | null;
+  };
+};
+
 export function Pending() {
   return (
     <div className="mx-auto max-w-2xl py-20">
@@ -36,7 +43,7 @@ export function Approved() {
   );
 }
 
-export function Rejected({ application: string }) {
+export function Rejected({ application }: RejectedProps) {
   return (
     <div className="mx-auto max-w-2xl py-20">
       <div className="rounded-xl border p-8 text-center">
