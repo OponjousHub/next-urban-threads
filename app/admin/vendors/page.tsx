@@ -12,7 +12,7 @@ export default function SettingsPage() {
   const tabs = [{ id: "application", label: "Applications" }];
 
   return (
-    <div className="flex gap-8 max-w-7xl mx-auto p-6">
+    <div className="flex gap-8 max-w-[90rem] mx-auto p-6">
       {/* Sidebar */}
       <aside className="w-56 shrink-0">
         <div className="bg-white border rounded-2xl p-3 shadow-sm">

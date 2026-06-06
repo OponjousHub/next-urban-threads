@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { StatusBadge } from "@/lib/status-badge";
-import { FaChevronRight } from "react-icons/fa";
+import { FaChevronRight, FaSearch } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { MetricCard } from "./metricCard";
 
 type VendorApplication = {
   id: string;
-  user: { id: string; name: string; email: string };
-  businessName: String;
-  businessEmail?: String;
-  businessPhone?: String;
-  description?: String;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  businessName: string;
+  businessEmail?: string;
+  businessPhone?: string;
+  description?: string;
   status: string;
   createdAt: string;
 };
@@ -20,6 +24,9 @@ type VendorApplication = {
 export default function VendorAprovalPage() {
   const [vendors, setVendors] = useState<VendorApplication[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [sortBy, setSortBy] = useState("newest");
   const [metrics, setMetrics] = useState({
     pendingApplications: 0,
     approvedApplications: 0,
@@ -27,34 +34,19 @@ export default function VendorAprovalPage() {
     totalApplications: 0,
   });
   const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const cards = [
-    {
-      label: "Pending Applications",
-      value: metrics.pendingApplications,
-      border: "border-yellow-200",
-    },
-    {
-      label: "Approved Vendors",
-      value: metrics.approvedApplications,
-      border: "border-green-200",
-    },
-    {
-      label: "Rejected Applications",
-      value: metrics.rejectedApplications,
-      border: "border-red-200",
-    },
-    {
-      label: "Total Applications",
-      value: metrics.totalApplications,
-      border: "border-blue-200",
-    },
-  ];
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     fetchVendors();
     fetchMetrics();
   }, []);
+
+  // Reset Page When Filters Change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter, sortBy]);
 
   async function fetchMetrics() {
     try {
@@ -80,6 +72,75 @@ export default function VendorAprovalPage() {
     }
   }
 
+  const filteredVendors = vendors
+    .filter((vendor) => {
+      const searchTerm = search.toLowerCase();
+
+      const matchesSearch =
+        vendor.businessName?.toLowerCase().includes(searchTerm) ||
+        vendor.businessEmail?.toLowerCase().includes(searchTerm) ||
+        vendor.businessPhone?.toLowerCase().includes(searchTerm) ||
+        vendor.user.name?.toLowerCase().includes(searchTerm) ||
+        vendor.user.email?.toLowerCase().includes(searchTerm);
+
+      const matchesStatus =
+        statusFilter === "ALL" ? true : vendor.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "oldest":
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+
+        case "business-asc":
+          return a.businessName.localeCompare(b.businessName);
+
+        case "business-desc":
+          return b.businessName.localeCompare(a.businessName);
+
+        case "applicant-asc":
+          return a.user.name.localeCompare(b.user.name);
+
+        case "applicant-desc":
+          return b.user.name.localeCompare(a.user.name);
+
+        default:
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+      }
+    });
+
+  const filters = [
+    {
+      label: `All (${metrics.totalApplications})`,
+      value: "ALL",
+    },
+    {
+      label: `Pending (${metrics.pendingApplications})`,
+      value: "PENDING",
+    },
+    {
+      label: `Approved (${metrics.approvedApplications})`,
+      value: "APPROVED",
+    },
+    {
+      label: `Rejected (${metrics.rejectedApplications})`,
+      value: "REJECTED",
+    },
+  ];
+
+  // Process Pagination
+  const totalPages = Math.ceil(filteredVendors.length / ITEMS_PER_PAGE);
+
+  const paginatedVendors = filteredVendors.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
   if (loading) {
     return <p className="p-6">Loading vendors applications...</p>;
   }
@@ -88,17 +149,61 @@ export default function VendorAprovalPage() {
     <main className="p-6">
       <h1 className="text-2xl font-bold mb-6">Vendor applications</h1>
 
-      <div className="grid gap-4 mb-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card) => (
-          <div
-            key={card.label}
-            className={`rounded-xl border bg-white p-5 shadow-sm ${card.border}`}
-          >
-            <p className="text-sm text-muted-foreground">{card.label}</p>
+      <div className="mb-6 rounded-xl border bg-white p-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Search */}
+          <div className="relative w-full lg:max-w-sm">
+            <input
+              type="text"
+              placeholder="Search business name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-lg border pl-10 pr-4 py-2"
+            />
 
-            <h2 className="mt-2 text-3xl font-bold">{card.value}</h2>
+            <FaSearch
+              className="absolute left-3 top-3 text-gray-400"
+              size={14}
+            />
           </div>
-        ))}
+
+          {/* Sorting */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-500">Sort</label>
+
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="rounded-lg border px-3 py-2 text-sm"
+            >
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="business-asc">Business A-Z</option>
+              <option value="business-desc">Business Z-A</option>
+              <option value="applicant-asc">Applicant A-Z</option>
+              <option value="applicant-desc">Applicant Z-A</option>
+            </select>
+          </div>
+
+          {/* Status Filters */}
+          <div className="flex flex-wrap gap-2">
+            {filters.map((filter) => (
+              <button
+                key={filter.value}
+                onClick={() => setStatusFilter(filter.value)}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition
+  ${
+    statusFilter === filter.value
+      ? "bg-[var(--color-primary)] text-white"
+      : "border bg-white hover:bg-gray-50"
+  }
+`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="bg-white border rounded-xl overflow-hidden">
@@ -116,9 +221,8 @@ export default function VendorAprovalPage() {
           </thead>
 
           <tbody>
-            {vendors.map((r) => {
+            {paginatedVendors.map((r) => {
               return (
-                // <Link key={r.id} href={`/admin/vendors/${r.id}`}>
                 <tr
                   key={r.id}
                   onClick={() => router.push(`/admin/vendors/${r.id}`)}
@@ -134,15 +238,58 @@ export default function VendorAprovalPage() {
                   <td className="p-3">
                     {new Date(r.createdAt).toLocaleDateString()}
                   </td>
-                  <td className=" align-middle ">
-                    <FaChevronRight size={8} className="align-middle" />
+                  <td className="w-12">
+                    <div className="flex items-center justify-center">
+                      <FaChevronRight
+                        size={12}
+                        className="text-gray-400 transition-transform duration-200 group-hover:translate-x-1"
+                      />
+                    </div>
                   </td>
                 </tr>
-                // </Link>
               );
             })}
+            {filteredVendors.length === 0 && (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="p-8 text-center text-muted-foreground"
+                >
+                  No applications found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
+      </div>
+      <div className="flex items-center justify-between border-t px-4 py-4">
+        <div className="text-sm text-muted-foreground">
+          Showing{" "}
+          {Math.min(
+            (currentPage - 1) * ITEMS_PER_PAGE + 1,
+            filteredVendors.length,
+          )}
+          -{Math.min(currentPage * ITEMS_PER_PAGE, filteredVendors.length)} of{" "}
+          {filteredVendors.length}
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="rounded-lg border px-3 py-2 disabled:opacity-50"
+          >
+            Previous
+          </button>
+
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="rounded-lg border px-3 py-2 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </main>
   );
