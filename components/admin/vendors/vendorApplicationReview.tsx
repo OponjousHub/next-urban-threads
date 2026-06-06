@@ -8,6 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/lib/status-badge";
 import { Prisma } from "@prisma/client";
 import Link from "next/link";
+import { appToast } from "@/utils/appToast";
+import { useRouter } from "next/navigation";
 
 type VendorApplicationWithUser = Prisma.VendorApplicationGetPayload<{
   include: {
@@ -26,8 +28,9 @@ export default function VendorApprovalReview({
   onActionComplete,
 }: Props) {
   const [loading, setLoading] = useState(false);
-
   const [rejectionReason, setRejectionReason] = useState("");
+
+  const router = useRouter();
 
   async function approveVendor() {
     try {
@@ -44,11 +47,12 @@ export default function VendorApprovalReview({
         throw new Error();
       }
 
-      toast.success("Vendor approved successfully");
+      appToast.success("Success", "Vendor approved successfully");
 
       onActionComplete?.();
+      router.refresh();
     } catch {
-      toast.error("Failed to approve application");
+      appToast.error("Failed", "Failed to approve application");
     } finally {
       setLoading(false);
     }
@@ -74,12 +78,12 @@ export default function VendorApprovalReview({
       if (!res.ok) {
         throw new Error();
       }
-
-      toast.success("Application rejected");
+      appToast.success("Success", "Application rejected");
 
       onActionComplete?.();
+      router.refresh();
     } catch {
-      toast.error("Failed to reject application");
+      appToast.error("Failed", "Failed to reject application");
     } finally {
       setLoading(false);
     }
@@ -167,19 +171,27 @@ export default function VendorApprovalReview({
           />
         </div>
 
-        <div className="flex justify-end gap-3 text-white">
-          <Button
-            variant="destructive"
-            disabled={loading}
-            onClick={rejectVendor}
-          >
-            Reject
-          </Button>
+        {application.status === "PENDING" && (
+          <div className="flex gap-3">
+            <Button variant="destructive" onClick={rejectVendor}>
+              Reject
+            </Button>
 
-          <Button disabled={loading} onClick={approveVendor}>
-            Approve Vendor
-          </Button>
-        </div>
+            <Button onClick={approveVendor}>Approve Vendor</Button>
+          </div>
+        )}
+
+        {application.status === "APPROVED" && (
+          <div className="rounded-lg border p-4  text-sky-600">
+            This application has already been approved.
+          </div>
+        )}
+
+        {application.status === "REJECTED" && (
+          <div className="rounded-lg border p-4 text-orange-700">
+            This application has already been rejected.
+          </div>
+        )}
       </div>
     </div>
   );

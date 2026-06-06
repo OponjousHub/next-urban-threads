@@ -27,6 +27,31 @@ export async function POST(
       );
     }
 
+    if (application.status !== "PENDING") {
+      return NextResponse.json(
+        {
+          message: "Only pending applications can be approved",
+        },
+        { status: 400 },
+      );
+    }
+
+    const existing = await prisma.vendorApplication.findFirst({
+      where: {
+        id,
+        status: "PENDING",
+      },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        {
+          message: "You already have a pending application.",
+        },
+        { status: 400 },
+      );
+    }
+
     const slug = application.businessName
       .toLowerCase()
       .trim()
@@ -49,7 +74,7 @@ export async function POST(
           id: application.userId,
         },
         data: {
-          role: Role.VENDOR,
+          role: Role.Vendor,
           vendorId: vendor.id,
         },
       });

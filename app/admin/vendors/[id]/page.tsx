@@ -21,6 +21,5 @@ export default async function VendorReviewPage({
   if (!application) {
     notFound();
   }
-  console.log("vvvvvvvvvvvvvvvvvv", application);
   return <VendorApprovalReview application={application} />;
 }
