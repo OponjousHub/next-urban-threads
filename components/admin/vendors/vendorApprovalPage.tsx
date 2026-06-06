@@ -27,6 +27,7 @@ export default function VendorAprovalPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState("newest");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [metrics, setMetrics] = useState({
     pendingApplications: 0,
     approvedApplications: 0,
@@ -141,6 +142,67 @@ export default function VendorAprovalPage() {
     currentPage * ITEMS_PER_PAGE,
   );
 
+  // Select/Deselect Single Row
+  function toggleSelection(id: string) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  }
+
+  // Select All
+  function toggleSelectAll() {
+    if (selectedIds.length === paginatedVendors.length) {
+      setSelectedIds([]);
+      return;
+    }
+
+    setSelectedIds(paginatedVendors.map((vendor) => vendor.id));
+  }
+
+  // Bulk Approve
+  async function bulkApprove() {
+    try {
+      await fetch("/api/admin/vendors/application/bulk-approve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ids: selectedIds,
+        }),
+      });
+
+      setSelectedIds([]);
+
+      fetchVendors();
+      fetchMetrics();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // Bulk Reject
+  async function bulkReject() {
+    try {
+      await fetch("/api/admin/vendors/application/bulk-reject", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ids: selectedIds,
+        }),
+      });
+
+      setSelectedIds([]);
+
+      fetchVendors();
+      fetchMetrics();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   if (loading) {
     return <p className="p-6">Loading vendors applications...</p>;
   }
@@ -207,9 +269,44 @@ export default function VendorAprovalPage() {
       </div>
 
       <div className="bg-white border rounded-xl overflow-hidden">
+        {/*Bulk Toolbar, only when something is selected*/}
+        {selectedIds.length > 0 && (
+          <div className="mb-4 flex items-center justify-between rounded-xl border bg-blue-50 px-4 py-3">
+            <div className="font-medium">{selectedIds.length} selected</div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={bulkApprove}
+                className="rounded-lg bg-green-600 px-4 py-2 text-white"
+              >
+                Approve Selected
+              </button>
+
+              <button
+                onClick={bulkReject}
+                className="rounded-lg bg-red-600 px-4 py-2 text-white"
+              >
+                Reject Selected
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Application table*/}
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
             <tr>
+              {/*Checkbox Column*/}
+              <th className="w-12 p-3">
+                <input
+                  type="checkbox"
+                  checked={
+                    paginatedVendors.length > 0 &&
+                    selectedIds.length === paginatedVendors.length
+                  }
+                  onChange={toggleSelectAll}
+                />
+              </th>
               <th className="p-3 text-left">Applicant</th>
               <th className="p-3 text-left">Business name</th>
               <th className="p-3 text-left">Business email</th>
@@ -228,6 +325,13 @@ export default function VendorAprovalPage() {
                   onClick={() => router.push(`/admin/vendors/${r.id}`)}
                   className="border-t hover:bg-gray-50 cursor-pointer"
                 >
+                  <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(r.id)}
+                      onChange={() => toggleSelection(r.id)}
+                    />
+                  </td>
                   <td className="p-3">{r.user.name}</td>
                   <td className="p-3">{r.businessName}</td>
                   <td className="p-3">{r.businessEmail}</td>
