@@ -32,14 +32,18 @@ export async function approveVendorApplication(applicationId: string) {
       throw new Error("Only pending applications can be approved");
     }
 
-    const existingVendor = await tx.vendor.findFirst({
+    const user = await tx.user.findUnique({
       where: {
-        userId: application.userId,
+        id: application.userId,
       },
     });
 
-    if (existingVendor) {
-      throw new Error("Vendor already exists for this user");
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (user.vendorId) {
+      throw new Error("User already has a vendor account");
     }
 
     const baseSlug = slugify(application.businessName);
