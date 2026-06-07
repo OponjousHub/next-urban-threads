@@ -1,7 +1,5 @@
 import { prisma } from "@/utils/prisma";
 import { Role } from "@prisma/client";
-import { getLoggedInUserId } from "@/lib/auth";
-import { NextResponse } from "next/server";
 
 function slugify(text: string) {
   return text
@@ -12,11 +10,6 @@ function slugify(text: string) {
 }
 
 export async function approveVendorApplication(applicationId: string) {
-  const userId = await getLoggedInUserId();
-  if (!userId) {
-    return NextResponse.json({ message: " Unauthorized" }, { status: 401 });
-  }
-
   return prisma.$transaction(async (tx) => {
     const application = await tx.vendorApplication.findUnique({
       where: {
@@ -69,7 +62,6 @@ export async function approveVendorApplication(applicationId: string) {
         email: application.businessEmail,
         phone: application.businessPhone,
         status: "APPROVED",
-        userId: application.userId,
       },
     });
 

@@ -108,6 +108,10 @@ model Vendor {
   banner      String?
   description String?
 
+  ownerId     String @unique
+
+  owner       User @relation("VendorOwner", fields: [ownerId], references: [id])
+
   email       String?
   phone       String?
 

@@ -1,14 +1,17 @@
 import { approveVendorApplication } from "@/app/lib/services/vendor/approveVendorApplication";
-
+import { getAuthPayload } from "@/lib/server/auth";
 import { NextResponse } from "next/server";
-// import { prisma } from "@/utils/prisma";
-// import { getAuthPayload } from "@/lib/server/auth";
-// import { VendorStatus, Role } from "@prisma/client";
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await getAuthPayload();
+
+  // Prevent non-admin from approving application
+  if (!auth || auth.role !== "ADMIN") {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
   try {
     const { id } = await params;
 
