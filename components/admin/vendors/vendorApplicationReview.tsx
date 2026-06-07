@@ -172,7 +172,7 @@ export default function VendorApprovalReview({
         </div>
 
         {application.status === "PENDING" && (
-          <div className="flex gap-3">
+          <div className="flex gap-3 text-white">
             <Button variant="destructive" onClick={rejectVendor}>
               Reject
             </Button>
