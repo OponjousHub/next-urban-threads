@@ -1,5 +1,6 @@
 import { prisma } from "@/utils/prisma";
 import { Role } from "@prisma/client";
+import { NextResponse } from "next/server";
 
 function slugify(text: string) {
   return text
@@ -55,8 +56,23 @@ export async function approveVendorApplication(applicationId: string) {
       count++;
     }
 
+    const tenantUser = await tx.user.findUnique({
+      where: {
+        id: application.userId,
+      },
+      select: {
+        tenantId: true,
+        vendorId: true,
+      },
+    });
+
+    if (!tenantUser) {
+      return NextResponse.json("Unauthorized!");
+    }
+
     const vendor = await tx.vendor.create({
       data: {
+        tenantId: tenantUser.tenantId,
         name: application.businessName,
         slug,
         email: application.businessEmail,
