@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { StatusBadge } from "@/lib/status-badge";
 import { FaChevronRight, FaSearch } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { MetricCard } from "./metricCard";
+import { appToast } from "@/utils/appToast";
 
 type VendorApplication = {
   id: string;
@@ -162,43 +162,65 @@ export default function VendorAprovalPage() {
   // Bulk Approve
   async function bulkApprove() {
     try {
-      await fetch("/api/admin/vendors/application/bulk-approve", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "/api/admin/vendors/application/bulk-approve",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ids: selectedIds,
+          }),
         },
-        body: JSON.stringify({
-          ids: selectedIds,
-        }),
-      });
+      );
+      const res = await response.json();
+      if (!response.ok) {
+        throw new Error(res.message || "Request failed");
+      }
+
+      appToast.success(
+        "Success",
+        "Selected application(s) approved successfully",
+      );
 
       setSelectedIds([]);
 
       fetchVendors();
       fetchMetrics();
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      appToast.error("Failed", error.message || "Something went wrong");
     }
   }
 
   // Bulk Reject
   async function bulkReject() {
     try {
-      await fetch("/api/admin/vendors/application/bulk-reject", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "/api/admin/vendors/application/bulk-reject",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ids: selectedIds,
+          }),
         },
-        body: JSON.stringify({
-          ids: selectedIds,
-        }),
-      });
+      );
+      const res = await response.json();
+      if (!response.ok) {
+        throw new Error(res.message || "Request failed");
+      }
+
+      appToast.success("Success", "Selected application(s) rejected");
 
       setSelectedIds([]);
 
       fetchVendors();
       fetchMetrics();
-    } catch (error) {
+    } catch (error: any) {
+      appToast.error("Failed", error);
       console.error(error);
     }
   }

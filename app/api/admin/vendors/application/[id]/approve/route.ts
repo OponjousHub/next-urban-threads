@@ -19,6 +19,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
+      message: "Vendor application approved",
     });
   } catch (error) {
     console.error(error);

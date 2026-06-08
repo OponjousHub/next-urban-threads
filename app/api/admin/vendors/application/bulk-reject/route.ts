@@ -25,5 +25,6 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     success: true,
+    message: "Vendor application rejected",
   });
 }
