@@ -28,6 +28,8 @@ export default function VendorAprovalPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState("newest");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkApproving, setBulkApproving] = useState(false);
+  const [bulkRejecting, setBulkRejecting] = useState(false);
   const [metrics, setMetrics] = useState({
     pendingApplications: 0,
     approvedApplications: 0,
@@ -162,6 +164,8 @@ export default function VendorAprovalPage() {
   // Bulk Approve
   async function bulkApprove() {
     try {
+      setBulkApproving(true);
+
       const response = await fetch(
         "/api/admin/vendors/application/bulk-approve",
         {
@@ -190,12 +194,17 @@ export default function VendorAprovalPage() {
       fetchMetrics();
     } catch (error: any) {
       appToast.error("Failed", error.message || "Something went wrong");
+      console.error(error);
+    } finally {
+      setBulkApproving(false);
     }
   }
 
   // Bulk Reject
   async function bulkReject() {
     try {
+      setBulkRejecting(true);
+
       const response = await fetch(
         "/api/admin/vendors/application/bulk-reject",
         {
@@ -220,8 +229,10 @@ export default function VendorAprovalPage() {
       fetchVendors();
       fetchMetrics();
     } catch (error: any) {
-      appToast.error("Failed", error);
+      appToast.error("Failed", error.message || "Something went wrong");
       console.error(error);
+    } finally {
+      setBulkRejecting(false);
     }
   }
 
@@ -299,16 +310,26 @@ export default function VendorAprovalPage() {
             <div className="flex gap-2">
               <button
                 onClick={bulkApprove}
-                className="rounded-lg bg-green-600 px-4 py-2 text-white"
+                disabled={bulkApproving || selectedIds.length === 0}
+                className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Approve Selected
+                {bulkApproving && (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                )}
+
+                {bulkApproving ? "Approving..." : "Approve Selected"}
               </button>
 
               <button
                 onClick={bulkReject}
-                className="rounded-lg bg-red-600 px-4 py-2 text-white"
+                disabled={bulkRejecting || selectedIds.length === 0}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Reject Selected
+                {bulkRejecting && (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                )}
+
+                {bulkRejecting ? "Rejecting..." : "Reject Selected"}
               </button>
             </div>
           </div>

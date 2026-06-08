@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
@@ -29,12 +28,14 @@ export default function VendorApprovalReview({
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [approving, setApproving] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
 
   const router = useRouter();
 
   async function approveVendor() {
     try {
-      setLoading(true);
+      setApproving(true);
 
       const res = await fetch(
         `/api/admin/vendors/application/${application.id}/approve`,
@@ -54,13 +55,13 @@ export default function VendorApprovalReview({
     } catch {
       appToast.error("Failed", "Failed to approve application");
     } finally {
-      setLoading(false);
+      setApproving(false);
     }
   }
 
   async function rejectVendor() {
     try {
-      setLoading(true);
+      setRejecting(true);
 
       const res = await fetch(
         `/api/admin/vendors/application/${application.id}/reject`,
@@ -85,7 +86,7 @@ export default function VendorApprovalReview({
     } catch {
       appToast.error("Failed", "Failed to reject application");
     } finally {
-      setLoading(false);
+      setRejecting(false);
     }
   }
 
@@ -173,11 +174,28 @@ export default function VendorApprovalReview({
 
         {application.status === "PENDING" && (
           <div className="flex gap-3 text-white">
-            <Button variant="destructive" onClick={rejectVendor}>
-              Reject
-            </Button>
+            <button
+              onClick={rejectVendor}
+              disabled={rejecting}
+              className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {rejecting && (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              )}
 
-            <Button onClick={approveVendor}>Approve Vendor</Button>
+              {rejecting ? "Rejecting..." : "Reject Vendor"}
+            </button>
+            <button
+              onClick={approveVendor}
+              disabled={approving}
+              className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {approving && (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              )}
+
+              {approving ? "Approving..." : "Approve Vendor"}
+            </button>
           </div>
         )}
 
