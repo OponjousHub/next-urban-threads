@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { StatusBadge } from "@/lib/status-badge";
-import { FaChevronRight, FaSearch } from "react-icons/fa";
+import { FaChevronRight, FaSearch, FaChevronLeft } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { appToast } from "@/utils/appToast";
 
@@ -421,32 +421,66 @@ export default function VendorAprovalPage() {
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between border-t px-4 py-4">
+
+      <div className="flex items-center justify-between border-t bg-gray-50 px-6 py-4">
+        {/* Results Info */}
         <div className="text-sm text-muted-foreground">
           Showing{" "}
-          {Math.min(
-            (currentPage - 1) * ITEMS_PER_PAGE + 1,
-            filteredVendors.length,
-          )}
-          -{Math.min(currentPage * ITEMS_PER_PAGE, filteredVendors.length)} of{" "}
-          {filteredVendors.length}
+          <span className="font-medium text-foreground">
+            {Math.min(
+              (currentPage - 1) * ITEMS_PER_PAGE + 1,
+              filteredVendors.length,
+            )}
+          </span>
+          -
+          <span className="font-medium text-foreground">
+            {Math.min(currentPage * ITEMS_PER_PAGE, filteredVendors.length)}
+          </span>{" "}
+          of{" "}
+          <span className="font-medium text-foreground">
+            {filteredVendors.length}
+          </span>{" "}
+          vendors
         </div>
 
-        <div className="flex gap-2">
+        {/* Pagination */}
+        <div className="flex items-center gap-2">
           <button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((p) => p - 1)}
-            className="rounded-lg border px-3 py-2 disabled:opacity-50"
+            className="
+        inline-flex items-center gap-2
+        rounded-lg border bg-white px-3 py-2
+        text-sm font-medium
+        shadow-sm transition
+        hover:bg-gray-50
+        disabled:pointer-events-none
+        disabled:opacity-40
+      "
           >
+            <FaChevronLeft size={10} />
             Previous
           </button>
+
+          <div className="flex h-10 min-w-[80px] items-center justify-center rounded-lg border bg-white px-4 text-sm font-medium">
+            Page {currentPage} of {totalPages}
+          </div>
 
           <button
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((p) => p + 1)}
-            className="rounded-lg border px-3 py-2 disabled:opacity-50"
+            className="
+        inline-flex items-center gap-2
+        rounded-lg border bg-white px-3 py-2
+        text-sm font-medium
+        shadow-sm transition
+        hover:bg-gray-50
+        disabled:pointer-events-none
+        disabled:opacity-40
+      "
           >
             Next
+            <FaChevronRight size={10} />
           </button>
         </div>
       </div>
