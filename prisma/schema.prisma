@@ -125,7 +125,7 @@ model Vendor {
 
 model VendorApplication {
   id String @id @default(cuid())
-  tenantId    String?
+  tenantId    String
 
   userId String
   user User @relation(fields: [userId], references: [id])
@@ -137,7 +137,7 @@ model VendorApplication {
   description String?
 
   status VendorApplicationStatus @default(PENDING)
-  tenant      Tenant? @relation(fields: [tenantId], references: [id])
+  tenant      Tenant @relation(fields: [tenantId], references: [id])
 
   reviewedAt DateTime?
   reviewedBy String?
