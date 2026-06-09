@@ -112,7 +112,7 @@ export default function VendorManagementPage() {
         throw new Error(res.message || "Request failed");
       }
 
-      appToast.success("Success", "Vendor(s) suspended");
+      appToast.success("Success", "Selected Vendor(s) suspended");
 
       setSelectedIds([]);
 
@@ -124,8 +124,8 @@ export default function VendorManagementPage() {
     }
   }
 
-  // BULK ACTIVATE
-  async function bulkActivate() {
+  // BULK REACTIVATE
+  async function bulkReactivate() {
     try {
       setBulkActivating(true);
 
@@ -143,10 +143,7 @@ export default function VendorManagementPage() {
         throw new Error(res.message || "Request failed");
       }
 
-      appToast.success(
-        "Success",
-        "Selected application(s) activated successfully",
-      );
+      appToast.success("Success", "Selected vendors(s) activated successfully");
 
       setSelectedIds([]);
 
@@ -159,6 +156,18 @@ export default function VendorManagementPage() {
       setBulkActivating(false);
     }
   }
+
+  const selectedVendors = vendors.filter((vendor) =>
+    selectedIds.includes(vendor.id),
+  );
+
+  const approvedSelected = selectedVendors.filter(
+    (vendor) => vendor.status === "APPROVED",
+  );
+
+  const suspendedSelected = selectedVendors.filter(
+    (vendor) => vendor.status === "SUSPENDED",
+  );
 
   if (loading) {
     return <div className="p-6">Loading vendors...</div>;
@@ -214,36 +223,33 @@ export default function VendorManagementPage() {
         {selectedIds.length > 0 && (
           <div className="mb-4 flex items-center  justify-end gap-3 rounded-xl border bg-white p-4">
             <span className="text-sm">{selectedIds.length} selected</span>
+            {approvedSelected.length > 0 && (
+              <button
+                onClick={bulkSuspend}
+                disabled={bulkSuspending || selectedIds.length === 0}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {bulkSuspending && (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                )}
+                {bulkSuspending ? "Suspending..." : "Suspend Selected"} (
+                {approvedSelected.length})
+              </button>
+            )}
 
-            <button
-              onClick={bulkSuspend}
-              className="rounded-lg bg-red-600 px-4 py-2 text-white"
-            >
-              Suspend
-            </button>
-            <button
-              onClick={bulkSuspend}
-              disabled={bulkSuspending || selectedIds.length === 0}
-              className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {bulkSuspending && (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              )}
-
-              {bulkSuspending ? "Suspending..." : "Suspend Selected"}
-            </button>
-
-            <button
-              onClick={bulkActivate}
-              disabled={bulkActivating || selectedIds.length === 0}
-              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {bulkActivating && (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              )}
-
-              {bulkActivating ? "Activating..." : "Activate Selected"}
-            </button>
+            {suspendedSelected.length > 0 && (
+              <button
+                onClick={bulkReactivate}
+                disabled={bulkActivating || selectedIds.length === 0}
+                className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {bulkActivating && (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                )}
+                {bulkActivating ? "Reactivating..." : "Reactivate Selected"} (
+                {suspendedSelected.length})
+              </button>
+            )}
           </div>
         )}
         <table className="w-full text-sm">
