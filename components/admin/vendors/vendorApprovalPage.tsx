@@ -241,6 +241,7 @@ export default function VendorAprovalPage() {
     selectedIds.includes(app.id),
   );
 
+  // Show buttons only when application is pending
   const actionableApplications = selectedApplications.filter(
     (app) => app.status === "PENDING",
   );
