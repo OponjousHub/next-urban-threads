@@ -210,6 +210,42 @@ export default function VendorManagementPage() {
       {/* Table */}
 
       <div className="overflow-hidden rounded-xl border bg-white">
+        {/*Bulk Toolbar, only when something is selected*/}
+        {selectedIds.length > 0 && (
+          <div className="mb-4 flex items-center  justify-end gap-3 rounded-xl border bg-white p-4">
+            <span className="text-sm">{selectedIds.length} selected</span>
+
+            <button
+              onClick={bulkSuspend}
+              className="rounded-lg bg-red-600 px-4 py-2 text-white"
+            >
+              Suspend
+            </button>
+            <button
+              onClick={bulkSuspend}
+              disabled={bulkSuspending || selectedIds.length === 0}
+              className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {bulkSuspending && (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              )}
+
+              {bulkSuspending ? "Suspending..." : "Suspend Selected"}
+            </button>
+
+            <button
+              onClick={bulkActivate}
+              disabled={bulkActivating || selectedIds.length === 0}
+              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {bulkActivating && (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              )}
+
+              {bulkActivating ? "Activating..." : "Activate Selected"}
+            </button>
+          </div>
+        )}
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-xs uppercase text-gray-500">
             <tr>
@@ -239,25 +275,6 @@ export default function VendorManagementPage() {
               <th className="w-12"></th>
             </tr>
           </thead>
-          {selectedIds.length > 0 && (
-            <div className="mb-4 flex items-center gap-3 rounded-xl border bg-white p-4">
-              <span className="text-sm">{selectedIds.length} selected</span>
-
-              <button
-                onClick={bulkSuspend}
-                className="rounded-lg bg-red-600 px-4 py-2 text-white"
-              >
-                Suspend
-              </button>
-
-              <button
-                onClick={bulkActivate}
-                className="rounded-lg bg-green-600 px-4 py-2 text-white"
-              >
-                Activate
-              </button>
-            </div>
-          )}
 
           <tbody>
             {filteredVendors.map((vendor) => {
