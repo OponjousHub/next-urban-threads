@@ -157,6 +157,7 @@ export default function VendorManagementPage() {
     }
   }
 
+  // COMPUTING VENDOR COUNTS
   const selectedVendors = vendors.filter((vendor) =>
     selectedIds.includes(vendor.id),
   );

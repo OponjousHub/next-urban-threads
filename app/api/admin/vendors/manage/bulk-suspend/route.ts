@@ -9,6 +9,7 @@ export async function POST(req: Request) {
       id: {
         in: ids,
       },
+      status: "APPROVED",
     },
     data: {
       status: "SUSPENDED",
