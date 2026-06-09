@@ -91,6 +91,7 @@ export default function VendorManagementPage() {
     }
   }
 
+  //BULK SUSPENSE
   async function bulkSuspend() {
     try {
       setBulkSuspending(true);
@@ -120,6 +121,42 @@ export default function VendorManagementPage() {
       appToast.error("Failed", error.message);
     } finally {
       setBulkSuspending(false);
+    }
+  }
+
+  // BULK ACTIVATE
+  async function bulkActivate() {
+    try {
+      setBulkActivating(true);
+
+      const response = await fetch("/api/admin/vendors/manage/bulk-activate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ids: selectedIds,
+        }),
+      });
+      const res = await response.json();
+      if (!response.ok) {
+        throw new Error(res.message || "Request failed");
+      }
+
+      appToast.success(
+        "Success",
+        "Selected application(s) activated successfully",
+      );
+
+      setSelectedIds([]);
+
+      fetchVendors();
+      //   fetchMetrics();
+    } catch (error: any) {
+      appToast.error("Failed", error.message || "Something went wrong");
+      console.error(error);
+    } finally {
+      setBulkActivating(false);
     }
   }
 
