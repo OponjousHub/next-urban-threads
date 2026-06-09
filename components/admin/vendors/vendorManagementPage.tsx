@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FaChevronRight, FaSearch } from "react-icons/fa";
 import { StatusBadge } from "@/lib/status-badge";
 import { Vendor } from "@/types/vendor";
+import { appToast } from "@/utils/appToast";
 
 export default function VendorManagementPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -12,6 +13,8 @@ export default function VendorManagementPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [bulkSuspending, setBulkSuspending] = useState(false);
+  const [bulkActivating, setBulkActivating] = useState(false);
 
   const router = useRouter();
 
@@ -85,6 +88,38 @@ export default function VendorManagementPage() {
       setSelectedIds([]);
     } else {
       setSelectedIds(filteredVendors.map((vendor) => vendor.id));
+    }
+  }
+
+  async function bulkSuspend() {
+    try {
+      setBulkSuspending(true);
+
+      const response = await fetch("/api/admin/vendors/manage/bulk-suspend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ids: selectedIds,
+        }),
+      });
+
+      const res = await response.json();
+
+      if (!response.ok) {
+        throw new Error(res.message || "Request failed");
+      }
+
+      appToast.success("Success", "Vendor(s) suspended");
+
+      setSelectedIds([]);
+
+      fetchVendors();
+    } catch (error: any) {
+      appToast.error("Failed", error.message);
+    } finally {
+      setBulkSuspending(false);
     }
   }
 
