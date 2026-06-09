@@ -11,30 +11,7 @@ import {
   FaShoppingBag,
 } from "react-icons/fa";
 import { StatusBadge } from "@/lib/status-badge";
-
-type Vendor = {
-  id: string;
-  name: string;
-  slug: string;
-  email: string | null;
-  phone: string | null;
-  description: string | null;
-  status: string;
-  createdAt: string;
-
-  users: {
-    id: string;
-    name: string | null;
-    email: string;
-    role: string;
-    createdAt: string;
-  }[];
-
-  _count: {
-    products: number;
-    orders: number;
-  };
-};
+import { Vendor } from "@/types/vendor";
 
 export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
   const [vendor, setVendor] = useState<Vendor | null>(null);
@@ -58,9 +35,9 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
     }
   }
 
-  if (loading) {
-    return <div className="p-8">Loading vendor...</div>;
-  }
+  // if (loading) {
+  //   return <div className="p-8">Loading vendor...</div>;
+  // }
 
   if (!vendor) {
     return <div className="p-8">Vendor not found</div>;

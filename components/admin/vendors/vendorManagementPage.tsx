@@ -17,7 +17,7 @@ export default function VendorManagementPage() {
   const [bulkActivating, setBulkActivating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const pageSize = 1;
+  const pageSize = 10;
 
   const router = useRouter();
 
@@ -182,9 +182,9 @@ export default function VendorManagementPage() {
     (vendor) => vendor.status === "SUSPENDED",
   );
 
-  if (loading) {
-    return <div className="p-6">Loading vendors...</div>;
-  }
+  // if (loading) {
+  //   return <div className="p-6">Loading vendors...</div>;
+  // }
 
   return (
     <main className="p-6">
