@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function GET() {
+  const tenant = await getDefaultTenant();
+
+  if (!tenant) {
+    return NextResponse.json("Unauthorized!");
+  }
+
   try {
     const auth = await getAuthPayload();
 
@@ -18,6 +25,9 @@ export async function GET() {
     }
 
     const vendors = await prisma.vendor.findMany({
+      where: {
+        tenantId: tenant.id,
+      },
       include: {
         users: {
           select: {

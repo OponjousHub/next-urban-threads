@@ -102,7 +102,7 @@ model Product {
 
 model Vendor {
   id          String   @id @default(cuid())
-  tenantId    String?
+  tenantId    String
   name        String
   slug        String   @unique
   logo        String?
@@ -113,7 +113,7 @@ model Vendor {
   phone       String?
 
   status      VendorStatus @default(PENDING)
-  tenant      Tenant? @relation(fields: [tenantId], references: [id])
+  tenant      Tenant @relation(fields: [tenantId], references: [id])
 
   products    Product[]
   users       User[]
@@ -125,6 +125,7 @@ model Vendor {
 
 model VendorApplication {
   id String @id @default(cuid())
+  tenantId    String?
 
   userId String
   user User @relation(fields: [userId], references: [id])
@@ -136,6 +137,7 @@ model VendorApplication {
   description String?
 
   status VendorApplicationStatus @default(PENDING)
+  tenant      Tenant? @relation(fields: [tenantId], references: [id])
 
   reviewedAt DateTime?
   reviewedBy String?
@@ -270,6 +272,7 @@ model Tenant {
   users              User[]
   WishlistItem       WishlistItem[]
   vendors            Vendor[]
+  VendorApplication   VendorApplication[]
 }
 
 model Session {
