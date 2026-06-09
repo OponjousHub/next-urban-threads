@@ -4,38 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaChevronRight, FaSearch } from "react-icons/fa";
 import { StatusBadge } from "@/lib/status-badge";
-
-type Vendor = {
-  id: string;
-  name: string;
-  slug: string;
-
-  logo?: string | null;
-
-  email?: string | null;
-
-  phone?: string | null;
-
-  status: string;
-
-  createdAt: string;
-
-  users: {
-    id: string;
-    name: string | null;
-    email: string;
-  }[];
-
-  _count: {
-    products: number;
-    orders: number;
-  };
-};
+import { Vendor } from "@/types/vendor";
 
 export default function VendorManagementPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
 
@@ -98,6 +72,22 @@ export default function VendorManagementPage() {
     },
   ];
 
+  // Toggle selection
+  function toggleVendor(id: string) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  }
+
+  // Select all
+  function toggleSelectAll() {
+    if (selectedIds.length === filteredVendors.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredVendors.map((vendor) => vendor.id));
+    }
+  }
+
   if (loading) {
     return <div className="p-6">Loading vendors...</div>;
   }
@@ -151,6 +141,17 @@ export default function VendorManagementPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-xs uppercase text-gray-500">
             <tr>
+              <th className="w-12 p-4">
+                {/*Checkbox*/}
+                <input
+                  type="checkbox"
+                  checked={
+                    filteredVendors.length > 0 &&
+                    selectedIds.length === filteredVendors.length
+                  }
+                  onChange={toggleSelectAll}
+                />
+              </th>
               <th className="p-4 text-left">Vendor</th>
 
               <th className="p-4 text-left">Owner</th>
@@ -166,6 +167,25 @@ export default function VendorManagementPage() {
               <th className="w-12"></th>
             </tr>
           </thead>
+          {selectedIds.length > 0 && (
+            <div className="mb-4 flex items-center gap-3 rounded-xl border bg-white p-4">
+              <span className="text-sm">{selectedIds.length} selected</span>
+
+              <button
+                onClick={bulkSuspend}
+                className="rounded-lg bg-red-600 px-4 py-2 text-white"
+              >
+                Suspend
+              </button>
+
+              <button
+                onClick={bulkActivate}
+                className="rounded-lg bg-green-600 px-4 py-2 text-white"
+              >
+                Activate
+              </button>
+            </div>
+          )}
 
           <tbody>
             {filteredVendors.map((vendor) => {
@@ -179,6 +199,13 @@ export default function VendorManagementPage() {
                   }
                   className="cursor-pointer border-t hover:bg-gray-50"
                 >
+                  <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(vendor.id)}
+                      onChange={() => toggleVendor(vendor.id)}
+                    />
+                  </td>
                   <td className="p-4">
                     <div>
                       <div className="font-medium">{vendor.name}</div>
