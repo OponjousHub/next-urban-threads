@@ -3,21 +3,30 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
+import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
 
 export default function VendorProductsPage({ vendorId }: { vendorId: string }) {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
   async function fetchProducts() {
+    setLoading(true);
     const res = await fetch(`/api/admin/vendors/manage/${vendorId}/products`);
 
     const data = await res.json();
 
     setProducts(data.data);
+    setLoading(false);
   }
+
+  if (loading) {
+    return <VendorDetailSkeleton />;
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       <Link

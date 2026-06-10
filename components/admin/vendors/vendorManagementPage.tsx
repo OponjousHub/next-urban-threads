@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaChevronRight, FaSearch, FaChevronLeft } from "react-icons/fa";
 import { StatusBadge } from "@/lib/status-badge";
+import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
 import { Vendor } from "@/types/vendor";
 import { appToast } from "@/utils/appToast";
 
@@ -27,6 +28,7 @@ export default function VendorManagementPage() {
 
   async function fetchVendors() {
     try {
+      setLoading(true);
       const response = await fetch("/api/admin/vendors/manage");
 
       const data = await response.json();
@@ -182,9 +184,9 @@ export default function VendorManagementPage() {
     (vendor) => vendor.status === "SUSPENDED",
   );
 
-  // if (loading) {
-  //   return <div className="p-6">Loading vendors...</div>;
-  // }
+  if (loading) {
+    return <VendorDetailSkeleton />;
+  }
 
   return (
     <main className="p-6">
@@ -296,6 +298,11 @@ export default function VendorManagementPage() {
           </thead>
 
           <tbody>
+            {loading && (
+              <tr>
+                <td>Loading vendors...</td>
+              </tr>
+            )}
             {paginatedVendors.map((vendor) => {
               const owner = vendor.users[0];
 

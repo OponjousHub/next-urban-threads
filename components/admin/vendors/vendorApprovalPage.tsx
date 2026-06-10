@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { StatusBadge } from "@/lib/status-badge";
 import { FaChevronRight, FaSearch, FaChevronLeft } from "react-icons/fa";
+import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
 import { useRouter } from "next/navigation";
 import { appToast } from "@/utils/appToast";
 
@@ -23,7 +24,7 @@ type VendorApplication = {
 
 export default function VendorAprovalPage() {
   const [vendors, setVendors] = useState<VendorApplication[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState("newest");
@@ -52,12 +53,14 @@ export default function VendorAprovalPage() {
   }, [search, statusFilter, sortBy]);
 
   async function fetchMetrics() {
+    setLoading(true);
     try {
       const res = await fetch("/api/admin/vendors/application/metrics");
 
       const data = await res.json();
 
       setMetrics(data);
+      setLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -247,7 +250,7 @@ export default function VendorAprovalPage() {
   );
 
   if (loading) {
-    return <p className="p-6">Loading vendors applications...</p>;
+    return <VendorDetailSkeleton />;
   }
 
   return (

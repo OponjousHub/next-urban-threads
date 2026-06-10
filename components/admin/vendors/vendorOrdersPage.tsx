@@ -5,21 +5,25 @@ import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import { StatusBadge } from "@/lib/status-badge";
 import { FiCopy, FiCheck } from "react-icons/fi";
+import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
 
 export default function VendorOrdersPage({ vendorId }: { vendorId: string }) {
   const [orders, setOrders] = useState([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
   async function fetchOrders() {
+    setLoading(true);
     const res = await fetch(`/api/admin/vendors/manage/${vendorId}/orders`);
 
     const data = await res.json();
 
     setOrders(data.data);
+    setLoading(false);
   }
 
   async function handleCopy(id: string) {
@@ -30,6 +34,10 @@ export default function VendorOrdersPage({ vendorId }: { vendorId: string }) {
     setTimeout(() => {
       setCopiedId(null);
     }, 2000);
+  }
+
+  if (loading) {
+    return <VendorDetailSkeleton />;
   }
 
   return (

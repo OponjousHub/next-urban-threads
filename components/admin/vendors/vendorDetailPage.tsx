@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
+import { appToast } from "@/utils/appToast";
+import { useRouter } from "next/navigation";
 import {
   FaArrowLeft,
   FaChevronRight,
@@ -15,7 +18,9 @@ import { Vendor } from "@/types/vendor";
 
 export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
   const [vendor, setVendor] = useState<Vendor | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     fetchVendor();
@@ -23,6 +28,8 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
 
   async function fetchVendor() {
     try {
+      setLoading(true);
+
       const response = await fetch(`/api/admin/vendors/manage/${vendorId}`);
 
       const data = await response.json();
@@ -35,9 +42,9 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
     }
   }
 
-  // if (loading) {
-  //   return <div className="p-8">Loading vendor...</div>;
-  // }
+  if (loading) {
+    return <VendorDetailSkeleton />;
+  }
 
   if (!vendor) {
     return <div className="p-8">Vendor not found</div>;
