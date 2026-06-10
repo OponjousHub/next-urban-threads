@@ -5,7 +5,7 @@ import Link from "next/link";
 import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
 import { appToast } from "@/utils/appToast";
 import { Textarea } from "@/components/ui/textarea";
-
+import { StatCard } from "./vendorStatsCard";
 import {
   FaArrowLeft,
   FaChevronRight,
@@ -17,11 +17,19 @@ import {
 import { StatusBadge } from "@/lib/status-badge";
 import { Vendor, VendorApplication } from "@/types/vendor";
 
+export type VendorStats = {
+  products: number;
+  orders: number;
+  revenue: number;
+  customers: number;
+};
+
 export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [suspensionReason, setSuspensionReason] = useState("");
+  const [stats, setStats] = useState<VendorStats | null>(null);
   const [application, setApplication] = useState<VendorApplication | null>(
     null,
   );
@@ -37,9 +45,9 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
       const response = await fetch(`/api/admin/vendors/manage/${vendorId}`);
 
       const data = await response.json();
-      console.log("DATAaaaaaa", data);
       setVendor(data.data);
       setApplication(data.application);
+      setStats(data.stats);
     } catch (error) {
       console.error(error);
     } finally {
@@ -123,6 +131,22 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
           <StatusBadge status={vendor.status} />
         </div>
       </div>
+
+      {/*Render stats*/}
+      {stats && (
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Products" value={stats.products} />
+
+          <StatCard label="Orders" value={stats.orders} />
+
+          <StatCard label="Customers" value={stats.customers} />
+
+          <StatCard
+            label="Revenue"
+            value={`₦${stats.revenue.toLocaleString()}`}
+          />
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Business Info */}
