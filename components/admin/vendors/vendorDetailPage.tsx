@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
 import { appToast } from "@/utils/appToast";
-import { useRouter } from "next/navigation";
+import { Textarea } from "@/components/ui/textarea";
+
 import {
   FaArrowLeft,
   FaChevronRight,
@@ -14,14 +15,16 @@ import {
   FaShoppingBag,
 } from "react-icons/fa";
 import { StatusBadge } from "@/lib/status-badge";
-import { Vendor } from "@/types/vendor";
+import { Vendor, VendorApplication } from "@/types/vendor";
 
 export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-
-  const router = useRouter();
+  const [suspensionReason, setSuspensionReason] = useState("");
+  const [application, setApplication] = useState<VendorApplication | null>(
+    null,
+  );
 
   useEffect(() => {
     fetchVendor();
@@ -34,8 +37,9 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
       const response = await fetch(`/api/admin/vendors/manage/${vendorId}`);
 
       const data = await response.json();
-
+      console.log("DATAaaaaaa", data);
       setVendor(data.data);
+      setApplication(data.application);
     } catch (error) {
       console.error(error);
     } finally {
@@ -49,10 +53,21 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
 
       const endpoint = vendor?.status === "APPROVED" ? "suspend" : "reactivate";
 
+      // Prevent suspension without suspensionReason
+      if (vendor?.status === "APPROVED" && !suspensionReason.trim()) {
+        appToast.warning("Required", "Please provide a suspension reason");
+
+        return;
+      }
+
       const response = await fetch(
         `/api/admin/vendors/manage/${vendorId}/${endpoint}`,
         {
           method: "POST",
+          body: JSON.stringify({
+            suspensionReason:
+              vendor?.status === "APPROVED" ? suspensionReason : null,
+          }),
         },
       );
 
@@ -84,7 +99,7 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
   }
 
   const owner = vendor.users[0];
-
+  console.log("applicationnnn", application);
   return (
     <div className="mx-auto max-w-7xl p-6 space-y-6">
       {/* Header */}
@@ -187,6 +202,18 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
         {/* Actions */}
 
         <Card icon={<FaBox />} title="Actions">
+          {!vendor.suspensionReason && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+              <h3 className="font-semibold text-red-700">Suspension Reason</h3>
+
+              <Textarea
+                value={suspensionReason}
+                onChange={(e) => setSuspensionReason(e.target.value)}
+                placeholder="Reason for suspending..."
+              />
+            </div>
+          )}
+
           {vendor.status === "APPROVED" ? (
             <button
               onClick={handleStatusChange}

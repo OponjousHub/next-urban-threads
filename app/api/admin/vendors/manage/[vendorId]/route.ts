@@ -44,8 +44,18 @@ export async function GET(
       );
     }
 
+    const latestApplication = await prisma.vendorApplication.findFirst({
+      where: {
+        userId: vendor.users[0]?.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
     return NextResponse.json({
       data: vendor,
+      application: latestApplication,
     });
   } catch (error) {
     console.error(error);

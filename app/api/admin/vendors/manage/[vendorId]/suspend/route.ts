@@ -6,8 +6,9 @@ export async function POST(
   { params }: { params: Promise<{ vendorId: string }> },
 ) {
   const { vendorId } = await params;
+  const { suspensionReason } = await req.json();
 
-  await suspendVendor(vendorId);
+  await suspendVendor(vendorId, suspensionReason);
 
   return NextResponse.json({
     success: true,

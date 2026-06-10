@@ -83,8 +83,8 @@ export default function VendorApprovalReview({
 
       onActionComplete?.();
       router.refresh();
-    } catch {
-      appToast.error("Failed", "Failed to reject application");
+    } catch (error: any) {
+      appToast.error("Failed", error.meesage || "Failed to reject application");
     } finally {
       setRejecting(false);
     }

@@ -14,8 +14,13 @@ export async function POST(
   }
   try {
     const { id } = await params;
+    const { rejectionReason } = await req.json();
 
-    await rejectVendorApplication(id);
+    if(!rejectionReason) {
+      return NextResponse.json({message: "Please provide reason for rejection"},{status: 400})
+    }
+
+    await rejectVendorApplication(id, rejectionReason);
 
     return NextResponse.json({
       success: true,

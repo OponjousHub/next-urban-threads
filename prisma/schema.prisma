@@ -112,6 +112,8 @@ model Vendor {
   email       String?
   phone       String?
 
+  suspensionReason String?
+
   status      VendorStatus @default(PENDING)
   tenant      Tenant @relation(fields: [tenantId], references: [id])
 

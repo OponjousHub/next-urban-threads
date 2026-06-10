@@ -13,11 +13,13 @@ export type Vendor = {
 
   createdAt: string;
 
+  suspensionReason: string;
+
   users: {
     id: string;
     name: string | null;
     email: string;
-     role: string;
+    role: string;
     createdAt: string;
   }[];
 
@@ -26,3 +28,32 @@ export type Vendor = {
     orders: number;
   };
 };
+
+export type VendorApplication = {
+  id: string;
+
+  userId: string;
+
+  businessName: string;
+  businessEmail?: string | null;
+  businessPhone?: string | null;
+
+  description?: string | null;
+
+  status: string;
+
+  rejectionReason?: string | null;
+
+  reviewedAt?: string | null;
+  reviewedBy?: string | null;
+
+  createdAt: string;
+  updatedAt: string;
+};
+
+// export type VendorApplication = {
+//   application: {
+//     status: string;
+//     rejectionReason: string;
+//   };
+// };
