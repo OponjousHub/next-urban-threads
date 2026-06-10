@@ -5,6 +5,7 @@ import Link from "next/link";
 import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
 import { appToast } from "@/utils/appToast";
 import { Textarea } from "@/components/ui/textarea";
+import { useTenant } from "@/store/tenant-provider-context";
 import { StatCard } from "./vendorStatsCard";
 import {
   FaArrowLeft,
@@ -33,6 +34,8 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
   const [application, setApplication] = useState<VendorApplication | null>(
     null,
   );
+
+  const { tenant } = useTenant();
 
   useEffect(() => {
     fetchVendor();
@@ -134,7 +137,7 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
 
       {/*Render stats*/}
       {stats && (
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
           <StatCard label="Products" value={stats.products} />
 
           <StatCard label="Orders" value={stats.orders} />
@@ -143,7 +146,7 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
 
           <StatCard
             label="Revenue"
-            value={`₦${stats.revenue.toLocaleString()}`}
+            value={`${tenant.currency}${stats.revenue.toLocaleString()}`}
           />
         </div>
       )}
