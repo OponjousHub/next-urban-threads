@@ -53,9 +53,56 @@ export async function GET(
       },
     });
 
+    // Adding statistics
+
+    // Product count
+    const productCount = await prisma.product.count({
+      where: {
+        vendorId,
+      },
+    });
+
+    // Order count
+    const orderCount = await prisma.order.count({
+      where: {
+        vendorId,
+      },
+    });
+
+    // Revenue count
+    const revenue = await prisma.order.aggregate({
+      where: {
+        vendorId,
+      },
+
+      _sum: {
+        totalAmount: true,
+      },
+    });
+
+    // Customer count
+    const customers = await prisma.order.findMany({
+      where: {
+        vendorId,
+      },
+
+      distinct: ["userId"],
+
+      select: {
+        userId: true,
+      },
+    });
+
     return NextResponse.json({
       data: vendor,
       application: latestApplication,
+
+      stats: {
+        products: productCount,
+        orders: orderCount,
+        revenue: revenue._sum.totalAmount || 0,
+        customers: customers.length,
+      },
     });
   } catch (error) {
     console.error(error);
