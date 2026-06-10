@@ -19,6 +19,7 @@ import { Vendor } from "@/types/vendor";
 export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const router = useRouter();
 
@@ -39,6 +40,38 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleStatusChange() {
+    try {
+      setActionLoading(true);
+
+      const endpoint = vendor?.status === "APPROVED" ? "suspend" : "reactivate";
+
+      const response = await fetch(
+        `/api/admin/vendors/manage/${vendorId}/${endpoint}`,
+        {
+          method: "POST",
+        },
+      );
+
+      const res = await response.json();
+
+      if (!response.ok) {
+        throw new Error(res.message || "Action failed");
+      }
+
+      fetchVendor();
+
+      appToast.success(
+        "Success",
+        endpoint === "suspend" ? "Vendor suspended" : "Vendor reactivated",
+      );
+    } catch (error: any) {
+      appToast.error("Failed", error.message);
+    } finally {
+      setActionLoading(false);
     }
   }
 
@@ -156,25 +189,34 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
         <Card icon={<FaBox />} title="Actions">
           {vendor.status === "APPROVED" ? (
             <button
-              className="
-                w-full rounded-xl
+              onClick={handleStatusChange}
+              disabled={actionLoading}
+              className={`inline-flex items-center justify-center gap-2 w-full rounded-xl
                 bg-red-600 px-4 py-3
                 font-medium text-white
-                hover:bg-red-700
-              "
+                hover:bg-red-700`}
             >
-              Suspend Vendor
+              {actionLoading && (
+                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              )}
+              {actionLoading ? "Processing..." : "Suspend Vendor"}
             </button>
           ) : (
             <button
+              onClick={handleStatusChange}
+              disabled={actionLoading}
               className="
+              inline-flex items-center justify-center gap-2
                 w-full rounded-xl
                 bg-green-600 px-4 py-3
                 font-medium text-white
                 hover:bg-green-700
               "
             >
-              Reactivate Vendor
+              {actionLoading && (
+                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              )}
+              {actionLoading ? "Processing..." : "Reactivate Vendor"}
             </button>
           )}
         </Card>
