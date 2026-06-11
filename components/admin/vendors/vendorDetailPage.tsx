@@ -31,6 +31,8 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
   const [actionLoading, setActionLoading] = useState(false);
   const [suspensionReason, setSuspensionReason] = useState("");
   const [stats, setStats] = useState<VendorStats | null>(null);
+  const [adminNotes, setAdminNotes] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
   const [application, setApplication] = useState<VendorApplication | null>(
     null,
   );
@@ -51,6 +53,7 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
       setVendor(data.data);
       setApplication(data.application);
       setStats(data.stats);
+      setAdminNotes(data.data.adminNotes || "");
     } catch (error) {
       console.error(error);
     } finally {
@@ -98,6 +101,40 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
       appToast.error("Failed", error.message);
     } finally {
       setActionLoading(false);
+    }
+  }
+
+  //Saving admin notes
+  async function saveNotes() {
+    try {
+      setSavingNotes(true);
+
+      const response = await fetch(
+        `/api/admin/vendors/manage/${vendorId}/notes`,
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            adminNotes,
+          }),
+        },
+      );
+
+      const res = await response.json();
+
+      if (!response.ok) {
+        throw new Error(res.message || "Failed to save notes");
+      }
+
+      appToast.success("Success", "Admin notes updated");
+    } catch (error: any) {
+      appToast.error("Failed", error.message);
+    } finally {
+      setSavingNotes(false);
     }
   }
 
@@ -225,6 +262,52 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
             }
           />
         </Card>
+
+        {/*ADMIN Notes*/}
+        <div className="rounded-2xl border bg-white p-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">Admin Notes</h2>
+
+            <p className="text-sm text-muted-foreground">
+              Internal notes visible only to administrators.
+            </p>
+          </div>
+
+          <textarea
+            value={adminNotes}
+            onChange={(e) => setAdminNotes(e.target.value)}
+            rows={5}
+            placeholder="Add notes about this vendor..."
+            className="
+      w-full rounded-xl border
+      p-4 text-sm
+      resize-none
+    "
+          />
+
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={saveNotes}
+              disabled={savingNotes}
+              className="
+        rounded-xl
+        bg-[var(--color-primary)]
+        px-5 py-2.5
+        text-white
+        disabled:opacity-50
+      "
+            >
+              {savingNotes ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </div>
+              ) : (
+                "Save Notes"
+              )}
+            </button>
+          </div>
+        </div>
 
         {/* Actions */}
 
