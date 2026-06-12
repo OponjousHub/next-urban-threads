@@ -22,8 +22,13 @@ export async function getCurrentVendor() {
     throw new Error("Vendor account not found");
   }
 
+  const vendor = await prisma.vendor.findUnique({
+    where: { id: user?.vendorId },
+  });
+
   return {
     vendorId: user.vendorId,
     role: user.role,
+    vendor,
   };
 }
