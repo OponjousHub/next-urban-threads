@@ -21,4 +21,15 @@ export default function VendorDashboardPage() {
       setLoading(false);
     }
   }
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-24 rounded-xl bg-gray-200" />
+          <div className="h-64 rounded-xl bg-gray-200" />
+        </div>
+      </div>
+    );
+  }
 }
