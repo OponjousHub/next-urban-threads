@@ -66,3 +66,13 @@ export type VendorDashboard = {
     thumbnail: string;
   }[];
 };
+
+export type VendorHeaderProps = {
+  title: string;
+  subtitle?: string;
+  vendor: {
+    name?: string;
+    status?: string;
+    logo?: string | null;
+  } | null;
+};

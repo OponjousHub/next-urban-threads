@@ -1,7 +1,6 @@
 import VendorSidebar from "@/components/vendor/vendorSidebar";
 import { getAuthPayload } from "@/lib/server/auth";
 import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
-import { prisma } from "@/utils/prisma";
 import { redirect } from "next/navigation";
 
 export default async function VendorLayout({

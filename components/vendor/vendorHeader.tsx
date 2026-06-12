@@ -1,13 +1,14 @@
 "use client";
 
 import { FaBell } from "react-icons/fa";
+import { StatusBadge } from "@/lib/status-badge";
+import { VendorHeaderProps } from "@/types/vendor";
 
-type VendorHeaderProps = {
-  title: string;
-  subtitle?: string;
-};
-
-export default function VendorHeaderUI({ title, subtitle }: VendorHeaderProps) {
+export default function VendorHeaderUI({
+  title,
+  subtitle,
+  vendor,
+}: VendorHeaderProps) {
   return (
     <header className="sticky top-0 z-20 border-b bg-white">
       <div className="flex h-16 items-center justify-between px-6">
@@ -27,14 +28,24 @@ export default function VendorHeaderUI({ title, subtitle }: VendorHeaderProps) {
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 font-semibold">
-              V
-            </div>
+            {vendor?.logo ? (
+              <img
+                src={vendor?.logo}
+                alt={vendor?.name || "Vendor"}
+                className="h-10 w-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 font-semibold">
+                {vendor?.name?.charAt(0).toUpperCase() || "V"}
+              </div>
+            )}
 
-            <div className="hidden md:block">
-              <p className="font-medium">Vendor</p>
+            <div className="flex flex-col gap-2">
+              <p className="font-medium">{vendor?.name || "Vendor"}</p>
 
-              <p className="text-xs text-muted-foreground">Seller Account</p>
+              <p className="hidden md:block text-xs text-muted-foreground">
+                <StatusBadge status={vendor?.status || ""} />
+              </p>
             </div>
           </div>
         </div>

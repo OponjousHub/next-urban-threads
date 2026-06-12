@@ -1,4 +1,4 @@
-export function StatusBadge({ status }: { status: string }) {
+export function StatusBadge({ status }: { status: string | undefined }) {
   const styles: Record<string, string> = {
     REQUESTED: "bg-yellow-100 text-yellow-700",
     APPROVED: "bg-blue-100 text-blue-700",
@@ -12,6 +12,7 @@ export function StatusBadge({ status }: { status: string }) {
     DELIVERED: "bg-green-100 text-green-700",
     CANCELLED: "bg-red-100 text-red-700",
   };
+  if (!status) return null;
 
   return (
     <span
