@@ -1,4 +1,4 @@
-function MetricCard({
+export function MetricCard({
   title,
   value,
 }: {
