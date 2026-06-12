@@ -60,7 +60,7 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
             className="block px-4 py-2 text-sm hover:bg-gray-100"
             onClick={handleCloseUserMenu}
           >
-            My Dashboard
+            My Account
           </Link>
           <Link
             href="/dashboard/order"
@@ -75,7 +75,7 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
               className="block px-4 py-2 text-sm hover:bg-gray-100"
               onClick={handleCloseUserMenu}
             >
-              Admin Dashboard
+              Admin Panel
             </Link>
           )}
           {role === "Vendor" && (
@@ -84,7 +84,7 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
               className="block px-4 py-2 text-sm hover:bg-gray-100"
               onClick={handleCloseUserMenu}
             >
-              Vendor Dashboard
+              Vendor Center
             </Link>
           )}
           {isMultiVendor && role === "USER" && (
