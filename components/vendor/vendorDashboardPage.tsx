@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaBox, FaShoppingBag, FaCog, FaPlus } from "react-icons/fa";
 import { MetricCard } from "@/utils/vendorDashboardCard";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type DashboardData = {
   revenue: number;
@@ -32,6 +33,8 @@ export default function VendorDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const { tenant } = useTenant();
 
   useEffect(() => {
     fetchDashboard();
@@ -87,7 +90,7 @@ export default function VendorDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           title="Revenue"
-          value={`₦${Number(dashboard?.revenue || 0).toLocaleString()}`}
+          value={`${tenant.currency}${Number(dashboard?.revenue || 0).toLocaleString()}`}
         />
 
         <MetricCard title="Orders" value={dashboard?.orders || 0} />
@@ -140,10 +143,13 @@ export default function VendorDashboardPage() {
 
                   <div className="text-right">
                     <p className="font-semibold">
-                      ₦{Number(order.totalAmount).toLocaleString()}
+                      {tenant.currency}
+                      <span className="font-bold">
+                        {Number(order.totalAmount).toLocaleString()}
+                      </span>
                     </p>
 
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground ">
                       {order.status}
                     </p>
                   </div>

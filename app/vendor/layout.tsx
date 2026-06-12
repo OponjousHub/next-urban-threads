@@ -19,13 +19,7 @@ export default async function VendorLayout({
     redirect("/");
   }
 
-  const { vendorId } = await getCurrentVendor();
-
-  const vendor = await prisma.vendor.findUnique({
-    where: {
-      id: vendorId,
-    },
-  });
+  const { vendor } = await getCurrentVendor();
 
   if (vendor?.status === "SUSPENDED") {
     redirect("/");
@@ -35,7 +29,7 @@ export default async function VendorLayout({
     <div className="flex min-h-screen bg-gray-50">
       <VendorSidebar />
 
-      <main className="flex-1 overflow-auto">{children}</main>
+      <div className="flex flex-1 flex-col">{children}</div>
     </div>
   );
 }
