@@ -47,13 +47,32 @@ export async function GET() {
       },
     });
 
+    const lowStockProducts = await prisma.product.findMany({
+      where: {
+        vendorId,
+        stock: {
+          lte: 5,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        stock: true,
+        thumbnail: true,
+      },
+      orderBy: {
+        stock: "asc",
+      },
+      take: 5,
+    });
+
     return NextResponse.json({
       revenue: revenueResult._sum.totalAmount ?? 0,
-
       products,
       orders,
       pendingOrders,
       recentOrders,
+      lowStockProducts,
     });
   } catch (error) {
     console.error(error);

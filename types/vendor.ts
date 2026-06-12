@@ -51,9 +51,18 @@ export type VendorApplication = {
   updatedAt: string;
 };
 
-// export type VendorApplication = {
-//   application: {
-//     status: string;
-//     rejectionReason: string;
-//   };
-// };
+export type VendorDashboard = {
+  revenue: number;
+  orders: number;
+  products: number;
+  pendingOrders: number;
+
+  recentOrders: any[];
+
+  lowStockProducts: {
+    id: string;
+    name: string;
+    stock: number;
+    thumbnail: string;
+  }[];
+};
