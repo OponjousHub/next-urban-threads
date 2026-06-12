@@ -78,6 +78,15 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
               Admin Dashboard
             </Link>
           )}
+          {role === "Vendor" && (
+            <Link
+              href="/vendor"
+              className="block px-4 py-2 text-sm hover:bg-gray-100"
+              onClick={handleCloseUserMenu}
+            >
+              Vendor Dashboard
+            </Link>
+          )}
           {isMultiVendor && role === "USER" && (
             <Link
               href="/account/vendor-application"
