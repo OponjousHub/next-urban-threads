@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ProductSearch } from "@/components/admin/products/product-search";
-import { ProductFilters } from "@/components/admin/products/product-filters";
-import ProductSorting from "@/components/admin/products/product-sorting";
+import ProductSearch from "@/components/products/product-search";
+import { ProductFilters } from "@/components/products/product-filters";
+import ProductSorting from "@/components/products/product-sorting";
 
 export default function Header() {
   return (
@@ -24,12 +24,12 @@ export default function Header() {
 
       {/* Search row */}
       <div className="w-full">
-        <ProductSearch />
+        <ProductSearch basePath="/admin/products" />
       </div>
 
       {/* Filters + Sort */}
       <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-        <ProductFilters />
+        <ProductFilters basePath="/admin/products" />
         <div className="flex flex-col text-xs text-gray-500">
           <span>Sort</span>
           <ProductSorting />

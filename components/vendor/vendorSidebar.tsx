@@ -100,9 +100,9 @@ export default function VendorSidebar({ vendor }: VendorSidebarProps) {
         </div>
 
         {/* Store Branding */}
-        <div className="border-b p-6">
+        <div className="border-b p-6 lg:hidden">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary)] text-lg font-bold text-white">
               {vendor?.logo ? (
                 <img
                   src={vendor.logo}
@@ -110,7 +110,7 @@ export default function VendorSidebar({ vendor }: VendorSidebarProps) {
                   className="h-8 w-8 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary-light)] text-sm font-semibold text-[var(--color-primary)]">
                   {vendor?.name?.charAt(0).toUpperCase() || "V"}
                 </div>
               )}
@@ -148,7 +148,7 @@ export default function VendorSidebar({ vendor }: VendorSidebarProps) {
 
                   ${
                     active
-                      ? "bg-blue-50 text-blue-600"
+                      ? "bg-[var(--color-primary-lighter)] text-[var(--color-primary)]"
                       : "text-gray-700 hover:bg-gray-50"
                   }
                 `}

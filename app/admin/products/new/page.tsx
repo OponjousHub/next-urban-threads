@@ -1,5 +1,5 @@
-import { ProductForm } from "@/components/admin/products/productForm";
+import { ProductForm } from "@/components/products/productForm";
 
 export default function NewProductPage() {
-  return <ProductForm />;
+  return <ProductForm basePath="/admin/products" />;
 }

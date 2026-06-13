@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import { ProductForm } from "@/components/admin/products/productForm";
+import { ProductForm } from "@/components/products/productForm";
 
 export default async function EditProductPage({
   params,
@@ -30,5 +30,5 @@ export default async function EditProductPage({
       : undefined,
   };
 
-  return <ProductForm initialData={productData} />;
+  return <ProductForm initialData={productData} basePath={"/admin/products"} />;
 }

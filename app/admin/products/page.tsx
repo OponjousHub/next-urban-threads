@@ -1,6 +1,6 @@
 import Header from "@/components/admin/products/header";
-import ProductsTable from "@/components/admin/products/product-table";
-import Pagination from "@/components/admin/products/product-pagination";
+import ProductsTable from "@/components/products/product-table";
+import Pagination from "@/components/products/product-pagination";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
 

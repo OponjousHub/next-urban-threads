@@ -10,6 +10,8 @@ export default async function VendorLayout({
   children: React.ReactNode;
 }) {
   const auth = await getAuthPayload();
+  const { vendor } = await getCurrentVendor();
+
 
   if (!auth.userId) {
     redirect("/login");
@@ -18,8 +20,6 @@ export default async function VendorLayout({
   if (auth.role !== "Vendor") {
     redirect("/");
   }
-
-  const { vendor } = await getCurrentVendor();
 
   if (vendor?.status === "SUSPENDED") {
     redirect("/");
