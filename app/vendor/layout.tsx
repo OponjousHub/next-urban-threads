@@ -28,7 +28,7 @@ export default async function VendorLayout({
   return (
     <VendorSidebarProvider>
       <div className="flex min-h-screen bg-gray-50">
-        <VendorSidebar />
+        <VendorSidebar vendor={vendor} />
 
         <div className="flex flex-1 flex-col">{children}</div>
       </div>
