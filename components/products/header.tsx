@@ -3,7 +3,11 @@ import ProductSearch from "@/components/products/product-search";
 import { ProductFilters } from "@/components/products/product-filters";
 import ProductSorting from "@/components/products/product-sorting";
 
-export default function Header() {
+type ProductSearchProps = {
+  basePath: string;
+};
+
+export default function Header({ basePath }: ProductSearchProps) {
   return (
     <div className="sticky top-0 z-30 bg-white border-b px-4 py-3 space-y-4">
       {/* Top row */}
@@ -15,7 +19,7 @@ export default function Header() {
           </p>
         </div>
 
-        <Link href="/admin/products/new">
+        <Link href={`${basePath}/new`}>
           <button className="bg-black text-white px-3 py-2 lg:px-4 rounded-lg text-sm hover:opacity-90">
             + Add
           </button>

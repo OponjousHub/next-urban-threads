@@ -1,4 +1,4 @@
-import Header from "@/components/admin/products/header";
+import Header from "@/components/products/header";
 import ProductsTable from "@/components/products/product-table";
 import Pagination from "@/components/products/product-pagination";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
@@ -107,7 +107,7 @@ export default async function ProductsPage({
 
   return (
     <div className="space-y-6 sticky top-0 z-30">
-      <Header />
+      <Header basePath={"/admin/products"} />
       {query && (
         <p className="text-sm text-gray-600">
           Showing results for{" "}
