@@ -3,6 +3,7 @@ import OrderFilters from "@/components/order/order-filters";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
+import VendorHeaderUI from "@/components/vendor/vendorHeader";
 import { prisma } from "@/utils/prisma";
 
 type Props = {
@@ -135,11 +136,12 @@ export default async function OrdersPage({ searchParams }: Props) {
 
   return (
     <div className="bg-white border-b px-4 py-4 mb-6 rounded-xl shadow-sm">
+      <VendorHeaderUI
+        title="Orders"
+        subtitle="Manage your store orders"
+        vendor={vendor}
+      />
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-800">
-          Orders
-        </h1>
-
         <div className="flex items-center gap-3 flex-wrap">
           <OrderFilters basePath={"/vendor/orders"} />
         </div>
