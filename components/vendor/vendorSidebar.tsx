@@ -132,7 +132,10 @@ export default function VendorSidebar({ vendor }: VendorSidebarProps) {
             const Icon = link.icon;
 
             const active =
-              pathname === link.href || pathname.startsWith(`${link.href}/`);
+              link.href === "/vendor"
+                ? pathname === "/vendor"
+                : pathname === link.href ||
+                  pathname.startsWith(`${link.href}/`);
 
             return (
               <Link
