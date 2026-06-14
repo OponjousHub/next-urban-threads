@@ -2,6 +2,7 @@ import OrdersTable from "@/components/order/order-table";
 import OrderFilters from "@/components/order/order-filters";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
+import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 import { prisma } from "@/utils/prisma";
 
 type Props = {
@@ -19,6 +20,11 @@ export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams;
   const tenant = await getDefaultTenant();
   if (!tenant) throw new Error("Default tenant not found");
+
+  const { vendor } = await getCurrentVendor();
+  if (!vendor) {
+    throw new Error("Vendor not found");
+  }
 
   const { status, payment, query, from, to } = params;
 
@@ -38,6 +44,7 @@ export default async function OrdersPage({ searchParams }: Props) {
       orderBy: { createdAt: "desc" },
       where: {
         tenantId: tenant.id,
+        vendorId: vendor.id,
         storeMode: tenant.storeMode,
 
         ...(status &&
@@ -76,6 +83,8 @@ export default async function OrdersPage({ searchParams }: Props) {
     prisma.order.count({
       where: {
         tenantId: tenant.id,
+        vendorId: vendor.id,
+        storeMode: tenant.storeMode,
 
         ...(status &&
           status !== "ALL" && {
@@ -104,8 +113,6 @@ export default async function OrdersPage({ searchParams }: Props) {
           ],
         }),
       },
-
-      orderBy: { createdAt: "desc" },
     }),
   ]);
 

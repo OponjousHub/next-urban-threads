@@ -81,7 +81,7 @@ export default function OrdersTable({
 
   const base =
     "px-3 py-1.5 text-sm rounded-lg border transition disabled:opacity-40 disabled:cursor-not-allowed";
-
+  console.log("TOTALORDERSSSS", totalOrders);
   return (
     <>
       <div className="bg-white rounded-2xl border shadow-sm overflow-visible">
