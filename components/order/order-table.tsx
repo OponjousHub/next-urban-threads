@@ -85,50 +85,51 @@ export default function OrdersTable({
   return (
     <>
       <div className="bg-white rounded-2xl border shadow-sm overflow-visible">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
-            <tr className="text-left text-lg">
-              <th className="py-3 px-4">Order</th>
-              <th className="py-3 px-4">Customer</th>
-              <th className="py-3 px-4">Date</th>
-              <th className="py-3 px-4">Total</th>
-              <th className="py-3 px-4">Payment</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4 text-right">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {orders.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="text-center py-10 text-gray-500">
-                  No orders found
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
+              <tr className="text-left text-lg">
+                <th className="py-3 px-4">Order</th>
+                <th className="py-3 px-4">Customer</th>
+                <th className="py-3 px-4">Date</th>
+                <th className="py-3 px-4">Total</th>
+                <th className="py-3 px-4">Payment</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
-            ) : (
-              orders.map((order) => (
-                <OrderRow
-                  key={order.id}
-                  order={order}
-                  onAction={(action, order) => {
-                    // Only CANCEL needs confirmation
-                    if (
-                      action.type === "status" &&
-                      action.value === "CANCELLED"
-                    ) {
-                      setSelectedOrder({ action, order });
-                      setShowModal(true);
-                    } else {
-                      updateOrder(action, order.id);
-                    }
-                  }}
-                  basePath={basePath}
-                />
-              ))
-            )}
-          </tbody>
-        </table>
+            </thead>
 
+            <tbody>
+              {orders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-10 text-gray-500">
+                    No orders found
+                  </td>
+                </tr>
+              ) : (
+                orders.map((order) => (
+                  <OrderRow
+                    key={order.id}
+                    order={order}
+                    onAction={(action, order) => {
+                      // Only CANCEL needs confirmation
+                      if (
+                        action.type === "status" &&
+                        action.value === "CANCELLED"
+                      ) {
+                        setSelectedOrder({ action, order });
+                        setShowModal(true);
+                      } else {
+                        updateOrder(action, order.id);
+                      }
+                    }}
+                    basePath={basePath}
+                  />
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
         {/* Pagination & Page Info */}
         <div className="border-t px-4 py-10 bg-gray-50 rounded-b-2xl">
           <div className="flex justify-center items-center flex-wrap gap-3">
