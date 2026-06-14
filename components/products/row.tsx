@@ -2,18 +2,22 @@
 
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { useRouter } from "next/navigation";
-import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
+import { useTenant } from "@/store/tenant-provider-context";
+// import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 
 export default function Row({
   product,
   onDeleteClick,
   query,
+  basePath,
 }: {
   product: any;
   onDeleteClick: (product: any) => void;
   query?: string;
+  basePath: string;
 }) {
   const router = useRouter();
+  const { tenant } = useTenant();
 
   // Highlighting a matched search text
   function highlight(text: string, query: string) {
@@ -42,7 +46,7 @@ export default function Row({
         {/* Product */}
         <td
           className="p-4 cursor-pointer"
-          onClick={() => router.push(`/admin/products/${product.id}`)}
+          onClick={() => router.push(`${basePath}/${product.id}`)}
         >
           <div className="flex items-center gap-3 h-full">
             {product.images?.[0] ? (
@@ -64,7 +68,10 @@ export default function Row({
           </div>
         </td>
         {/* Price */}
-        <td className="align-middle">₦{product.price.toLocaleString()}</td>
+        <td className="align-middle">
+          {tenant.currency}
+          <span className="font-bold">{product.price.toLocaleString()}</span>
+        </td>
         {/* Stock */}
         <td className="align-middle">
           <span
@@ -88,7 +95,7 @@ export default function Row({
         <td className="pr-4 align-middle">
           <div className="flex justify-end items-center gap-2 h-full">
             <button
-              onClick={() => router.push(`/admin/products/${product.id}/edit`)}
+              onClick={() => router.push(`${basePath}/${product.id}/edit`)}
               className="text-gray-600 hover:text-blue-600"
             >
               <FiEdit size={18} />

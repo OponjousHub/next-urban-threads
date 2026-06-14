@@ -5,12 +5,15 @@ import { useState } from "react";
 import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
+
 export default function ProductsTable({
   products,
   query,
+  basePath,
 }: {
   products: any[];
   query?: string;
+  basePath: string;
 }) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -78,6 +81,7 @@ export default function ProductsTable({
                 key={product.id}
                 product={product}
                 query={query}
+                basePath={basePath}
                 onDeleteClick={(product) => {
                   setSelectedProduct(product);
                   setShowDeleteModal(true);

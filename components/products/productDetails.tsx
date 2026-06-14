@@ -3,12 +3,20 @@
 import { useRouter } from "next/navigation";
 import { appToast } from "@/utils/appToast";
 import { useState } from "react";
+import { useTenant } from "@/store/tenant-provider-context";
 import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 
-export default function ProductDetails({ product }: { product: any }) {
+export default function ProductDetails({
+  product,
+  basePath,
+}: {
+  product: any;
+  basePath: string;
+}) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const router = useRouter();
+  const { tenant } = useTenant();
 
   const stockStatus =
     product.stock === 0 ? "out" : product.stock <= 5 ? "low" : "ok";
@@ -28,7 +36,7 @@ export default function ProductDetails({ product }: { product: any }) {
       }
 
       appToast.success("success", "The product has been removed successfully");
-      router.push("/admin/products");
+      router.push(basePath);
     } catch (err) {
       setDeleting(false);
       appToast.error("Delete failed", "Network error. Try again.");
@@ -48,7 +56,7 @@ export default function ProductDetails({ product }: { product: any }) {
 
         <div className="flex gap-3">
           <button
-            onClick={() => router.push(`/admin/products/${product.id}/edit`)}
+            onClick={() => router.push(`${basePath}/${product.id}/edit`)}
             className="px-4 py-2 bg-blue-600 text-white rounded-md"
           >
             Edit
@@ -131,7 +139,8 @@ export default function ProductDetails({ product }: { product: any }) {
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="font-semibold mb-4">Pricing</h3>
             <p className="text-xl font-bold">
-              ₦{product.price.toLocaleString()}
+              {tenant.currency}
+              {product.price.toLocaleString()}
             </p>
           </div>
 

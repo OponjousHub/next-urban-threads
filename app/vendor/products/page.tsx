@@ -124,34 +124,61 @@ export default async function VendorProductsPage({
         subtitle="Manage your store products"
         vendor={vendor}
       />
-      <div className="sticky top-0 z-30 bg-white border-b px-4 py-3 space-y-4">
-        {/* Top row */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl lg:text-2xl font-semibold">Products</h1>
-            <p className="hidden lg:block text-sm text-gray-500">
-              Manage your inventory and product listings
-            </p>
+      <div className="sticky top-0 z-30 bg-white border-b px-4 py-3">
+        <div className="flex flex-col gap-3">
+          {/* Row 1: Search (mobile) | Search + Filters (md) | Part of single row (lg) */}
+          <div className="flex flex-col gap-3 lg:hidden">
+            {/* Search */}
+            <div className="w-full lg:flex-1">
+              <ProductSearch basePath="/vendor/products" />
+            </div>
+
+            {/* Filters */}
+            <div className="w-full md:w-auto lg:shrink-0">
+              <ProductFilters basePath="/vendor/products" />
+            </div>
           </div>
 
-          <Link href={`/vendor/products/new`}>
-            <button className="bg-black text-white px-3 py-2 lg:px-4 rounded-lg text-sm hover:opacity-90">
-              + Add
-            </button>
-          </Link>
-        </div>
+          {/* Row 2: Sort + Add (mobile/md) | Part of single row (lg) */}
+          <div className="flex items-end justify-between gap-3 lg:contents">
+            {/* Sort */}
+            <div className="flex flex-col text-xs text-gray-500 shrink-0 lg:hidden">
+              <span>Sort</span>
+              <ProductSorting />
+            </div>
 
-        {/* Search row */}
-        <div className="w-full">
-          <ProductSearch basePath="/vendor/products" />
-        </div>
+            {/* Add Button */}
+            <div className="shrink-0 lg:ml-auto">
+              <Link href="/vendor/products/new">
+                <button className="flex items-center justify-center gap-2 bg-black text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg hover:opacity-90 transition-all duration-200 whitespace-nowrap">
+                  <span className="text-lg leading-none">+</span>
+                  <span>Add Product</span>
+                </button>
+              </Link>
+            </div>
+          </div>
 
-        {/* Filters + Sort */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          <ProductFilters basePath="/vendor/products" />
-          <div className="flex flex-col text-xs text-gray-500">
-            <span>Sort</span>
-            <ProductSorting />
+          {/* Desktop layout override */}
+          <div className="hidden lg:flex lg:items-end lg:gap-4 lg:absolute lg:inset-0 lg:px-4 lg:py-3">
+            <div className="flex-1">
+              <ProductSearch basePath="/vendor/products" />
+            </div>
+
+            <ProductFilters basePath="/vendor/products" />
+
+            <div className="flex flex-col text-xs text-gray-500">
+              <span>Sort</span>
+              <ProductSorting />
+            </div>
+
+            <div className="ml-auto">
+              <Link href="/vendor/products/new">
+                <button className="flex items-center justify-center gap-2 bg-black text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg hover:opacity-90 transition-all duration-200 whitespace-nowrap">
+                  <span className="text-lg leading-none">+</span>
+                  <span>Add Product</span>
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -162,7 +189,7 @@ export default async function VendorProductsPage({
         </p>
       )}
 
-      <ProductsTable products={safeProducts} query={query} />
+      <ProductsTable products={safeProducts} query={query} basePath="/vendor/products" />
       <Pagination totalPages={totalPages} />
     </div>
   );
