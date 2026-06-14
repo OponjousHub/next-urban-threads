@@ -147,7 +147,11 @@ export default async function ProductsPage({
           <span className="font-medium text-black">"{query}"</span>
         </p>
       )}
-      <ProductsTable products={safeProducts} query={query} />
+      <ProductsTable
+        products={safeProducts}
+        query={query}
+        basePath="/admin/products"
+      />
       <Pagination totalPages={totalPages} />
     </div>
   );
