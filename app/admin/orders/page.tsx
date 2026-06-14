@@ -1,5 +1,5 @@
-import OrdersTable from "@/components/admin/orders/order-table";
-import OrderFilters from "@/components/admin/orders/order-filters";
+import OrdersTable from "@/components/order/order-table";
+import OrderFilters from "@/components/order/order-filters";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { prisma } from "@/utils/prisma";
@@ -104,10 +104,7 @@ export default async function OrdersPage({ searchParams }: Props) {
           ],
         }),
       },
-      // include: {
-      //   user: { select: { name: true, email: true } },
-      //   items: true,
-      // },
+
       orderBy: { createdAt: "desc" },
     }),
   ]);
@@ -137,10 +134,11 @@ export default async function OrdersPage({ searchParams }: Props) {
         </h1>
 
         <div className="flex items-center gap-3 flex-wrap">
-          <OrderFilters />
+          <OrderFilters basePath={"/admin/orders"} />
         </div>
       </div>
       <OrdersTable
+        basePath={"/admin/orders"}
         orders={formattedOrders}
         totalOrders={totalOrders}
         currentPage={page}
