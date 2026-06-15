@@ -192,11 +192,11 @@ export default function OrderDetails({
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* HEADER */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col-2 gap-4 lg:flex-row lg:items-start justify-between">
           {/* LEFT */}
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              <h1 className="hidden md:block text-3xl font-bold tracking-tight text-gray-900">
                 Order
               </h1>
 

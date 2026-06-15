@@ -79,8 +79,8 @@ export default async function OrderDetailsPage({
   return (
     <>
       <VendorHeaderUI
-        title="Orders"
-        subtitle="Manage your store orders"
+        title="Order details"
+        subtitle="View order details"
         vendor={vendor}
       />
       <OrderDetails order={formattedOrder} basePath={"/vendor/orders"} />;
