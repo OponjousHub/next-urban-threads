@@ -10,7 +10,10 @@ import { useTenant } from "@/store/tenant-provider-context";
 type Props = {
   order: Order;
   onAction: (action: Action, order: Order) => void;
+  rowIndex: number;
+  totalRows: number;
   basePath: string;
+  onOpenActions: (order: Order) => void;
 };
 
 /* ---------------- STATUS FLOW ---------------- */
@@ -67,7 +70,14 @@ const statusStyles: Partial<Record<OrderStatus, string>> = {
 
 /* ---------------- COMPONENT ---------------- */
 
-export function OrderRow({ order, onAction, basePath }: Props) {
+export function OrderRow({
+  order,
+  rowIndex,
+  totalRows,
+  onOpenActions,
+  onAction,
+  basePath,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -123,6 +133,9 @@ export function OrderRow({ order, onAction, basePath }: Props) {
   const menuItem =
     "w-full text-left px-4 py-2 text-sm transition disabled:cursor-not-allowed";
 
+  // Open the action menu upwards
+  const openUpward = rowIndex >= totalRows - 2;
+
   return (
     <tr className="border-b hover:bg-gray-50 transition">
       <td className="py-3 px-4 font-medium">#{order.id.slice(0, 8)}</td>
@@ -168,16 +181,27 @@ export function OrderRow({ order, onAction, basePath }: Props) {
 
       {/* ACTIONS */}
       <td className="py-3 px-4 text-right">
-        <div ref={ref} className="relative inline-block text-left">
+        <div ref={ref} className="relative inline-block text-left z-[9999]">
           <button
             onClick={() => setOpen(!open)}
-            className="p-2 rounded-full hover:bg-gray-200"
+            className="hidden md:block p-2 rounded-full hover:bg-gray-200"
+          >
+            <FiMoreVertical size={16} />
+          </button>
+          <button
+            onClick={() => onOpenActions(order)}
+            className="md:hidden p-2 rounded-full hover:bg-gray-200"
           >
             <FiMoreVertical size={16} />
           </button>
 
           {open && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-xl z-50">
+            <div
+              className={`absolute right-0 z-50 w-48 rounded-xl border bg-white shadow-lg ${
+                openUpward ? "bottom-full mb-2" : "top-full mt-2"
+              }`}
+            >
+              {" "}
               {/* NAVIGATION */}
               <button
                 onClick={() => router.push(`${basePath}/${order.id}`)}
@@ -185,14 +209,12 @@ export function OrderRow({ order, onAction, basePath }: Props) {
               >
                 View details
               </button>
-
               <button
                 onClick={() => router.push(`${basePath}/${order.id}/tracking`)}
                 className={menuItem}
               >
                 View tracking
               </button>
-
               <button
                 disabled={order.paymentStatus === "PAID"}
                 onClick={() => {
@@ -203,9 +225,7 @@ export function OrderRow({ order, onAction, basePath }: Props) {
               >
                 Mark as paid
               </button>
-
               <hr />
-
               {/* STATUS ACTIONS */}
               {STATUS_ORDER.map((status) => {
                 const disabled = isPast(status) || submitting;
@@ -227,9 +247,7 @@ export function OrderRow({ order, onAction, basePath }: Props) {
                   </button>
                 );
               })}
-
               <hr />
-
               {/* CANCEL */}
               <button
                 disabled={order.status === "CANCELLED"}

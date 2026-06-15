@@ -17,6 +17,16 @@ type SelectedOrder = {
   order: Order;
 } | null;
 
+type OrderSelected = {
+  id: string;
+  createdAt: Date;
+  total: number;
+  paymentStatus: PaymentStatus;
+  status: OrderStatus;
+  itemsCount: number;
+  customer: { name: string; email: string } | null;
+};
+
 type OrdersTableProps = {
   orders: Order[];
   query?: string;
@@ -36,6 +46,10 @@ export default function OrdersTable({
 }: OrdersTableProps) {
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<SelectedOrder>(null);
+  const [orderSelected, setOrderSelected] = useState<OrderSelected | null>(
+    null,
+  );
+  const [showActionsSheet, setShowActionsSheet] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -72,6 +86,12 @@ export default function OrdersTable({
     }
   }
 
+  //Callback function for opening sheet for mobile
+  const handleOpenActions = (order: Order) => {
+    setOrderSelected(order);
+    setShowActionsSheet(true);
+  };
+
   // Navigate while preserving filters
   function goToPage(page: number) {
     const params = new URLSearchParams(window.location.search);
@@ -81,12 +101,13 @@ export default function OrdersTable({
 
   const base =
     "px-3 py-1.5 text-sm rounded-lg border transition disabled:opacity-40 disabled:cursor-not-allowed";
-  console.log("TOTALORDERSSSS", totalOrders);
+
   return (
     <>
-      <div className="bg-white rounded-2xl border shadow-sm overflow-visible">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+      <div className="bg-white rounded-2xl border shadow-sm ">
+        <div className="overflow-x-auto md:overflow-visible">
+          {" "}
+          <table className=" w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
               <tr className="text-left text-lg">
                 <th className="py-3 px-4">Order</th>
@@ -98,7 +119,6 @@ export default function OrdersTable({
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-
             <tbody>
               {orders.length === 0 ? (
                 <tr>
@@ -107,10 +127,13 @@ export default function OrdersTable({
                   </td>
                 </tr>
               ) : (
-                orders.map((order) => (
+                orders.map((order, index) => (
                   <OrderRow
                     key={order.id}
                     order={order}
+                    rowIndex={index}
+                    totalRows={orders.length}
+                    onOpenActions={() => handleOpenActions(order)}
                     onAction={(action, order) => {
                       // Only CANCEL needs confirmation
                       if (
@@ -130,58 +153,55 @@ export default function OrdersTable({
             </tbody>
           </table>
         </div>
-        {/* Pagination & Page Info */}
-        <div className="border-t px-4 py-10 bg-gray-50 rounded-b-2xl">
-          <div className="flex justify-center items-center flex-wrap gap-3">
-            <div className="flex justify-between items-center mt-4 flex-wrap gap-2">
-              <p className="text-sm text-gray-600">
-                Showing{" "}
-                <span className="font-medium">
-                  {(currentPage - 1) * 10 + 1}
-                </span>
-                –
-                <span className="font-medium">
-                  {Math.min(currentPage * 10, totalOrders)}
-                </span>{" "}
-                of <span className="font-medium">{totalOrders}</span>
-              </p>
+      </div>
+      {/* Pagination & Page Info */}
+      <div className="border-t px-4 py-10 bg-gray-50 rounded-b-2xl">
+        <div className="flex justify-center items-center flex-wrap gap-3">
+          <div className="flex justify-between items-center mt-4 flex-wrap gap-2">
+            <p className="text-sm text-gray-600">
+              Showing{" "}
+              <span className="font-medium">{(currentPage - 1) * 10 + 1}</span>–
+              <span className="font-medium">
+                {Math.min(currentPage * 10, totalOrders)}
+              </span>{" "}
+              of <span className="font-medium">{totalOrders}</span>
+            </p>
 
-              <div className="flex items-center gap-1">
-                {/* Previous */}
-                <button
-                  onClick={() => goToPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`${base} bg-white hover:bg-gray-100`}
-                >
-                  ←
-                </button>
+            <div className="flex items-center gap-1">
+              {/* Previous */}
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`${base} bg-white hover:bg-gray-100`}
+              >
+                ←
+              </button>
 
-                {/* Page Numbers (limit visible pages 👇 important) */}
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .slice(Math.max(0, currentPage - 3), currentPage + 2)
-                  .map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => goToPage(p)}
-                      className={`${base} ${
-                        p === currentPage
-                          ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-sm"
-                          : "bg-white hover:bg-gray-100"
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  ))}
+              {/* Page Numbers (limit visible pages 👇 important) */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .slice(Math.max(0, currentPage - 3), currentPage + 2)
+                .map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => goToPage(p)}
+                    className={`${base} ${
+                      p === currentPage
+                        ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-sm"
+                        : "bg-white hover:bg-gray-100"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
 
-                {/* Next */}
-                <button
-                  onClick={() => goToPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`${base} bg-white hover:bg-gray-100`}
-                >
-                  →
-                </button>
-              </div>
+              {/* Next */}
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`${base} bg-white hover:bg-gray-100`}
+              >
+                →
+              </button>
             </div>
           </div>
         </div>
@@ -202,6 +222,103 @@ export default function OrdersTable({
           title="Cancel Order"
           description="Are you sure you want to cancel this order?"
         />
+      )}
+
+      {showActionsSheet && orderSelected && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50"
+            onClick={() => setShowActionsSheet(false)}
+          />
+
+          <div className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl bg-white p-6 shadow-2xl">
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-gray-300" />
+
+            <h3 className="mb-4 text-lg font-semibold">Order Actions</h3>
+
+            <div className="space-y-2">
+              <button
+                className="w-full rounded-xl border p-3 text-left hover:bg-gray-50"
+                onClick={() => {
+                  router.push(`${basePath}/${orderSelected.id}`);
+                }}
+              >
+                View details
+              </button>
+              <button
+                onClick={() =>
+                  router.push(`${basePath}/${orderSelected.id}/tracking`)
+                }
+                className="w-full rounded-xl border p-3 text-left hover:bg-gray-50"
+              >
+                View tracking
+              </button>
+              <button
+                disabled={orderSelected.paymentStatus === "PAID"}
+                onClick={() => {
+                  setShowActionsSheet(false);
+                  onAction({ type: "payment", value: "PAID" }, orderSelected);
+                }}
+                className="w-full rounded-xl border p-3 text-left hover:bg-gray-50"
+              >
+                Mark as paid
+              </button>
+
+              <button
+                className="w-full rounded-xl border p-3 text-left hover:bg-gray-50"
+                onClick={() => {
+                  updateOrder(
+                    {
+                      type: "status",
+                      value: "PROCESSING",
+                    },
+                    orderSelected.id,
+                  );
+
+                  setShowActionsSheet(false);
+                }}
+              >
+                Mark Processing
+              </button>
+
+              <button
+                className="w-full rounded-xl border p-3 text-left hover:bg-gray-50"
+                onClick={() => {
+                  updateOrder(
+                    {
+                      type: "status",
+                      value: "SHIPPED",
+                    },
+                    orderSelected.id,
+                  );
+
+                  setShowActionsSheet(false);
+                }}
+              >
+                Mark Shipped
+              </button>
+
+              <button
+                className="w-full rounded-xl border p-3 text-left text-red-600 hover:bg-red-50"
+                onClick={() => {
+                  setShowActionsSheet(false);
+
+                  setSelectedOrder({
+                    action: {
+                      type: "status",
+                      value: "CANCELLED",
+                    },
+                    order: orderSelected,
+                  });
+
+                  setShowModal(true);
+                }}
+              >
+                Cancel Order
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </>
   );

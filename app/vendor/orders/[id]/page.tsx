@@ -1,6 +1,8 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import VendorHeaderUI from "@/components/vendor/vendorHeader";
 import OrderDetails from "@/components/order/orderDetails";
+import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 
 interface OrderDetailsPageProps {
   params: { id: string };
@@ -69,5 +71,19 @@ export default async function OrderDetailsPage({
     })),
   };
 
-  return <OrderDetails order={formattedOrder} basePath={"/vendor/orders"} />;
+  const { vendor } = await getCurrentVendor();
+  if (!vendor) {
+    throw new Error("Vendor not found");
+  }
+
+  return (
+    <>
+      <VendorHeaderUI
+        title="Orders"
+        subtitle="Manage your store orders"
+        vendor={vendor}
+      />
+      <OrderDetails order={formattedOrder} basePath={"/vendor/orders"} />;
+    </>
+  );
 }
