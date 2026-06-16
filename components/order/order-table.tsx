@@ -6,16 +6,17 @@ import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
+import {
+  buildOrderActions,
+  Action,
+  STATUS_CONFIG,
+} from "@/app/lib/order/buildOrderActions";
 import { appToast } from "@/utils/appToast";
 
-export type Action =
-  | { type: "status"; value: OrderStatus }
-  | { type: "payment"; value: PaymentStatus };
-
-type SelectedOrder = {
+type SelectedOrderState = {
   action: Action;
-  order: Order;
-} | null;
+  order: OrderSelected;
+};
 
 type OrderSelected = {
   id: string;
@@ -45,13 +46,98 @@ export default function OrdersTable({
   basePath,
 }: OrdersTableProps) {
   const [showModal, setShowModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<SelectedOrder>(null);
+  const [selectedOrder, setSelectedOrder] = useState<SelectedOrderState | null>(
+    null,
+  );
+  const [submitting, setSubmitting] = useState(false);
   const [orderSelected, setOrderSelected] = useState<OrderSelected | null>(
     null,
   );
   const [showActionsSheet, setShowActionsSheet] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Order Action
+  const orderActions = orderSelected
+    ? buildOrderActions({
+        order: orderSelected,
+        basePath,
+
+        onViewDetails: () => {
+          router.push(`${basePath}/${orderSelected.id}`);
+        },
+
+        onViewTracking: () => {
+          router.push(`${basePath}/${orderSelected.id}/tracking`);
+        },
+
+        onPaymentUpdate: () => {
+          updateOrder(
+            {
+              type: "payment",
+              value: "PAID",
+            },
+            orderSelected.id,
+          );
+        },
+
+        onStatusUpdate: (status) => {
+          updateOrder(
+            {
+              type: "status",
+              value: status,
+            },
+            orderSelected.id,
+          );
+
+          handleUpdateStatus(status);
+        },
+
+        onCancel: () => {
+          setSelectedOrder({
+            action: {
+              type: "status",
+              value: "CANCELLED",
+            },
+            order: orderSelected,
+          });
+
+          setShowModal(true);
+        },
+      })
+    : [];
+
+  /* ---------------- API ---------------- */
+
+  const handleUpdateStatus = async (status: OrderStatus) => {
+    // const config = STATUS_CONFIG[status];
+    // if (!config) return;
+
+    const config = STATUS_CONFIG[status];
+
+    if (!config) return;
+
+    setSubmitting(true);
+
+    try {
+      await fetch(`/api/admin/orders/${orderSelected?.id}/tracking`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status,
+          title: config.title,
+          message: config.message,
+          type: "STATUS_CHANGE",
+        }),
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Unified update function
   async function updateOrder(action: Action, orderId: string) {
@@ -226,96 +312,71 @@ export default function OrdersTable({
 
       {showActionsSheet && orderSelected && (
         <>
+          {/* Backdrop */}
           <div
-            className="fixed inset-0 z-40 bg-black/50"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
             onClick={() => setShowActionsSheet(false)}
           />
 
-          <div className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl bg-white p-6 shadow-2xl">
-            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-gray-300" />
+          {/* Sheet */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+            <div className="rounded-t-3xl bg-white shadow-2xl">
+              {/* Handle */}
+              <div className="flex justify-center py-3">
+                <div className="h-1.5 w-12 rounded-full bg-gray-300" />
+              </div>
 
-            <h3 className="mb-4 text-lg font-semibold">Order Actions</h3>
+              {/* Header */}
+              <div className="border-b px-5 pb-4">
+                <h3 className="text-lg font-semibold">Order Actions</h3>
 
-            <div className="space-y-2">
-              <button
-                className="w-full rounded-xl border p-3 text-left hover:bg-gray-50"
-                onClick={() => {
-                  router.push(`${basePath}/${orderSelected.id}`);
-                }}
-              >
-                View details
-              </button>
-              <button
-                onClick={() =>
-                  router.push(`${basePath}/${orderSelected.id}/tracking`)
-                }
-                className="w-full rounded-xl border p-3 text-left hover:bg-gray-50"
-              >
-                View tracking
-              </button>
-              <button
-                disabled={orderSelected.paymentStatus === "PAID"}
-                onClick={() => {
-                  setShowActionsSheet(false);
-                  onAction({ type: "payment", value: "PAID" }, orderSelected);
-                }}
-                className="w-full rounded-xl border p-3 text-left hover:bg-gray-50"
-              >
-                Mark as paid
-              </button>
+                <p className="mt-1 text-sm text-gray-500">
+                  Order #{orderSelected.id.slice(-8)}
+                </p>
+              </div>
 
-              <button
-                className="w-full rounded-xl border p-3 text-left hover:bg-gray-50"
-                onClick={() => {
-                  updateOrder(
-                    {
-                      type: "status",
-                      value: "PROCESSING",
-                    },
-                    orderSelected.id,
-                  );
+              {/* Actions */}
+              <div className="space-y-2">
+                {orderActions.map((item) => (
+                  <button
+                    key={item.label}
+                    disabled={item.disabled}
+                    onClick={() => {
+                      item.action();
 
-                  setShowActionsSheet(false);
-                }}
-              >
-                Mark Processing
-              </button>
+                      if (!item.disabled) {
+                        setShowActionsSheet(false);
+                      }
+                    }}
+                    className={`
+        flex w-full items-center justify-between
+        rounded-xl border px-4 py-3 text-left transition
 
-              <button
-                className="w-full rounded-xl border p-3 text-left hover:bg-gray-50"
-                onClick={() => {
-                  updateOrder(
-                    {
-                      type: "status",
-                      value: "SHIPPED",
-                    },
-                    orderSelected.id,
-                  );
+        ${
+          item.disabled
+            ? "cursor-not-allowed bg-gray-50 text-gray-400"
+            : item.danger
+              ? "border-red-200 text-red-600 hover:bg-red-50"
+              : "hover:bg-gray-50"
+        }
+      `}
+                  >
+                    <span>{item.label}</span>
 
-                  setShowActionsSheet(false);
-                }}
-              >
-                Mark Shipped
-              </button>
+                    {!item.disabled && <span className="text-gray-400">›</span>}
+                  </button>
+                ))}
+              </div>
 
-              <button
-                className="w-full rounded-xl border p-3 text-left text-red-600 hover:bg-red-50"
-                onClick={() => {
-                  setShowActionsSheet(false);
-
-                  setSelectedOrder({
-                    action: {
-                      type: "status",
-                      value: "CANCELLED",
-                    },
-                    order: orderSelected,
-                  });
-
-                  setShowModal(true);
-                }}
-              >
-                Cancel Order
-              </button>
+              {/* Footer */}
+              <div className="border-t p-4">
+                <button
+                  onClick={() => setShowActionsSheet(false)}
+                  className="w-full rounded-xl border py-3 font-medium hover:bg-gray-50"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </>

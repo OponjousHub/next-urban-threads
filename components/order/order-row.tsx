@@ -3,9 +3,15 @@
 import { FiMoreVertical } from "react-icons/fi";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Order, Action } from "@/types/order";
+import { Order } from "@/types/order";
 import { OrderStatus } from "@prisma/client";
 import { useTenant } from "@/store/tenant-provider-context";
+import { StatusBadge } from "@/lib/status-badge";
+import {
+  buildOrderActions,
+  Action,
+  STATUS_CONFIG,
+} from "@/app/lib/order/buildOrderActions";
 
 type Props = {
   order: Order;
@@ -15,60 +21,6 @@ type Props = {
   basePath: string;
   onOpenActions: (order: Order) => void;
 };
-
-/* ---------------- STATUS FLOW ---------------- */
-
-const STATUS_ORDER: OrderStatus[] = [
-  "PENDING",
-  "PROCESSING",
-  "SHIPPED",
-  "OUT_FOR_DELIVERY",
-  "DELIVERED",
-];
-
-/* ---------------- CONFIG ---------------- */
-
-const STATUS_CONFIG: Partial<
-  Record<OrderStatus, { title: string; message: string }>
-> = {
-  PENDING: {
-    title: "Order placed",
-    message: "Your order has been received",
-  },
-  PROCESSING: {
-    title: "Processing",
-    message: "We are preparing your order",
-  },
-  SHIPPED: {
-    title: "Shipped",
-    message: "Your package has left our warehouse",
-  },
-  OUT_FOR_DELIVERY: {
-    title: "Out for delivery",
-    message: "Your package is out for delivery and will arrive today",
-  },
-  DELIVERED: {
-    title: "Delivered",
-    message: "Your order has been delivered",
-  },
-  CANCELLED: {
-    title: "Cancelled",
-    message: "Order has been cancelled",
-  },
-};
-
-/* ---------------- STYLES ---------------- */
-
-const statusStyles: Partial<Record<OrderStatus, string>> = {
-  PENDING: "bg-orange-100 text-orange-700",
-  PROCESSING: "bg-blue-100 text-blue-700",
-  SHIPPED: "bg-purple-100 text-purple-700",
-  OUT_FOR_DELIVERY: "bg-indigo-100 text-indigo-700",
-  DELIVERED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
-};
-
-/* ---------------- COMPONENT ---------------- */
 
 export function OrderRow({
   order,
@@ -80,9 +32,74 @@ export function OrderRow({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({
+    top: 0,
+    left: 0,
+  });
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { tenant } = useTenant();
+
+  const handleOpenMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const menuHeight = 220;
+
+    setMenuPosition({
+      left: rect.right - 190,
+      top: rect.bottom + 8,
+    });
+
+    setMenuPosition({
+      left: rect.right - 190,
+      top: rect.top - 8,
+    });
+
+    setOpen(true);
+  };
+
+  const actions = buildOrderActions({
+    order,
+    basePath,
+
+    onViewDetails: () => {
+      router.push(`${basePath}/${order.id}`);
+    },
+
+    onViewTracking: () => {
+      router.push(`${basePath}/${order.id}/tracking`);
+    },
+
+    onPaymentUpdate: () => {
+      onAction(
+        {
+          type: "payment",
+          value: "PAID",
+        },
+        order,
+      );
+    },
+
+    onStatusUpdate: (status) => {
+      onAction(
+        {
+          type: "status",
+          value: status,
+        },
+        order,
+      );
+    },
+
+    onCancel: () => {
+      onAction(
+        {
+          type: "status",
+          value: "CANCELLED",
+        },
+        order,
+      );
+    },
+  });
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -97,10 +114,10 @@ export function OrderRow({
 
   /* ---------------- STATUS POSITION ---------------- */
 
-  const currentIndex = STATUS_ORDER.indexOf(order.status);
+  // const currentIndex = STATUS_ORDER.indexOf(order.status);
 
-  const isPast = (status: OrderStatus) =>
-    STATUS_ORDER.indexOf(status) <= currentIndex;
+  // const isPast = (status: OrderStatus) =>
+  //   STATUS_ORDER.indexOf(status) <= currentIndex;
 
   /* ---------------- API ---------------- */
 
@@ -170,22 +187,17 @@ export function OrderRow({
 
       {/* STATUS BADGE */}
       <td className="py-3 px-4">
-        <span
-          className={`px-2 py-1 text-xs rounded-full ${
-            statusStyles[order.status]
-          }`}
-        >
-          {order.status}
-        </span>
+        <StatusBadge status={order.status} />{" "}
       </td>
 
       {/* ACTIONS */}
       <td className="py-3 px-4 text-right">
         <div ref={ref} className="relative inline-block text-left z-[9999]">
           <button
-            onClick={() => setOpen(!open)}
+            onClick={handleOpenMenu}
             className="hidden md:block p-2 rounded-full hover:bg-gray-200"
           >
+            {" "}
             <FiMoreVertical size={16} />
           </button>
           <button
@@ -197,68 +209,28 @@ export function OrderRow({
 
           {open && (
             <div
-              className={`absolute right-0 z-50 w-48 rounded-xl border bg-white shadow-lg ${
-                openUpward ? "bottom-full mb-2" : "top-full mt-2"
+              className={`fixed z-[9999] w-56 rounded-xl border bg-white shadow-xl ${
+                openUpward ? "-translate-y-full" : ""
               }`}
+              style={{
+                top: menuPosition.top,
+                left: menuPosition.left,
+              }}
             >
-              {" "}
-              {/* NAVIGATION */}
-              <button
-                onClick={() => router.push(`${basePath}/${order.id}`)}
-                className={menuItem}
-              >
-                View details
-              </button>
-              <button
-                onClick={() => router.push(`${basePath}/${order.id}/tracking`)}
-                className={menuItem}
-              >
-                View tracking
-              </button>
-              <button
-                disabled={order.paymentStatus === "PAID"}
-                onClick={() => {
-                  setOpen(false);
-                  onAction({ type: "payment", value: "PAID" }, order);
-                }}
-                className={menuItem}
-              >
-                Mark as paid
-              </button>
-              <hr />
-              {/* STATUS ACTIONS */}
-              {STATUS_ORDER.map((status) => {
-                const disabled = isPast(status) || submitting;
-
-                return (
-                  <button
-                    key={status}
-                    disabled={disabled}
-                    onClick={() => {
-                      setOpen(false);
-                      onAction({ type: "status", value: status }, order);
-                      handleUpdateStatus(status);
-                    }}
-                    className={`${menuItem} ${
-                      disabled ? "opacity-40 bg-gray-50" : "hover:bg-gray-100"
-                    }`}
-                  >
-                    {STATUS_CONFIG[status]?.title}
-                  </button>
-                );
-              })}
-              <hr />
-              {/* CANCEL */}
-              <button
-                disabled={order.status === "CANCELLED"}
-                onClick={() => {
-                  setOpen(false);
-                  onAction({ type: "status", value: "CANCELLED" }, order);
-                }}
-                className={`${menuItem} text-red-600`}
-              >
-                Cancel order
-              </button>
+              {actions.map((item) => (
+                <button
+                  key={item.label}
+                  disabled={item.disabled}
+                  onClick={item.action}
+                  className={`
+      ${menuItem}
+      ${item.disabled ? "opacity-40 cursor-not-allowed" : ""}
+      ${item.danger ? "text-red-600" : ""}
+    `}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
