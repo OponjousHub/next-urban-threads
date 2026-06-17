@@ -102,7 +102,7 @@ export default async function VendorCustomersPage() {
       </div>
 
       {/* Customers Table */}
-      <CustomerTable customers={customers} />
+      <CustomerTable customers={customers} vendor={vendor} />
     </div>
   );
 }

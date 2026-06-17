@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       },
     });
 
-    if (user?.role === "VENDOR") {
+    if (user?.role === "Vendor") {
       return NextResponse.json(
         {
           message: "You are already a vendor",
@@ -49,6 +49,7 @@ export async function POST(req: Request) {
     const vendorApply = await prisma.vendorApplication.create({
       data: {
         userId: userId,
+        tenantId: tenant.id,
         businessName: businessName,
         businessEmail: businessEmail,
         businessPhone: businessPhone,

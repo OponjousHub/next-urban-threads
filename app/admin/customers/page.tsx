@@ -1,15 +1,7 @@
-import VendorHeaderUI from "@/components/vendor/vendorHeader";
-// import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
 
 export default async function VendorCustomersPage() {
-  //   const { vendor } = await getCurrentVendor();
-
-  //   if (!vendor) {
-  //     throw new Error("Vendor not found");
-  //   }
-
   const tenant = await getDefaultTenant();
 
   const orders = await prisma.order.findMany({

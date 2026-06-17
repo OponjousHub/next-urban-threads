@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTenant } from "@/store/tenant-provider-context";
+import { Vendor } from "@prisma/client";
 
 type Customer = {
   id: string;
@@ -17,9 +18,10 @@ type Customer = {
 
 type Props = {
   customers: Customer[];
+  vendor: Vendor;
 };
 
-export function CustomerTable({ customers }: Props) {
+export function CustomerTable({ customers, vendor }: Props) {
   const { tenant } = useTenant();
   const router = useRouter();
   return (
