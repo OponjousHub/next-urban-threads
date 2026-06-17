@@ -15,6 +15,8 @@ export default async function VendorCustomersPage() {
   const orders = await prisma.order.findMany({
     where: {
       vendorId: vendor.id,
+      storeMode: tenant?.storeMode,
+      tenantId: tenant?.id,
     },
     include: {
       user: true,
@@ -77,7 +79,7 @@ export default async function VendorCustomersPage() {
       />
 
       {/* Stats */}
-      <div className="grid gap-4  grid-cols-3">
+      <div className="grid gap-4  grid-cols-3 mx-4">
         <div className="rounded-2xl border bg-white p-5 shadow-sm">
           <p className="text-sm text-gray-500">Total Customers</p>
           <h2 className="mt-2 text-3xl font-bold">{totalCustomers}</h2>
@@ -95,7 +97,7 @@ export default async function VendorCustomersPage() {
       </div>
 
       {/* Customers Table */}
-      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm mx-4">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
