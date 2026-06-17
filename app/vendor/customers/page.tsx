@@ -53,6 +53,10 @@ export default async function VendorCustomersPage() {
     }
   }
 
+  //   const address = await prisma.address.findFirst({
+  //     where: { userId: orders.user.id },
+  //   });
+
   const customers = Array.from(customerMap.values());
 
   const totalCustomers = customers.length;

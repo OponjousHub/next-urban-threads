@@ -56,11 +56,28 @@ export default async function CustomerDetailPage({
     },
   });
 
+  const customerAddress = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    include: {
+      addresses: true,
+      // orders: true,
+    },
+  });
+  console.log("CUSTOMERSSSS", customerAddress?.addresses);
+
   const safeCustomer = serializeDecimals(customer);
 
   if (!customer) {
     notFound();
   }
 
-  return <CustomerDetail customer={safeCustomer} vendorId={vendor.id} />;
+  return (
+    <CustomerDetail
+      customer={safeCustomer}
+      vendorId={vendor.id}
+      address={customerAddress?.addresses[0]}
+    />
+  );
 }

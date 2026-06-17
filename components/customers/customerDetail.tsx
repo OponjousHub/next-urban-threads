@@ -5,9 +5,23 @@ import { useTenant } from "@/store/tenant-provider-context";
 type Props = {
   customer: any;
   vendorId: string;
+  address?: {
+    id: string;
+    createdAt: Date;
+    city: string;
+    country: string;
+    phone: string | null;
+    updatedAt: Date;
+    isDeleted: boolean;
+    tenantId: string;
+    userId: string;
+    fullName: string | null;
+    street: string;
+    state: string | null;
+  } | null;
 };
 
-export default function CustomerDetail({ customer }: Props) {
+export default function CustomerDetail({ customer, address }: Props) {
   const { tenant } = useTenant();
   const totalOrders = customer.orders.length;
 
@@ -91,7 +105,10 @@ export default function CustomerDetail({ customer }: Props) {
 
           <Info label="City" value={customer.city} />
 
-          <Info label="Address" value={customer.address} />
+          <Info
+            label="Address"
+            value={`${address?.street}, ${address?.city}, ${address?.state ? address?.state : ""}, ${address?.country}`}
+          />
 
           <Info label="Status" value={customer.status} />
         </div>
