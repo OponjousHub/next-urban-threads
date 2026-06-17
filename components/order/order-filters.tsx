@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import OrderSearch from "./order-search";
 
 export default function OrderFilters({ basePath }: { basePath: string }) {
   const router = useRouter();
@@ -159,12 +160,13 @@ export default function OrderFilters({ basePath }: { basePath: string }) {
         </div>
 
         {/* Search */}
-        <input
+        <OrderSearch basePath={basePath} />
+        {/* <input
           placeholder="Search orders..."
           defaultValue={params.get("query") || ""}
           onBlur={(e) => updateParam("query", e.target.value)}
           className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm w-[80%] lg:w-60 bg-gray-50 focus:ring-[var(--color-primary-ring)] focus:ring-1 "
-        />
+        /> */}
 
         {/* Reset Button */}
         <button
