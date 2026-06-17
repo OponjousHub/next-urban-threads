@@ -75,6 +75,27 @@ export default function AdminSidebar({
           pathname={pathname}
         />
         <SidebarItem
+          href="/admin/customers"
+          icon={<FiUsers size={20} />}
+          label="Customers"
+          collapsed={collapsed}
+          pathname={pathname}
+        />
+        <SidebarItem
+          href="/admin/reviews"
+          icon={<FiUsers size={20} />}
+          label="Reviews"
+          collapsed={collapsed}
+          pathname={pathname}
+        />
+        <SidebarItem
+          href="/admin/orders"
+          icon={<FiUsers size={20} />}
+          label="Orders"
+          collapsed={collapsed}
+          pathname={pathname}
+        />
+        <SidebarItem
           href="/admin/support"
           icon={<FiInbox size={20} />}
           label="Inbox"
