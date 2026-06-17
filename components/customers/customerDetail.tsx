@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   customer: any;
@@ -8,6 +8,7 @@ type Props = {
 };
 
 export default function CustomerDetail({ customer }: Props) {
+  const { tenant } = useTenant();
   const totalOrders = customer.orders.length;
 
   const totalSpent = customer.orders.reduce(
@@ -18,7 +19,7 @@ export default function CustomerDetail({ customer }: Props) {
   const avgOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0;
 
   const lastOrder = customer.orders.length > 0 ? customer.orders[0] : null;
-
+  console.log("CUSTOMER", customer);
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -54,14 +55,18 @@ export default function CustomerDetail({ customer }: Props) {
           <p className="text-sm text-gray-500">Total Spend</p>
 
           <p className="mt-2 text-2xl font-bold">
-            ₦{totalSpent.toLocaleString()}
+            {tenant.currency}
+            {totalSpent.toLocaleString()}
           </p>
         </div>
 
         <div className="rounded-2xl border bg-white p-5">
           <p className="text-sm text-gray-500">Average Order</p>
 
-          <p className="mt-2 text-2xl font-bold">₦{avgOrderValue.toFixed(2)}</p>
+          <p className="mt-2 text-2xl font-bold">
+            {tenant.currency}
+            {avgOrderValue.toFixed(2)}
+          </p>
         </div>
 
         <div className="rounded-2xl border bg-white p-5">
@@ -112,7 +117,10 @@ export default function CustomerDetail({ customer }: Props) {
             <tbody>
               {customer.orders.map((order: any) => (
                 <tr key={order.id} className="border-b">
-                  <td className="p-4">#{order.id.slice(0, 8)}</td>
+                  <td className="p-4">
+                    {tenant.currency}
+                    {order.id.slice(0, 8)}
+                  </td>
 
                   <td className="p-4">
                     {new Date(order.createdAt).toLocaleDateString()}
@@ -121,7 +129,8 @@ export default function CustomerDetail({ customer }: Props) {
                   <td className="p-4">{order.status}</td>
 
                   <td className="p-4">
-                    ₦{Number(order.totalAmount).toLocaleString()}
+                    {tenant.currency}
+                    {Number(order.totalAmount).toLocaleString()}
                   </td>
                 </tr>
               ))}
@@ -131,7 +140,7 @@ export default function CustomerDetail({ customer }: Props) {
       </div>
 
       {/* Reviews */}
-      <div className="rounded-2xl border bg-white">
+      <div className="rounded-2xl border bg-white md:mx-8">
         <div className="border-b p-5">
           <h2 className="font-semibold">Reviews</h2>
         </div>
@@ -141,7 +150,7 @@ export default function CustomerDetail({ customer }: Props) {
             <p className="text-sm text-gray-500">No reviews yet.</p>
           ) : (
             customer.reviews.map((review: any) => (
-              <div key={review.id} className="rounded-xl border p-4">
+              <div key={review.id} className="rounded-xl border p-4 ">
                 <div className="flex items-center justify-between">
                   <p className="font-medium">{review.product?.name}</p>
 
