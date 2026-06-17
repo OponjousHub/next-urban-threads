@@ -1,55 +1,48 @@
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
+import Link from "next/link";
 
 export default async function VendorCustomersPage() {
   const tenant = await getDefaultTenant();
 
-  const orders = await prisma.order.findMany({
+  const customers = await prisma.user.findMany({
     where: {
-      storeMode: tenant?.storeMode,
       tenantId: tenant?.id,
+      // role: "USER" ,
+      isDeleted: false,
     },
     include: {
-      user: true,
-    },
-    orderBy: {
-      createdAt: "desc",
+      orders: true,
     },
   });
 
-  const customerMap = new Map();
+  const customerRows = customers.map((customer) => ({
+    id: customer.id,
+    name: customer.name || "Customer",
+    email: customer.email,
+    status: customer.status,
+    joinedAt: customer.createdAt,
 
-  for (const order of orders) {
-    if (!order.user) continue;
+    orders: customer.orders.length,
 
-    const existing = customerMap.get(order.user.id);
+    spent: customer.orders.reduce(
+      (sum, order) => sum + Number(order.totalAmount),
+      0,
+    ),
 
-    if (existing) {
-      existing.orders += 1;
-      existing.spent += Number(order.totalAmount);
+    lastOrder:
+      customer.orders.length > 0
+        ? customer.orders.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          )[0].createdAt
+        : null,
+  }));
 
-      if (order.createdAt > existing.lastOrder) {
-        existing.lastOrder = order.createdAt;
-      }
-    } else {
-      customerMap.set(order.user.id, {
-        id: order.user.id,
-        name: order.user.name || "Customer",
-        email: order.user.email,
-        orders: 1,
-        spent: Number(order.totalAmount),
-        lastOrder: order.createdAt,
-      });
-    }
-  }
+  // const customers = Array.from(customerMap.values());
 
-  const customers = Array.from(customerMap.values());
+  const totalCustomers = customerRows.length;
 
-  const totalCustomers = customers.length;
-
-  const repeatBuyers = customers.filter(
-    (customer) => customer.orders > 1,
-  ).length;
+  const repeatBuyers = customerRows.filter((c) => c.orders > 1).length;
 
   const startOfMonth = new Date(
     new Date().getFullYear(),
@@ -57,8 +50,8 @@ export default async function VendorCustomersPage() {
     1,
   );
 
-  const newCustomers = customers.filter(
-    (customer) => customer.lastOrder >= startOfMonth,
+  const newCustomers = customerRows.filter(
+    (c) => c.joinedAt >= startOfMonth,
   ).length;
 
   return (
@@ -91,7 +84,10 @@ export default async function VendorCustomersPage() {
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Orders</th>
                 <th className="px-4 py-3">Spent</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Join</th>
                 <th className="px-4 py-3">Last Order</th>
+                <th className="px-4 py-3">Action</th>
               </tr>
             </thead>
 
@@ -103,23 +99,41 @@ export default async function VendorCustomersPage() {
                   </td>
                 </tr>
               ) : (
-                customers.map((customer) => (
+                customerRows.map((customer) => (
                   <tr key={customer.id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-4 font-medium">{customer.name}</td>
-
+                    <td className="px-4 py-4 font-medium">{customer.name}</td>{" "}
                     <td className="px-4 py-4 text-gray-600">
                       {customer.email}
                     </td>
-
                     <td className="px-4 py-4">{customer.orders}</td>
-
                     <td className="px-4 py-4 font-medium">
                       {tenant?.currency}
                       {customer.spent.toLocaleString()}
                     </td>
-
+                    <td>
+                      <span
+                        className={`rounded-full px-2 py-1 text-xs ${
+                          customer.status === "ACTIVE"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {customer.status}
+                      </span>
+                    </td>{" "}
+                    <td>{customer.joinedAt.toLocaleDateString()}</td>
                     <td className="px-4 py-4 text-gray-600">
-                      {customer.lastOrder.toLocaleDateString()}
+                      {customer.lastOrder
+                        ? customer.lastOrder.toLocaleDateString()
+                        : "Never"}
+                    </td>
+                    <td className="px-4 py-4">
+                      <Link
+                        href={`/admin/customers/${customer.id}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        View
+                      </Link>
                     </td>
                   </tr>
                 ))
