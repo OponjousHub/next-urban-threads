@@ -2,6 +2,7 @@ import VendorHeaderUI from "@/components/vendor/vendorHeader";
 import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
+import { CustomerTable } from "@/components/customers/customer-table";
 
 export default async function VendorCustomersPage() {
   const { vendor } = await getCurrentVendor();
@@ -97,52 +98,7 @@ export default async function VendorCustomersPage() {
       </div>
 
       {/* Customers Table */}
-      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm mx-4">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
-              <tr>
-                <th className="px-4 py-3">Customer</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Orders</th>
-                <th className="px-4 py-3">Spent</th>
-                <th className="px-4 py-3">Last Order</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {customers.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-12 text-center text-gray-500">
-                    No customers yet
-                  </td>
-                </tr>
-              ) : (
-                customers.map((customer) => (
-                  <tr key={customer.id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-4 font-medium">{customer.name}</td>
-
-                    <td className="px-4 py-4 text-gray-600">
-                      {customer.email}
-                    </td>
-
-                    <td className="px-4 py-4">{customer.orders}</td>
-
-                    <td className="px-4 py-4 font-medium">
-                      {tenant?.currency}
-                      {customer.spent.toLocaleString()}
-                    </td>
-
-                    <td className="px-4 py-4 text-gray-600">
-                      {customer.lastOrder.toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <CustomerTable customers={customers} />
     </div>
   );
 }

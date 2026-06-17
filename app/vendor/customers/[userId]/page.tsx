@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 import CustomerDetail from "@/components/customers/customerDetail";
+import { serializeDecimals } from "@/lib/serialize";
 
 export default async function CustomerDetailPage({
   params,
@@ -55,9 +56,11 @@ export default async function CustomerDetailPage({
     },
   });
 
+  const safeCustomer = serializeDecimals(customer);
+
   if (!customer) {
     notFound();
   }
 
-  return <CustomerDetail customer={customer} vendorId={vendor.id} />;
+  return <CustomerDetail customer={safeCustomer} vendorId={vendor.id} />;
 }
