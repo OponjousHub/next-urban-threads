@@ -158,23 +158,20 @@ export default function OrderFilters({ basePath }: { basePath: string }) {
             <option value="CANCELLED">Cancelled</option>
           </select>
         </div>
+        <div className="ml-auto">
+          <div className="flex gap-4">
+            {/* Search */}
+            <OrderSearch basePath={basePath} />
 
-        {/* Search */}
-        <OrderSearch basePath={basePath} />
-        {/* <input
-          placeholder="Search orders..."
-          defaultValue={params.get("query") || ""}
-          onBlur={(e) => updateParam("query", e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm w-[80%] lg:w-60 bg-gray-50 focus:ring-[var(--color-primary-ring)] focus:ring-1 "
-        /> */}
-
-        {/* Reset Button */}
-        <button
-          onClick={() => router.push(basePath)}
-          className="px-3 py-2 text-sm border rounded-lg bg-slate-700 text-slate-100 hover:bg-slate-900"
-        >
-          Reset
-        </button>
+            {/* Reset Button */}
+            <button
+              onClick={() => router.push(basePath)}
+              className="px-3 py-2 text-sm border rounded-lg bg-slate-700 text-slate-100 hover:bg-slate-900"
+            >
+              Reset
+            </button>
+          </div>{" "}
+        </div>
       </div>
     </div>
   );
