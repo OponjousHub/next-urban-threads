@@ -10,6 +10,7 @@ import {
   FiInbox,
   FiPackage,
   FiUserCheck,
+  FiUserPlus,
   FiStar,
   FiSettings,
   FiChevronLeft,
@@ -101,9 +102,18 @@ export default function AdminSidebar({
         />
         {tenant.storeMode === "MULTI_VENDOR" && (
           <SidebarItem
-            href="/admin/vendors"
+            href="/admin/vendors/application"
+            icon={<FiUserPlus size={20} />}
+            label="Vendor Applications"
+            collapsed={collapsed}
+            pathname={pathname}
+          />
+        )}
+        {tenant.storeMode === "MULTI_VENDOR" && (
+          <SidebarItem
+            href="/admin/vendors/manageVendors"
             icon={<FiUserCheck size={20} />}
-            label="Vendors"
+            label="Manage Vendors"
             collapsed={collapsed}
             pathname={pathname}
           />
