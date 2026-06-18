@@ -62,10 +62,8 @@ export default async function CustomerDetailPage({
     },
     include: {
       addresses: true,
-      // orders: true,
     },
   });
-  console.log("CUSTOMERSSSS", customerAddress?.addresses);
 
   const safeCustomer = serializeDecimals(customer);
 

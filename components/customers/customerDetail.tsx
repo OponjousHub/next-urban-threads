@@ -5,7 +5,7 @@ import CustomerDetailUI from "./customerDetailUI";
 
 type Props = {
   customer: any;
-  vendorId: string;
+  vendorId?: string;
   address?: {
     id: string;
     createdAt: Date;
