@@ -1,22 +1,22 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import CustomerDetail from "@/components/customers/customerDetail";
+import CustomerDetailUI from "@/components/customers/customerDetailUI";
 import { serializeDecimals } from "@/lib/serialize";
 
 export default async function AdminCustomerDetailPage({
   params,
 }: {
-  params: Promise<{ userId: string }>;
+  params: Promise<{ customerId: string }>;
 }) {
-  const { userId } = await params;
+  const { customerId } = await params;
 
   const tenant = await getDefaultTenant();
   if (!tenant) throw new Error("Tenant not found");
 
   const customer = await prisma.user.findFirst({
     where: {
-      id: userId,
+      id: customerId,
       tenantId: tenant.id,
     },
 
@@ -53,7 +53,7 @@ export default async function AdminCustomerDetailPage({
 
   const customerAddress = await prisma.user.findUnique({
     where: {
-      id: userId,
+      id: customerId,
     },
     include: {
       addresses: true,
@@ -67,7 +67,7 @@ export default async function AdminCustomerDetailPage({
   }
 
   return (
-    <CustomerDetail
+    <CustomerDetailUI
       customer={safeCustomer}
       address={customerAddress?.addresses[0]}
     />
