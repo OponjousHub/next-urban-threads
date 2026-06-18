@@ -8,6 +8,9 @@ import {
   FiShoppingBag,
   FiUsers,
   FiInbox,
+  FiPackage,
+  FiUserCheck,
+  FiStar,
   FiSettings,
   FiChevronLeft,
 } from "react-icons/fi";
@@ -69,7 +72,7 @@ export default function AdminSidebar({
         />
         <SidebarItem
           href="/admin/orders"
-          icon={<FiUsers size={20} />}
+          icon={<FiPackage size={20} />}
           label="Orders"
           collapsed={collapsed}
           pathname={pathname}
@@ -83,18 +86,12 @@ export default function AdminSidebar({
         />
         <SidebarItem
           href="/admin/reviews"
-          icon={<FiUsers size={20} />}
+          icon={<FiStar size={20} />}
           label="Reviews"
           collapsed={collapsed}
           pathname={pathname}
         />
-        <SidebarItem
-          href="/admin/orders"
-          icon={<FiUsers size={20} />}
-          label="Orders"
-          collapsed={collapsed}
-          pathname={pathname}
-        />
+
         <SidebarItem
           href="/admin/support"
           icon={<FiInbox size={20} />}
@@ -105,7 +102,7 @@ export default function AdminSidebar({
         {tenant.storeMode === "MULTI_VENDOR" && (
           <SidebarItem
             href="/admin/vendors"
-            icon={<FiUsers size={20} />}
+            icon={<FiUserCheck size={20} />}
             label="Vendors"
             collapsed={collapsed}
             pathname={pathname}

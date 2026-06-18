@@ -107,7 +107,7 @@ export default function CustomerDetailUI({ customer, address }: Props) {
 
           <Info
             label="Address"
-            value={`${address?.street}, ${address?.city}, ${address?.state ? address?.state : ""}, ${address?.country}`}
+            value={`${address?.street}, ${address?.city}, ${address?.state ? address?.state : ""} ${address?.state ? "state" : ""}, ${address?.country}`}
           />
 
           <Info label="Status" value={customer.status} />
