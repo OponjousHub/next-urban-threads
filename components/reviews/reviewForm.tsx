@@ -7,7 +7,6 @@ import { StarRatingInput } from "./starRatingInput";
 import { useRouter } from "next/navigation";
 import { DialogClose } from "@/components/ui/dialog";
 import { X } from "lucide-react";
-import { updateProductRating } from "@/lib/calProduct-rating";
 import { appToast } from "@/utils/appToast";
 
 interface Props {
@@ -73,7 +72,6 @@ export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
           : "Review submitted successfully",
       );
 
-      updateProductRating(productId);
       setRating(0);
       setComment("");
       router.refresh();

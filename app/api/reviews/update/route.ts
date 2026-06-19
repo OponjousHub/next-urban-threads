@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
+import { updateProductRating } from "@/lib/calProduct-rating";
 
 export async function PATCH(req: Request) {
   const { rating, comment, reviewId } = await req.json();
@@ -22,6 +23,8 @@ export async function PATCH(req: Request) {
       status: "PENDING", // optional: re-moderate on edit
     },
   });
+
+  await updateProductRating(review.productId);
 
   return NextResponse.json(review);
 }

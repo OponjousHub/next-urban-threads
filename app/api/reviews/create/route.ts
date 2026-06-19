@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
+import { updateProductRating } from "@/lib/calProduct-rating";
 
 export async function POST(req: Request) {
   try {
@@ -50,6 +51,9 @@ export async function POST(req: Request) {
         status: "APPROVED", // or PENDING depending on tenant policy
       },
     });
+
+    //Update product rating
+    await updateProductRating(review.productId);
 
     // Recalculate product rating (ONLY approved reviews)
     const stats = await prisma.review.aggregate({
