@@ -20,6 +20,13 @@ export async function PATCH(
       },
     });
 
+    await prisma.reviewModerationHistory.create({
+      data: {
+        reviewId,
+        action: "REPLIED",
+      },
+    });
+
     return NextResponse.json(review);
   } catch (error) {
     console.error(error);
