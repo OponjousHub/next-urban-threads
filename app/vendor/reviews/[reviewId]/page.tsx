@@ -12,7 +12,7 @@ type Props = {
 export default async function VendorReviewPage({ params }: Props) {
   const { reviewId } = await params;
 
-  const vendor = await getVendor();
+  const { vendor } = await getCurrentVendor();
 
   if (!vendor) notFound();
 
