@@ -2,7 +2,7 @@
 
 import Row from "./row";
 import { useState } from "react";
-import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
+import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
 import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
 

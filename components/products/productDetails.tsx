@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { appToast } from "@/utils/appToast";
 import { useState } from "react";
 import { useTenant } from "@/store/tenant-provider-context";
-import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
+import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
 
 export default function ProductDetails({
   product,

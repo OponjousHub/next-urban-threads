@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
+import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
 import { FiLoader } from "react-icons/fi";
 
 type Props = {
@@ -19,6 +20,8 @@ export default function ReviewDetail({ review }: Props) {
   const [currentStatus, setCurrentStatus] = useState(review.status);
   const [reply, setReply] = useState(review.reply || "");
   const [savingReply, setSavingReply] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [loadingAction, setLoadingAction] = useState<
     "APPROVED" | "REJECTED" | null
   >(null);
@@ -29,7 +32,7 @@ export default function ReviewDetail({ review }: Props) {
   const updateStatus = async (status: "APPROVED" | "REJECTED") => {
     try {
       setLoadingAction(status);
-
+      setUpdatingStatus(true);
       // update UI immediately
       setCurrentStatus(status);
 
@@ -58,6 +61,7 @@ export default function ReviewDetail({ review }: Props) {
       appToast.error("Failed", `Could not ${status.toLowerCase()} review`);
     } finally {
       setLoadingAction(null);
+      setUpdatingStatus(false);
     }
   };
 
@@ -89,6 +93,31 @@ export default function ReviewDetail({ review }: Props) {
       appToast.error("Failed", "Could not save reply");
     } finally {
       setSavingReply(false);
+    }
+  };
+
+  // DElete review
+  const deleteReview = async () => {
+    try {
+      setDeleting(true);
+
+      const response = await fetch(`/api/reviews/${review.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      appToast.success("Deleted", "Review deleted successfully");
+
+      router.push("/vendor/reviews");
+    } catch (error) {
+      console.error(error);
+
+      appToast.error("Failed", "Could not delete review");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -387,7 +416,50 @@ export default function ReviewDetail({ review }: Props) {
             </div>
           </div>
         </div>
+        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5">
+          <h3 className="font-semibold text-red-700">Danger Zone</h3>
+
+          <p className="mt-2 text-sm text-red-600">
+            Permanently remove this review from your store. This action cannot
+            be undone.
+          </p>
+
+          <button
+            disabled={deleting}
+            onClick={() => setShowDeleteModal(true)}
+            className="
+      mt-4 flex items-center gap-2
+      rounded-xl
+      bg-red-600
+      px-4 py-2
+      text-white
+      font-medium
+      hover:bg-red-700
+      disabled:opacity-50
+    "
+          >
+            {deleting ? (
+              <>
+                <FiLoader className="animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              "Delete Review"
+            )}
+          </button>
+        </div>
       </div>
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={deleteReview}
+        loading={deleting}
+        loadingText="Deleting..."
+        action="Delete Review"
+        title="Delete Review"
+        description="Are you sure you want to delete this review? This action cannot
+            be undone."
+      />
     </>
   );
 }

@@ -2,7 +2,7 @@
 
 import { OrderRow } from "./order-row";
 import { Order } from "@/types/order";
-import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
+import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
