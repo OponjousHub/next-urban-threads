@@ -10,12 +10,20 @@ import { useRouter } from "next/navigation";
 import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
 import { FiLoader } from "react-icons/fi";
 
+type ModerationHistory = {
+  id: string;
+  action: string;
+  note: string | null;
+  createdAt: Date;
+};
+
 type Props = {
   review: any;
   vendorId: string;
+  moderationHistory: ModerationHistory[];
 };
 
-export default function ReviewDetail({ review }: Props) {
+export default function ReviewDetail({ review, moderationHistory }: Props) {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(review.status);
   const [reply, setReply] = useState(review.reply || "");
@@ -447,6 +455,59 @@ export default function ReviewDetail({ review }: Props) {
               "Delete Review"
             )}
           </button>
+        </div>
+
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Moderation History</h3>
+
+              <p className="text-sm text-gray-500">
+                Track all actions performed on this review
+              </p>
+            </div>
+          </div>
+
+          {moderationHistory.length === 0 ? (
+            <div className="rounded-xl bg-gray-50 p-6 text-center text-sm text-gray-500">
+              No moderation activity yet.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {moderationHistory.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-start gap-4 rounded-xl border border-gray-100 p-4"
+                >
+                  <div
+                    className={`mt-1 h-3 w-3 rounded-full ${
+                      item.action === "APPROVED"
+                        ? "bg-green-500"
+                        : item.action === "REJECTED"
+                          ? "bg-yellow-500"
+                          : item.action === "DELETED"
+                            ? "bg-red-500"
+                            : "bg-blue-500"
+                    }`}
+                  />
+
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium">{item.action}</p>
+
+                      <span className="text-xs text-gray-500">
+                        {new Date(item.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+
+                    {item.note && (
+                      <p className="mt-2 text-sm text-gray-600">{item.note}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <ConfirmDeleteModal

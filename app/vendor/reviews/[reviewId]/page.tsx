@@ -40,6 +40,15 @@ export default async function VendorReviewPage({ params }: Props) {
     },
   });
 
+  const moderationHistory = await prisma.reviewModerationHistory.findMany({
+    where: {
+      reviewId: reviewId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   if (!review) {
     notFound();
   }
@@ -61,7 +70,12 @@ export default async function VendorReviewPage({ params }: Props) {
         subtitle="Manage your store reviews"
         vendor={vendor}
       />
-      <ReviewDetail review={safeReview} vendorId={vendor.id} />;
+      <ReviewDetail
+        review={safeReview}
+        vendorId={vendor.id}
+        moderationHistory={moderationHistory}
+      />
+      ;
     </>
   );
 }
