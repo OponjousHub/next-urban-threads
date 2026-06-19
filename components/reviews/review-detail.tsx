@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { useState } from "react";
 import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
+import { FiLoader } from "react-icons/fi";
 
 type Props = {
   review: any;
@@ -13,11 +15,14 @@ type Props = {
 };
 
 export default function ReviewDetail({ review }: Props) {
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
   const { tenant } = useTenant();
   const router = useRouter();
 
   const updateStatus = async (status: "APPROVED" | "REJECTED") => {
     try {
+      setUpdatingStatus(true);
       const response = await fetch(`/api/reviews/${review.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -44,6 +49,8 @@ export default function ReviewDetail({ review }: Props) {
         "Failed",
         `Could not ${status === "REJECTED" ? "rejected" : "approved"} review.`,
       );
+    } finally {
+      setUpdatingStatus(false);
     }
   };
 
@@ -82,19 +89,43 @@ export default function ReviewDetail({ review }: Props) {
               <div className="mb-6 flex gap-2">
                 {review.status !== "APPROVED" && (
                   <button
+                    disabled={updatingStatus}
                     onClick={() => updateStatus("APPROVED")}
-                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white"
+                    className="
+    flex items-center justify-center gap-2
+    rounded-lg bg-green-600 px-4 py-2
+    text-white disabled:opacity-70
+  "
                   >
-                    Approve
+                    {updatingStatus ? (
+                      <>
+                        <FiLoader className="animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      "Approve"
+                    )}
                   </button>
                 )}
 
                 {review.status !== "REJECTED" && (
                   <button
+                    disabled={updatingStatus}
                     onClick={() => updateStatus("REJECTED")}
-                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white"
+                    className="
+    flex items-center justify-center gap-2
+    rounded-lg bg-red-600 px-4 py-2
+    text-white disabled:opacity-70
+  "
                   >
-                    Reject
+                    {updatingStatus ? (
+                      <>
+                        <FiLoader className="animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      "Reject"
+                    )}
                   </button>
                 )}
               </div>
