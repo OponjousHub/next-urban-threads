@@ -43,13 +43,15 @@ export default async function VendorReviewPage({ params }: Props) {
     notFound();
   }
 
-  const safeReview = {
-    ...review,
-    product: {
-      ...review.product,
-      price: Number(review.product.price),
-    },
-  };
+  const safeReview = JSON.parse(
+    JSON.stringify(review, (_, value) =>
+      typeof value === "object" &&
+      value !== null &&
+      value.constructor?.name === "Decimal"
+        ? Number(value)
+        : value,
+    ),
+  );
 
   return <ReviewDetail review={safeReview} vendorId={vendor.id} />;
 }
