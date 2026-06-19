@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { useTenant } from "@/store/tenant-provider-context";
+import { appToast } from "@/utils/appToast";
+import { useRouter } from "next/navigation";
 
 type Props = {
   review: any;
@@ -12,6 +14,39 @@ type Props = {
 
 export default function ReviewDetail({ review }: Props) {
   const { tenant } = useTenant();
+  const router = useRouter();
+
+  const updateStatus = async (status: "APPROVED" | "REJECTED") => {
+    try {
+      const response = await fetch(`/api/reviews/${review.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status,
+          reviewId: review.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error(error);
+        throw new Error(error);
+      }
+
+      appToast.success(
+        "Success",
+        `Review  ${status === "REJECTED" ? "rejected" : "approved"} successfully`,
+      );
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      appToast.error(
+        "Failed",
+        `Could not ${status === "REJECTED" ? "rejected" : "approved"} review.`,
+      );
+    }
+  };
+
   return (
     <>
       <div className="space-y-6 p-4">
@@ -47,7 +82,7 @@ export default function ReviewDetail({ review }: Props) {
               <div className="mb-6 flex gap-2">
                 {review.status !== "APPROVED" && (
                   <button
-                    // onClick={() => updateStatus("APPROVED")}
+                    onClick={() => updateStatus("APPROVED")}
                     className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white"
                   >
                     Approve
@@ -56,7 +91,7 @@ export default function ReviewDetail({ review }: Props) {
 
                 {review.status !== "REJECTED" && (
                   <button
-                    // onClick={() => updateStatus("REJECTED")}
+                    onClick={() => updateStatus("REJECTED")}
                     className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white"
                   >
                     Reject
