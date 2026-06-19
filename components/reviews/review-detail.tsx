@@ -26,17 +26,46 @@ export default function ReviewDetail({ review }: Props) {
               </p>
             </div>
 
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${
-                review.status === "APPROVED"
-                  ? "bg-green-100 text-green-700"
-                  : review.status === "REJECTED"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-yellow-100 text-yellow-700"
-              }`}
-            >
-              {review.status}
-            </span>
+            <div className="rounded-2xl border bg-white p-5">
+              <h3 className="mb-4 font-semibold">Moderation</h3>
+
+              <div className="mb-4">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    review.status === "APPROVED"
+                      ? "bg-green-100 text-green-700"
+                      : review.status === "REJECTED"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {review.status}
+                </span>
+              </div>
+
+              {/* ACTION BAR */}
+              <div className="mb-6 flex gap-2">
+                {review.status !== "APPROVED" && (
+                  <button
+                    // onClick={() => updateStatus("APPROVED")}
+                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white"
+                  >
+                    Approve
+                  </button>
+                )}
+
+                {review.status !== "REJECTED" && (
+                  <button
+                    // onClick={() => updateStatus("REJECTED")}
+                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white"
+                  >
+                    Reject
+                  </button>
+                )}
+              </div>
+
+              {/* Reply editor comes next */}
+            </div>
           </div>
         </div>
 
