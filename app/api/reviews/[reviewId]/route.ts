@@ -21,7 +21,7 @@ export async function PATCH(
     await prisma.reviewModerationHistory.create({
       data: {
         reviewId,
-        action: "APPROVED",
+        action: status === "APPROVED" ? "APPROVED" : "REJECTED",
       },
     });
 
