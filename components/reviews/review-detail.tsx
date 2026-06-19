@@ -16,41 +16,46 @@ type Props = {
 
 export default function ReviewDetail({ review }: Props) {
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState(review.status);
+  const [loadingAction, setLoadingAction] = useState<
+    "APPROVED" | "REJECTED" | null
+  >(null);
 
   const { tenant } = useTenant();
   const router = useRouter();
 
   const updateStatus = async (status: "APPROVED" | "REJECTED") => {
     try {
-      setUpdatingStatus(true);
+      setLoadingAction(status);
+
+      // update UI immediately
+      setCurrentStatus(status);
+
       const response = await fetch(`/api/reviews/${review.id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status,
-          reviewId: review.id,
-        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        console.error(error);
-        throw new Error(error);
+        throw new Error();
       }
 
       appToast.success(
         "Success",
-        `Review  ${status === "REJECTED" ? "rejected" : "approved"} successfully`,
+        `Review ${status.toLowerCase()} successfully`,
       );
+
       router.refresh();
     } catch (err) {
-      console.error(err);
-      appToast.error(
-        "Failed",
-        `Could not ${status === "REJECTED" ? "rejected" : "approved"} review.`,
-      );
+      // rollback if failed
+      setCurrentStatus(review.status);
+
+      appToast.error("Failed", `Could not ${status.toLowerCase()} review`);
     } finally {
-      setUpdatingStatus(false);
+      setLoadingAction(null);
     }
   };
 
@@ -87,7 +92,7 @@ export default function ReviewDetail({ review }: Props) {
 
               {/* ACTION BAR */}
               <div className="mb-6 flex gap-2">
-                {review.status !== "APPROVED" && (
+                {currentStatus !== "APPROVED" && (
                   <button
                     disabled={updatingStatus}
                     onClick={() => updateStatus("APPROVED")}
@@ -108,7 +113,7 @@ export default function ReviewDetail({ review }: Props) {
                   </button>
                 )}
 
-                {review.status !== "REJECTED" && (
+                {currentStatus !== "REJECTED" && (
                   <button
                     disabled={updatingStatus}
                     onClick={() => updateStatus("REJECTED")}

@@ -57,8 +57,8 @@ export default async function VendorReviewPage({ params }: Props) {
   return (
     <>
       <VendorHeaderUI
-        title="Products"
-        subtitle="Manage your store products"
+        title="Reviews"
+        subtitle="Manage your store reviews"
         vendor={vendor}
       />
       <ReviewDetail review={safeReview} vendorId={vendor.id} />;
