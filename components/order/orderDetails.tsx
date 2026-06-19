@@ -5,6 +5,7 @@ import InvoiceTemplate from "./invoice-template";
 import { useState } from "react";
 import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
+import { StatusBadge } from "@/lib/status-badge";
 
 interface OrderItem {
   id: string;
@@ -243,17 +244,9 @@ export default function OrderDetails({
               <div className="mt-2">
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold
-                ${
-                  localOrder.status === "DELIVERED"
-                    ? "bg-green-100 text-green-700"
-                    : localOrder.status === "PENDING"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : localOrder.status === "CANCELLED"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-blue-100 text-blue-700"
-                }`}
+             `}
                 >
-                  {localOrder.status}
+                  <StatusBadge status={localOrder.status} />
                 </span>
               </div>
             </div>
