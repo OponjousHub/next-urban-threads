@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
 import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
+import VendorHeaderUI from "@/components/vendor/vendorHeader";
 import ReviewDetail from "@/components/reviews/review-detail";
 
 type Props = {
@@ -53,5 +54,14 @@ export default async function VendorReviewPage({ params }: Props) {
     ),
   );
 
-  return <ReviewDetail review={safeReview} vendorId={vendor.id} />;
+  return (
+    <>
+      <VendorHeaderUI
+        title="Products"
+        subtitle="Manage your store products"
+        vendor={vendor}
+      />
+      <ReviewDetail review={safeReview} vendorId={vendor.id} />;
+    </>
+  );
 }
