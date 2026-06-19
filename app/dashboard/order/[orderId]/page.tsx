@@ -175,7 +175,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
       </div>
     );
   }
-  console.log("CUSTOMER'S ODER ------ ", order);
 
   /* ------------------------------------
      ✅ NORMAL PAGE CONTENT

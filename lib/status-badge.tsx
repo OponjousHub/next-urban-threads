@@ -1,4 +1,5 @@
 export function StatusBadge({ status }: { status: string | undefined }) {
+  
   const styles: Record<string, string> = {
     REQUESTED: "bg-yellow-100 text-yellow-700",
     APPROVED: "bg-blue-100 text-blue-700",

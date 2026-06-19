@@ -34,7 +34,7 @@ export default function CustomerTrackingTimeline({
       try {
         const res = await fetch(`/api/orders/${orderId}/tracking`);
         const data = await res.json();
-
+        console.log("TRACKING", data);
         const sorted = [...data].sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),

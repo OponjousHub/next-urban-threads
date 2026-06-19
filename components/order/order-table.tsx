@@ -89,8 +89,6 @@ export default function OrdersTable({
             },
             orderSelected.id,
           );
-
-          handleUpdateStatus(status);
         },
 
         onCancel: () => {
@@ -109,36 +107,6 @@ export default function OrdersTable({
 
   /* ---------------- API ---------------- */
 
-  const handleUpdateStatus = async (status: OrderStatus) => {
-    // const config = STATUS_CONFIG[status];
-    // if (!config) return;
-
-    const config = STATUS_CONFIG[status];
-
-    if (!config) return;
-
-    setSubmitting(true);
-
-    try {
-      await fetch(`/api/admin/orders/${orderSelected?.id}/tracking`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          status,
-          title: config.title,
-          message: config.message,
-          type: "STATUS_CHANGE",
-        }),
-      });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   // Unified update function
   async function updateOrder(action: Action, orderId: string) {
     try {
@@ -147,12 +115,37 @@ export default function OrdersTable({
       const res = await fetch(`/api/orders/${orderId}`, {
         method: "PATCH",
         body: JSON.stringify({
-          ...(action.type === "status" && { status: action.value }),
-          ...(action.type === "payment" && { paymentStatus: action.value }),
+          ...(action.type === "status" && {
+            status: action.value,
+          }),
+          ...(action.type === "payment" && {
+            paymentStatus: action.value,
+          }),
         }),
       });
 
       if (!res.ok) throw new Error();
+
+      // CREATE TRACKING EVENT
+      if (action.type === "status") {
+        const config = STATUS_CONFIG[action.value];
+
+        if (config) {
+          await fetch(`/api/admin/orders/${orderId}/tracking`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              status: action.value,
+              title: config.title,
+              message: config.message,
+              type: "STATUS_CHANGE",
+            }),
+          });
+        }
+      }
+
       appToast.success(
         "Order updated",
         action.type === "payment"
@@ -162,16 +155,12 @@ export default function OrdersTable({
 
       router.refresh();
     } catch (err: any) {
-      appToast.error(
-        "Update failed",
-        `${err?.message || "Could not update order"}`,
-      );
+      appToast.error("Update failed", err?.message || "Could not update order");
     } finally {
       setLoading(false);
       setShowModal(false);
     }
   }
-
   //Callback function for opening sheet for mobile
   const handleOpenActions = (order: Order) => {
     setOrderSelected(order);
