@@ -48,7 +48,7 @@ export async function POST(req: Request) {
         storeMode: tenant.storeMode,
         orderId: hasPurchased.id,
         verifiedPurchase: true,
-        status: "APPROVED", // or PENDING depending on tenant policy
+        status: "APPROVED",
       },
     });
 

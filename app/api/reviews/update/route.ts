@@ -6,7 +6,7 @@ import { updateProductRating } from "@/lib/calProduct-rating";
 export async function PATCH(req: Request) {
   const { rating, comment, reviewId } = await req.json();
 
-  const { userId } = await getAuthPayload();
+  const { userId, tenant } = await getAuthPayload();
 
   if (!userId) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -20,7 +20,7 @@ export async function PATCH(req: Request) {
     data: {
       rating,
       comment,
-      status: "PENDING", // optional: re-moderate on edit
+      status: "APPROVED",
     },
   });
 

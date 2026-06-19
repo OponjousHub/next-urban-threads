@@ -234,6 +234,7 @@ model Tenant {
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
   autoApproveReviews Boolean        @default(false)
+  reviewModeration   Boolean        @default(false)
   reviewPolicy       ReviewPolicy   @default(AFTER_PAYMENT)
   currency           currencyEnum @default(NGN)      
   email              String?
