@@ -17,6 +17,8 @@ type Props = {
 export default function ReviewDetail({ review }: Props) {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(review.status);
+  const [reply, setReply] = useState(review.reply || "");
+  const [savingReply, setSavingReply] = useState(false);
   const [loadingAction, setLoadingAction] = useState<
     "APPROVED" | "REJECTED" | null
   >(null);
@@ -56,6 +58,37 @@ export default function ReviewDetail({ review }: Props) {
       appToast.error("Failed", `Could not ${status.toLowerCase()} review`);
     } finally {
       setLoadingAction(null);
+    }
+  };
+
+  // Save Reply
+  const saveReply = async () => {
+    try {
+      setSavingReply(true);
+
+      const response = await fetch(`/api/reviews/${review.id}/reply`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reply,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      appToast.success("Reply Saved", "Customer response updated successfully");
+
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+
+      appToast.error("Failed", "Could not save reply");
+    } finally {
+      setSavingReply(false);
     }
   };
 
@@ -233,6 +266,81 @@ export default function ReviewDetail({ review }: Props) {
             </div>
           </div>
         )}
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Vendor Reply
+              </h3>
+
+              <p className="text-sm text-gray-500 mt-1">
+                Respond publicly to this customer review.
+              </p>
+            </div>
+          </div>
+
+          <textarea
+            value={reply}
+            onChange={(e) => setReply(e.target.value)}
+            rows={5}
+            placeholder="Write your response to the customer..."
+            className="
+      w-full rounded-xl border border-gray-300
+      bg-gray-50 p-4 text-sm
+      focus:border-[var(--color-primary)]
+      focus:outline-none
+      focus:ring-2
+      focus:ring-[var(--color-primary-ring)]
+    "
+          />
+
+          <div className="mt-4 flex justify-end">
+            <button
+              disabled={savingReply}
+              onClick={saveReply}
+              className="
+        flex items-center gap-2
+        rounded-xl
+        bg-[var(--color-primary)]
+        px-5 py-2.5
+        text-white
+        font-medium
+        shadow-sm
+        hover:opacity-90
+        disabled:opacity-50
+      "
+            >
+              {savingReply && (
+                <svg
+                  className="h-4 w-4 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    opacity=".25"
+                  />
+                  <path
+                    d="M22 12a10 10 0 00-10-10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                </svg>
+              )}
+
+              {savingReply
+                ? "Saving..."
+                : review.reply
+                  ? "Update Reply"
+                  : "Save Reply"}
+            </button>
+          </div>
+        </div>
 
         {/* Reply */}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
