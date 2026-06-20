@@ -61,7 +61,6 @@ export default function ReviewDetail({
     try {
       setLoadingAction(status);
       setUpdatingStatus(true);
-      // update UI immediately
       setCurrentStatus(status);
 
       const response = await fetch(`/api/reviews/${review.id}`, {
@@ -158,78 +157,184 @@ export default function ReviewDetail({
       <div className="space-y-6 p-4">
         {/* Header */}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h1 className="text-2xl font-bold">Review Details</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold">Review Details</h1>
 
-              <p className="mt-1 text-sm text-gray-500">
-                Review ID: {review.id}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border bg-white p-5">
-              <h3 className="mb-4 font-semibold">Moderation</h3>
-
-              <div className="mb-4">
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    review.status === "APPROVED"
+                    currentStatus === "APPROVED"
                       ? "bg-green-100 text-green-700"
-                      : review.status === "REJECTED"
+                      : currentStatus === "REJECTED"
                         ? "bg-red-100 text-red-700"
                         : "bg-yellow-100 text-yellow-700"
                   }`}
                 >
-                  {review.status}
+                  {currentStatus}
                 </span>
               </div>
 
-              {/* ACTION BAR */}
-              <div className="mb-6 flex gap-2">
-                {currentStatus !== "APPROVED" && (
-                  <button
-                    disabled={updatingStatus}
-                    onClick={() => updateStatus("APPROVED")}
-                    className="
-    flex items-center justify-center gap-2
-    rounded-lg bg-green-600 px-4 py-2
-    text-white disabled:opacity-70
-  "
-                  >
-                    {updatingStatus ? (
-                      <>
-                        <FiLoader className="animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      "Approve"
-                    )}
-                  </button>
-                )}
+              <p className="mt-2 text-sm text-gray-500">
+                Review ID: {review.id}
+              </p>
 
-                {currentStatus !== "REJECTED" && (
-                  <button
-                    disabled={updatingStatus}
-                    onClick={() => updateStatus("REJECTED")}
-                    className="
-    flex items-center justify-center gap-2
-    rounded-lg bg-red-600 px-4 py-2
-    text-white disabled:opacity-70
-  "
-                  >
-                    {updatingStatus ? (
-                      <>
-                        <FiLoader className="animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      "Reject"
-                    )}
-                  </button>
-                )}
+              <div className="mt-3 flex items-center gap-1">
+                {[...Array(review.rating)].map((_, i) => (
+                  <Star
+                    key={i}
+                    size={18}
+                    fill="currentColor"
+                    className="text-yellow-500"
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              {currentStatus !== "APPROVED" && (
+                <button
+                  disabled={updatingStatus}
+                  onClick={() => updateStatus("APPROVED")}
+                  className="
+            flex items-center gap-2
+            rounded-xl
+            bg-green-600
+            px-4 py-2
+            text-white
+            hover:bg-green-700
+            disabled:opacity-60
+          "
+                >
+                  {updatingStatus ? (
+                    <>
+                      <FiLoader className="animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Approve"
+                  )}
+                </button>
+              )}
+
+              {currentStatus !== "REJECTED" && (
+                <button
+                  disabled={updatingStatus}
+                  onClick={() => updateStatus("REJECTED")}
+                  className="
+            flex items-center gap-2
+            rounded-xl
+            bg-red-600
+            px-4 py-2
+            text-white
+            hover:bg-red-700
+            disabled:opacity-60
+          "
+                >
+                  {updatingStatus ? (
+                    <>
+                      <FiLoader className="animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Reject"
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Review */}
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold">Review</h2>
+
+          <div className="mb-3 flex gap-1">
+            {[...Array(review.rating)].map((_, i) => (
+              <Star
+                key={i}
+                size={18}
+                fill="currentColor"
+                className="text-yellow-500"
+              />
+            ))}
+          </div>
+
+          {review.title && (
+            <h3 className="mb-2 font-semibold">{review.title}</h3>
+          )}
+
+          <p className="text-gray-700">{review.comment}</p>
+
+          <p className="mt-4 text-xs text-gray-500">
+            Posted on {new Date(review.createdAt).toLocaleDateString()}
+          </p>
+        </div>
+
+        {/* Reviewer */}
+        <div className="rounded-2xl border bg-white p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">
+                Customer Purchase Context
+              </h3>
+
+              <p className="text-sm text-gray-500">
+                Purchase history and customer value
+              </p>
+            </div>
+
+            {vip && (
+              <span
+                className="
+          rounded-full
+          bg-amber-100
+          px-3 py-1
+          text-xs
+          font-semibold
+          text-amber-700
+          border border-amber-200
+        "
+              >
+                ⭐ VIP Customer
+              </span>
+            )}
+          </div>
+
+          {/* card content */}
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-semibold">Customer</h2>
+
+                <p className="text-sm text-gray-500">Reviewer information</p>
               </div>
 
-              {/* Reply editor comes next */}
+              {vip && (
+                <span
+                  className="
+      rounded-full
+      bg-amber-100
+      px-3 py-1
+      text-xs
+      font-semibold
+      text-amber-700
+      border
+      border-amber-200
+    "
+                >
+                  ⭐ VIP Customer
+                </span>
+              )}
+            </div>
+            <div className="space-y-2">
+              <p>
+                <strong>Name:</strong> {review.user?.name || "Customer"}
+              </p>
+
+              <p>
+                <strong>Email:</strong> {review.user?.email}
+              </p>
             </div>
           </div>
         </div>
@@ -267,76 +372,97 @@ export default function ReviewDetail({
           </div>
         </div>
 
-        {/* Reviewer */}
-        <div className="rounded-2xl border bg-white p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">
-                Customer Purchase Context
-              </h3>
-
-              <p className="text-sm text-gray-500">
-                Purchase history and customer value
-              </p>
-            </div>
-
-            {vip && (
-              <span
-                className="
-          rounded-full
-          bg-amber-100
-          px-3 py-1
-          text-xs
-          font-semibold
-          text-amber-700
-          border border-amber-200
-        "
-              >
-                ⭐ VIP Customer
-              </span>
-            )}
-          </div>
-
-          {/* card content */}
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">Customer</h2>
-
-            <div className="space-y-2">
-              <p>
-                <strong>Name:</strong> {review.user?.name || "Customer"}
-              </p>
-
-              <p>
-                <strong>Email:</strong> {review.user?.email}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Review */}
+        {/*Customer Purchase Context*/}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold">Review</h2>
+          <div className="mb-5">
+            <h3 className="text-lg font-semibold">Customer Purchase Context</h3>
 
-          <div className="mb-3 flex gap-1">
-            {[...Array(review.rating)].map((_, i) => (
-              <Star
-                key={i}
-                size={18}
-                fill="currentColor"
-                className="text-yellow-500"
-              />
-            ))}
+            <p className="text-sm text-gray-500 mt-1">
+              Purchase history and customer value.
+            </p>
           </div>
 
-          {review.title && (
-            <h3 className="mb-2 font-semibold">{review.title}</h3>
-          )}
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-xs text-gray-500">Total Orders</p>
 
-          <p className="text-gray-700">{review.comment}</p>
+              <p className="mt-1 text-2xl font-bold">
+                {customerContext.totalOrders}
+              </p>
+            </div>
 
-          <p className="mt-4 text-xs text-gray-500">
-            Posted on {new Date(review.createdAt).toLocaleDateString()}
-          </p>
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-xs text-gray-500">Total Spent</p>
+
+              <p className="mt-1 text-2xl font-bold">
+                {tenant.currency}
+                {customerContext.totalSpent.toLocaleString()}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-xs text-gray-500">First Purchase</p>
+
+              <p className="mt-1 font-medium">
+                {customerContext.firstPurchase
+                  ? new Date(customerContext.firstPurchase).toLocaleDateString()
+                  : "-"}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-xs text-gray-500">Last Purchase</p>
+
+              <p className="mt-1 font-medium">
+                {customerContext.lastPurchase
+                  ? new Date(customerContext.lastPurchase).toLocaleDateString()
+                  : "-"}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <h4 className="mb-3 font-medium">Recent Orders</h4>
+
+            <div className="overflow-hidden rounded-xl border">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Order</th>
+
+                    <th className="px-4 py-3 text-left">Date</th>
+
+                    <th className="px-4 py-3 text-left">Total</th>
+
+                    <th className="px-4 py-3 text-left">Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {customerContext.recentOrders.slice(0, 5).map((order) => (
+                    <tr key={order.id} className="border-t">
+                      <td className="px-4 py-3">#{order.id.slice(-8)}</td>
+
+                      <td className="px-4 py-3">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        {tenant.currency}
+                        {Number(order.totalAmount).toLocaleString()}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
+                          {order.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {/* Images */}
@@ -359,6 +485,7 @@ export default function ReviewDetail({
           </div>
         )}
 
+        {/*Vendor reply textarea*/}
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -434,7 +561,7 @@ export default function ReviewDetail({
           </div>
         </div>
 
-        {/* Reply */}
+        {/* Reply list*/}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold">Vendor Reply</h2>
 
@@ -452,96 +579,6 @@ export default function ReviewDetail({
           ) : (
             <p className="text-gray-500">No reply yet</p>
           )}
-        </div>
-
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
-          <div className="mb-5">
-            <h3 className="text-lg font-semibold">Customer Purchase Context</h3>
-
-            <p className="text-sm text-gray-500 mt-1">
-              Purchase history and customer value.
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="rounded-xl bg-gray-50 p-4">
-              <p className="text-xs text-gray-500">Total Orders</p>
-
-              <p className="mt-1 text-2xl font-bold">
-                {customerContext.totalOrders}
-              </p>
-            </div>
-
-            <div className="rounded-xl bg-gray-50 p-4">
-              <p className="text-xs text-gray-500">Total Spent</p>
-
-              <p className="mt-1 text-2xl font-bold">
-                ₦{customerContext.totalSpent.toLocaleString()}
-              </p>
-            </div>
-
-            <div className="rounded-xl bg-gray-50 p-4">
-              <p className="text-xs text-gray-500">First Purchase</p>
-
-              <p className="mt-1 font-medium">
-                {customerContext.firstPurchase
-                  ? new Date(customerContext.firstPurchase).toLocaleDateString()
-                  : "-"}
-              </p>
-            </div>
-
-            <div className="rounded-xl bg-gray-50 p-4">
-              <p className="text-xs text-gray-500">Last Purchase</p>
-
-              <p className="mt-1 font-medium">
-                {customerContext.lastPurchase
-                  ? new Date(customerContext.lastPurchase).toLocaleDateString()
-                  : "-"}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <h4 className="mb-3 font-medium">Recent Orders</h4>
-
-            <div className="overflow-hidden rounded-xl border">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left">Order</th>
-
-                    <th className="px-4 py-3 text-left">Date</th>
-
-                    <th className="px-4 py-3 text-left">Total</th>
-
-                    <th className="px-4 py-3 text-left">Status</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {customerContext.recentOrders.slice(0, 5).map((order) => (
-                    <tr key={order.id} className="border-t">
-                      <td className="px-4 py-3">#{order.id.slice(-8)}</td>
-
-                      <td className="px-4 py-3">
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </td>
-
-                      <td className="px-4 py-3">
-                        ₦{Number(order.totalAmount).toLocaleString()}
-                      </td>
-
-                      <td className="px-4 py-3">
-                        <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
-                          {order.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
         </div>
 
         {/* Metadata */}
@@ -569,39 +606,8 @@ export default function ReviewDetail({
             </div>
           </div>
         </div>
-        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5">
-          <h3 className="font-semibold text-red-700">Danger Zone</h3>
 
-          <p className="mt-2 text-sm text-red-600">
-            Permanently remove this review from your store. This action cannot
-            be undone.
-          </p>
-
-          <button
-            disabled={deleting}
-            onClick={() => setShowDeleteModal(true)}
-            className="
-      mt-4 flex items-center gap-2
-      rounded-xl
-      bg-red-600
-      px-4 py-2
-      text-white
-      font-medium
-      hover:bg-red-700
-      disabled:opacity-50
-    "
-          >
-            {deleting ? (
-              <>
-                <FiLoader className="animate-spin" />
-                Deleting...
-              </>
-            ) : (
-              "Delete Review"
-            )}
-          </button>
-        </div>
-
+        {/*Moderation History*/}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
           <div className="mb-5 flex items-center justify-between">
             <div>
@@ -653,6 +659,40 @@ export default function ReviewDetail({
               ))}
             </div>
           )}
+        </div>
+
+        {/*Danger zone*/}
+        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5">
+          <h3 className="font-semibold text-red-700">Danger Zone</h3>
+
+          <p className="mt-2 text-sm text-red-600">
+            Permanently remove this review from your store. This action cannot
+            be undone.
+          </p>
+
+          <button
+            disabled={deleting}
+            onClick={() => setShowDeleteModal(true)}
+            className="
+      mt-4 flex items-center gap-2
+      rounded-xl
+      bg-red-600
+      px-4 py-2
+      text-white
+      font-medium
+      hover:bg-red-700
+      disabled:opacity-50
+    "
+          >
+            {deleting ? (
+              <>
+                <FiLoader className="animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              "Delete Review"
+            )}
+          </button>
         </div>
       </div>
       <ConfirmDeleteModal
