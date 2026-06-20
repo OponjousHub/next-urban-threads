@@ -49,6 +49,38 @@ export default async function VendorReviewPage({ params }: Props) {
     },
   });
 
+  const customerOrders = await prisma.order.findMany({
+    where: {
+      userId: review?.userId,
+      vendorId: vendor.id,
+    },
+    include: {
+      items: {
+        include: {
+          product: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const totalSpent = customerOrders.reduce(
+    (sum, order) => sum + Number(order.totalAmount),
+    0,
+  );
+
+  const totalOrders = customerOrders.length;
+
+  const firstPurchase =
+    customerOrders.length > 0
+      ? customerOrders[customerOrders.length - 1].createdAt
+      : null;
+
+  const lastPurchase =
+    customerOrders.length > 0 ? customerOrders[0].createdAt : null;
+
   if (!review) {
     notFound();
   }
@@ -74,6 +106,13 @@ export default async function VendorReviewPage({ params }: Props) {
         review={safeReview}
         vendorId={vendor.id}
         moderationHistory={moderationHistory}
+        customerContext={{
+          totalSpent,
+          totalOrders,
+          firstPurchase,
+          lastPurchase,
+          orders: customerOrders,
+        }}
       />
       ;
     </>

@@ -17,13 +17,26 @@ type ModerationHistory = {
   createdAt: Date;
 };
 
+type CustomerContext = {
+  totalSpent: number;
+  totalOrders: number;
+  firstPurchase: Date | null;
+  lastPurchase: Date | null;
+  orders: any[];
+};
+
 type Props = {
   review: any;
   vendorId: string;
   moderationHistory: ModerationHistory[];
+  customerContext: CustomerContext;
 };
 
-export default function ReviewDetail({ review, moderationHistory }: Props) {
+export default function ReviewDetail({
+  review,
+  moderationHistory,
+  customerContext,
+}: Props) {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(review.status);
   const [reply, setReply] = useState(review.reply || "");
@@ -128,6 +141,9 @@ export default function ReviewDetail({ review, moderationHistory }: Props) {
       setDeleting(false);
     }
   };
+
+  const vip =
+    customerContext.totalSpent >= 100000 || customerContext.totalOrders >= 10;
 
   return (
     <>
@@ -244,17 +260,48 @@ export default function ReviewDetail({ review, moderationHistory }: Props) {
         </div>
 
         {/* Reviewer */}
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold">Customer</h2>
+        <div className="rounded-2xl border bg-white p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">
+                Customer Purchase Context
+              </h3>
 
-          <div className="space-y-2">
-            <p>
-              <strong>Name:</strong> {review.user?.name || "Customer"}
-            </p>
+              <p className="text-sm text-gray-500">
+                Purchase history and customer value
+              </p>
+            </div>
 
-            <p>
-              <strong>Email:</strong> {review.user?.email}
-            </p>
+            {vip && (
+              <span
+                className="
+          rounded-full
+          bg-amber-100
+          px-3 py-1
+          text-xs
+          font-semibold
+          text-amber-700
+          border border-amber-200
+        "
+              >
+                ⭐ VIP Customer
+              </span>
+            )}
+          </div>
+
+          {/* card content */}
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold">Customer</h2>
+
+            <div className="space-y-2">
+              <p>
+                <strong>Name:</strong> {review.user?.name || "Customer"}
+              </p>
+
+              <p>
+                <strong>Email:</strong> {review.user?.email}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -397,6 +444,96 @@ export default function ReviewDetail({ review, moderationHistory }: Props) {
           ) : (
             <p className="text-gray-500">No reply yet</p>
           )}
+        </div>
+
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-5">
+            <h3 className="text-lg font-semibold">Customer Purchase Context</h3>
+
+            <p className="text-sm text-gray-500 mt-1">
+              Purchase history and customer value.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-xs text-gray-500">Total Orders</p>
+
+              <p className="mt-1 text-2xl font-bold">
+                {customerContext.totalOrders}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-xs text-gray-500">Total Spent</p>
+
+              <p className="mt-1 text-2xl font-bold">
+                ₦{customerContext.totalSpent.toLocaleString()}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-xs text-gray-500">First Purchase</p>
+
+              <p className="mt-1 font-medium">
+                {customerContext.firstPurchase
+                  ? new Date(customerContext.firstPurchase).toLocaleDateString()
+                  : "-"}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-xs text-gray-500">Last Purchase</p>
+
+              <p className="mt-1 font-medium">
+                {customerContext.lastPurchase
+                  ? new Date(customerContext.lastPurchase).toLocaleDateString()
+                  : "-"}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <h4 className="mb-3 font-medium">Recent Orders</h4>
+
+            <div className="overflow-hidden rounded-xl border">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Order</th>
+
+                    <th className="px-4 py-3 text-left">Date</th>
+
+                    <th className="px-4 py-3 text-left">Total</th>
+
+                    <th className="px-4 py-3 text-left">Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {customerContext.orders.slice(0, 5).map((order) => (
+                    <tr key={order.id} className="border-t">
+                      <td className="px-4 py-3">#{order.id.slice(-8)}</td>
+
+                      <td className="px-4 py-3">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        ₦{Number(order.totalAmount).toLocaleString()}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
+                          {order.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {/* Metadata */}
