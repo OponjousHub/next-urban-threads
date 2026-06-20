@@ -22,7 +22,14 @@ type CustomerContext = {
   totalOrders: number;
   firstPurchase: Date | null;
   lastPurchase: Date | null;
-  orders: any[];
+
+  recentOrders: {
+    id: string;
+    createdAt: Date;
+    totalAmount: number;
+    status: string;
+    items: number;
+  }[];
 };
 
 type Props = {
@@ -144,6 +151,7 @@ export default function ReviewDetail({
 
   const vip =
     customerContext.totalSpent >= 100000 || customerContext.totalOrders >= 10;
+  console.log(JSON.stringify(customerContext));
 
   return (
     <>
@@ -511,7 +519,7 @@ export default function ReviewDetail({
                 </thead>
 
                 <tbody>
-                  {customerContext.orders.slice(0, 5).map((order) => (
+                  {customerContext.recentOrders.slice(0, 5).map((order) => (
                     <tr key={order.id} className="border-t">
                       <td className="px-4 py-3">#{order.id.slice(-8)}</td>
 

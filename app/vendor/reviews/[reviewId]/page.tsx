@@ -95,6 +95,26 @@ export default async function VendorReviewPage({ params }: Props) {
     ),
   );
 
+  //   const safeOrders = orders.map((order) => ({
+  //   ...order,
+  //   totalAmount: Number(order.totalAmount),
+  // }));
+
+  const customerPurchaseContext = {
+    totalSpent,
+    totalOrders,
+    firstPurchase,
+    lastPurchase,
+
+    recentOrders: customerOrders.slice(0, 5).map((order) => ({
+      id: order.id,
+      createdAt: order.createdAt,
+      totalAmount: Number(order.totalAmount),
+      status: order.status,
+      items: order.items.length,
+    })),
+  };
+
   return (
     <>
       <VendorHeaderUI
@@ -106,13 +126,7 @@ export default async function VendorReviewPage({ params }: Props) {
         review={safeReview}
         vendorId={vendor.id}
         moderationHistory={moderationHistory}
-        customerContext={{
-          totalSpent,
-          totalOrders,
-          firstPurchase,
-          lastPurchase,
-          orders: customerOrders,
-        }}
+        customerContext={customerPurchaseContext}
       />
       ;
     </>
