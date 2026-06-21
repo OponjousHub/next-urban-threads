@@ -85,9 +85,19 @@ export default function ReviewTable({ reviews, basePath }: Props) {
                   <td className="px-4 py-4">
                     <Link
                       href={`${basePath}/${review.id}`}
-                      className="text-blue-600 hover:underline"
+                      className="
+                        inline-flex items-center gap-2
+                        rounded-xl
+                       bg-gray-100
+                        px-4 py-2
+                        text-sm font-medium
+                       text-gray-700
+                        transition-all
+                       hover:bg-gray-200
+                        hover:shadow-sm
+  "
                     >
-                      View
+                      👁 View Review
                     </Link>
                   </td>
                 </tr>
