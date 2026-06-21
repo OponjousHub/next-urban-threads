@@ -188,17 +188,6 @@ export default function ReviewDetail({
               <p className="mt-2 text-sm text-gray-500">
                 Review ID: {review.id}
               </p>
-
-              <div className="mt-3 flex items-center gap-1">
-                {[...Array(review.rating)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={18}
-                    fill="currentColor"
-                    className="text-yellow-500"
-                  />
-                ))}
-              </div>
             </div>
 
             <div className="flex gap-2">
