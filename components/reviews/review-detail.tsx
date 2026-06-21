@@ -9,7 +9,6 @@ import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
 import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
 import { FiLoader } from "react-icons/fi";
-import { Vendor } from "@prisma/client";
 
 type ModerationHistory = {
   id: string;
@@ -190,12 +189,13 @@ export default function ReviewDetail({
               </p>
             </div>
 
-            <div className="flex gap-2">
-              {currentStatus !== "APPROVED" && (
-                <button
-                  disabled={updatingStatus}
-                  onClick={() => updateStatus("APPROVED")}
-                  className="
+            {tenant.storeMode === "MULTI_VENDOR" && (
+              <div className="flex gap-2">
+                {currentStatus !== "APPROVED" && (
+                  <button
+                    disabled={updatingStatus}
+                    onClick={() => updateStatus("APPROVED")}
+                    className="
             flex items-center gap-2
             rounded-xl
             bg-green-600
@@ -204,23 +204,23 @@ export default function ReviewDetail({
             hover:bg-green-700
             disabled:opacity-60
           "
-                >
-                  {updatingStatus ? (
-                    <>
-                      <FiLoader className="animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    "Approve"
-                  )}
-                </button>
-              )}
+                  >
+                    {updatingStatus ? (
+                      <>
+                        <FiLoader className="animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      "Approve"
+                    )}
+                  </button>
+                )}
 
-              {currentStatus !== "REJECTED" && (
-                <button
-                  disabled={updatingStatus}
-                  onClick={() => updateStatus("REJECTED")}
-                  className="
+                {currentStatus !== "REJECTED" && (
+                  <button
+                    disabled={updatingStatus}
+                    onClick={() => updateStatus("REJECTED")}
+                    className="
             flex items-center gap-2
             rounded-xl
             bg-red-600
@@ -229,18 +229,19 @@ export default function ReviewDetail({
             hover:bg-red-700
             disabled:opacity-60
           "
-                >
-                  {updatingStatus ? (
-                    <>
-                      <FiLoader className="animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    "Reject"
-                  )}
-                </button>
-              )}
-            </div>
+                  >
+                    {updatingStatus ? (
+                      <>
+                        <FiLoader className="animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      "Reject"
+                    )}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -659,18 +660,19 @@ export default function ReviewDetail({
         </div>
 
         {/*Danger zone*/}
-        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5">
-          <h3 className="font-semibold text-red-700">Danger Zone</h3>
+        {tenant.storeMode === "MULTI_VENDOR" && (
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5">
+            <h3 className="font-semibold text-red-700">Danger Zone</h3>
 
-          <p className="mt-2 text-sm text-red-600">
-            Permanently remove this review from your store. This action cannot
-            be undone.
-          </p>
+            <p className="mt-2 text-sm text-red-600">
+              Permanently remove this review from your store. This action cannot
+              be undone.
+            </p>
 
-          <button
-            disabled={deleting}
-            onClick={() => setShowDeleteModal(true)}
-            className="
+            <button
+              disabled={deleting}
+              onClick={() => setShowDeleteModal(true)}
+              className="
       mt-4 flex items-center gap-2
       rounded-xl
       bg-red-600
@@ -680,17 +682,18 @@ export default function ReviewDetail({
       hover:bg-red-700
       disabled:opacity-50
     "
-          >
-            {deleting ? (
-              <>
-                <FiLoader className="animate-spin" />
-                Deleting...
-              </>
-            ) : (
-              "Delete Review"
-            )}
-          </button>
-        </div>
+            >
+              {deleting ? (
+                <>
+                  <FiLoader className="animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Review"
+              )}
+            </button>
+          </div>
+        )}
       </div>
       <ConfirmDeleteModal
         open={showDeleteModal}
