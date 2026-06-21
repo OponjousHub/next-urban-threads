@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
-import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
-import VendorHeaderUI from "@/components/vendor/vendorHeader";
+import { getAuthPayload } from "@/lib/server/auth";
 import ReviewDetail from "@/components/reviews/review-detail";
 
 type Props = {
@@ -12,6 +11,7 @@ type Props = {
 
 export default async function VendorReviewPage({ params }: Props) {
   const { reviewId } = await params;
+  const { role } = await getAuthPayload();
 
   const review = await prisma.review.findFirst({
     where: {
@@ -123,6 +123,7 @@ export default async function VendorReviewPage({ params }: Props) {
         customerContext={customerPurchaseContext}
         isAdmin={true}
         vendor={review.product.vendor}
+        role={role}
       />
       ;
     </>

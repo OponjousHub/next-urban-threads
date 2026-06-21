@@ -45,6 +45,7 @@ type Props = {
     status: string;
     logo: string | null;
   } | null;
+  role: string | null;
 };
 
 export default function ReviewDetail({
@@ -53,6 +54,7 @@ export default function ReviewDetail({
   customerContext,
   isAdmin,
   vendor,
+  role,
 }: Props) {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(review.status);
@@ -161,6 +163,9 @@ export default function ReviewDetail({
   const vip =
     customerContext.totalSpent >= 100000 || customerContext.totalOrders >= 10;
 
+  const canDeleteReview =
+    tenant.storeMode === "SINGLE_VENDOR" ||
+    (tenant.storeMode === "MULTI_VENDOR" && isAdmin);
   return (
     <>
       <div className="space-y-6 p-4">
@@ -189,7 +194,7 @@ export default function ReviewDetail({
               </p>
             </div>
 
-            {tenant.storeMode === "MULTI_VENDOR" && (
+            {canDeleteReview && (
               <div className="flex gap-2">
                 {currentStatus !== "APPROVED" && (
                   <button
@@ -660,7 +665,7 @@ export default function ReviewDetail({
         </div>
 
         {/*Danger zone*/}
-        {tenant.storeMode === "MULTI_VENDOR" && (
+        {canDeleteReview && (
           <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5">
             <h3 className="font-semibold text-red-700">Danger Zone</h3>
 
@@ -673,15 +678,15 @@ export default function ReviewDetail({
               disabled={deleting}
               onClick={() => setShowDeleteModal(true)}
               className="
-      mt-4 flex items-center gap-2
-      rounded-xl
-      bg-red-600
-      px-4 py-2
-      text-white
-      font-medium
-      hover:bg-red-700
-      disabled:opacity-50
-    "
+                mt-4 flex items-center gap-2
+                rounded-xl
+               bg-red-600
+                px-4 py-2
+               text-white
+                font-medium
+               hover:bg-red-700
+                disabled:opacity-50
+                 "
             >
               {deleting ? (
                 <>
