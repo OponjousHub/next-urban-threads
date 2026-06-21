@@ -39,7 +39,7 @@ export default async function ProductDetailPage({
       productId,
       tenantId: tenant.id,
       storeMode: tenant.storeMode,
-      // status: "APPROVED",
+      status: "APPROVED",
     },
     include: { user: true },
     orderBy: { createdAt: "desc" },
