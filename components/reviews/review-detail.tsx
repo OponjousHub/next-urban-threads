@@ -9,6 +9,7 @@ import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
 import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
 import { FiLoader } from "react-icons/fi";
+import { Vendor } from "@prisma/client";
 
 type ModerationHistory = {
   id: string;
@@ -34,15 +35,25 @@ type CustomerContext = {
 
 type Props = {
   review: any;
-  vendorId: string;
+  vendorId?: string;
   moderationHistory: ModerationHistory[];
   customerContext: CustomerContext;
+  isAdmin: boolean;
+  vendor?: {
+    id: string;
+    name: string;
+    email: string | null;
+    status: string;
+    logo: string | null;
+  } | null;
 };
 
 export default function ReviewDetail({
   review,
   moderationHistory,
   customerContext,
+  isAdmin,
+  vendor,
 }: Props) {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(review.status);
@@ -344,6 +355,30 @@ export default function ReviewDetail({
             </div>
           </div>
         </div>
+
+        {/*Vendor card / Admin pnly*/}
+        {isAdmin && vendor && (
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <h3 className="font-semibold mb-3">Vendor</h3>
+
+            <div className="flex items-center gap-3">
+              {vendor.logo && (
+                <Image
+                  src={vendor.logo}
+                  alt={vendor.name}
+                  width={48}
+                  height={48}
+                  className="rounded-full"
+                />
+              )}
+
+              <div>
+                <p className="font-medium">{vendor.name}</p>
+                <p className="text-sm text-gray-500">{vendor.email}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/*Customer Purchase Context*/}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
