@@ -150,7 +150,6 @@ export default function ReviewDetail({
 
   const vip =
     customerContext.totalSpent >= 100000 || customerContext.totalOrders >= 10;
-  console.log(JSON.stringify(customerContext));
 
   return (
     <>
@@ -271,74 +270,6 @@ export default function ReviewDetail({
           </p>
         </div>
 
-        {/* Reviewer */}
-        <div className="rounded-2xl border bg-white p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">
-                Customer Purchase Context
-              </h3>
-
-              <p className="text-sm text-gray-500">
-                Purchase history and customer value
-              </p>
-            </div>
-
-            {vip && (
-              <span
-                className="
-          rounded-full
-          bg-amber-100
-          px-3 py-1
-          text-xs
-          font-semibold
-          text-amber-700
-          border border-amber-200
-        "
-              >
-                ⭐ VIP Customer
-              </span>
-            )}
-          </div>
-
-          {/* card content */}
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-semibold">Customer</h2>
-
-                <p className="text-sm text-gray-500">Reviewer information</p>
-              </div>
-
-              {vip && (
-                <span
-                  className="
-      rounded-full
-      bg-amber-100
-      px-3 py-1
-      text-xs
-      font-semibold
-      text-amber-700
-      border
-      border-amber-200
-    "
-                >
-                  ⭐ VIP Customer
-                </span>
-              )}
-            </div>
-            <div className="space-y-2">
-              <p>
-                <strong>Name:</strong> {review.user?.name || "Customer"}
-              </p>
-
-              <p>
-                <strong>Email:</strong> {review.user?.email}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Product */}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold">Product</h2>
@@ -368,6 +299,48 @@ export default function ReviewDetail({
               <p className="text-sm text-gray-500">
                 Avg Rating: {review.product.averageRating}
               </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-lg font-semibold">Customer</h2>
+
+              <p className="text-sm text-gray-500">
+                Information about the reviewer
+              </p>
+            </div>
+
+            {vip && (
+              <span
+                className="
+          rounded-full
+          border border-amber-200
+          bg-amber-100
+          px-3 py-1
+          text-xs
+          font-semibold
+          text-amber-700
+        "
+              >
+                ⭐ VIP Customer
+              </span>
+            )}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <p className="text-xs text-gray-500">Name</p>
+
+              <p className="font-medium">{review.user?.name || "Customer"}</p>
+            </div>
+
+            <div>
+              <p className="text-xs text-gray-500">Email</p>
+
+              <p className="font-medium">{review.user?.email}</p>
             </div>
           </div>
         </div>
