@@ -15,6 +15,7 @@ export default async function VendorAnalyticsPage() {
       prisma.order.findMany({
         where: {
           vendorId: vendor.id,
+          tenantId: tenant?.id,
           paymentStatus: "PAID",
         },
       }),
@@ -78,6 +79,60 @@ export default async function VendorAnalyticsPage() {
     .filter((order) => order.createdAt >= startOfMonth)
     .reduce((sum, order) => sum + Number(order.totalAmount), 0);
 
+  // Revenue Trends calculation
+  const thirtyDaysAgo = new Date();
+
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const revenueOrders = await prisma.order.findMany({
+    where: {
+      vendorId: vendor.id,
+      tenantId: tenant?.id,
+      paymentStatus: "PAID",
+      createdAt: {
+        gte: thirtyDaysAgo,
+      },
+    },
+    select: {
+      createdAt: true,
+      totalAmount: true,
+    },
+  });
+
+  // Build Daily Revenue Dataset
+  const revenueMap = new Map<string, number>();
+
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date();
+
+    date.setDate(date.getDate() - i);
+
+    const key = date.toISOString().split("T")[0];
+
+    revenueMap.set(key, 0);
+  }
+
+  revenueOrders.forEach((order) => {
+    const key = order.createdAt.toISOString().split("T")[0];
+
+    revenueMap.set(key, (revenueMap.get(key) || 0) + Number(order.totalAmount));
+  });
+
+  const revenueTrend = Array.from(revenueMap.entries()).map(
+    ([date, revenue]) => ({
+      date,
+      revenue,
+    }),
+  );
+
+  // Calculate Summary Stats
+  const periodRevenue = revenueTrend.reduce((sum, day) => sum + day.revenue, 0);
+
+  const highestDay = [...revenueTrend].sort((a, b) => b.revenue - a.revenue)[0];
+
+  const lowestDay = [...revenueTrend].sort((a, b) => a.revenue - b.revenue)[0];
+
+  //
   return (
     <>
       <VendorHeaderUI
@@ -89,7 +144,7 @@ export default async function VendorAnalyticsPage() {
       <div className="space-y-6 p-4">
         {/* KPI CARDS */}
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-4 xl:grid-cols-4">
           <div className="rounded-2xl border bg-white p-6 shadow-sm">
             <p className="text-sm text-gray-500">Total Revenue</p>
 
@@ -147,6 +202,63 @@ export default async function VendorAnalyticsPage() {
             <p className="mt-2 text-sm text-amber-600">
               {pendingReviews} pending moderation
             </p>
+          </div>
+        </div>
+
+        {/*Premium Revenue Trend Card*/}
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Revenue Trend</h2>
+
+              <p className="text-sm text-gray-500">Last 30 days performance</p>
+            </div>
+
+            <div className="rounded-xl bg-green-50 px-4 py-2">
+              <p className="text-xs text-green-600">Revenue</p>
+
+              <p className="font-semibold text-green-700">
+                {tenant?.currency}
+                {periodRevenue.toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-xl border p-4">
+              <p className="text-xs text-gray-500">Highest Day</p>
+
+              <p className="mt-2 text-lg font-bold">
+                {tenant?.currency}
+                {highestDay.revenue.toLocaleString()}
+              </p>
+
+              <p className="text-sm text-gray-500">
+                {new Date(highestDay.date).toLocaleDateString()}
+              </p>
+            </div>
+
+            <div className="rounded-xl border p-4">
+              <p className="text-xs text-gray-500">Lowest Day</p>
+
+              <p className="mt-2 text-lg font-bold">
+                {tenant?.currency}
+                {lowestDay.revenue.toLocaleString()}
+              </p>
+
+              <p className="text-sm text-gray-500">
+                {new Date(lowestDay.date).toLocaleDateString()}
+              </p>
+            </div>
+
+            <div className="rounded-xl border p-4">
+              <p className="text-xs text-gray-500">Average Daily Revenue</p>
+
+              <p className="mt-2 text-lg font-bold">
+                {tenant?.currency}
+                {(periodRevenue / 30).toLocaleString()}
+              </p>
+            </div>
           </div>
         </div>
       </div>

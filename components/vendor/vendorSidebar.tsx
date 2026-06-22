@@ -9,6 +9,7 @@ import {
   FaShoppingCart,
   FaCog,
   FaChartLine,
+  FaChartBar,
   FaUsers,
   FaStar,
   FaTimes,
@@ -21,6 +22,11 @@ const links = [
     label: "Dashboard",
     href: "/vendor",
     icon: FaChartLine,
+  },
+  {
+    label: "Analytics",
+    href: "/vendor/analytics",
+    icon: FaChartBar,
   },
   {
     label: "Products",
