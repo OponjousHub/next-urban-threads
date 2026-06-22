@@ -21,6 +21,7 @@ export default async function VendorAnalyticsPage() {
     totalReviews,
     pendingReviews,
     recentOrders,
+    topCustomers,
   ] = await Promise.all([
     prisma.order.findMany({
       where: {
@@ -88,6 +89,27 @@ export default async function VendorAnalyticsPage() {
         createdAt: "desc",
       },
       take: 10,
+    }),
+
+    prisma.user.findMany({
+      where: {
+        tenantId: tenant?.id,
+        orders: {
+          some: {
+            vendorId: vendor.id,
+          },
+        },
+      },
+
+      include: {
+        orders: {
+          where: {
+            vendorId: vendor.id,
+          },
+        },
+      },
+
+      take: 5,
     }),
   ]);
 
@@ -304,6 +326,25 @@ export default async function VendorAnalyticsPage() {
     status: item.status,
     count: item._count.status,
   }));
+
+  // Transform top customers
+  const customerAnalytics = topCustomers
+    .map((customer) => ({
+      id: customer.id,
+
+      name: customer.name || "Customer",
+
+      email: customer.email,
+
+      totalOrders: customer.orders.length,
+
+      totalSpent: customer.orders.reduce(
+        (sum, order) => sum + Number(order.totalAmount),
+        0,
+      ),
+    }))
+    .sort((a, b) => b.totalSpent - a.totalSpent)
+    .slice(0, 5);
 
   return (
     <>
@@ -564,6 +605,79 @@ export default async function VendorAnalyticsPage() {
                 {averageCustomerValue.toLocaleString()}
               </p>
             </div>
+          </div>
+        </div>
+
+        {/*Top Customers*/}
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Top Customers</h3>
+
+              <p className="text-sm text-gray-500">
+                Highest spending customers
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {customerAnalytics.map((customer, index) => (
+              <div
+                key={customer.id}
+                className="
+          flex items-center justify-between
+          rounded-xl border
+          p-4
+          hover:bg-gray-50
+          transition
+        "
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className="
+              flex h-10 w-10 items-center
+              justify-center rounded-full
+              bg-gray-100 font-semibold
+            "
+                  >
+                    #{index + 1}
+                  </div>
+
+                  <div>
+                    <p className="font-medium">
+                      {customer.name}{" "}
+                      {customer.totalSpent > 100000 && (
+                        <span
+                          className="
+                            rounded-full
+                           bg-amber-100
+                            px-2 py-1
+                            text-xs
+                            font-medium
+                           text-amber-700
+    "
+                        >
+                          VIP
+                        </span>
+                      )}
+                    </p>
+
+                    <p className="text-sm text-gray-500">{customer.email}</p>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <p className="font-semibold">
+                    {tenant?.currency}
+                    {customer.totalSpent.toLocaleString()}
+                  </p>
+
+                  <p className="text-sm text-gray-500">
+                    {customer.totalOrders} orders
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
