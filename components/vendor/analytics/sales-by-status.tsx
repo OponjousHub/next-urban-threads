@@ -9,13 +9,14 @@ type Props = {
   }[];
 };
 
-const COLORS = [
-  "#3B82F6", // Processing
-  "#8B5CF6", // Shipped
-  "#10B981", // Delivered
-  "#EF4444", // Cancelled
-  "#F59E0B", // Refunded
-];
+const STATUS_COLORS: Record<string, string> = {
+  PROCESSING: "#3B82F6",
+  SHIPPED: "#8B5CF6",
+  DELIVERED: "#10B981",
+  CANCELLED: "#EF4444",
+  REFUNDED: "#F59E0B",
+  PENDING: "#EAB308",
+};
 
 export default function SalesByStatus({ data }: Props) {
   return (
@@ -31,15 +32,12 @@ export default function SalesByStatus({ data }: Props) {
       <div className="h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie
-              data={data}
-              dataKey="count"
-              nameKey="status"
-              outerRadius={110}
-              label
-            >
-              {data.map((_, index) => (
-                <Cell key={index} fill={COLORS[index % COLORS.length]} />
+            <Pie data={data} dataKey="count" nameKey="status" outerRadius={110}>
+              {data.map((entry) => (
+                <Cell
+                  key={entry.status}
+                  fill={STATUS_COLORS[entry.status] || "#9CA3AF"}
+                />
               ))}
             </Pie>
 
