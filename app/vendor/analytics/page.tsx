@@ -2,6 +2,7 @@ import { prisma } from "@/utils/prisma";
 import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 import VendorHeaderUI from "@/components/vendor/vendorHeader";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import CustomerGrowthChart from "@/components/vendor/analytics/customer-growth-chart";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -421,6 +422,7 @@ export default async function VendorAnalyticsPage() {
         </div>
 
         {/*Customer Growth Trend Card*/}
+        <CustomerGrowthChart data={customerGrowthData} />
 
         {/*Top Products*/}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
