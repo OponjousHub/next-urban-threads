@@ -19,7 +19,7 @@ type Props = {
 
 export default function CustomerGrowthChart({ data }: Props) {
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border bg-white p-6 shadow-sm ">
       <div className="mb-4">
         <h3 className="font-semibold text-lg">Customer Growth Trend</h3>
 

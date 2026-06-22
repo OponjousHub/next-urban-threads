@@ -20,6 +20,7 @@ export default async function VendorAnalyticsPage() {
     totalCustomers,
     totalReviews,
     pendingReviews,
+    recentOrders,
   ] = await Promise.all([
     prisma.order.findMany({
       where: {
@@ -73,6 +74,20 @@ export default async function VendorAnalyticsPage() {
           vendorId: vendor.id,
         },
       },
+    }),
+
+    prisma.order.findMany({
+      where: {
+        vendorId: vendor.id,
+        tenantId: tenant?.id,
+      },
+      include: {
+        user: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 10,
     }),
   ]);
 

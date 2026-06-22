@@ -20,7 +20,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function SalesByStatus({ data }: Props) {
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border bg-white p-6 shadow-sm ">
       <div className="mb-5">
         <h3 className="text-lg font-semibold">Sales by Order Status</h3>
 

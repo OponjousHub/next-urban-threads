@@ -12,7 +12,6 @@ export default async function VendorLayout({
   const auth = await getAuthPayload();
   const { vendor } = await getCurrentVendor();
 
-
   if (!auth.userId) {
     redirect("/login");
   }
@@ -30,7 +29,7 @@ export default async function VendorLayout({
       <div className="flex min-h-screen bg-gray-50">
         <VendorSidebar vendor={vendor} />
 
-        <div className="flex flex-1 flex-col">{children}</div>
+        <div className="flex flex-1 flex-col mb-6">{children}</div>
       </div>
     </VendorSidebarProvider>
   );
