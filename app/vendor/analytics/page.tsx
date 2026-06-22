@@ -12,51 +12,68 @@ export default async function VendorAnalyticsPage() {
 
   if (!vendor) notFound();
 
-  const [orders, totalProducts, totalCustomers, totalReviews, pendingReviews] =
-    await Promise.all([
-      prisma.order.findMany({
-        where: {
+  const [
+    orders,
+    orderStatusData,
+    totalProducts,
+    totalCustomers,
+    totalReviews,
+    pendingReviews,
+  ] = await Promise.all([
+    prisma.order.findMany({
+      where: {
+        vendorId: vendor.id,
+        tenantId: tenant?.id,
+        paymentStatus: "PAID",
+      },
+    }),
+
+    prisma.order.groupBy({
+      by: ["status"],
+      where: {
+        vendorId: vendor.id,
+        tenantId: tenant?.id,
+      },
+      _count: {
+        status: true,
+      },
+    }),
+
+    prisma.product.count({
+      where: {
+        vendorId: vendor.id,
+        tenantId: tenant?.id,
+        deletedAt: null,
+      },
+    }),
+
+    prisma.user.count({
+      where: {
+        vendorId: vendor.id,
+        tenantId: tenant?.id,
+        isDeleted: false,
+      },
+    }),
+
+    prisma.review.count({
+      where: {
+        product: {
           vendorId: vendor.id,
           tenantId: tenant?.id,
-          paymentStatus: "PAID",
         },
-      }),
+      },
+    }),
 
-      prisma.product.count({
-        where: {
+    prisma.review.count({
+      where: {
+        tenantId: tenant?.id,
+        status: "PENDING",
+        product: {
           vendorId: vendor.id,
-          tenantId: tenant?.id,
-          deletedAt: null,
         },
-      }),
-
-      prisma.user.count({
-        where: {
-          vendorId: vendor.id,
-          tenantId: tenant?.id,
-          isDeleted: false,
-        },
-      }),
-
-      prisma.review.count({
-        where: {
-          product: {
-            vendorId: vendor.id,
-            tenantId: tenant?.id,
-          },
-        },
-      }),
-
-      prisma.review.count({
-        where: {
-          tenantId: tenant?.id,
-          status: "PENDING",
-          product: {
-            vendorId: vendor.id,
-          },
-        },
-      }),
-    ]);
+      },
+    }),
+  ]);
 
   /* ---------------- REVENUE ---------------- */
 
@@ -230,27 +247,47 @@ export default async function VendorAnalyticsPage() {
     totalCustomers > 0 ? totalCustomerRevenue / totalCustomers : 0;
 
   // Build Monthly Customer Growth Data
-  const monthlyCustomerGrowth = new Map<string, number>();
+  const months: {
+    label: string;
+    count: number;
+  }[] = [];
+
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+
+    months.push({
+      label: date.toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      }),
+      count: 0,
+    });
+  }
 
   customers.forEach((customer) => {
-    const month = customer.createdAt.toLocaleString("default", {
+    const monthLabel = customer.createdAt.toLocaleString("default", {
       month: "short",
       year: "numeric",
     });
 
-    monthlyCustomerGrowth.set(
-      month,
-      (monthlyCustomerGrowth.get(month) || 0) + 1,
-    );
+    const existing = months.find((m) => m.label === monthLabel);
+
+    if (existing) {
+      existing.count += 1;
+    }
   });
 
-  // Convert to Chart array
-  const customerGrowthData = Array.from(monthlyCustomerGrowth.entries()).map(
-    ([month, customers]) => ({
-      month,
-      customers,
-    }),
-  );
+  const customerGrowthData = months.map((m) => ({
+    month: m.label,
+    customers: m.count,
+  }));
+
+  // Converting other status for chart
+  const salesByStatus = orderStatusData.map((item) => ({
+    status: item.status,
+    count: item._count.status,
+  }));
 
   return (
     <>
@@ -381,46 +418,6 @@ export default async function VendorAnalyticsPage() {
           </div>
         </div>
 
-        {/*Customer KPI*/}
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold">Customer Analytics</h2>
-
-            <p className="text-sm text-gray-500">
-              Customer growth and loyalty metrics
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="rounded-xl border p-5">
-              <p className="text-sm text-gray-500">Total Customers</p>
-
-              <p className="mt-2 text-3xl font-bold">{totalVendorCustomers}</p>
-            </div>
-
-            <div className="rounded-xl border p-5">
-              <p className="text-sm text-gray-500">New This Month</p>
-
-              <p className="mt-2 text-3xl font-bold">{newCustomers}</p>
-            </div>
-
-            <div className="rounded-xl border p-5">
-              <p className="text-sm text-gray-500">Repeat Buyers</p>
-
-              <p className="mt-2 text-3xl font-bold">{repeatBuyers}</p>
-            </div>
-
-            <div className="rounded-xl border p-5">
-              <p className="text-sm text-gray-500">Avg Customer Value</p>
-
-              <p className="mt-2 text-3xl font-bold">
-                {tenant?.currency}
-                {averageCustomerValue.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/*Customer Growth Trend Card*/}
         <CustomerGrowthChart data={customerGrowthData} />
 
@@ -502,6 +499,46 @@ export default async function VendorAnalyticsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/*Customer KPI*/}
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold">Customer Analytics</h2>
+
+            <p className="text-sm text-gray-500">
+              Customer growth and loyalty metrics
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="rounded-xl border p-5">
+              <p className="text-sm text-gray-500">Total Customers</p>
+
+              <p className="mt-2 text-3xl font-bold">{totalVendorCustomers}</p>
+            </div>
+
+            <div className="rounded-xl border p-5">
+              <p className="text-sm text-gray-500">New This Month</p>
+
+              <p className="mt-2 text-3xl font-bold">{newCustomers}</p>
+            </div>
+
+            <div className="rounded-xl border p-5">
+              <p className="text-sm text-gray-500">Repeat Buyers</p>
+
+              <p className="mt-2 text-3xl font-bold">{repeatBuyers}</p>
+            </div>
+
+            <div className="rounded-xl border p-5">
+              <p className="text-sm text-gray-500">Avg Customer Value</p>
+
+              <p className="mt-2 text-3xl font-bold">
+                {tenant?.currency}
+                {averageCustomerValue.toLocaleString()}
+              </p>
+            </div>
           </div>
         </div>
       </div>
