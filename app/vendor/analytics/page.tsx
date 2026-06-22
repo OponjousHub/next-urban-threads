@@ -566,6 +566,77 @@ export default async function VendorAnalyticsPage() {
             </div>
           </div>
         </div>
+
+        {/*Recent Orders*/}
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Recent Orders</h3>
+
+              <p className="text-sm text-gray-500">Latest customer purchases</p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-gray-500">
+                  <th className="pb-3">Order</th>
+                  <th className="pb-3">Customer</th>
+                  <th className="pb-3">Date</th>
+                  <th className="pb-3">Total</th>
+                  <th className="pb-3">Payment</th>
+                  <th className="pb-3">Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {recentOrders.map((order) => (
+                  <tr key={order.id} className="border-b last:border-0">
+                    <td className="py-4 font-medium">#{order.id.slice(-8)}</td>
+
+                    <td className="py-4">{order.user?.name || "Customer"}</td>
+
+                    <td className="py-4">
+                      {order.createdAt.toLocaleDateString()}
+                    </td>
+
+                    <td className="py-4 font-semibold">
+                      {tenant?.currency}
+                      {Number(order.totalAmount).toLocaleString()}
+                    </td>
+
+                    <td className="py-4">
+                      <span
+                        className={`rounded-full px-2 py-1 text-xs ${
+                          order.paymentStatus === "PAID"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {order.paymentStatus}
+                      </span>
+                    </td>
+
+                    <td className="py-4">
+                      <span
+                        className={`rounded-full px-2 py-1 text-xs ${
+                          order.status === "DELIVERED"
+                            ? "bg-green-100 text-green-700"
+                            : order.status === "CANCELLED"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {order.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </>
   );
