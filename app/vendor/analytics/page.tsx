@@ -24,6 +24,7 @@ export default async function VendorAnalyticsPage() {
       prisma.product.count({
         where: {
           vendorId: vendor.id,
+          tenantId: tenant?.id,
           deletedAt: null,
         },
       }),
@@ -31,6 +32,7 @@ export default async function VendorAnalyticsPage() {
       prisma.user.count({
         where: {
           vendorId: vendor.id,
+          tenantId: tenant?.id,
           isDeleted: false,
         },
       }),
@@ -39,12 +41,14 @@ export default async function VendorAnalyticsPage() {
         where: {
           product: {
             vendorId: vendor.id,
+            tenantId: tenant?.id,
           },
         },
       }),
 
       prisma.review.count({
         where: {
+          tenantId: tenant?.id,
           status: "PENDING",
           product: {
             vendorId: vendor.id,
@@ -176,6 +180,54 @@ export default async function VendorAnalyticsPage() {
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 10);
 
+  // Fetch Customer Analytics
+  const customers = await prisma.user.findMany({
+    where: {
+      tenantId: tenant?.id,
+      orders: {
+        some: {
+          vendorId: vendor.id,
+          paymentStatus: "PAID",
+        },
+      },
+    },
+
+    include: {
+      orders: {
+        where: {
+          vendorId: vendor.id,
+          paymentStatus: "PAID",
+        },
+      },
+    },
+  });
+
+  // Total Customers
+  const totalVendorCustomers = customers.length;
+
+  const newCustomers = customers.filter(
+    (customer) => customer.createdAt >= startOfMonth,
+  ).length;
+
+  // Repeat Buyers
+  const repeatBuyers = customers.filter(
+    (customer) => customer.orders.length > 1,
+  ).length;
+
+  // Average Customer Value
+  const totalCustomerRevenue = customers.reduce(
+    (sum, customer) =>
+      sum +
+      customer.orders.reduce(
+        (orderSum, order) => orderSum + Number(order.totalAmount),
+        0,
+      ),
+    0,
+  );
+
+  const averageCustomerValue =
+    totalCustomers > 0 ? totalCustomerRevenue / totalCustomers : 0;
+
   return (
     <>
       <VendorHeaderUI
@@ -248,7 +300,7 @@ export default async function VendorAnalyticsPage() {
           </div>
         </div>
 
-        {/*Premium Revenue Trend Card*/}
+        {/* Revenue Trend Card*/}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
           <div className="mb-6 flex items-center justify-between">
             <div>
@@ -305,6 +357,46 @@ export default async function VendorAnalyticsPage() {
           </div>
         </div>
 
+        {/*Customer KPI*/}
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold">Customer Analytics</h2>
+
+            <p className="text-sm text-gray-500">
+              Customer growth and loyalty metrics
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="rounded-xl border p-5">
+              <p className="text-sm text-gray-500">Total Customers</p>
+
+              <p className="mt-2 text-3xl font-bold">{totalVendorCustomers}</p>
+            </div>
+
+            <div className="rounded-xl border p-5">
+              <p className="text-sm text-gray-500">New This Month</p>
+
+              <p className="mt-2 text-3xl font-bold">{newCustomers}</p>
+            </div>
+
+            <div className="rounded-xl border p-5">
+              <p className="text-sm text-gray-500">Repeat Buyers</p>
+
+              <p className="mt-2 text-3xl font-bold">{repeatBuyers}</p>
+            </div>
+
+            <div className="rounded-xl border p-5">
+              <p className="text-sm text-gray-500">Avg Customer Value</p>
+
+              <p className="mt-2 text-3xl font-bold">
+                {tenant?.currency}
+                {averageCustomerValue.toLocaleString()}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/*Top Products*/}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
           <div className="mb-6 flex items-center justify-between">
@@ -332,10 +424,20 @@ export default async function VendorAnalyticsPage() {
               </thead>
 
               <tbody>
-                {topProducts.map((product) => (
+                {topProducts.map((product, index) => (
                   <tr key={product.id} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
+                        <span
+                          className="
+                            flex h-8 w-8 items-center
+                            justify-center rounded-full
+                           bg-blue-100 text-blue-700
+                            text-xs font-bold
+  "
+                        >
+                          #{index + 1}
+                        </span>
                         <img
                           src={product.thumbnail}
                           alt={product.name}
