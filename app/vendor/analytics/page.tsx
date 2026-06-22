@@ -512,11 +512,13 @@ export default async function VendorAnalyticsPage() {
 
           {/*Top Products*/}
           <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <div className="mb-5 rounded-xl bg-red-50 p-4">
-              <p className="font-medium text-red-700">
-                {criticalStockCount} products require immediate restocking
-              </p>
-            </div>
+            {criticalStockCount > 0 && (
+              <div className="mb-5 rounded-xl bg-red-50 p-4">
+                <p className="font-medium text-red-700">
+                  {criticalStockCount} products require immediate restocking
+                </p>
+              </div>
+            )}
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold">Top Products</h2>
@@ -761,7 +763,7 @@ export default async function VendorAnalyticsPage() {
                         <p className="font-medium">{product.name}</p>
 
                         <p className="text-sm text-gray-500">
-                          {tenant.currency}
+                          {tenant?.currency}
                           {Number(product.price).toLocaleString()}
                         </p>
                       </div>
