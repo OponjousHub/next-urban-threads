@@ -228,6 +228,29 @@ export default async function VendorAnalyticsPage() {
   const averageCustomerValue =
     totalCustomers > 0 ? totalCustomerRevenue / totalCustomers : 0;
 
+  // Build Monthly Customer Growth Data
+  const monthlyCustomerGrowth = new Map<string, number>();
+
+  customers.forEach((customer) => {
+    const month = customer.createdAt.toLocaleString("default", {
+      month: "short",
+      year: "numeric",
+    });
+
+    monthlyCustomerGrowth.set(
+      month,
+      (monthlyCustomerGrowth.get(month) || 0) + 1,
+    );
+  });
+
+  // Convert to Chart array
+  const customerGrowthData = Array.from(monthlyCustomerGrowth.entries()).map(
+    ([month, customers]) => ({
+      month,
+      customers,
+    }),
+  );
+
   return (
     <>
       <VendorHeaderUI
@@ -396,6 +419,8 @@ export default async function VendorAnalyticsPage() {
             </div>
           </div>
         </div>
+
+        {/*Customer Growth Trend Card*/}
 
         {/*Top Products*/}
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
