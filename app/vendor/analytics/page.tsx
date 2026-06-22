@@ -3,6 +3,7 @@ import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 import VendorHeaderUI from "@/components/vendor/vendorHeader";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
 export default async function VendorAnalyticsPage() {
   const { vendor } = await getCurrentVendor();
@@ -132,7 +133,49 @@ export default async function VendorAnalyticsPage() {
 
   const lowestDay = [...revenueTrend].sort((a, b) => a.revenue - b.revenue)[0];
 
-  //
+  //Fetch Top Products
+  const topProductsRaw = await prisma.orderItem.findMany({
+    where: {
+      order: {
+        vendorId: vendor.id,
+        paymentStatus: "PAID",
+      },
+    },
+    include: {
+      product: true,
+    },
+  });
+
+  // Aggregate Product Performance
+  const productMap = new Map();
+
+  for (const item of topProductsRaw) {
+    const productId = item.product.id;
+
+    const revenue = Number(item.price) * item.quantity;
+
+    if (productMap.has(productId)) {
+      const existing = productMap.get(productId);
+
+      existing.unitsSold += item.quantity;
+      existing.revenue += revenue;
+    } else {
+      productMap.set(productId, {
+        id: item.product.id,
+        name: item.product.name,
+        slug: item.product.slug,
+        thumbnail: item.product.thumbnail,
+        unitsSold: item.quantity,
+        revenue,
+      });
+    }
+  }
+
+  // Sort Best Sellers
+  const topProducts = Array.from(productMap.values())
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 10);
+
   return (
     <>
       <VendorHeaderUI
@@ -259,6 +302,77 @@ export default async function VendorAnalyticsPage() {
                 {(periodRevenue / 30).toLocaleString()}
               </p>
             </div>
+          </div>
+        </div>
+
+        {/*Top Products*/}
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Top Products</h2>
+
+              <p className="text-sm text-gray-500">
+                Best performing products by revenue
+              </p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-gray-50 text-left">
+                  <th className="px-4 py-3">Product</th>
+
+                  <th className="px-4 py-3">Units Sold</th>
+
+                  <th className="px-4 py-3">Revenue</th>
+
+                  <th className="px-4 py-3">Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {topProducts.map((product) => (
+                  <tr key={product.id} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={product.thumbnail}
+                          alt={product.name}
+                          className="h-12 w-12 rounded-lg border object-cover"
+                        />
+
+                        <div>
+                          <p className="font-medium">{product.name}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-4">{product.unitsSold}</td>
+
+                    <td className="px-4 py-4 font-semibold">
+                      {tenant?.currency}
+                      {product.revenue.toLocaleString()}
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <Link
+                        href={`/vendor/products/${product.id}`}
+                        className="
+                  inline-flex items-center
+                  rounded-lg border
+                  px-3 py-1.5
+                  text-sm font-medium
+                  hover:bg-gray-50
+                "
+                      >
+                        View
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
