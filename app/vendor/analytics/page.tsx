@@ -22,6 +22,7 @@ export default async function VendorAnalyticsPage() {
     pendingReviews,
     recentOrders,
     topCustomers,
+    lowStockProducts,
   ] = await Promise.all([
     prisma.order.findMany({
       where: {
@@ -110,6 +111,32 @@ export default async function VendorAnalyticsPage() {
       },
 
       take: 5,
+    }),
+
+    prisma.product.findMany({
+      where: {
+        tenantId: tenant?.id,
+        vendorId: vendor.id,
+        deletedAt: null,
+        stock: {
+          lte: 5,
+        },
+      },
+
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        thumbnail: true,
+        stock: true,
+        price: true,
+      },
+
+      orderBy: {
+        stock: "asc",
+      },
+
+      take: 10,
     }),
   ]);
 
@@ -346,6 +373,11 @@ export default async function VendorAnalyticsPage() {
     .sort((a, b) => b.totalSpent - a.totalSpent)
     .slice(0, 5);
 
+  // Urgent Restock Summay card
+  const criticalStockCount = lowStockProducts.filter(
+    (p) => p.stock <= 3,
+  ).length;
+
   return (
     <>
       <VendorHeaderUI
@@ -480,6 +512,11 @@ export default async function VendorAnalyticsPage() {
 
           {/*Top Products*/}
           <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="mb-5 rounded-xl bg-red-50 p-4">
+              <p className="font-medium text-red-700">
+                {criticalStockCount} products require immediate restocking
+              </p>
+            </div>
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold">Top Products</h2>
@@ -608,47 +645,48 @@ export default async function VendorAnalyticsPage() {
           </div>
         </div>
 
-        {/*Top Customers*/}
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">Top Customers</h3>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/*Top Customers*/}
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Top Customers</h3>
 
-              <p className="text-sm text-gray-500">
-                Highest spending customers
-              </p>
+                <p className="text-sm text-gray-500">
+                  Highest spending customers
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-4">
-            {customerAnalytics.map((customer, index) => (
-              <div
-                key={customer.id}
-                className="
+            <div className="space-y-4">
+              {customerAnalytics.map((customer, index) => (
+                <div
+                  key={customer.id}
+                  className="
           flex items-center justify-between
           rounded-xl border
           p-4
           hover:bg-gray-50
           transition
         "
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className="
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="
               flex h-10 w-10 items-center
               justify-center rounded-full
               bg-gray-100 font-semibold
             "
-                  >
-                    #{index + 1}
-                  </div>
+                    >
+                      #{index + 1}
+                    </div>
 
-                  <div>
-                    <p className="font-medium">
-                      {customer.name}{" "}
-                      {customer.totalSpent > 100000 && (
-                        <span
-                          className="
+                    <div>
+                      <p className="font-medium">
+                        {customer.name}{" "}
+                        {customer.totalSpent > 100000 && (
+                          <span
+                            className="
                             rounded-full
                            bg-amber-100
                             px-2 py-1
@@ -656,28 +694,97 @@ export default async function VendorAnalyticsPage() {
                             font-medium
                            text-amber-700
     "
-                        >
-                          VIP
-                        </span>
-                      )}
+                          >
+                            VIP
+                          </span>
+                        )}
+                      </p>
+
+                      <p className="text-sm text-gray-500">{customer.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="font-semibold">
+                      {tenant?.currency}
+                      {customer.totalSpent.toLocaleString()}
                     </p>
 
-                    <p className="text-sm text-gray-500">{customer.email}</p>
+                    <p className="text-sm text-gray-500">
+                      {customer.totalOrders} orders
+                    </p>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
 
-                <div className="text-right">
-                  <p className="font-semibold">
-                    {tenant?.currency}
-                    {customer.totalSpent.toLocaleString()}
-                  </p>
+          {/*Low Stock*/}
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Low Stock Products</h3>
 
-                  <p className="text-sm text-gray-500">
-                    {customer.totalOrders} orders
-                  </p>
-                </div>
+                <p className="text-sm text-gray-500">
+                  Products that need restocking soon
+                </p>
               </div>
-            ))}
+            </div>
+
+            {lowStockProducts.length === 0 ? (
+              <div className="rounded-xl bg-green-50 p-6 text-center">
+                <p className="font-medium text-green-700">
+                  🎉 All products are sufficiently stocked
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {lowStockProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="
+            flex items-center justify-between
+            rounded-xl border
+            p-4
+            hover:bg-gray-50
+            transition
+          "
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={product.thumbnail}
+                        alt={product.name}
+                        className="h-12 w-12 rounded-lg border object-cover"
+                      />
+
+                      <div>
+                        <p className="font-medium">{product.name}</p>
+
+                        <p className="text-sm text-gray-500">
+                          {tenant.currency}
+                          {Number(product.price).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span
+                        className={`
+                rounded-full px-3 py-1 text-xs font-medium
+                ${
+                  product.stock <= 3
+                    ? "bg-red-100 text-red-700"
+                    : "bg-yellow-100 text-yellow-700"
+                }
+              `}
+                      >
+                        {product.stock} left
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
