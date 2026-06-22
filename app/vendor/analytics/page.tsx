@@ -3,6 +3,7 @@ import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 import VendorHeaderUI from "@/components/vendor/vendorHeader";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import CustomerGrowthChart from "@/components/vendor/analytics/customer-growth-chart";
+import SalesByStatus from "@/components/vendor/analytics/sales-by-status";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -361,145 +362,154 @@ export default async function VendorAnalyticsPage() {
           </div>
         </div>
 
-        {/* Revenue Trend Card*/}
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">Revenue Trend</h2>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Revenue Trend Card*/}
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Revenue Trend</h2>
 
-              <p className="text-sm text-gray-500">Last 30 days performance</p>
+                <p className="text-sm text-gray-500">
+                  Last 30 days performance
+                </p>
+              </div>
+
+              <div className="rounded-xl bg-green-50 px-4 py-2">
+                <p className="text-xs text-green-600">Revenue</p>
+
+                <p className="font-semibold text-green-700">
+                  {tenant?.currency}
+                  {periodRevenue.toLocaleString()}
+                </p>
+              </div>
             </div>
 
-            <div className="rounded-xl bg-green-50 px-4 py-2">
-              <p className="text-xs text-green-600">Revenue</p>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-xl border p-4">
+                <p className="text-xs text-gray-500">Highest Day</p>
 
-              <p className="font-semibold text-green-700">
-                {tenant?.currency}
-                {periodRevenue.toLocaleString()}
-              </p>
-            </div>
-          </div>
+                <p className="mt-2 text-lg font-bold">
+                  {tenant?.currency}
+                  {highestDay.revenue.toLocaleString()}
+                </p>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border p-4">
-              <p className="text-xs text-gray-500">Highest Day</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(highestDay.date).toLocaleDateString()}
+                </p>
+              </div>
 
-              <p className="mt-2 text-lg font-bold">
-                {tenant?.currency}
-                {highestDay.revenue.toLocaleString()}
-              </p>
+              <div className="rounded-xl border p-4">
+                <p className="text-xs text-gray-500">Lowest Day</p>
 
-              <p className="text-sm text-gray-500">
-                {new Date(highestDay.date).toLocaleDateString()}
-              </p>
-            </div>
+                <p className="mt-2 text-lg font-bold">
+                  {tenant?.currency}
+                  {lowestDay.revenue.toLocaleString()}
+                </p>
 
-            <div className="rounded-xl border p-4">
-              <p className="text-xs text-gray-500">Lowest Day</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(lowestDay.date).toLocaleDateString()}
+                </p>
+              </div>
 
-              <p className="mt-2 text-lg font-bold">
-                {tenant?.currency}
-                {lowestDay.revenue.toLocaleString()}
-              </p>
+              <div className="rounded-xl border p-4">
+                <p className="text-xs text-gray-500">Average Daily Revenue</p>
 
-              <p className="text-sm text-gray-500">
-                {new Date(lowestDay.date).toLocaleDateString()}
-              </p>
-            </div>
-
-            <div className="rounded-xl border p-4">
-              <p className="text-xs text-gray-500">Average Daily Revenue</p>
-
-              <p className="mt-2 text-lg font-bold">
-                {tenant?.currency}
-                {(periodRevenue / 30).toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/*Customer Growth Trend Card*/}
-        <CustomerGrowthChart data={customerGrowthData} />
-
-        {/*Top Products*/}
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">Top Products</h2>
-
-              <p className="text-sm text-gray-500">
-                Best performing products by revenue
-              </p>
+                <p className="mt-2 text-lg font-bold">
+                  {tenant?.currency}
+                  {(periodRevenue / 30).toLocaleString()}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-gray-50 text-left">
-                  <th className="px-4 py-3">Product</th>
+          {/*Top Products*/}
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Top Products</h2>
 
-                  <th className="px-4 py-3">Units Sold</th>
+                <p className="text-sm text-gray-500">
+                  Best performing products by revenue
+                </p>
+              </div>
+            </div>
 
-                  <th className="px-4 py-3">Revenue</th>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-gray-50 text-left">
+                    <th className="px-4 py-3">Product</th>
 
-                  <th className="px-4 py-3">Action</th>
-                </tr>
-              </thead>
+                    <th className="px-4 py-3">Units Sold</th>
 
-              <tbody>
-                {topProducts.map((product, index) => (
-                  <tr key={product.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <span
-                          className="
+                    <th className="px-4 py-3">Revenue</th>
+
+                    <th className="px-4 py-3">Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {topProducts.map((product, index) => (
+                    <tr key={product.id} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <span
+                            className="
                             flex h-8 w-8 items-center
                             justify-center rounded-full
                            bg-blue-100 text-blue-700
                             text-xs font-bold
   "
-                        >
-                          #{index + 1}
-                        </span>
-                        <img
-                          src={product.thumbnail}
-                          alt={product.name}
-                          className="h-12 w-12 rounded-lg border object-cover"
-                        />
+                          >
+                            #{index + 1}
+                          </span>
+                          <img
+                            src={product.thumbnail}
+                            alt={product.name}
+                            className="h-12 w-12 rounded-lg border object-cover"
+                          />
 
-                        <div>
-                          <p className="font-medium">{product.name}</p>
+                          <div>
+                            <p className="font-medium">{product.name}</p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="px-4 py-4">{product.unitsSold}</td>
+                      <td className="px-4 py-4">{product.unitsSold}</td>
 
-                    <td className="px-4 py-4 font-semibold">
-                      {tenant?.currency}
-                      {product.revenue.toLocaleString()}
-                    </td>
+                      <td className="px-4 py-4 font-semibold">
+                        {tenant?.currency}
+                        {product.revenue.toLocaleString()}
+                      </td>
 
-                    <td className="px-4 py-4">
-                      <Link
-                        href={`/vendor/products/${product.id}`}
-                        className="
+                      <td className="px-4 py-4">
+                        <Link
+                          href={`/vendor/products/${product.id}`}
+                          className="
                   inline-flex items-center
                   rounded-lg border
                   px-3 py-1.5
                   text-sm font-medium
                   hover:bg-gray-50
                 "
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        >
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/*Customer Growth Trend Card*/}
+          <CustomerGrowthChart data={customerGrowthData} />
+
+          {/*Sales By Status*/}
+          <SalesByStatus data={salesByStatus} />
         </div>
 
         {/*Customer KPI*/}
