@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 import VendorHeaderUI from "@/components/vendor/vendorHeader";
 import CouponDetail from "@/components/coupons/coupon-detail";
+import { getAuthPayload } from "@/lib/server/auth";
 
 type Props = {
   params: Promise<{
@@ -12,6 +13,7 @@ type Props = {
 
 export default async function CouponDetailPage({ params }: Props) {
   const { couponId } = await params;
+  const { tenant } = await getAuthPayload();
 
   const { vendor } = await getCurrentVendor();
 
@@ -19,6 +21,7 @@ export default async function CouponDetailPage({ params }: Props) {
     where: {
       id: couponId,
       vendorId: vendor?.id,
+      tenantId: tenant?.id,
     },
 
     include: {
@@ -47,11 +50,7 @@ export default async function CouponDetailPage({ params }: Props) {
   const safeCoupon = {
     ...coupon,
     value: Number(coupon.value),
-
-    orders: coupon.orders.map((order) => ({
-      ...order,
-      totalAmount: Number(order.totalAmount),
-    })),
+    minimumAmount: coupon.minimumAmount ? Number(coupon.minimumAmount) : null,
   };
 
   return (
