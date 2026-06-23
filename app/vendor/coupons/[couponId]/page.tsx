@@ -18,7 +18,7 @@ export default async function CouponDetailPage({ params }: Props) {
   const coupon = await prisma.coupon.findFirst({
     where: {
       id: couponId,
-      vendorId: vendor.id,
+      vendorId: vendor?.id,
     },
 
     include: {

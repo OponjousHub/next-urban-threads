@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { appToast } from "@/utils/appToast";
 
 type Props = {
-  vendorId: string;
+  vendorId?: string;
 };
 
 export default function CouponForm({ vendorId }: Props) {

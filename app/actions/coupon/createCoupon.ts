@@ -8,7 +8,11 @@ export async function createCoupon(data: any) {
 
   return prisma.coupon.create({
     data: {
-      vendorId: data.vendorId,
+      vendor: {
+        connect: {
+          id: data.vendorId,
+        },
+      },
 
       code: data.code,
 
