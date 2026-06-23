@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
 
 type Props = {
-  coupon: any;
+  mode?: "create" | "edit";
+  coupon?: any;
 };
 
 export default function CouponDetail({ coupon }: Props) {
@@ -38,10 +39,6 @@ export default function CouponDetail({ coupon }: Props) {
   }
 
   async function deleteCoupon() {
-    if (!confirm("Delete this coupon permanently?")) {
-      return;
-    }
-
     try {
       setDeleting(true);
 

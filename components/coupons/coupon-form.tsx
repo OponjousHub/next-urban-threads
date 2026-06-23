@@ -6,24 +6,26 @@ import { useRouter } from "next/navigation";
 import { appToast } from "@/utils/appToast";
 
 type Props = {
+  mode?: "create" | "edit";
+  coupon?: any;
   vendorId?: string;
 };
 
-export default function CouponForm({ vendorId }: Props) {
+export default function CouponForm({ mode, coupon, vendorId }: Props) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    code: "",
-    description: "",
-    type: "PERCENTAGE",
-    value: "",
-    minimumOrderAmount: "",
-    usageLimit: "",
-    startsAt: "",
-    expiresAt: "",
-    active: true,
+    code: coupon?.code ?? "",
+    description: coupon?.description ?? "",
+    type: coupon?.type ?? "PERCENTAGE",
+    value: coupon?.value ?? "",
+    minimumOrderAmount: coupon?.minimumAmount ?? "",
+    usageLimit: coupon?.usageLimit ?? "",
+    startsAt: coupon?.startsAt ?? "",
+    expiresAt: coupon?.expiresAt ?? "",
+    active: coupon?.active ?? true,
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -32,17 +34,40 @@ export default function CouponForm({ vendorId }: Props) {
     try {
       setLoading(true);
 
-      await createCoupon({
-        vendorId,
-        ...form,
-      });
+      if (mode === "edit") {
+        const response = await fetch(`/api/coupons/${coupon.id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        });
 
-      appToast.success("Success", "Coupon created successfully");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Could not update coupon");
+        }
+      } else {
+        await createCoupon({
+          vendorId,
+          ...form,
+        });
+      }
+
+      appToast.success(
+        "Success",
+        `Coupon ${mode === "edit" ? "updated" : "created"} successfully`,
+      );
 
       router.push("/vendor/coupons");
       router.refresh();
     } catch (err: any) {
-      appToast.error("Failed", err.message || "Could not create coupon");
+      appToast.error(
+        "Failed",
+        err.message ||
+          `Could not ${mode === "edit" ? "update" : "create"} coupon`,
+      );
     } finally {
       setLoading(false);
     }
