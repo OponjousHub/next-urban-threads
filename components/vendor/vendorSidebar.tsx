@@ -13,6 +13,7 @@ import {
   FaUsers,
   FaStar,
   FaTimes,
+  FaTags,
 } from "react-icons/fa";
 
 import { useVendorSidebar } from "@/store/vendor-sidebar-context";
@@ -47,6 +48,11 @@ const links = [
     label: "Reviews",
     href: "/vendor/reviews",
     icon: FaStar,
+  },
+  {
+    label: "Coupons",
+    href: "/vendor/coupons",
+    icon: FaTags,
   },
   {
     label: "Store Settings",
