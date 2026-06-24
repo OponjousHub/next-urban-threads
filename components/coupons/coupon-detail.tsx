@@ -83,7 +83,7 @@ export default function CouponDetail({ coupon }: Props) {
 
         {/* KPI */}
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
           <div className="rounded-xl border bg-white p-5">
             <p className="text-sm text-gray-500">Discount</p>
 
