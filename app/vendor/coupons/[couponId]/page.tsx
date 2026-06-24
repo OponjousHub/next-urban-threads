@@ -60,7 +60,7 @@ export default async function CouponDetailPage({ params }: Props) {
       ? new Date(coupon.expiresAt).toISOString().slice(0, 16)
       : "",
   };
-
+  console.log("SAFE COUPON", safeCoupon);
   return (
     <>
       <VendorHeaderUI

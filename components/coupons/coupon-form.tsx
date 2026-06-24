@@ -27,7 +27,7 @@ export default function CouponForm({ mode, coupon, vendorId }: Props) {
     expiresAt: coupon?.expiresAt ?? "",
     active: coupon?.active ?? true,
   });
-  console.log("COUPON DATE:", form.startsAt);
+  console.log("COUPON DATE:", coupon.startsAt);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -246,7 +246,7 @@ export default function CouponForm({ mode, coupon, vendorId }: Props) {
           >
             {loading
               ? mode === "edit"
-                ? "Updating"
+                ? "Updating..."
                 : "Creating..."
               : mode === "edit"
                 ? "Update Coupon"
