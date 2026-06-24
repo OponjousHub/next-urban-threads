@@ -16,7 +16,7 @@ export async function PATCH(
   const { tenant } = await getAuthPayload();
 
   const data = await req.json();
-
+  console.log("UPDATED COUPON", data);
   const coupon = await prisma.coupon.update({
     where: {
       id: couponId,
@@ -32,7 +32,9 @@ export async function PATCH(
 
       value: Number(data.value),
 
-      minimumAmount: data.minimumAmount ? Number(data.minimumAmount) : null,
+      minimumAmount: data.minimumOrderAmount
+        ? Number(data.minimumOrderAmount)
+        : null,
 
       usageLimit: data.usageLimit ? Number(data.usageLimit) : null,
 

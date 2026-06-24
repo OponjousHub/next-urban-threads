@@ -15,7 +15,7 @@ export default function CouponForm({ mode, coupon, vendorId }: Props) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-
+  console.log("minimumOrderAmount:", coupon?.minimumOrderAmount);
   const [form, setForm] = useState({
     code: coupon?.code ?? "",
     description: coupon?.description ?? "",
@@ -27,7 +27,8 @@ export default function CouponForm({ mode, coupon, vendorId }: Props) {
     expiresAt: coupon?.expiresAt ?? "",
     active: coupon?.active ?? true,
   });
-  console.log("COUPON", coupon);
+  console.log("COUPON DATE:", form.startsAt);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 

@@ -51,6 +51,14 @@ export default async function CouponDetailPage({ params }: Props) {
     ...coupon,
     value: Number(coupon.value),
     minimumAmount: coupon.minimumAmount ? Number(coupon.minimumAmount) : null,
+
+    startsAt: coupon.startsAt
+      ? new Date(coupon.startsAt).toISOString().slice(0, 16)
+      : "",
+
+    expiresAt: coupon.expiresAt
+      ? new Date(coupon.expiresAt).toISOString().slice(0, 16)
+      : "",
   };
 
   return (
