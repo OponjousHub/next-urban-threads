@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
+import { FiLoader } from "react-icons/fi";
 
 type Props = {
   mode?: "create" | "edit";
@@ -14,11 +15,13 @@ export default function CouponDetail({ coupon }: Props) {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [toggling, setToggling] = useState(false);
   const router = useRouter();
 
   async function toggleCoupon() {
     try {
       setLoading(true);
+      setToggling(true);
 
       await fetch(`/api/coupons/${coupon.id}/toggle`, {
         method: "PATCH",
@@ -35,6 +38,7 @@ export default function CouponDetail({ coupon }: Props) {
       router.refresh();
     } finally {
       setLoading(false);
+      setToggling(false);
     }
   }
 
@@ -137,15 +141,39 @@ export default function CouponDetail({ coupon }: Props) {
           <div className="mt-6 flex gap-3">
             <button
               onClick={toggleCoupon}
-              disabled={loading}
-              className="rounded-xl border px-4 py-2"
+              disabled={toggling}
+              className={`
+    flex items-center gap-2
+    rounded-xl px-4 py-2
+    font-medium text-white
+    transition-all duration-200
+
+    ${
+      coupon.active
+        ? "bg-amber-500 hover:bg-amber-600"
+        : "bg-green-600 hover:bg-green-700"
+    }
+
+    disabled:cursor-not-allowed
+    disabled:opacity-70
+  `}
             >
-              {coupon.active ? "Disable Coupon" : "Enable Coupon"}
+              {toggling ? (
+                <>
+                  <FiLoader className="h-4 w-4 animate-spin" />
+
+                  {coupon.active ? "Disabling..." : "Enabling..."}
+                </>
+              ) : coupon.active ? (
+                "Disable Coupon"
+              ) : (
+                "Enable Coupon"
+              )}
             </button>
 
             <Link
               href={`/vendor/coupons/${coupon.id}/edit`}
-              className="rounded-xl border px-4 py-2"
+              className="rounded-xl border px-4 py-2 hover:bg-slate-50"
             >
               Edit Coupon
             </Link>
