@@ -20,7 +20,7 @@ export default function CouponDetail({ coupon }: Props) {
     try {
       setLoading(true);
 
-      await fetch(`/api/coupons/${coupon.id}`, {
+      await fetch(`/api/coupons/${coupon.id}/toggle`, {
         method: "PATCH",
 
         headers: {
