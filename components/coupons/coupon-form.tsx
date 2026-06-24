@@ -171,49 +171,73 @@ export default function CouponForm({ mode, coupon, vendorId }: Props) {
           </div>
         </div>
 
-        <div className="rounded-2xl border bg-white p-6">
-          <h3 className="font-semibold mb-5">Validity</h3>
+        <div className="rounded-2xl border bg-white p-6 flex flex-col gap-7">
+          <div className="grid ">
+            <h3 className="text-lg font-semibold">Coupon Schedule</h3>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <input
-              type="datetime-local"
-              value={form.startsAt}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  startsAt: e.target.value,
-                })
-              }
-              className="rounded-xl border p-3"
-            />
-
-            <input
-              type="datetime-local"
-              value={form.expiresAt}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  expiresAt: e.target.value,
-                })
-              }
-              className="rounded-xl border p-3"
-            />
+            <p className="mt-1 text-sm text-gray-500">
+              Control when this coupon becomes active and when it expires.
+            </p>
           </div>
+          {/* Starts At */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                Activation Date & Time
+              </label>
 
-          <label className="mt-5 flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={form.active}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  active: e.target.checked,
-                })
-              }
-            />
+              <input
+                type="datetime-local"
+                value={form.startsAt}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    startsAt: e.target.value,
+                  })
+                }
+                className="
+                  w-full rounded-xl border border-gray-300
+                  px-4 py-3
+                  text-sm
+                  focus:border-[var(--color-primary)]
+                  focus:outline-none
+                "
+              />
 
-            <span>Activate Immediately</span>
-          </label>
+              <p className="mt-1 text-xs text-gray-500">
+                Customers can start using this coupon from this date.
+              </p>
+            </div>
+
+            {/* Expires At */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                Expiration Date & Time
+              </label>
+
+              <input
+                type="datetime-local"
+                value={form.expiresAt}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    expiresAt: e.target.value,
+                  })
+                }
+                className="
+                w-full rounded-xl border border-gray-300
+                px-4 py-3
+                text-sm
+                focus:border-[var(--color-primary)]
+                focus:outline-none
+              "
+              />
+
+              <p className="mt-1 text-xs text-gray-500">
+                The coupon automatically stops working after this date.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
