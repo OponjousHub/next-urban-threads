@@ -5,9 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { FiPlus, FiMinus } from "react-icons/fi";
 import { useTenant } from "@/store/tenant-provider-context";
+import { useState } from "react";
+import { appToast } from "@/utils/appToast";
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
+  // const [couponCode, setCouponCode] = useState("");
+  const [coupon, setCoupon] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  // const [applyingCoupon, setApplyingCoupon] = useState(false);
+
   const { tenant } = useTenant();
   const updateProductQuantity = (id: string, delta: number) => {
     updateQuantity(id, delta);
@@ -24,6 +31,55 @@ export default function CartPage() {
   const shipping = subtotal > 0 ? 10 : 0;
   const total = subtotal + shipping;
   console.log("CART ITEMS", cartItems);
+
+  // Applying coupon
+  // async function applyCoupon() {
+  //   try {
+  //     setApplyingCoupon(true);
+
+  //     const response = await fetch("/api/coupons/validate", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         code: couponCode,
+  //         subtotal,
+  //       }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (!response.ok || !data.valid) {
+  //       throw new Error(data.message);
+  //     }
+
+  //     const validatedCoupon = data.coupon;
+
+  //     let discount = 0;
+
+  //     if (validatedCoupon.type === "PERCENTAGE") {
+  //       discount = (subtotal * validatedCoupon.value) / 100;
+  //     }
+
+  //     if (validatedCoupon.type === "FIXED") {
+  //       discount = validatedCoupon.value;
+  //     }
+
+  //     setCoupon(validatedCoupon);
+
+  //     setDiscountAmount(discount);
+
+  //     appToast.success(
+  //       "Coupon Applied",
+  //       `${validatedCoupon.code} applied successfully`,
+  //     );
+  //   } catch (err: any) {
+  //     appToast.error("Invalid Coupon", err.message);
+  //   } finally {
+  //     setApplyingCoupon(false);
+  //   }
+  // }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -131,6 +187,18 @@ export default function CartPage() {
               {subtotal.toFixed(2)}
             </span>
           </div>
+
+          {discountAmount > 0 && (
+            <div className="flex justify-between text-green-600">
+              <span>Discount ({coupon?.code})</span>
+
+              <span>
+                -{tenant.currency}
+                {discountAmount.toLocaleString()}
+              </span>
+            </div>
+          )}
+
           <div className="flex justify-between">
             <span>Shipping</span>
             <span>
