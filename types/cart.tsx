@@ -10,3 +10,10 @@ export interface CartItem {
   variantColor?: string;
   variantSize?: string;
 }
+
+export type CouponData = {
+  id: string;
+  code: string;
+  type: "PERCENTAGE" | "FIXED";
+  value: number;
+};

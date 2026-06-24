@@ -6,14 +6,13 @@ import Link from "next/link";
 import { FiPlus, FiMinus } from "react-icons/fi";
 import { useTenant } from "@/store/tenant-provider-context";
 import { useState } from "react";
-import { appToast } from "@/utils/appToast";
+import CouponInput from "@/components/cart/coupon-input";
+import { CouponData } from "@/types/cart";
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
-  // const [couponCode, setCouponCode] = useState("");
-  const [coupon, setCoupon] = useState(null);
+  const [coupon, setCoupon] = useState<CouponData | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
-  // const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const { tenant } = useTenant();
   const updateProductQuantity = (id: string, delta: number) => {
@@ -187,6 +186,14 @@ export default function CartPage() {
               {subtotal.toFixed(2)}
             </span>
           </div>
+
+          <CouponInput
+            subtotal={subtotal}
+            onCouponApplied={(coupon, discountAmount) => {
+              setCoupon(coupon);
+              setDiscountAmount(discountAmount);
+            }}
+          />
 
           {discountAmount > 0 && (
             <div className="flex justify-between text-green-600">

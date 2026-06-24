@@ -3,17 +3,10 @@
 import { useState } from "react";
 import { appToast } from "@/utils/appToast";
 import { FiLoader, FiCheckCircle } from "react-icons/fi";
-
-type CouponData = {
-  id: string;
-  code: string;
-  type: "PERCENTAGE" | "FIXED";
-  value: number;
-};
+import { CouponData } from "@/types/cart";
 
 type Props = {
   subtotal: number;
-
   onCouponApplied: (coupon: CouponData, discountAmount: number) => void;
 };
 
