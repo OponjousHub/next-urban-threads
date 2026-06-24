@@ -27,7 +27,7 @@ export default function CouponForm({ mode, coupon, vendorId }: Props) {
     expiresAt: coupon?.expiresAt ?? "",
     active: coupon?.active ?? true,
   });
-
+  console.log("COUPON", coupon);
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
@@ -35,7 +35,7 @@ export default function CouponForm({ mode, coupon, vendorId }: Props) {
       setLoading(true);
 
       if (mode === "edit") {
-        const response = await fetch(`/api/coupons/${coupon.id}`, {
+        const response = await fetch(`/api/coupons/${coupon.id}/edit`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -243,7 +243,13 @@ export default function CouponForm({ mode, coupon, vendorId }: Props) {
               font-medium
             "
           >
-            {loading ? "Creating..." : "Create Coupon"}
+            {loading
+              ? mode === "edit"
+                ? "Updating"
+                : "Creating..."
+              : mode === "edit"
+                ? "Update Coupon"
+                : "Create Coupon"}
           </button>
         </div>
       </div>

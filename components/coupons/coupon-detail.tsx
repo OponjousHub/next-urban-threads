@@ -42,7 +42,7 @@ export default function CouponDetail({ coupon }: Props) {
     try {
       setDeleting(true);
 
-      await fetch(`/api/coupons/${coupon.id}`, {
+      await fetch(`/api/coupons/${coupon.id}/edit`, {
         method: "DELETE",
       });
 
