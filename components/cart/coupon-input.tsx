@@ -15,7 +15,7 @@ export default function CouponInput({ subtotal }: Props) {
   // const [coupon, setCoupon] = useState<CouponData | null>(null);
   const [applying, setApplying] = useState(false);
 
-  const { setCoupon, setDiscountAmount, coupon } = useCart();
+  const { setCoupon, setDiscountAmount, coupon, removeCoupon } = useCart();
 
   async function applyCoupon() {
     if (!couponCode.trim()) {
@@ -144,6 +144,25 @@ export default function CouponInput({ subtotal }: Props) {
           <span>
             Coupon <strong>{coupon.code}</strong> applied successfully.
           </span>
+        </div>
+      )}
+
+      {coupon && (
+        <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">{coupon.code}</p>
+
+              <p className="text-sm text-green-700">Coupon Applied</p>
+            </div>
+
+            <button
+              onClick={removeCoupon}
+              className="text-sm font-medium text-red-600"
+            >
+              Remove
+            </button>
+          </div>
         </div>
       )}
     </div>

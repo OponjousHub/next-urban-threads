@@ -205,25 +205,6 @@ export default function CartPage() {
             </div>
           )}
 
-          {coupon && (
-            <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{coupon.code}</p>
-
-                  <p className="text-sm text-green-700">Coupon Applied</p>
-                </div>
-
-                <button
-                  onClick={removeCoupon}
-                  className="text-sm font-medium text-red-600"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          )}
-
           <div className="flex justify-between">
             <span>Shipping</span>
             <span>
