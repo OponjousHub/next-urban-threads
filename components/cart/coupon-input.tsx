@@ -33,11 +33,15 @@ export default function CouponInput({ subtotal }: Props) {
     try {
       const response = await fetch("/api/coupons/active");
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
       const data = await response.json();
 
       setAvailableCoupons(data);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to load coupons:", error);
     }
   }
 
@@ -170,7 +174,7 @@ export default function CouponInput({ subtotal }: Props) {
 
         <button
           type="button"
-          onClick={applyCoupon}
+          onClick={() => applyCoupon()}
           disabled={applying}
           className="
             flex items-center gap-2

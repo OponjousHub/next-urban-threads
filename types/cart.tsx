@@ -16,6 +16,7 @@ export type CouponData = {
   code: string;
   type: "PERCENTAGE" | "FIXED";
   value: number;
+  description: string;
 };
 
 export type AppliedCoupon = {
