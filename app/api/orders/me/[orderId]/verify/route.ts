@@ -81,6 +81,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json(order);
     }
 
+    if (order.paymentStatus === "PAID") {
+      return NextResponse.json(order);
+    }
+
     // ---------------------------
     // 5️⃣ Verify with Paystack
     // ---------------------------
@@ -109,8 +113,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       data: {
         paymentStatus: "PAID",
         status: "PROCESSING",
-
-        // 🔥 CRITICAL FIX
         paymentReference: String(result.transactionId), // for refunds
         paymentTxRef: result.txRef, // optional tracking
       },
@@ -132,6 +134,20 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           "Your payment was successful. We are now processing your order.",
       },
     });
+
+    if (order.couponId) {
+      await prisma.coupon.update({
+        where: {
+          id: order.couponId,
+        },
+
+        data: {
+          usedCount: {
+            increment: 1,
+          },
+        },
+      });
+    }
 
     return NextResponse.json(updatedOrder);
   } catch (error) {
