@@ -534,13 +534,22 @@ export default function CheckoutClient({
             </span>
           </div>
 
+          <div className="flex justify-between">
+            <span>Discounted Amount</span>
+            <span>
+              - {tenant.currency}
+              {discountAmount.toLocaleString()}
+            </span>
+          </div>
+
           <hr className="my-3" />
 
           <div className="flex justify-between font-semibold text-gray-900 text-lg">
             <span>Total</span>
             <span>
               {tenant.currency}
-              {total.toFixed(2)}
+              {Number(total.toFixed(2)) -
+                Number(discountAmount.toLocaleString())}
             </span>
           </div>
         </div>
