@@ -5,8 +5,8 @@ import { useCart } from "@/store/cart-context";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
-import toast from "react-hot-toast";
 import { appToast } from "@/utils/appToast";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type ShippingAddress = {
   id: string;
@@ -38,7 +38,7 @@ export default function CheckoutClient({
 }) {
   const [addresses, setAddresses] =
     useState<ShippingAddress[]>(initialAddresses);
-  const { cartItems, clearCart } = useCart();
+  const { cartItems, clearCart, coupon, discountAmount } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string }>({});
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
@@ -61,9 +61,8 @@ export default function CheckoutClient({
   });
 
   const router = useRouter();
-
   const searchParams = useSearchParams();
-
+  const { tenant } = useTenant();
   const mode = searchParams.get("mode");
 
   const buyNowItems: CheckoutItem[] =
@@ -502,25 +501,47 @@ export default function CheckoutClient({
               </div>
 
               <p className="font-semibold text-gray-800">
-                ${(item.price * item.quantity).toFixed(2)}
+                {tenant.currency}
+                {(item.price * item.quantity).toFixed(2)}
               </p>
             </div>
           ))}
 
           <div className="flex justify-between mt-3">
             <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>
+              {tenant.currency}
+              {subtotal.toFixed(2)}
+            </span>
           </div>
+
+          {coupon && (
+            <div className="flex justify-between text-green-600">
+              <span>Discount ({coupon?.code})</span>
+
+              <span>
+                -{tenant.currency}
+                {discountAmount.toLocaleString()}
+              </span>
+            </div>
+          )}
+
           <div className="flex justify-between">
             <span>Shipping</span>
-            <span>${shipping.toFixed(2)}</span>
+            <span>
+              {tenant.currency}
+              {shipping.toFixed(2)}
+            </span>
           </div>
 
           <hr className="my-3" />
 
           <div className="flex justify-between font-semibold text-gray-900 text-lg">
             <span>Total</span>
-            <span>${total.toFixed(2)}</span>
+            <span>
+              {tenant.currency}
+              {total.toFixed(2)}
+            </span>
           </div>
         </div>
         <div className="mt-6 space-y-2 text-sm text-gray-500 border-t pt-4">
