@@ -4,18 +4,18 @@ import { useState } from "react";
 import { appToast } from "@/utils/appToast";
 import { FiLoader, FiCheckCircle } from "react-icons/fi";
 import { CouponData } from "@/types/cart";
+import { useCart } from "@/store/cart-context";
 
 type Props = {
   subtotal: number;
-  onCouponApplied: (coupon: CouponData, discountAmount: number) => void;
 };
 
-export default function CouponInput({ subtotal, onCouponApplied }: Props) {
+export default function CouponInput({ subtotal }: Props) {
   const [couponCode, setCouponCode] = useState("");
-
-  const [coupon, setCoupon] = useState<CouponData | null>(null);
-
+  // const [coupon, setCoupon] = useState<CouponData | null>(null);
   const [applying, setApplying] = useState(false);
+
+  const { setCoupon, setDiscountAmount, coupon } = useCart();
 
   async function applyCoupon() {
     if (!couponCode.trim()) {
@@ -29,11 +29,9 @@ export default function CouponInput({ subtotal, onCouponApplied }: Props) {
 
       const response = await fetch("/api/coupons/validate", {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
           code: couponCode,
           subtotal,
@@ -48,19 +46,19 @@ export default function CouponInput({ subtotal, onCouponApplied }: Props) {
 
       const validatedCoupon = data.coupon as CouponData;
 
-      let discountAmount = 0;
+      let calculatedDiscount = 0;
 
       if (validatedCoupon.type === "PERCENTAGE") {
-        discountAmount = (subtotal * validatedCoupon.value) / 100;
+        calculatedDiscount = (subtotal * validatedCoupon.value) / 100;
       }
 
       if (validatedCoupon.type === "FIXED") {
-        discountAmount = validatedCoupon.value;
+        calculatedDiscount = validatedCoupon.value;
       }
 
       setCoupon(validatedCoupon);
 
-      onCouponApplied(validatedCoupon, discountAmount);
+      setDiscountAmount(calculatedDiscount);
 
       appToast.success(
         "Coupon Applied",

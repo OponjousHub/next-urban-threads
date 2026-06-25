@@ -9,6 +9,7 @@ import React, {
 import { CartItem } from "@/types/cart";
 import { appToast } from "@/utils/appToast";
 import { useTenant } from "@/store/tenant-provider-context";
+import { AppliedCoupon } from "@/types/cart";
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -17,6 +18,11 @@ interface CartContextType {
   updateQuantity: (id: string, delta: number) => void;
   subTotal: number;
   clearCart: () => void;
+  coupon: AppliedCoupon | null;
+  setCoupon: React.Dispatch<React.SetStateAction<AppliedCoupon | null>>;
+  discountAmount: number;
+  setDiscountAmount: React.Dispatch<React.SetStateAction<number>>;
+  removeCoupon: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -24,6 +30,8 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartContextProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   const { tenant } = useTenant();
   const cartKey = `cart_${tenant.storeMode}`;
@@ -92,6 +100,27 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
       ];
     });
 
+    // Persisting Coupon on Local Storage
+    useEffect(() => {
+      localStorage.setItem("appliedCoupon", JSON.stringify(coupon));
+
+      localStorage.setItem("discountAmount", JSON.stringify(discountAmount));
+    }, [coupon, discountAmount]);
+
+    // Restore on Refresh
+    useEffect(() => {
+      const storedCoupon = localStorage.getItem("appliedCoupon");
+      const storedDiscount = localStorage.getItem("discountAmount");
+
+      if (storedCoupon) {
+        setCoupon(JSON.parse(storedCoupon));
+      }
+
+      if (storedDiscount) {
+        setDiscountAmount(JSON.parse(storedDiscount));
+      }
+    }, []);
+
     if (errorMessage) {
       appToast.error("Error", errorMessage);
     }
@@ -145,6 +174,17 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
     0,
   );
 
+  // Remove coupon
+  function removeCoupon() {
+    setCoupon(null);
+
+    setDiscountAmount(0);
+
+    localStorage.removeItem("appliedCoupon");
+
+    localStorage.removeItem("discountAmount");
+  }
+
   if (isLoading) return null; // Return nothing during load to avoid Hook mismatch
   return (
     <CartContext.Provider
@@ -155,6 +195,11 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
         updateQuantity,
         subTotal,
         clearCart,
+        coupon,
+        setCoupon,
+        discountAmount,
+        setDiscountAmount,
+        removeCoupon,
       }}
     >
       {children}

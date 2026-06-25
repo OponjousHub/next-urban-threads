@@ -10,9 +10,14 @@ import CouponInput from "@/components/cart/coupon-input";
 import { CouponData } from "@/types/cart";
 
 export default function CartPage() {
-  const { cartItems, removeFromCart, updateQuantity } = useCart();
-  const [coupon, setCoupon] = useState<CouponData | null>(null);
-  const [discountAmount, setDiscountAmount] = useState(0);
+  const {
+    cartItems,
+    removeFromCart,
+    updateQuantity,
+    coupon,
+    discountAmount,
+    removeCoupon,
+  } = useCart();
 
   const { tenant } = useTenant();
   const updateProductQuantity = (id: string, delta: number) => {
@@ -187,13 +192,7 @@ export default function CartPage() {
             </span>
           </div>
 
-          <CouponInput
-            subtotal={subtotal}
-            onCouponApplied={(coupon, discountAmount) => {
-              setCoupon(coupon);
-              setDiscountAmount(discountAmount);
-            }}
-          />
+          <CouponInput subtotal={subtotal} />
 
           {discountAmount > 0 && (
             <div className="flex justify-between text-green-600">
@@ -203,6 +202,25 @@ export default function CartPage() {
                 -{tenant.currency}
                 {discountAmount.toLocaleString()}
               </span>
+            </div>
+          )}
+
+          {coupon && (
+            <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">{coupon.code}</p>
+
+                  <p className="text-sm text-green-700">Coupon Applied</p>
+                </div>
+
+                <button
+                  onClick={removeCoupon}
+                  className="text-sm font-medium text-red-600"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           )}
 
