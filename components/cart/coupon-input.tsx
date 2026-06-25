@@ -22,6 +22,13 @@ export default function CouponInput({ subtotal }: Props) {
     loadCoupons();
   }, []);
 
+  // Quick Apply Function
+  async function applyExistingCoupon(code: string) {
+    setCouponCode(code);
+
+    await applyCoupon(code);
+  }
+
   async function loadCoupons() {
     try {
       const response = await fetch("/api/coupons/active");
@@ -34,7 +41,7 @@ export default function CouponInput({ subtotal }: Props) {
     }
   }
 
-  async function applyCoupon() {
+  async function applyCoupon(overrideCode?: string) {
     if (!couponCode.trim()) {
       appToast.error("Coupon Required", "Please enter a coupon code");
 
@@ -50,7 +57,7 @@ export default function CouponInput({ subtotal }: Props) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          code: couponCode,
+          code: overrideCode || couponCode,
           subtotal,
         }),
       });
@@ -90,6 +97,50 @@ export default function CouponInput({ subtotal }: Props) {
 
   return (
     <div className="rounded-2xl border bg-white p-5">
+      {/*List Available coupons*/}
+      {availableCoupons.length > 0 && (
+        <div className="mb-4 rounded-xl border bg-white p-4">
+          <h3 className="mb-3 font-semibold">Available Coupons</h3>
+
+          <div className="space-y-3">
+            {availableCoupons.map((coupon) => (
+              <div
+                key={coupon.id}
+                className="
+            flex
+            items-center
+            justify-between
+            rounded-lg
+            border
+            p-3
+          "
+              >
+                <div>
+                  <p className="font-medium">{coupon.code}</p>
+
+                  <p className="text-sm text-gray-500">{coupon.description}</p>
+                </div>
+
+                <button
+                  onClick={() => applyExistingCoupon(coupon.code)}
+                  className="
+              rounded-lg
+              bg-[var(--color-primary)]
+              px-4
+              py-2
+              text-white
+              text-sm
+              font-medium
+            "
+                >
+                  Apply
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mb-3">
         <h3 className="font-semibold">Coupon Code</h3>
 
@@ -98,6 +149,7 @@ export default function CouponInput({ subtotal }: Props) {
         </p>
       </div>
 
+      {/*Coupon inputn card*/}
       <div className="flex gap-2">
         <input
           type="text"
