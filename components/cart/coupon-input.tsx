@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { appToast } from "@/utils/appToast";
 import { FiLoader, FiCheckCircle } from "react-icons/fi";
 import { CouponData } from "@/types/cart";
@@ -16,6 +16,23 @@ export default function CouponInput({ subtotal }: Props) {
   const [applying, setApplying] = useState(false);
 
   const { setCoupon, setDiscountAmount, coupon, removeCoupon } = useCart();
+  const [availableCoupons, setAvailableCoupons] = useState<CouponData[]>([]);
+
+  useEffect(() => {
+    loadCoupons();
+  }, []);
+
+  async function loadCoupons() {
+    try {
+      const response = await fetch("/api/coupons/active");
+
+      const data = await response.json();
+
+      setAvailableCoupons(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   async function applyCoupon() {
     if (!couponCode.trim()) {
