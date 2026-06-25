@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       paymentMethod,
       email,
       saveAddress,
+      couponId,
     } = await req.json();
     if (!items || items.length === 0) {
       return NextResponse.json({ message: "Cart is empty" }, { status: 400 });
@@ -111,6 +112,53 @@ export async function POST(req: NextRequest) {
     });
 
     let totalAmount = new Prisma.Decimal(0);
+    let discountAmount = new Prisma.Decimal(0);
+    let coupon = null;
+
+    // Get Coupon
+    if (couponId) {
+      coupon = await prisma.coupon.findFirst({
+        where: {
+          id: couponId,
+          tenantId: tenant.id,
+          active: true,
+        },
+      });
+    }
+
+    // Validate Coupon
+    if (coupon) {
+      const now = new Date();
+
+      if (coupon.startsAt && coupon.startsAt > now) {
+        throw new Error("Coupon is not active yet");
+      }
+
+      if (coupon.expiresAt && coupon.expiresAt < now) {
+        throw new Error("Coupon has expired");
+      }
+
+      if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+        throw new Error("Coupon usage limit reached");
+      }
+    }
+
+    // If Coupon is Valid, Calculate discount on server
+    if (coupon) {
+      if (coupon.type === "PERCENTAGE") {
+        discountAmount = totalAmount.mul(Number(coupon.value) / 100);
+      }
+
+      if (coupon.type === "FIXED") {
+        discountAmount = new Prisma.Decimal(coupon.value);
+      }
+
+      if (discountAmount.greaterThan(totalAmount)) {
+        discountAmount = totalAmount;
+      }
+
+      totalAmount = totalAmount.minus(discountAmount);
+    }
 
     const orderItems = items.map((item: any) => {
       const product = products.find((p) => p.id === item.productId);
@@ -188,7 +236,9 @@ export async function POST(req: NextRequest) {
         currency,
         paymentProvider: providerKey,
         paymentMethod,
-        paymentReference, // set later
+        paymentReference,
+        discountAmount,
+        couponId: coupon?.id ?? null,
         items: {
           create: orderItems,
         },

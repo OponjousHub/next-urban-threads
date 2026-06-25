@@ -164,6 +164,7 @@ model Order {
   status             OrderStatus          @default(PENDING)
   paymentMethod      String
   totalAmount        Decimal
+  discountAmount     Decimal @default(0)
   currency           String
   paymentProvider    PaymentProvider
   paymentReference   String              @unique

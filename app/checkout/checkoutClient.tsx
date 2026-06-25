@@ -158,6 +158,7 @@ export default function CheckoutClient({
           paymentMethod: formData.paymentMethod,
           email: formData.email,
           saveAddress,
+          couponId: coupon?.id ?? null,
         }),
       });
 
@@ -169,8 +170,6 @@ export default function CheckoutClient({
       // //SHOW TOAST NOTIFICATION
       appToast.dismiss();
       appToast.loading("Redirecting to secure payment...");
-      // toast.dismiss(toastId);
-      // toast.loading("Redirecting to secure payment...");
 
       const data = await res.json();
 
@@ -184,7 +183,6 @@ export default function CheckoutClient({
     } catch (err: any) {
       console.error(err);
 
-      // toast.dismiss(toastId);
       appToast.error(
         "Order failed",
         `${err.message || "Something went wrong"}`,
