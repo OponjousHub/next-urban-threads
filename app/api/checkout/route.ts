@@ -121,6 +121,7 @@ export async function POST(req: NextRequest) {
         where: {
           id: couponId,
           tenantId: tenant.id,
+          vendorId: products[0]?.vendorId,
           active: true,
         },
       });

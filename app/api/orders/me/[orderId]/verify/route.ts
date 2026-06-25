@@ -139,6 +139,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       await prisma.coupon.update({
         where: {
           id: order.couponId,
+          tenantId: tenant.id,
+          vendorId: order.vendorId,
         },
 
         data: {
