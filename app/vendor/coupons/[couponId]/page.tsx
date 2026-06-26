@@ -55,35 +55,11 @@ export default async function CouponDetailPage({ params }: Props) {
 
   const averageOrderValue = totalUses === 0 ? 0 : revenueGenerated / totalUses;
 
-  // const coupon = await prisma.coupon.findFirst({
-  //   where: {
-  //     id: couponId,
-  //     vendorId: vendor?.id,
-  //     tenantId: tenant?.id,
-  //   },
-
-  //   include: {
-  //     orders: {
-  //       select: {
-  //         id: true,
-  //         createdAt: true,
-  //         totalAmount: true,
-  //         status: true,
-  //         customerEmail: true,
-  //       },
-
-  //       orderBy: {
-  //         createdAt: "desc",
-  //       },
-
-  //       take: 20,
-  //     },
-  //   },
-  // });
-
   const safeCoupon = {
     ...coupon,
+
     value: Number(coupon.value),
+
     minimumAmount: coupon.minimumAmount ? Number(coupon.minimumAmount) : null,
 
     startsAt: coupon.startsAt
@@ -93,6 +69,20 @@ export default async function CouponDetailPage({ params }: Props) {
     expiresAt: coupon.expiresAt
       ? new Date(coupon.expiresAt).toISOString().slice(0, 16)
       : "",
+
+    orders: coupon.orders.map((order) => ({
+      ...order,
+
+      totalAmount: Number(order.totalAmount),
+
+      discountAmount: Number(order.discountAmount ?? 0),
+
+      createdAt: order.createdAt.toISOString(),
+
+      user: {
+        ...order.user,
+      },
+    })),
   };
 
   const safeAverageOrderValue = Number(averageOrderValue);
