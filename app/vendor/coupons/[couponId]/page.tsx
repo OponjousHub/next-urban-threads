@@ -20,28 +20,66 @@ export default async function CouponDetailPage({ params }: Props) {
   const coupon = await prisma.coupon.findFirst({
     where: {
       id: couponId,
-      vendorId: vendor?.id,
       tenantId: tenant?.id,
+      vendorId: vendor?.id,
     },
 
     include: {
       orders: {
-        select: {
-          id: true,
-          createdAt: true,
-          totalAmount: true,
-          status: true,
-          customerEmail: true,
+        include: {
+          user: true,
         },
 
         orderBy: {
           createdAt: "desc",
         },
-
-        take: 20,
       },
     },
   });
+
+  if (!coupon) {
+    notFound();
+  }
+
+  const totalUses = coupon.orders.length;
+
+  const revenueGenerated = coupon.orders.reduce(
+    (sum, order) => sum + Number(order.totalAmount),
+    0,
+  );
+
+  const totalDiscount = coupon.orders.reduce(
+    (sum, order) => sum + Number(order.discountAmount ?? 0),
+    0,
+  );
+
+  const averageOrderValue = totalUses === 0 ? 0 : revenueGenerated / totalUses;
+
+  // const coupon = await prisma.coupon.findFirst({
+  //   where: {
+  //     id: couponId,
+  //     vendorId: vendor?.id,
+  //     tenantId: tenant?.id,
+  //   },
+
+  //   include: {
+  //     orders: {
+  //       select: {
+  //         id: true,
+  //         createdAt: true,
+  //         totalAmount: true,
+  //         status: true,
+  //         customerEmail: true,
+  //       },
+
+  //       orderBy: {
+  //         createdAt: "desc",
+  //       },
+
+  //       take: 20,
+  //     },
+  //   },
+  // });
 
   if (!coupon) {
     notFound();
