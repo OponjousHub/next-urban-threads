@@ -55,6 +55,11 @@ const links = [
     icon: FaTags,
   },
   {
+    label: "Payouts",
+    href: "/vendor/payouts",
+    icon: FaTags,
+  },
+  {
     label: "Store Settings",
     href: "/vendor/settings",
     icon: FaCog,
