@@ -238,6 +238,7 @@ export async function POST(req: NextRequest) {
         paymentProvider: providerKey,
         paymentMethod,
         paymentReference,
+        vendorId: products[0]?.vendorId,
         discountAmount,
         couponId: coupon?.id ?? null,
         items: {

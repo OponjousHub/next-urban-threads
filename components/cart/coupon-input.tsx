@@ -5,6 +5,7 @@ import { appToast } from "@/utils/appToast";
 import { FiLoader, FiCheckCircle } from "react-icons/fi";
 import { CouponData } from "@/types/cart";
 import { useCart } from "@/store/cart-context";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   subtotal: number;
@@ -12,11 +13,10 @@ type Props = {
 
 export default function CouponInput({ subtotal }: Props) {
   const [couponCode, setCouponCode] = useState("");
-  // const [coupon, setCoupon] = useState<CouponData | null>(null);
   const [applying, setApplying] = useState(false);
-
   const { setCoupon, setDiscountAmount, coupon, removeCoupon } = useCart();
   const [availableCoupons, setAvailableCoupons] = useState<CouponData[]>([]);
+  const { tenant } = useTenant();
 
   useEffect(() => {
     loadCoupons();
@@ -26,7 +26,7 @@ export default function CouponInput({ subtotal }: Props) {
   async function applyExistingCoupon(code: string) {
     setCouponCode(code);
 
-    await applyCoupon(code);
+    await validateCoupon(code);
   }
 
   async function loadCoupons() {
@@ -45,59 +45,110 @@ export default function CouponInput({ subtotal }: Props) {
     }
   }
 
-  async function applyCoupon(overrideCode?: string) {
-    if (!couponCode.trim()) {
+  async function validateCoupon(code: string) {
+    if (!code.trim()) {
       appToast.error("Coupon Required", "Please enter a coupon code");
-
       return;
     }
 
-    try {
-      setApplying(true);
+    // move ALL your current applyCoupon logic here
 
-      const response = await fetch("/api/coupons/validate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          code: overrideCode || couponCode,
-          subtotal,
-        }),
-      });
+    const response = await fetch("/api/coupons/validate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code,
+        subtotal,
+      }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok || !data.valid) {
-        throw new Error(data.message || "Invalid coupon");
-      }
-
-      const validatedCoupon = data.coupon as CouponData;
-
-      let calculatedDiscount = 0;
-
-      if (validatedCoupon.type === "PERCENTAGE") {
-        calculatedDiscount = (subtotal * validatedCoupon.value) / 100;
-      }
-
-      if (validatedCoupon.type === "FIXED") {
-        calculatedDiscount = validatedCoupon.value;
-      }
-
-      setCoupon(validatedCoupon);
-
-      setDiscountAmount(calculatedDiscount);
-
-      appToast.success(
-        "Coupon Applied",
-        `${validatedCoupon.code} applied successfully`,
-      );
-    } catch (err: any) {
-      appToast.error("Invalid Coupon", err.message);
-    } finally {
-      setApplying(false);
+    if (!response.ok || !data.valid) {
+      throw new Error(data.message || "Invalid coupon");
     }
+
+    const validatedCoupon = data.coupon as CouponData;
+
+    let calculatedDiscount = 0;
+
+    if (validatedCoupon.type === "PERCENTAGE") {
+      calculatedDiscount = (subtotal * validatedCoupon.value) / 100;
+    }
+
+    if (validatedCoupon.type === "FIXED") {
+      calculatedDiscount = validatedCoupon.value;
+    }
+
+    setCoupon(validatedCoupon);
+
+    setDiscountAmount(calculatedDiscount);
+
+    appToast.success(
+      "Coupon Applied",
+      `${validatedCoupon.code} applied successfully`,
+    );
   }
+
+  async function applyCoupon() {
+    await validateCoupon(couponCode);
+  }
+
+  // async function applyCoupon(overrideCode?: string) {
+  //   if (!couponCode.trim()) {
+  //     appToast.error("Coupon Required", "Please enter a coupon code");
+
+  //     return;
+  //   }
+
+  //   try {
+  //     setApplying(true);
+
+  //     const response = await fetch("/api/coupons/validate", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         code: overrideCode || couponCode,
+  //         subtotal,
+  //       }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (!response.ok || !data.valid) {
+  //       throw new Error(data.message || "Invalid coupon");
+  //     }
+
+  //     const validatedCoupon = data.coupon as CouponData;
+
+  //     let calculatedDiscount = 0;
+
+  //     if (validatedCoupon.type === "PERCENTAGE") {
+  //       calculatedDiscount = (subtotal * validatedCoupon.value) / 100;
+  //     }
+
+  //     if (validatedCoupon.type === "FIXED") {
+  //       calculatedDiscount = validatedCoupon.value;
+  //     }
+
+  //     setCoupon(validatedCoupon);
+
+  //     setDiscountAmount(calculatedDiscount);
+
+  //     appToast.success(
+  //       "Coupon Applied",
+  //       `${validatedCoupon.code} applied successfully`,
+  //     );
+  //   } catch (err: any) {
+  //     appToast.error("Invalid Coupon", err.message);
+  //   } finally {
+  //     setApplying(false);
+  //   }
+  // }
 
   return (
     <div className="rounded-2xl border bg-white p-5">
@@ -122,7 +173,11 @@ export default function CouponInput({ subtotal }: Props) {
                 <div>
                   <p className="font-medium">{coupon.code}</p>
 
-                  <p className="text-sm text-gray-500">{coupon.description}</p>
+                  <p className="text-sm text-gray-500">
+                    {coupon.type === "PERCENTAGE"
+                      ? `${coupon.value}% off`
+                      : `${tenant?.currency}${coupon.value} off`}
+                  </p>
                 </div>
 
                 <button
