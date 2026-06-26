@@ -127,46 +127,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Validate Coupon
-    if (coupon) {
-      const now = new Date();
-
-      if (coupon.startsAt && coupon.startsAt > now) {
-        throw new Error("Coupon is not active yet");
-      }
-
-      if (coupon.expiresAt && coupon.expiresAt < now) {
-        throw new Error("Coupon has expired");
-      }
-
-      if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-        throw new Error("Coupon usage limit reached");
-      }
-    }
-
-    console.log("TOTAL BEFORE DISCOUNT:", totalAmount.toString());
-    console.log("COUPON TYPE:", coupon?.type);
-    console.log("COUPON VALUE:", coupon?.value);
-
-    // If Coupon is Valid, Calculate discount on server
-    if (coupon) {
-      if (coupon.type === "PERCENTAGE") {
-        discountAmount = totalAmount.mul(Number(coupon.value) / 100);
-      }
-
-      if (coupon.type === "FIXED") {
-        discountAmount = new Prisma.Decimal(coupon.value);
-      }
-
-      if (discountAmount.greaterThan(totalAmount)) {
-        discountAmount = totalAmount;
-      }
-
-      totalAmount = totalAmount.minus(discountAmount);
-    }
-
-    console.log("DISCOUNT AMOUNT", discountAmount);
-
     const orderItems = items.map((item: any) => {
       const product = products.find((p) => p.id === item.productId);
       if (!product) throw new Error("Product not found");
@@ -195,7 +155,39 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    console.log("TOTAL AFTER ITEMS:", totalAmount.toString());
+    // Validate Coupon
+    if (coupon) {
+      const now = new Date();
+
+      if (coupon.startsAt && coupon.startsAt > now) {
+        throw new Error("Coupon is not active yet");
+      }
+
+      if (coupon.expiresAt && coupon.expiresAt < now) {
+        throw new Error("Coupon has expired");
+      }
+
+      if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+        throw new Error("Coupon usage limit reached");
+      }
+    }
+
+    // If Coupon is Valid, Calculate discount on server
+    if (coupon) {
+      if (coupon.type === "PERCENTAGE") {
+        discountAmount = totalAmount.mul(Number(coupon.value) / 100);
+      }
+
+      if (coupon.type === "FIXED") {
+        discountAmount = new Prisma.Decimal(coupon.value);
+      }
+
+      if (discountAmount.greaterThan(totalAmount)) {
+        discountAmount = totalAmount;
+      }
+
+      totalAmount = totalAmount.minus(discountAmount);
+    }
 
     for (const item of items) {
       const product = await prisma.product.findUnique({

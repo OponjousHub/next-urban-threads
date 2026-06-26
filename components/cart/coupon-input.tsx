@@ -95,7 +95,6 @@ export default function CouponInput({ subtotal }: Props) {
       );
     } catch (err: any) {
       setCouponError(err.message);
-      // appToast.error("Invalid Coupon", err.message);
     }
   }
 
