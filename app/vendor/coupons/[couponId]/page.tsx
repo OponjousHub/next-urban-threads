@@ -81,10 +81,6 @@ export default async function CouponDetailPage({ params }: Props) {
   //   },
   // });
 
-  if (!coupon) {
-    notFound();
-  }
-
   const safeCoupon = {
     ...coupon,
     value: Number(coupon.value),
@@ -98,7 +94,8 @@ export default async function CouponDetailPage({ params }: Props) {
       ? new Date(coupon.expiresAt).toISOString().slice(0, 16)
       : "",
   };
-  console.log("SAFE COUPON", safeCoupon);
+
+  const safeAverageOrderValue = Number(averageOrderValue);
   return (
     <>
       <VendorHeaderUI
@@ -107,7 +104,12 @@ export default async function CouponDetailPage({ params }: Props) {
         vendor={vendor}
       />
 
-      <CouponDetail coupon={safeCoupon} />
+      <CouponDetail
+        coupon={safeCoupon}
+        revenueGenerated={revenueGenerated}
+        avgOrderValue={safeAverageOrderValue}
+        totalDiscount={totalDiscount}
+      />
     </>
   );
 }

@@ -5,13 +5,22 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
 import { FiLoader } from "react-icons/fi";
+import { StatusBadge } from "@/lib/status-badge";
 
 type Props = {
   mode?: "create" | "edit";
   coupon?: any;
+  revenueGenerated: number;
+  avgOrderValue: number;
+  totalDiscount: number;
 };
 
-export default function CouponDetail({ coupon }: Props) {
+export default function CouponDetail({
+  coupon,
+  revenueGenerated,
+  avgOrderValue,
+  totalDiscount,
+}: Props) {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -83,7 +92,7 @@ export default function CouponDetail({ coupon }: Props) {
 
         {/* KPI */}
 
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-3 md:grid-cols-3">
           <div className="rounded-xl border bg-white p-5">
             <p className="text-sm text-gray-500">Discount</p>
 
@@ -107,11 +116,19 @@ export default function CouponDetail({ coupon }: Props) {
           </div>
 
           <div className="rounded-xl border bg-white p-5">
-            <p className="text-sm text-gray-500">Remaining</p>
+            <p className="text-sm text-gray-500">Revenue Generated</p>
 
-            <h3 className="mt-2 text-2xl font-bold">
-              {coupon.usageLimit ? coupon.usageLimit - coupon.usedCount : "∞"}
-            </h3>
+            <h3 className="mt-2 text-2xl font-bold">{revenueGenerated}</h3>
+          </div>
+          <div className="rounded-xl border bg-white p-5">
+            <p className="text-sm text-gray-500">Average Order Value</p>
+
+            <h3 className="mt-2 text-2xl font-bold">{avgOrderValue}</h3>
+          </div>
+          <div className="rounded-xl border bg-white p-5">
+            <p className="text-sm text-gray-500">Total Discount</p>
+
+            <h3 className="mt-2 text-2xl font-bold">{totalDiscount}</h3>
           </div>
         </div>
 
@@ -198,6 +215,8 @@ export default function CouponDetail({ coupon }: Props) {
                   <th className="px-4 py-3 text-left">Total</th>
 
                   <th className="px-4 py-3 text-left">Date</th>
+                  <th className="px-4 py-3 text-left">Status</th>
+                  <th className="px-4 py-3 text-left">Discount</th>
                 </tr>
               </thead>
 
@@ -213,6 +232,10 @@ export default function CouponDetail({ coupon }: Props) {
                     <td className="px-4 py-3">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={order.status} />
+                    </td>
+                    <td className="px-4 py-3">{order.discountAmount}</td>
                   </tr>
                 ))}
               </tbody>
