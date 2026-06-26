@@ -118,6 +118,7 @@ model Vendor {
   status      VendorStatus @default(PENDING)
   tenant      Tenant @relation(fields: [tenantId], references: [id])
 
+  payouts     VendorPayout[]
   products    Product[]
   users       User[]
   orders      Order[]
@@ -174,6 +175,7 @@ model Order {
   couponId           String?
   tenantId           String
   vendorId           String?
+  commissionAmount   Decimal  @default(0) 
   vendor             Vendor? @relation(fields: [vendorId], references: [id])
   coupon             Coupon? @relation(fields:[couponId], references:[id])
   refundStatus       RefundStatus         @default(NONE)
@@ -273,6 +275,7 @@ model Tenant {
   categories         Category[]
   contact            Contact[]
   coupon             Coupon[]
+  vendorPayouts      VendorPayout[]
   tenant             FAQ[]
   newsletter         Newsletter[]
   orders             Order[]
@@ -539,6 +542,35 @@ model Coupon {
   orders        Order[]
 }
 
+model VendorPayout {
+  id            String   @id @default(cuid())
+
+  vendorId      String
+  tenantId      String
+
+  amount        Decimal
+
+  status        PayoutStatus @default(PENDING)
+
+  reference     String?
+
+  bankName      String?
+  accountName   String?
+  accountNumber String?
+
+  note          String?      // optional admin note
+
+  requestedAt   DateTime @default(now())
+  approvedAt    DateTime?
+  paidAt        DateTime?
+
+  vendor Vendor @relation(fields: [vendorId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([vendorId, status])
+  @@index([tenantId, status])
+}
+
 enum Priority {
   LOW
   NORMAL
@@ -654,4 +686,11 @@ enum VendorApplicationStatus {
 enum CouponType {
   PERCENTAGE
   FIXED
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
 }
