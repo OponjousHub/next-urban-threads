@@ -33,57 +33,7 @@ export default function CartPage() {
     0,
   );
   const shipping = subtotal > 0 ? 10 : 0;
-  const total = subtotal + shipping;
-  console.log("CART ITEMS", cartItems);
-
-  // Applying coupon
-  // async function applyCoupon() {
-  //   try {
-  //     setApplyingCoupon(true);
-
-  //     const response = await fetch("/api/coupons/validate", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         code: couponCode,
-  //         subtotal,
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (!response.ok || !data.valid) {
-  //       throw new Error(data.message);
-  //     }
-
-  //     const validatedCoupon = data.coupon;
-
-  //     let discount = 0;
-
-  //     if (validatedCoupon.type === "PERCENTAGE") {
-  //       discount = (subtotal * validatedCoupon.value) / 100;
-  //     }
-
-  //     if (validatedCoupon.type === "FIXED") {
-  //       discount = validatedCoupon.value;
-  //     }
-
-  //     setCoupon(validatedCoupon);
-
-  //     setDiscountAmount(discount);
-
-  //     appToast.success(
-  //       "Coupon Applied",
-  //       `${validatedCoupon.code} applied successfully`,
-  //     );
-  //   } catch (err: any) {
-  //     appToast.error("Invalid Coupon", err.message);
-  //   } finally {
-  //     setApplyingCoupon(false);
-  //   }
-  // }
+  const total = subtotal + shipping - discountAmount;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
