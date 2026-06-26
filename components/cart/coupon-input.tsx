@@ -16,6 +16,8 @@ export default function CouponInput({ subtotal }: Props) {
   const [applying, setApplying] = useState(false);
   const { setCoupon, setDiscountAmount, coupon, removeCoupon } = useCart();
   const [availableCoupons, setAvailableCoupons] = useState<CouponData[]>([]);
+  const [couponError, setCouponError] = useState("");
+
   const { tenant } = useTenant();
 
   useEffect(() => {
@@ -46,113 +48,70 @@ export default function CouponInput({ subtotal }: Props) {
   }
 
   async function validateCoupon(code: string) {
+    setCouponError("");
     if (!code.trim()) {
       appToast.error("Coupon Required", "Please enter a coupon code");
       return;
     }
 
     // move ALL your current applyCoupon logic here
+    try {
+      const response = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code,
+          subtotal,
+        }),
+      });
 
-    const response = await fetch("/api/coupons/validate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        code,
-        subtotal,
-      }),
-    });
+      const data = await response.json();
 
-    const data = await response.json();
+      if (!response.ok || !data.valid) {
+        throw new Error(data.message || "Invalid coupon");
+      }
 
-    if (!response.ok || !data.valid) {
-      throw new Error(data.message || "Invalid coupon");
+      const validatedCoupon = data.coupon as CouponData;
+
+      let calculatedDiscount = 0;
+
+      if (validatedCoupon.type === "PERCENTAGE") {
+        calculatedDiscount = (subtotal * validatedCoupon.value) / 100;
+      }
+
+      if (validatedCoupon.type === "FIXED") {
+        calculatedDiscount = validatedCoupon.value;
+      }
+
+      setCoupon(validatedCoupon);
+
+      setDiscountAmount(calculatedDiscount);
+
+      appToast.success(
+        "Coupon Applied",
+        `${validatedCoupon.code} applied successfully`,
+      );
+    } catch (err: any) {
+      setCouponError(err.message);
+      // appToast.error("Invalid Coupon", err.message);
     }
-
-    const validatedCoupon = data.coupon as CouponData;
-
-    let calculatedDiscount = 0;
-
-    if (validatedCoupon.type === "PERCENTAGE") {
-      calculatedDiscount = (subtotal * validatedCoupon.value) / 100;
-    }
-
-    if (validatedCoupon.type === "FIXED") {
-      calculatedDiscount = validatedCoupon.value;
-    }
-
-    setCoupon(validatedCoupon);
-
-    setDiscountAmount(calculatedDiscount);
-
-    appToast.success(
-      "Coupon Applied",
-      `${validatedCoupon.code} applied successfully`,
-    );
   }
 
   async function applyCoupon() {
+    setCouponError("");
     await validateCoupon(couponCode);
   }
-
-  // async function applyCoupon(overrideCode?: string) {
-  //   if (!couponCode.trim()) {
-  //     appToast.error("Coupon Required", "Please enter a coupon code");
-
-  //     return;
-  //   }
-
-  //   try {
-  //     setApplying(true);
-
-  //     const response = await fetch("/api/coupons/validate", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         code: overrideCode || couponCode,
-  //         subtotal,
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (!response.ok || !data.valid) {
-  //       throw new Error(data.message || "Invalid coupon");
-  //     }
-
-  //     const validatedCoupon = data.coupon as CouponData;
-
-  //     let calculatedDiscount = 0;
-
-  //     if (validatedCoupon.type === "PERCENTAGE") {
-  //       calculatedDiscount = (subtotal * validatedCoupon.value) / 100;
-  //     }
-
-  //     if (validatedCoupon.type === "FIXED") {
-  //       calculatedDiscount = validatedCoupon.value;
-  //     }
-
-  //     setCoupon(validatedCoupon);
-
-  //     setDiscountAmount(calculatedDiscount);
-
-  //     appToast.success(
-  //       "Coupon Applied",
-  //       `${validatedCoupon.code} applied successfully`,
-  //     );
-  //   } catch (err: any) {
-  //     appToast.error("Invalid Coupon", err.message);
-  //   } finally {
-  //     setApplying(false);
-  //   }
-  // }
 
   return (
     <div className="rounded-2xl border bg-white p-5">
       {/*List Available coupons*/}
+      {couponError && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {couponError}
+        </div>
+      )}
       {availableCoupons.length > 0 && (
         <div className="mb-4 rounded-xl border bg-white p-4">
           <h3 className="mb-3 font-semibold">Available Coupons</h3>
