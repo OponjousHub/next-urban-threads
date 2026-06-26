@@ -61,6 +61,27 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
     }
   }, [cartItems, isLoading]);
 
+  // Persisting Coupon on Local Storage
+  useEffect(() => {
+    localStorage.setItem("appliedCoupon", JSON.stringify(coupon));
+
+    localStorage.setItem("discountAmount", JSON.stringify(discountAmount));
+  }, [coupon, discountAmount]);
+
+  // Restore on Refresh
+  useEffect(() => {
+    const storedCoupon = localStorage.getItem("appliedCoupon");
+    const storedDiscount = localStorage.getItem("discountAmount");
+
+    if (storedCoupon) {
+      setCoupon(JSON.parse(storedCoupon));
+    }
+
+    if (storedDiscount) {
+      setDiscountAmount(JSON.parse(storedDiscount));
+    }
+  }, []);
+
   // ✅ Add to Cart
   const addToCart = (item: CartItem) => {
     let errorMessage = "";
@@ -99,27 +120,6 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
         },
       ];
     });
-
-    // Persisting Coupon on Local Storage
-    useEffect(() => {
-      localStorage.setItem("appliedCoupon", JSON.stringify(coupon));
-
-      localStorage.setItem("discountAmount", JSON.stringify(discountAmount));
-    }, [coupon, discountAmount]);
-
-    // Restore on Refresh
-    useEffect(() => {
-      const storedCoupon = localStorage.getItem("appliedCoupon");
-      const storedDiscount = localStorage.getItem("discountAmount");
-
-      if (storedCoupon) {
-        setCoupon(JSON.parse(storedCoupon));
-      }
-
-      if (storedDiscount) {
-        setDiscountAmount(JSON.parse(storedDiscount));
-      }
-    }, []);
 
     if (errorMessage) {
       appToast.error("Error", errorMessage);

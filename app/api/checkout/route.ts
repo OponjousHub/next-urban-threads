@@ -144,6 +144,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    console.log("TOTAL BEFORE DISCOUNT:", totalAmount.toString());
+    console.log("COUPON TYPE:", coupon?.type);
+    console.log("COUPON VALUE:", coupon?.value);
+
     // If Coupon is Valid, Calculate discount on server
     if (coupon) {
       if (coupon.type === "PERCENTAGE") {
@@ -160,6 +164,8 @@ export async function POST(req: NextRequest) {
 
       totalAmount = totalAmount.minus(discountAmount);
     }
+
+    console.log("DISCOUNT AMOUNT", discountAmount);
 
     const orderItems = items.map((item: any) => {
       const product = products.find((p) => p.id === item.productId);
@@ -188,6 +194,8 @@ export async function POST(req: NextRequest) {
         image: variant?.image || product.images?.[0],
       };
     });
+
+    console.log("TOTAL AFTER ITEMS:", totalAmount.toString());
 
     for (const item of items) {
       const product = await prisma.product.findUnique({
