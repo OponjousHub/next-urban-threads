@@ -58,6 +58,12 @@ export default function AdminPayoutTable({ payouts }: Props) {
 
   return (
     <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+      <div className=" m-5 mb-4">
+        <h1 className="text-2xl font-semibold">Vendor Payouts</h1>
+        <p className="text-sm text-gray-500">
+          Approve or reject vendor payout request
+        </p>
+      </div>
       <table className="min-w-full">
         <thead className="bg-gray-50">
           <tr className="text-left text-sm font-semibold">

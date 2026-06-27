@@ -14,6 +14,8 @@ import {
   FiStar,
   FiSettings,
   FiChevronLeft,
+  FiCreditCard,
+  FiTag,
 } from "react-icons/fi";
 
 interface Props {
@@ -100,6 +102,13 @@ export default function AdminSidebar({
           collapsed={collapsed}
           pathname={pathname}
         />
+        <SidebarItem
+          href="/admin/coupons"
+          icon={<FiTag size={20} />}
+          label="Coupons"
+          collapsed={collapsed}
+          pathname={pathname}
+        />
         {tenant.storeMode === "MULTI_VENDOR" && (
           <SidebarItem
             href="/admin/vendors/application"
@@ -114,6 +123,15 @@ export default function AdminSidebar({
             href="/admin/vendors/manageVendors"
             icon={<FiUserCheck size={20} />}
             label="Manage Vendors"
+            collapsed={collapsed}
+            pathname={pathname}
+          />
+        )}
+        {tenant.storeMode === "MULTI_VENDOR" && (
+          <SidebarItem
+            href="/admin/payouts"
+            icon={<FiCreditCard size={20} />}
+            label="Vendor Payouts"
             collapsed={collapsed}
             pathname={pathname}
           />
