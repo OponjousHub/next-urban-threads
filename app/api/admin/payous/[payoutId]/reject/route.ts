@@ -17,6 +17,27 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  // Reject only pending payouts
+  const existing = await prisma.vendorPayout.findFirst({
+    where: {
+      id: payoutId,
+      tenantId: tenant.id,
+    },
+  });
+
+  if (!existing) {
+    return NextResponse.json({ message: "Payout not found" }, { status: 404 });
+  }
+
+  if (existing.status !== "PENDING") {
+    return NextResponse.json(
+      {
+        message: "Only pending payouts can be marked as reject.",
+      },
+      { status: 400 },
+    );
+  }
+
   try {
     const payout = await prisma.vendorPayout.update({
       where: {
