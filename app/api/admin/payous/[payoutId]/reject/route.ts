@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
-import { getAuthPayload } from "@/app/lib/auth";
+import { getAuthPayload } from "@/lib/server/auth";
 
 type RouteParams = {
   params: Promise<{
