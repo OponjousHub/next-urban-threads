@@ -34,7 +34,7 @@ export default function VendorPayoutDashboard({
     <div className="space-y-8">
       {/* Top Cards */}
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3 xl:grid-cols-3">
         <PayoutStatCard
           title="Available Balance"
           value={availableBalance}
