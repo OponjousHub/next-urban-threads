@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   availableBalance: number;
@@ -14,6 +15,7 @@ export default function RequestWithdrawalModal({
   pendingBalance,
 }: Props) {
   const router = useRouter();
+  const { tenant } = useTenant();
 
   const [open, setOpen] = useState(false);
 
@@ -97,7 +99,8 @@ export default function RequestWithdrawalModal({
             <p className="mt-2 text-sm text-gray-500">Available Balance</p>
 
             <h3 className="mb-6 text-3xl font-bold text-green-600">
-              ₦{availableBalance.toLocaleString()}
+              {tenant?.currency}
+              {availableBalance.toLocaleString()}
             </h3>
 
             {pendingBalance > 0 && (

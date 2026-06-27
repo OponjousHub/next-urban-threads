@@ -2,6 +2,7 @@
 
 import PayoutHistoryTable from "./payout-history-table";
 import PayoutStatCard from "./payout-stat-card";
+import RequestWithdrawalModal from "./request-withdrawal-modal";
 
 type Order = {
   id: string;
@@ -80,12 +81,10 @@ export default function VendorPayoutDashboard({
             </p>
           </div>
 
-          <button
-            disabled={availableBalance <= 0}
-            className="rounded-lg bg-black px-6 py-3 text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
-          >
-            Request Withdrawal
-          </button>
+          <RequestWithdrawalModal
+            availableBalance={availableBalance}
+            pendingBalance={pendingBalance}
+          />
         </div>
       </div>
 
