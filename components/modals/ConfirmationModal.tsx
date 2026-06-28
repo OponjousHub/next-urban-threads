@@ -68,56 +68,58 @@ export default function ConfirmationModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-          />
-
-          {/* MODAL */}
-
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center px-4"
-            initial={{
-              opacity: 0,
-              scale: 0.95,
-            }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-            }}
-            exit={{
-              opacity: 0,
-              scale: 0.95,
-            }}
           >
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-              {icon && (
-                <div className="mb-4 flex justify-center text-4xl">{icon}</div>
-              )}
+            {/* MODAL */}
 
-              <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center px-4"
+              initial={{
+                opacity: 0,
+                scale: 0.95,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.95,
+              }}
+            >
+              <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                {icon && (
+                  <div className="mb-4 flex justify-center text-4xl">
+                    {icon}
+                  </div>
+                )}
 
-              {description && (
-                <p className="mt-2 text-sm text-gray-600">{description}</p>
-              )}
+                <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
 
-              {children && <div className="mt-5">{children}</div>}
+                {description && (
+                  <p className="mt-2 text-sm text-gray-600">{description}</p>
+                )}
 
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  onClick={onClose}
-                  disabled={loading}
-                  className="rounded-md border border-gray-300 px-4 py-2 transition hover:bg-gray-100"
-                >
-                  Cancel
-                </button>
+                {children && <div className="mt-5">{children}</div>}
 
-                <button
-                  onClick={onConfirm}
-                  disabled={loading}
-                  className={`rounded-md px-4 py-2 text-white transition disabled:opacity-60 ${buttonStyles[variant]}`}
-                >
-                  {loading ? loadingText : action}
-                </button>
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    onClick={onClose}
+                    disabled={loading}
+                    className="rounded-md border border-gray-300 px-4 py-2 transition hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={onConfirm}
+                    disabled={loading}
+                    className={`rounded-md px-4 py-2 text-white transition disabled:opacity-60 ${buttonStyles[variant]}`}
+                  >
+                    {loading ? loadingText : action}
+                  </button>
+                </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </>
       )}
