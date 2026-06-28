@@ -4,7 +4,7 @@ import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   title: string;
-  value: number;
+  value: number | string;
   color: "green" | "yellow" | "blue" | "purple" | "red" | "emerald";
 };
 
