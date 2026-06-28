@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTenant } from "@/store/tenant-provider-context";
+import ConfirmationModal from "@/components/modals/ConfirmationModal";
 import { appToast } from "@/utils/appToast";
 import { useState } from "react";
 
@@ -28,6 +29,14 @@ export default function AdminPayoutTable({ payouts }: Props) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [modalType, setModalType] = useState<
+    "approve" | "reject" | "paid" | null
+  >(null);
+  // const [approveOpen, setApproveOpen] = useState(false);
+  // const [rejectOpen, setRejectOpen] = useState(false);
+  // const [paidOpen, setPaidOpen] = useState(false);
+  const [selectedPayoutId, setSelectedPayoutId] = useState<string | null>(null);
 
   const router = useRouter();
   const { tenant } = useTenant();
@@ -36,26 +45,68 @@ export default function AdminPayoutTable({ payouts }: Props) {
     id: string,
     action: "approve" | "reject" | "paid",
   ) {
-    try {
-      setLoadingId(id);
+    setSelectedPayoutId(id);
 
-      const res = await fetch(`/api/admin/payouts/${id}/${action}`, {
+    if (action === "approve") {
+      setModalType("approve");
+      return;
+    }
+
+    if (action === "reject") {
+      setModalType("reject");
+      return;
+    }
+
+    setModalType("paid");
+  }
+
+  async function confirmApprove() {
+    if (!selectedPayoutId) return;
+
+    setLoading(true);
+
+    try {
+      await fetch(`/api/admin/payouts/${selectedPayoutId}/approve`, {
         method: "PATCH",
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message);
-      }
-
-      appToast.success("Success", `Payout ${action}d successfully`);
+      setModalType(null);
 
       router.refresh();
-    } catch (err: any) {
-      appToast.error("Error", err.message);
     } finally {
-      setLoadingId(null);
+      setLoading(false);
+    }
+  }
+  async function confirmPaid() {
+    if (!selectedPayoutId) return;
+
+    setLoading(true);
+
+    try {
+      await fetch(`/api/admin/payouts/${selectedPayoutId}/paid`, {
+        method: "PATCH",
+      });
+
+      setModalType(null);
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function confirmReject() {
+    if (!selectedPayoutId) return;
+
+    setLoading(true);
+
+    try {
+      await fetch(`/api/admin/payouts/${selectedPayoutId}/reject`, {
+        method: "PATCH",
+      });
+
+      setModalType(null);
+      router.refresh();
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -71,91 +122,92 @@ export default function AdminPayoutTable({ payouts }: Props) {
   });
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-      <div className="mb-6 rounded-xl border bg-white p-5 shadow-sm">
-        <div className="grid gap-5 lg:grid-cols-3">
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Search Vendor
-            </label>
+    <>
+      <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+        <div className="mb-6 rounded-xl border bg-white p-5 shadow-sm">
+          <div className="grid gap-5 lg:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Search Vendor
+              </label>
 
-            <input
-              placeholder="Vendor name or email..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none"
-            />
-          </div>
+              <input
+                placeholder="Vendor name or email..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium">Status</label>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Status</label>
 
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none"
-            >
-              <option value="ALL">All Requests</option>
-              <option value="PENDING">Pending</option>
-              <option value="APPROVED">Approved</option>
-              <option value="PAID">Paid</option>
-              <option value="REJECTED">Rejected</option>
-            </select>
-          </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="ALL">All Requests</option>
+                <option value="PENDING">Pending</option>
+                <option value="APPROVED">Approved</option>
+                <option value="PAID">Paid</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
+            </div>
 
-          <div className="flex items-end">
-            <p className="text-sm text-gray-500">
-              Showing
-              <span className="mx-1 font-semibold">{filtered.length}</span>
-              payout request(s)
-            </p>
+            <div className="flex items-end">
+              <p className="text-sm text-gray-500">
+                Showing
+                <span className="mx-1 font-semibold">{filtered.length}</span>
+                payout request(s)
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-      =
-      {filtered.length === 0 ? (
-        <div className="p-12 text-center text-gray-500">
-          No payout requests found.
-        </div>
-      ) : (
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr className="text-left text-sm font-semibold">
-              <th className="px-6 py-4">Vendor</th>
+        =
+        {filtered.length === 0 ? (
+          <div className="p-12 text-center text-gray-500">
+            No payout requests found.
+          </div>
+        ) : (
+          <table className="min-w-full">
+            <thead className="bg-gray-50">
+              <tr className="text-left text-sm font-semibold">
+                <th className="px-6 py-4">Vendor</th>
 
-              <th className="px-6 py-4">Amount</th>
+                <th className="px-6 py-4">Amount</th>
 
-              <th className="px-6 py-4">Requested</th>
+                <th className="px-6 py-4">Requested</th>
 
-              <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Status</th>
 
-              <th className="px-6 py-4">Actions</th>
-            </tr>
-          </thead>
+                <th className="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            {filtered.map((payout) => (
-              <tr key={payout.id} className="border-t">
-                <td className="px-6 py-4">
-                  <div className="font-medium">{payout.vendor.name}</div>
+            <tbody>
+              {filtered.map((payout) => (
+                <tr key={payout.id} className="border-t">
+                  <td className="px-6 py-4">
+                    <div className="font-medium">{payout.vendor.name}</div>
 
-                  <div className="text-sm text-gray-500">
-                    {payout.vendor.email}
-                  </div>
-                </td>
+                    <div className="text-sm text-gray-500">
+                      {payout.vendor.email}
+                    </div>
+                  </td>
 
-                <td className="px-6 py-4 font-semibold">
-                  {tenant.currency}
-                  {payout.amount.toLocaleString()}
-                </td>
+                  <td className="px-6 py-4 font-semibold">
+                    {tenant.currency}
+                    {payout.amount.toLocaleString()}
+                  </td>
 
-                <td className="px-6 py-4">
-                  {new Date(payout.requestedAt).toLocaleDateString()}
-                </td>
+                  <td className="px-6 py-4">
+                    {new Date(payout.requestedAt).toLocaleDateString()}
+                  </td>
 
-                <td className="px-6 py-4">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold
+                  <td className="px-6 py-4">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold
                   ${
                     payout.status === "PENDING"
                       ? "bg-yellow-100 text-yellow-700"
@@ -165,59 +217,103 @@ export default function AdminPayoutTable({ payouts }: Props) {
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
                   }`}
-                  >
-                    {payout.status}
-                  </span>
-                </td>
+                    >
+                      {payout.status}
+                    </span>
+                  </td>
 
-                <td className="px-6 py-4">
-                  <div className="flex gap-2">
-                    {payout.status === "PENDING" && (
-                      <>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      {payout.status === "PENDING" && (
+                        <>
+                          <button
+                            disabled={loadingId === payout.id}
+                            onClick={() => updateStatus(payout.id, "approve")}
+                            className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+                          >
+                            Approve
+                          </button>
+
+                          <button
+                            disabled={loadingId === payout.id}
+                            onClick={() => updateStatus(payout.id, "reject")}
+                            className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+
+                      {payout.status === "APPROVED" && (
                         <button
                           disabled={loadingId === payout.id}
-                          onClick={() => updateStatus(payout.id, "approve")}
-                          className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+                          onClick={() => updateStatus(payout.id, "paid")}
+                          className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
                         >
-                          Approve
+                          Mark Paid
                         </button>
+                      )}
 
-                        <button
-                          disabled={loadingId === payout.id}
-                          onClick={() => updateStatus(payout.id, "reject")}
-                          className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
+                      {payout.status === "PAID" && (
+                        <span className="text-green-600 font-medium">
+                          Completed
+                        </span>
+                      )}
 
-                    {payout.status === "APPROVED" && (
-                      <button
-                        disabled={loadingId === payout.id}
-                        onClick={() => updateStatus(payout.id, "paid")}
-                        className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
-                      >
-                        Mark Paid
-                      </button>
-                    )}
+                      {payout.status === "REJECTED" && (
+                        <span className="text-red-600 font-medium">
+                          Rejected
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      <ConfirmationModal
+        open={modalType === "approve"}
+        onClose={() => setModalType(null)}
+        onConfirm={confirmApprove}
+        loading={loading}
+        loadingText="Approving..."
+        title="Approve Withdrawal"
+        description="This request will become ready for payment."
+        action="Approve"
+        variant="primary"
+        icon="✅"
+      />
 
-                    {payout.status === "PAID" && (
-                      <span className="text-green-600 font-medium">
-                        Completed
-                      </span>
-                    )}
+      <ConfirmationModal
+        open={modalType === "reject"}
+        onClose={() => setModalType(null)}
+        onConfirm={confirmReject}
+        title="Reject Withdrawal"
+        description="Are you sure you want to reject this withdrawal?"
+        action="Reject"
+        loading={loading}
+        loadingText="Rejecting..."
+        variant="danger"
+        icon="❌"
+        // onClick={onClose}
+      >
+        {/* Optional rejection reason textarea */}
+      </ConfirmationModal>
 
-                    {payout.status === "REJECTED" && (
-                      <span className="text-red-600 font-medium">Rejected</span>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+      <ConfirmationModal
+        open={modalType === "paid"}
+        onClose={() => setModalType(null)}
+        onConfirm={confirmPaid}
+        title="Confirm Payment"
+        description="Have you successfully transferred this money to the vendor?"
+        action="Mark Paid"
+        loading={loading}
+        loadingText="Saving..."
+        variant="success"
+        icon="💰"
+      />
+    </>
   );
 }

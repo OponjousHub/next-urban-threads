@@ -16,7 +16,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
   if (!tenant) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
-
+  console.log("APPROVE ROUTE HITtttttttttttttt", payoutId);
   // Approve only pending payouts
   const existing = await prisma.vendorPayout.findFirst({
     where: {

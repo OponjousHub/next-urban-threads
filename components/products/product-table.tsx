@@ -2,7 +2,7 @@
 
 import Row from "./row";
 import { useState } from "react";
-import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
+import ConfirmationModal from "../modals/ConfirmationModal";
 import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
 
@@ -16,8 +16,8 @@ export default function ProductsTable({
   basePath: string;
 }) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   if (!products.length) {
@@ -32,7 +32,7 @@ export default function ProductsTable({
     if (!selectedProduct) return;
 
     try {
-      setDeleting(true);
+      setLoading(true);
 
       const res = await fetch(`/api/admin/products/${selectedProduct.id}`, {
         method: "DELETE",
@@ -53,12 +53,12 @@ export default function ProductsTable({
         "The product has been removed successfully",
       );
 
-      setShowDeleteModal(false);
+      setOpen(false);
       router.refresh(); // 🔥 important
     } catch (err) {
       appToast.error("Delete failed", "Network error. Try again.");
     } finally {
-      setDeleting(false);
+      setLoading(false);
     }
   }
 
@@ -84,7 +84,7 @@ export default function ProductsTable({
                 basePath={basePath}
                 onDeleteClick={(product) => {
                   setSelectedProduct(product);
-                  setShowDeleteModal(true);
+                  setOpen(true);
                 }}
               />
             ))}
@@ -92,13 +92,16 @@ export default function ProductsTable({
         </table>
       </div>
 
-      <ConfirmDeleteModal
-        open={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+      <ConfirmationModal
+        open={open}
+        onClose={() => setOpen(false)}
         onConfirm={handleDelete}
-        loading={deleting}
+        loading={loading}
         loadingText="Deleting..."
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This action cannot be undone."
         action="Delete Product"
+        variant="danger"
       />
     </>
   );
