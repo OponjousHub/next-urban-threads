@@ -100,6 +100,13 @@ export default async function VendorCustomersPage({
   const totalPages = Math.ceil(allCustomersCount / pageSize);
   return (
     <div className="space-y-6">
+      <div className="m-5">
+        <h1 className="text-xl lg:text-2xl font-semibold">Customers</h1>
+        <p className="hidden lg:block text-sm text-gray-500">
+          Manage your customers
+        </p>
+      </div>
+
       {/* Stats */}
       <div className="grid gap-4  grid-cols-3 mx-4">
         <div className="rounded-2xl border bg-white p-5 shadow-sm">

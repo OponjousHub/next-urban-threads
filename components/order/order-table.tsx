@@ -2,7 +2,7 @@
 
 import { OrderRow } from "./order-row";
 import { Order } from "@/types/order";
-import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
+import ConfirmationModal from "../modals/ConfirmationModal";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
@@ -284,7 +284,7 @@ export default function OrdersTable({
 
       {/* Confirm Cancel Modal */}
       {selectedOrder && (
-        <ConfirmDeleteModal
+        <ConfirmationModal
           open={showModal}
           onClose={() => setShowModal(false)}
           onConfirm={() => {
@@ -293,9 +293,10 @@ export default function OrdersTable({
           }}
           loading={loading}
           loadingText="Cancelling..."
-          action="Cancel order"
-          title="Cancel Order"
-          description="Are you sure you want to cancel this order?"
+          title="Cancel order"
+          description="Are you sure you want to cancel this order? This action cannot be undone."
+          action="Cancel Order"
+          variant="danger"
         />
       )}
 
