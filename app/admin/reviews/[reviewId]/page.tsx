@@ -125,7 +125,6 @@ export default async function VendorReviewPage({ params }: Props) {
         vendor={review.product.vendor}
         role={role}
       />
-      ;
     </>
   );
 }

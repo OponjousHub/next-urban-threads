@@ -154,7 +154,7 @@ export default function VendorDetailPage({ vendorId }: { vendorId: string }) {
 
       <div>
         <Link
-          href="/admin/vendors"
+          href="/admin/vendors/manageVendors"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <FaArrowLeft size={12} />

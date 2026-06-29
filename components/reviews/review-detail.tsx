@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
-import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
+import ConfirmationModal from "../modals/ConfirmationModal";
 import { FiLoader } from "react-icons/fi";
 
 type ModerationHistory = {
@@ -700,16 +700,17 @@ export default function ReviewDetail({
           </div>
         )}
       </div>
-      <ConfirmDeleteModal
+
+      <ConfirmationModal
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={deleteReview}
         loading={deleting}
         loadingText="Deleting..."
-        action="Delete Review"
         title="Delete Review"
-        description="Are you sure you want to delete this review? This action cannot
-            be undone."
+        description="Are you sure you want to delete this Review? This action cannot be undone."
+        action="Delete Review"
+        variant="danger"
       />
     </>
   );
