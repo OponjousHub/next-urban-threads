@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
 import { FiLoader } from "react-icons/fi";
 import { StatusBadge } from "@/lib/status-badge";
+import ConfirmationModal from "../modals/ConfirmationModal";
 
 type Props = {
   mode?: "create" | "edit";
@@ -258,16 +258,16 @@ export default function CouponDetail({
         </div>
       </div>
 
-      <ConfirmDeleteModal
+      <ConfirmationModal
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={deleteCoupon}
         loading={deleting}
         loadingText="Deleting..."
-        action="Delete Coupon"
         title="Delete Coupon"
-        description="Are you sure you want to delete this coupon? This action cannot
-                be undone."
+        description="Are you sure you want to delete this Coupon? This action cannot be undone."
+        action="Delete Coupon"
+        variant="danger"
       />
     </>
   );

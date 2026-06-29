@@ -150,7 +150,7 @@ export default async function AdminCouponsPage() {
 
                       <td className="px-4 py-4">
                         <Link
-                          href={`/admin/coupons/${coupon.id}`}
+                          href={`/vendor/coupons/${coupon.id}`}
                           className="inline-flex rounded-lg border px-3 py-2 text-sm font-medium hover:bg-gray-50"
                         >
                           Manage
