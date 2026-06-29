@@ -1,0 +1,46 @@
+import { notFound } from "next/navigation";
+import { prisma } from "@/utils/prisma";
+import CouponForm from "@/components/coupons/coupon-form";
+import { getAuthPayload } from "@/lib/server/auth";
+
+type Props = {
+  params: Promise<{
+    couponId: string;
+  }>;
+};
+
+export default async function EditCouponPage({ params }: Props) {
+  const { couponId } = await params;
+
+  const { tenant } = await getAuthPayload();
+
+  const coupon = await prisma.coupon.findFirst({
+    where: {
+      id: couponId,
+      tenantId: tenant?.id,
+    },
+  });
+
+  if (!coupon) {
+    notFound();
+  }
+  const safeCoupon = {
+    ...coupon,
+    value: Number(coupon.value),
+    minimumAmount: coupon.minimumAmount ? Number(coupon.minimumAmount) : null,
+
+    startsAt: coupon.startsAt
+      ? new Date(coupon.startsAt).toISOString().slice(0, 16)
+      : "",
+
+    expiresAt: coupon.expiresAt
+      ? new Date(coupon.expiresAt).toISOString().slice(0, 16)
+      : "",
+  };
+
+  return (
+    <>
+      <CouponForm mode="edit" coupon={safeCoupon} />
+    </>
+  );
+}
