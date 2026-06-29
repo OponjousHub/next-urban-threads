@@ -43,6 +43,10 @@ export default async function AdminCouponsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="ml-5 mt-5">
+        <h1 className="text-2xl font-semibold">Coupons</h1>
+        <p className="text-sm text-gray-500">Manage Coupons</p>
+      </div>
       {/* KPI */}
       <div className="grid gap-4 md:grid-cols-4">
         <div className="rounded-2xl border bg-white p-5 shadow-sm">
