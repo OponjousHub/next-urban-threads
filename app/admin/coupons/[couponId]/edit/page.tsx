@@ -4,12 +4,13 @@ import CouponForm from "@/components/coupons/coupon-form";
 import { getAuthPayload } from "@/lib/server/auth";
 
 type Props = {
+  basePath: string;
   params: Promise<{
     couponId: string;
   }>;
 };
 
-export default async function EditCouponPage({ params }: Props) {
+export default async function EditCouponPage({ basePath, params }: Props) {
   const { couponId } = await params;
 
   const { tenant } = await getAuthPayload();
@@ -40,7 +41,7 @@ export default async function EditCouponPage({ params }: Props) {
 
   return (
     <>
-      <CouponForm mode="edit" coupon={safeCoupon} />
+      <CouponForm mode="edit" coupon={safeCoupon} basePath={"/admin/coupons"} />
     </>
   );
 }

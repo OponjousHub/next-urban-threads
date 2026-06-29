@@ -90,6 +90,7 @@ export default async function CouponDetailPage({ params }: Props) {
         revenueGenerated={revenueGenerated}
         avgOrderValue={safeAverageOrderValue}
         totalDiscount={totalDiscount}
+        basePath="/admin/coupons"
       />
     </>
   );

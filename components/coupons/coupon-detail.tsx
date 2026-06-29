@@ -14,6 +14,7 @@ type Props = {
   revenueGenerated: number;
   avgOrderValue: number;
   totalDiscount: number;
+  basePath: string;
 };
 
 export default function CouponDetail({
@@ -21,6 +22,7 @@ export default function CouponDetail({
   revenueGenerated,
   avgOrderValue,
   totalDiscount,
+  basePath,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -60,7 +62,7 @@ export default function CouponDetail({
         method: "DELETE",
       });
 
-      router.push("/vendor/coupons");
+      router.push(basePath);
     } finally {
       setDeleting(false);
     }
@@ -72,7 +74,7 @@ export default function CouponDetail({
         {/* HEADER */}
 
         <Link
-          href="/admin/coupons"
+          href={basePath}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <FaArrowLeft size={12} />
@@ -197,7 +199,7 @@ export default function CouponDetail({
             </button>
 
             <Link
-              href={`/vendor/coupons/${coupon.id}/edit`}
+              href={`${basePath}/${coupon.id}/edit`}
               className="rounded-xl border px-4 py-2 hover:bg-slate-50"
             >
               Edit Coupon

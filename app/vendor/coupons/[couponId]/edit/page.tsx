@@ -28,7 +28,6 @@ export default async function EditCouponPage({ params }: Props) {
   if (!coupon) {
     notFound();
   }
-  console.log("SERVER COUPON", coupon);
   const safeCoupon = {
     ...coupon,
     value: Number(coupon.value),
@@ -51,7 +50,11 @@ export default async function EditCouponPage({ params }: Props) {
         vendor={vendor}
       />
 
-      <CouponForm mode="edit" coupon={safeCoupon} />
+      <CouponForm
+        mode="edit"
+        coupon={safeCoupon}
+        basePath={"/vendor/coupons"}
+      />
     </>
   );
 }

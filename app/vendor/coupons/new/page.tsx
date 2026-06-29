@@ -13,7 +13,7 @@ export default async function NewCouponPage() {
         vendor={vendor}
       />
 
-      <CouponForm vendorId={vendor?.id} />
+      <CouponForm vendorId={vendor?.id} basePath="/vendor/coupons" />
     </>
   );
 }
