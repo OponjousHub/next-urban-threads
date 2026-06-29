@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FiLoader } from "react-icons/fi";
 import { StatusBadge } from "@/lib/status-badge";
 import ConfirmationModal from "../modals/ConfirmationModal";
+import { FaArrowLeft } from "react-icons/fa";
 
 type Props = {
   mode?: "create" | "edit";
@@ -70,7 +71,14 @@ export default function CouponDetail({
       <div className="space-y-6 p-4">
         {/* HEADER */}
 
-        <div className="rounded-2xl border bg-white p-6">
+        <Link
+          href="/admin/coupons"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <FaArrowLeft size={12} />
+          Back to Coupons list
+        </Link>
+        <div className="rounded-2xl border bg-white p-6 pt-3">
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-bold">{coupon.code}</h1>

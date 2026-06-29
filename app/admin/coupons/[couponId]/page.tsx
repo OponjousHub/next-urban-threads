@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
-import VendorHeaderUI from "@/components/vendor/vendorHeader";
 import CouponDetail from "@/components/coupons/coupon-detail";
 import { getAuthPayload } from "@/lib/server/auth";
 
