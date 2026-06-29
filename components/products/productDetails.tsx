@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { appToast } from "@/utils/appToast";
 import { useState } from "react";
 import { useTenant } from "@/store/tenant-provider-context";
-import { ConfirmDeleteModal } from "@/components/confirmDeleteModal";
+import ConfirmationModal from "../modals/ConfirmationModal";
 
 export default function ProductDetails({
   product,
@@ -186,13 +186,16 @@ export default function ProductDetails({
           </div>
         </div>
       </div>
-      <ConfirmDeleteModal
+      <ConfirmationModal
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
         loading={deleting}
-        action="Delete Product"
         loadingText="Deleting..."
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This action cannot be undone."
+        action="Delete Product"
+        variant="danger"
       />
     </div>
   );
