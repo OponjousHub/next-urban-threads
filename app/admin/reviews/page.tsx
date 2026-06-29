@@ -58,6 +58,13 @@ export default async function AdminReviewsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="m-5">
+        <h1 className="text-xl lg:text-2xl font-semibold">Reviews</h1>
+        <p className="hidden lg:block text-sm text-gray-500">
+          Manage product reviews
+        </p>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="rounded-2xl border bg-white p-5 shadow-sm">

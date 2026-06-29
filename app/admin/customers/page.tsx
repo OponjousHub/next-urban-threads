@@ -181,9 +181,19 @@ export default async function VendorCustomersPage({
                     <td className="px-4 py-4">
                       <Link
                         href={`/admin/customers/${customer.id}`}
-                        className="text-blue-600 hover:underline"
+                        className="
+                                                  inline-flex items-center gap-2
+                                                  rounded-xl
+                                               bg-gray-100
+                                                  px-4 py-2
+                                                  text-sm font-medium
+                                               text-gray-700
+                                                  transition-all
+                                               hover:bg-gray-200
+                                                  hover:shadow-sm
+                        "
                       >
-                        View
+                        👁 View Customer
                       </Link>
                     </td>
                   </tr>

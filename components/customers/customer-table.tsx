@@ -27,12 +27,6 @@ export function CustomerTable({ customers, vendor }: Props) {
   return (
     <div className="overflow-hidden rounded-2xl border bg-white shadow-sm mx-4">
       <div className="overflow-x-auto">
-        <div>
-          <h1 className="text-xl lg:text-2xl font-semibold">Customers</h1>
-          <p className="hidden lg:block text-sm text-gray-500">
-            Manage your customers
-          </p>
-        </div>
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
             <tr>
