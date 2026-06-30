@@ -13,9 +13,17 @@ export async function PATCH(req: Request, { params }: RouteParams) {
 
   const { tenant } = await getAuthPayload();
   const { reason } = await req.json();
-
+  console.log("REJECTION REASON", reason);
   if (!tenant) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+  if (!reason) {
+    return NextResponse.json(
+      {
+        message: "Please provide the reason for rejecting the payout request.",
+      },
+      { status: 401 },
+    );
   }
 
   // Reject only pending payouts

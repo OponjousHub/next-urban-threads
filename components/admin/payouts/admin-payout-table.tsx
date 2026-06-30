@@ -68,9 +68,17 @@ export default function AdminPayoutTable({ payouts }: Props) {
         method: "PATCH",
       });
 
+      appToast.success("Success", "This payout request has been approved.");
+
       setModalType(null);
 
       router.refresh();
+    } catch (err: any) {
+      appToast.error(
+        "Failed",
+        `${err.message} | Could not approve this request!`,
+      );
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -86,8 +94,16 @@ export default function AdminPayoutTable({ payouts }: Props) {
         method: "PATCH",
       });
 
+      appToast.success("Success", "This request has been marked as paid.");
+
       setModalType(null);
       router.refresh();
+    } catch (err: any) {
+      appToast.error(
+        "Failed",
+        `${err.message} | Could not mark this request as paid!`,
+      );
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -99,17 +115,37 @@ export default function AdminPayoutTable({ payouts }: Props) {
     setLoading(true);
 
     try {
-      await fetch(`/api/admin/payouts/${selectedPayoutId}/reject`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(rejectReason),
-      });
+      console.log("REJECTION REASON", rejectReason);
 
+      const response = await fetch(
+        `/api/admin/payouts/${selectedPayoutId}/reject`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ reason: rejectReason }),
+        },
+      );
+
+      const ress = await response.json();
+      if (!response.ok) {
+        throw new Error(ress.message);
+      }
+
+      appToast.success(
+        "Success",
+        "This request has been rejected successfully.",
+      );
       setRejectReason("");
       setModalType(null);
       router.refresh();
+    } catch (err: any) {
+      appToast.error(
+        "Failed",
+        `${err.message}` || "Could not reject this request!",
+      );
+      console.error(err);
     } finally {
       setLoading(false);
     }
