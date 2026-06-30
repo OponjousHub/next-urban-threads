@@ -174,6 +174,7 @@ export default async function VendorPayoutPage() {
         availableBalance={availableBalance}
         orders={safeOrders}
         activeRequest={safeActiveRequest}
+        rejectedRequest={safeRejectedRequest}
       />
     </>
   );
