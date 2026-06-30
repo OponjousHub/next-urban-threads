@@ -42,7 +42,6 @@ export default function AdminPayoutTable({ payouts }: Props) {
   async function updateStatus(
     id: string,
     action: "approve" | "reject" | "paid",
-    reason?: string,
   ) {
     setSelectedPayoutId(id);
 
@@ -94,7 +93,7 @@ export default function AdminPayoutTable({ payouts }: Props) {
     }
   }
 
-  async function confirmReject(reason?: string) {
+  async function confirmReject() {
     if (!selectedPayoutId) return;
 
     setLoading(true);
@@ -102,8 +101,10 @@ export default function AdminPayoutTable({ payouts }: Props) {
     try {
       await fetch(`/api/admin/payouts/${selectedPayoutId}/reject`, {
         method: "PATCH",
-        headers: { ContentType: "application/json" },
-        body: JSON.stringify(reason),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(rejectReason),
       });
 
       setRejectReason("");
