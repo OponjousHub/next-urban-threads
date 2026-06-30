@@ -33,9 +33,7 @@ export default function AdminPayoutTable({ payouts }: Props) {
   const [modalType, setModalType] = useState<
     "approve" | "reject" | "paid" | null
   >(null);
-  // const [approveOpen, setApproveOpen] = useState(false);
-  // const [rejectOpen, setRejectOpen] = useState(false);
-  // const [paidOpen, setPaidOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
   const [selectedPayoutId, setSelectedPayoutId] = useState<string | null>(null);
 
   const router = useRouter();
@@ -44,6 +42,7 @@ export default function AdminPayoutTable({ payouts }: Props) {
   async function updateStatus(
     id: string,
     action: "approve" | "reject" | "paid",
+    reason?: string,
   ) {
     setSelectedPayoutId(id);
 
@@ -77,6 +76,7 @@ export default function AdminPayoutTable({ payouts }: Props) {
       setLoading(false);
     }
   }
+
   async function confirmPaid() {
     if (!selectedPayoutId) return;
 
@@ -93,7 +93,8 @@ export default function AdminPayoutTable({ payouts }: Props) {
       setLoading(false);
     }
   }
-  async function confirmReject() {
+
+  async function confirmReject(reason?: string) {
     if (!selectedPayoutId) return;
 
     setLoading(true);
@@ -101,8 +102,11 @@ export default function AdminPayoutTable({ payouts }: Props) {
     try {
       await fetch(`/api/admin/payouts/${selectedPayoutId}/reject`, {
         method: "PATCH",
+        headers: { ContentType: "application/json" },
+        body: JSON.stringify(reason),
       });
 
+      setRejectReason("");
       setModalType(null);
       router.refresh();
     } finally {
@@ -288,7 +292,10 @@ export default function AdminPayoutTable({ payouts }: Props) {
 
       <ConfirmationModal
         open={modalType === "reject"}
-        onClose={() => setModalType(null)}
+        onClose={() => {
+          setModalType(null);
+          setRejectReason("");
+        }}
         onConfirm={confirmReject}
         title="Reject Withdrawal"
         description="Are you sure you want to reject this withdrawal?"
@@ -297,9 +304,14 @@ export default function AdminPayoutTable({ payouts }: Props) {
         loadingText="Rejecting..."
         variant="danger"
         icon="❌"
-        // onClick={onClose}
       >
-        {/* Optional rejection reason textarea */}
+        <textarea
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+          placeholder="Explain why this withdrawal is being rejected..."
+          className="w-full rounded-lg border p-3 text-sm"
+          rows={4}
+        />
       </ConfirmationModal>
 
       <ConfirmationModal

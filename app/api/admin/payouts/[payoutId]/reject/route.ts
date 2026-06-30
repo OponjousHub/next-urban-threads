@@ -12,6 +12,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
   const { payoutId } = await params;
 
   const { tenant } = await getAuthPayload();
+  const { reason } = await req.json();
 
   if (!tenant) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -47,6 +48,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
 
       data: {
         status: "REJECTED",
+        note: reason,
       },
     });
 

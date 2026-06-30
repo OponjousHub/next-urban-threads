@@ -7,21 +7,13 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
-
   loading?: boolean;
-
   loadingText?: string;
-
   action: string;
-
   title: string;
-
   description?: string;
-
   variant?: "danger" | "success" | "warning" | "primary";
-
   icon?: ReactNode;
-
   children?: ReactNode;
 };
 
@@ -29,21 +21,13 @@ export default function ConfirmationModal({
   open,
   onClose,
   onConfirm,
-
   loading = false,
-
   loadingText = "Processing...",
-
   action,
-
   title,
-
   description,
-
   variant = "danger",
-
   icon,
-
   children,
 }: Props) {
   const buttonStyles = {
