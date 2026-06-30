@@ -76,6 +76,23 @@ export default async function AdminCouponsPage() {
         </div>
       </div>
 
+      {/* Actions */}
+      <div className="flex justify-end">
+        <Link
+          href="/admin/coupons/new"
+          className="
+            rounded-xl
+            bg-[var(--color-primary)]
+            px-4 py-2
+            text-white
+            font-medium
+            hover:opacity-90
+          "
+        >
+          Create Coupon
+        </Link>
+      </div>
+
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <div className="overflow-x-auto">
