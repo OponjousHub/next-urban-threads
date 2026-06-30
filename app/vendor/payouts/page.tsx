@@ -28,6 +28,20 @@ export default async function VendorPayoutPage() {
   });
 
   // ==========================================
+  // Last rejected request
+  // ==========================================
+  const latestRejectedRequest = await prisma.vendorPayout.findFirst({
+    where: {
+      vendorId: vendor.id,
+      tenantId: tenant.id,
+      status: "REJECTED",
+    },
+    orderBy: {
+      requestedAt: "desc",
+    },
+  });
+
+  // ==========================================
   // Delivered & Paid Orders
   // ==========================================
 
@@ -131,6 +145,15 @@ export default async function VendorPayoutPage() {
         id: activeRequest.id,
         amount: Number(activeRequest.amount),
         status: activeRequest.status,
+      }
+    : null;
+
+  const safeRejectedRequest = latestRejectedRequest
+    ? {
+        id: latestRejectedRequest.id,
+        amount: Number(latestRejectedRequest.amount),
+        note: latestRejectedRequest.note,
+        requestedAt: latestRejectedRequest.requestedAt.toISOString(),
       }
     : null;
 
