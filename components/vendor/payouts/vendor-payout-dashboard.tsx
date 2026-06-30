@@ -3,6 +3,7 @@
 import PayoutHistoryTable from "./payout-history-table";
 import PayoutStatCard from "./payout-stat-card";
 import RequestWithdrawalModal from "./request-withdrawal-modal";
+import { PayoutStatus } from "@prisma/client";
 
 type Order = {
   id: string;
@@ -12,6 +13,12 @@ type Order = {
   createdAt: string;
 };
 
+type ActiveRequest = {
+  id: string;
+  amount: number;
+  status: PayoutStatus;
+} | null;
+
 type Props = {
   grossEarnings: number;
   totalCommission: number;
@@ -20,6 +27,7 @@ type Props = {
   pendingBalance: number;
   availableBalance: number;
   orders: Order[];
+  activeRequest: ActiveRequest;
 };
 
 export default function VendorPayoutDashboard({
@@ -30,6 +38,7 @@ export default function VendorPayoutDashboard({
   pendingBalance,
   availableBalance,
   orders,
+  activeRequest,
 }: Props) {
   return (
     <div className="space-y-8">
@@ -84,6 +93,7 @@ export default function VendorPayoutDashboard({
           <RequestWithdrawalModal
             availableBalance={availableBalance}
             pendingBalance={pendingBalance}
+            activeRequest={activeRequest}
           />
         </div>
       </div>

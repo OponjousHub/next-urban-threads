@@ -4,15 +4,24 @@ import { useState } from "react";
 import { appToast } from "@/utils/appToast";
 import { useRouter } from "next/navigation";
 import { useTenant } from "@/store/tenant-provider-context";
+import { PayoutStatus } from "@prisma/client";
+
+type ActiveRequest = {
+  id: string;
+  amount: number;
+  status: PayoutStatus;
+} | null;
 
 type Props = {
   availableBalance: number;
   pendingBalance: number;
+  activeRequest: ActiveRequest;
 };
 
 export default function RequestWithdrawalModal({
   availableBalance,
   pendingBalance,
+  activeRequest,
 }: Props) {
   const router = useRouter();
   const { tenant } = useTenant();
@@ -22,6 +31,8 @@ export default function RequestWithdrawalModal({
   const [amount, setAmount] = useState("");
 
   const [loading, setLoading] = useState(false);
+
+  const hasActiveRequest = !!activeRequest;
 
   async function requestWithdrawal() {
     const value = Number(amount);
@@ -83,10 +94,59 @@ export default function RequestWithdrawalModal({
 
   return (
     <>
+      {activeRequest && (
+        <div
+          className={`mb-4 rounded-xl border p-4 ${
+            activeRequest.status === "APPROVED"
+              ? "border-green-200 bg-green-50"
+              : "border-yellow-200 bg-yellow-50"
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <div className="mt-1 text-xl">
+              {activeRequest.status === "APPROVED" ? "💰" : "⏳"}
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-gray-900">
+                {activeRequest.status === "APPROVED"
+                  ? "Withdrawal Approved"
+                  : "Withdrawal Pending"}
+              </h3>
+
+              <p className="mt-1 text-sm text-gray-600">
+                Your withdrawal request of{" "}
+                <span className="font-semibold">
+                  {tenant.currency}
+                  {Number(activeRequest.amount).toLocaleString()}
+                </span>{" "}
+                {activeRequest.status === "APPROVED"
+                  ? "has been approved and is awaiting payment."
+                  : "is awaiting approval from the administrator."}
+              </p>
+
+              <p className="mt-2 text-xs text-gray-500">
+                You can submit another withdrawal request once this request has
+                been marked as paid.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <button
-        disabled={availableBalance <= 0 || pendingBalance > 0}
+        disabled={availableBalance <= 0 || hasActiveRequest}
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-black px-5 py-3 text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+        className="
+    rounded-lg
+    bg-black
+    px-5
+    py-3
+    text-white
+    transition
+    hover:bg-gray-800
+    disabled:cursor-not-allowed
+    disabled:bg-gray-300
+  "
       >
         Request Withdrawal
       </button>

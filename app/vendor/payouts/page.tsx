@@ -15,6 +15,19 @@ export default async function VendorPayoutPage() {
   }
 
   // ==========================================
+  // Check if there is active request
+  // ==========================================
+  const activeRequest = await prisma.vendorPayout.findFirst({
+    where: {
+      vendorId: vendor.id,
+      tenantId: tenant.id,
+      status: {
+        in: ["PENDING", "APPROVED"],
+      },
+    },
+  });
+
+  // ==========================================
   // Delivered & Paid Orders
   // ==========================================
 
@@ -113,6 +126,14 @@ export default async function VendorPayoutPage() {
     createdAt: order.createdAt.toISOString(),
   }));
 
+  const safeActiveRequest = activeRequest
+    ? {
+        id: activeRequest.id,
+        amount: Number(activeRequest.amount),
+        status: activeRequest.status,
+      }
+    : null;
+
   return (
     <>
       <VendorHeaderUI
@@ -129,6 +150,7 @@ export default async function VendorPayoutPage() {
         pendingBalance={pendingBalance}
         availableBalance={availableBalance}
         orders={safeOrders}
+        activeRequest={safeActiveRequest}
       />
     </>
   );
