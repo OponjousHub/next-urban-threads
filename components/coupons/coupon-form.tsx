@@ -83,7 +83,7 @@ export default function CouponForm({
   return (
     <>
       <Link
-        href={`${basePath}/${coupon.id} `}
+        href={`${basePath}/${coupon?.id} `}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground m-4"
       >
         <FaArrowLeft size={12} />

@@ -99,6 +99,19 @@ export default async function VendorPayoutPage() {
   });
 
   // ==========================================
+  // Query all payouts
+  // ==========================================
+  const payoutHistory = await prisma.vendorPayout.findMany({
+    where: {
+      vendorId: vendor.id,
+      tenantId: tenant.id,
+    },
+    orderBy: {
+      requestedAt: "desc",
+    },
+  });
+
+  // ==========================================
   // Calculations
   // ==========================================
 
@@ -157,6 +170,17 @@ export default async function VendorPayoutPage() {
       }
     : null;
 
+  const safePayoutHistory = payoutHistory.map((payout) => ({
+    id: payout.id,
+    amount: Number(payout.amount),
+    status: payout.status,
+    note: payout.note,
+    reference: payout.reference,
+    requestedAt: payout.requestedAt.toISOString(),
+    approvedAt: payout.approvedAt?.toISOString() ?? null,
+    paidAt: payout.paidAt?.toISOString() ?? null,
+  }));
+
   return (
     <>
       <VendorHeaderUI
@@ -175,6 +199,7 @@ export default async function VendorPayoutPage() {
         orders={safeOrders}
         activeRequest={safeActiveRequest}
         rejectedRequest={safeRejectedRequest}
+        payoutHistory={safePayoutHistory}
       />
     </>
   );
