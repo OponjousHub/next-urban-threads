@@ -109,6 +109,7 @@ export default async function VendorPayoutPage() {
     orderBy: {
       requestedAt: "desc",
     },
+    take: 5,
   });
 
   // ==========================================
