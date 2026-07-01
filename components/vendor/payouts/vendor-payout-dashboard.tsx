@@ -171,47 +171,42 @@ export default function VendorPayoutDashboard({
       </div>
 
       {/*Vendor Withdrawal record*/}
-      <div className="flex items-center justify-between border-b p-5">
-        <div>
-          <h2 className="text-lg font-semibold">Withdrawal History</h2>
 
-          <p className="mt-1 text-sm text-gray-500">
-            Your most recent withdrawal requests.
-          </p>
-        </div>
-
-        <Link
-          href="/vendor/payouts/history"
-          className="
-      inline-flex items-center gap-2
-      rounded-xl
-      border
-      border-gray-200
-      bg-white
-      px-4
-      py-2
-      text-sm
-      font-medium
-      text-gray-700
-      shadow-sm
-      transition-all
-      hover:border-[var(--color-primary)]
-      hover:bg-[var(--color-primary)]
-      hover:text-white
-      hover:shadow-md
-    "
-        >
-          View Full History
-          <span className="text-base">→</span>
-        </Link>
-      </div>
       <div className="mt-8 rounded-2xl border bg-white shadow-sm">
-        <div className="border-b p-5">
-          <h2 className="text-lg font-semibold">Withdrawal History</h2>
+        <div className="flex justify-between align-middle">
+          <div className="border-b p-5">
+            <h2 className="text-lg font-semibold">Withdrawal History</h2>
 
-          <p className="mt-1 text-sm text-gray-500">
-            All withdrawal requests made from your account.
-          </p>
+            <p className="mt-1 text-sm text-gray-500">
+              All withdrawal requests made from your account.
+            </p>
+          </div>
+          <Link
+            href="/vendor/payouts/history"
+            className="
+              inline-flex items-center gap-2
+              rounded-xl
+              border
+             border-gray-200
+             bg-white
+              h-14
+              m-4
+              px-4
+              py-2
+              text-sm
+              font-medium
+             text-gray-700
+              shadow-sm
+              transition-all
+              hover:border-[var(--color-primary)]
+              hover:bg-[var(--color-primary)]
+             hover:text-white
+              hover:shadow-md
+            "
+          >
+            View Full History
+            <span className="text-base">→</span>
+          </Link>
         </div>
 
         <div className="overflow-x-auto">

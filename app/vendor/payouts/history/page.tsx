@@ -4,7 +4,7 @@ import { getAuthPayload } from "@/lib/server/auth";
 import { redirect } from "next/navigation";
 import VendorHeaderUI from "@/components/vendor/vendorHeader";
 
-export default async function PayoutHistory() {
+export default async function PayoutFullHistory() {
   const { tenant } = await getAuthPayload();
 
   const { vendor } = await getCurrentVendor();
@@ -21,7 +21,6 @@ export default async function PayoutHistory() {
     orderBy: {
       requestedAt: "desc",
     },
-    take: 5,
   });
 
   return (
