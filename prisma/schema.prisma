@@ -302,7 +302,7 @@ model Tenant {
   termsOfService   String?  // HTML (TipTap output)
   privacyPolicy    String?
   aboutContent     String?  // full rich about page
-  country          String?
+  country          String
 
   heroImage        String?
   heroTitle        String?
