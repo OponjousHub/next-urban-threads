@@ -184,7 +184,8 @@ model VendorBankAccount {
 
   vendorId        String   @unique
   tenantId        String
-
+  
+  bankCode        String
   bankName        String
   accountName     String
   accountNumber   String
