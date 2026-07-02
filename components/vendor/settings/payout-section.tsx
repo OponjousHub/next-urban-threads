@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import BankSelector from "@/components/sheared/bank-selector";
@@ -17,6 +17,9 @@ export default function PayoutSection({ bankAccount }: Props) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [verificationError, setVerificationError] = useState("");
 
   const [form, setForm] = useState({
     bankName: bankAccount?.bankName || "",
@@ -24,11 +27,61 @@ export default function PayoutSection({ bankAccount }: Props) {
     accountNumber: bankAccount?.accountNumber || "",
   });
 
+  //Watch the ccount number to call for verification once it is 10
+  useEffect(() => {
+    if (form.bankCode && form.accountNumber.length === 10) {
+      verifyAccount();
+    } else {
+      setVerified(false);
+      setVerificationError("");
+    }
+  }, [form.bankCode, form.accountNumber]);
+
   function update(field: string, value: string) {
     setForm((prev) => ({
       ...prev,
       [field]: value,
     }));
+  }
+
+  // Verification function
+  async function verifyAccount() {
+    setVerifying(true);
+
+    setVerified(false);
+
+    setVerificationError("");
+
+    try {
+      const res = await fetch("/api/vendor/settings/verify-account", {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          bankCode: form.bankCode,
+          accountNumber: form.accountNumber,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setVerificationError(data.message);
+
+        return;
+      }
+
+      update("accountName", data.accountName);
+
+      setVerified(true);
+    } catch {
+      setVerificationError("Unable to verify account.");
+    } finally {
+      setVerifying(false);
+    }
   }
 
   async function save() {
