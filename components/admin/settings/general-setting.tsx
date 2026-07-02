@@ -196,34 +196,33 @@ export default function GeneralSettings() {
           </p>
         </div>
 
-        <div className="mt-5 rounded-xl bg-blue-50 p-4">
-          <p className="font-medium text-blue-900">Complete these items:</p>
+        {percentage < 100 ? (
+          <div className="mt-5 rounded-xl bg-blue-50 p-4">
+            <p className="font-medium text-blue-900">Complete these items:</p>
 
-          <ul className="mt-2 space-y-1 text-sm text-blue-700">
-            {!values.logo && <li>• Upload your store logo</li>}
-            {!values.heroImage && <li>• Upload a hero image</li>}
-            {!values.currency && <li>• Chose store currency</li>}
-            {!values.heroCTA && <li>• Add hero CTA</li>}
-            {!values.heroTitle && (
-              <li>
-                • Add hero <title></title>
-              </li>
-            )}
-            {!values.address && <li>• Add your business address</li>}
-            {!values.heroSubtitle && <li>• Add hero sub title</li>}
-          </ul>
-        </div>
-
-        {/*Celebrate comletion*/}
-        {percentage === 100 && (
+            <ul className="mt-2 space-y-1 text-sm text-blue-700">
+              {!values.logo && <li>• Upload your store logo</li>}
+              {!values.heroImage && <li>• Upload a hero image</li>}
+              {!values.currency && <li>• Chose store currency</li>}
+              {!values.heroCTA && <li>• Add hero CTA</li>}
+              {!values.heroTitle && (
+                <li>
+                  • Add hero <title></title>
+                </li>
+              )}
+              {!values.address && <li>• Add your business address</li>}
+              {!values.heroSubtitle && <li>• Add hero sub title</li>}
+            </ul>
+          </div>
+        ) : (
           <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-4">
             <p className="font-medium text-green-700">
               🎉 Congratulations! Your store profile is fully complete.
             </p>
 
             <p className="mt-1 text-sm text-green-600">
-              Customers are more likely to trust and buy from stores with
-              complete business information.
+              Your storefront is fully configured and ready to impress
+              customers.
             </p>
           </div>
         )}

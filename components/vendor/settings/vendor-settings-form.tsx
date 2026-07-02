@@ -214,29 +214,28 @@ export default function VendorSettingsForm({ vendor }: Props) {
             </p>
           </div>
 
-          <div className="mt-5 rounded-xl bg-blue-50 p-4">
-            <p className="font-medium text-blue-900">Complete these items:</p>
+          {percentage < 100 ? (
+            <div className="mt-5 rounded-xl bg-blue-50 p-4">
+              <p className="font-medium text-blue-900">Complete these items:</p>
 
-            <ul className="mt-2 space-y-1 text-sm text-blue-700">
-              {!values.logo && <li>• Upload your store logo</li>}
-              {!values.banner && <li>• Upload a banner image</li>}
-              {!values.description && <li>• Add a business description</li>}
-              {!values.phone && <li>• Add a contact phone number</li>}
-              {!values.address && <li>• Add your business address</li>}
-              {!values.storeSlug && <li>• Choose a store URL</li>}
-            </ul>
-          </div>
-
-          {/*Celebrate comletion*/}
-          {percentage === 100 && (
+              <ul className="mt-2 space-y-1 text-sm text-blue-700">
+                {!values.logo && <li>• Upload your store logo</li>}
+                {!values.banner && <li>• Upload a banner image</li>}
+                {!values.description && <li>• Add a business description</li>}
+                {!values.phone && <li>• Add a contact phone number</li>}
+                {!values.address && <li>• Add your business address</li>}
+                {!values.storeSlug && <li>• Choose a store URL</li>}
+              </ul>
+            </div>
+          ) : (
             <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-4">
               <p className="font-medium text-green-700">
                 🎉 Congratulations! Your store profile is fully complete.
               </p>
 
               <p className="mt-1 text-sm text-green-600">
-                Customers are more likely to trust and buy from stores with
-                complete business information.
+                Your storefront is fully configured and ready to impress
+                customers.
               </p>
             </div>
           )}
