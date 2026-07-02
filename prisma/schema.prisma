@@ -142,6 +142,7 @@ model Vendor {
   city            String?
   state           String?
   country         String?
+  bankAccount     VendorBankAccount?
   storeSlug       String? @unique @db.VarChar(100)
 
   accentColor     String? @default("#000000")
@@ -176,6 +177,23 @@ model VendorApplication {
 
   @@index([userId])
   @@index([status])
+}
+
+model VendorBankAccount {
+  id              String   @id @default(cuid())
+
+  vendorId        String   @unique
+  tenantId        String
+
+  bankName        String
+  accountName     String
+  accountNumber   String
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  vendor          Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  tenant          Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 model Order {
@@ -292,6 +310,7 @@ model Tenant {
   // Optional
   termsUpdatedAt   DateTime?
   privacyUpdatedAt DateTime?
+  vendorBankAccounts VendorBankAccount[]
   address            Address[]
   cartItem           CartItem[]
   categories         Category[]
