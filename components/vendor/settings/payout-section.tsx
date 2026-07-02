@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import BankSelector from "@/components/sheared/bank-selector";
 
 type Props = {
   bankAccount: {
@@ -68,11 +69,13 @@ export default function PayoutSection({ bankAccount }: Props) {
       </p>
 
       <div className="mt-8 grid gap-5">
-        <input
+        <BankSelector
           value={form.bankName}
-          onChange={(e) => update("bankName", e.target.value)}
-          placeholder="Bank Name"
-          className="rounded-lg border p-3"
+          onSelect={(bank) => {
+            update("bankName", bank.name);
+
+            update("bankCode", bank.code);
+          }}
         />
 
         <input

@@ -153,7 +153,7 @@ export default function BankSelector({ value, onSelect }: Props) {
             {!loading &&
               filtered.map((bank) => (
                 <button
-                  key={bank.code}
+                  key={`${bank.code}-${bank.name}`}
                   type="button"
                   onClick={() => {
                     onSelect(bank);

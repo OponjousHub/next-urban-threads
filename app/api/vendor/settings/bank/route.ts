@@ -22,6 +22,7 @@ export async function PATCH(req: Request) {
       bankName: body.bankName,
       accountName: body.accountName,
       accountNumber: body.accountNumber,
+      bankCode: body.bankCode,
     },
 
     create: {
