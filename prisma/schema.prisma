@@ -184,8 +184,8 @@ model VendorBankAccount {
 
   vendorId        String   @unique
   tenantId        String
-  
-  bankCode        String
+
+  bankCode        String?
   bankName        String
   accountName     String
   accountNumber   String
@@ -302,6 +302,7 @@ model Tenant {
   termsOfService   String?  // HTML (TipTap output)
   privacyPolicy    String?
   aboutContent     String?  // full rich about page
+  country          String?
 
   heroImage        String?
   heroTitle        String?

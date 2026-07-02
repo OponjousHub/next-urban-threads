@@ -1,5 +1,4 @@
 import { PaymentProvider } from "@prisma/client";
-
 import { FlutterwaveProvider } from "./flutterwave";
 import { PaystackProvider } from "./paystack";
 

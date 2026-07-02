@@ -110,6 +110,23 @@ export class PaystackProvider {
     };
   }
 
+  // ==============================
+  // Fetch Supported Banks
+  // ==============================
+
+  // async getBanks() {
+  //   const res = await axios.get(`${this.baseUrl}/bank`, {
+  //     headers: {
+  //       Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+  //     },
+  //   });
+
+  //   return res.data.data.map((bank: { code: string; name: string }) => ({
+  //     code: bank.code,
+  //     name: bank.name,
+  //   }));
+  // }
+
   // =======================
   // Verify Account
   // =======================

@@ -101,6 +101,23 @@ export class FlutterwaveProvider implements PaymentProvider {
     };
   }
 
+  // ==============================
+  // Fetch Supported Banks
+  // ==============================
+
+  async getBanks(country: string) {
+    const res = await axios.get(`${this.baseUrl}/banks/${country}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+      },
+    });
+
+    return res.data.data.map((bank: { code: string; name: string }) => ({
+      code: bank.code,
+      name: bank.name,
+    }));
+  }
+
   // =======================
   // Transfer
   // =======================
