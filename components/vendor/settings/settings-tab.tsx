@@ -29,7 +29,10 @@ export default function SettingsPage({ vendor }: Props) {
   const [activeTab, setActiveTab] = useState("profile");
   const { tenant, storeMode } = useTenant();
 
-  const tabs = [{ id: "profile", label: "General Store Profile" }];
+  const tabs = [
+    { id: "profile", label: "General Store Profile" },
+    { id: "payout", label: "Payout" },
+  ];
 
   return (
     <div className="flex gap-8 w-[80rem] mx-auto p-6">
@@ -66,6 +69,7 @@ export default function SettingsPage({ vendor }: Props) {
 
         {/* Tab Content */}
         {activeTab === "profile" && <VendorSettingsForm vendor={vendor} />}
+        {activeTab === "payout" && <VendorSettingsForm vendor={vendor} />}
       </main>
     </div>
   );

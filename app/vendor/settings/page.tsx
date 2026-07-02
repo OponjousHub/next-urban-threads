@@ -13,6 +13,13 @@ export default async function VendorSettingsPage() {
     throw new Error("Vendor not found");
   }
 
+  // Load Bank Details
+  const bankAccount = await prisma.vendorBankAccount.findUnique({
+    where: {
+      vendorId: vendor.id,
+    },
+  });
+
   const safeVendor = {
     ...vendor,
     createdAt: vendor.createdAt.toISOString(),
@@ -27,7 +34,7 @@ export default async function VendorSettingsPage() {
         vendor={vendor}
       />
 
-      <SettingsPage vendor={safeVendor} />
+      <SettingsPage vendor={safeVendor} bankAccount={bankAccount} />
     </>
   );
 }
