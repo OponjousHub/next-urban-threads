@@ -12,6 +12,7 @@ export async function PATCH(req: Request) {
     const {
       name,
       email,
+      country,
       currency,
       logo,
       primaryColor,
@@ -29,6 +30,7 @@ export async function PATCH(req: Request) {
       data: {
         name,
         email,
+        country,
         currency,
         logo,
         primaryColor,
@@ -74,6 +76,7 @@ export async function GET() {
     JSON.stringify({
       name: tenant.name,
       email: tenant.email,
+      country: tenant.country,
       currency: tenant.currency,
       logo: tenant.logo,
       storeMode: tenant.storeMode,

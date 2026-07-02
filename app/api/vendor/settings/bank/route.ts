@@ -29,6 +29,7 @@ export async function PATCH(req: Request) {
       vendorId: vendor.id,
       tenantId: tenant.id,
 
+      bankCode: body.bankCode,
       bankName: body.bankName,
       accountName: body.accountName,
       accountNumber: body.accountNumber,

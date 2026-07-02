@@ -9,6 +9,7 @@ import { appToast } from "@/utils/appToast";
 export const settingSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email"),
+  country: z.string().optional(),
   currency: z.string().optional(),
 
   logo: z.string().optional(), // URL
@@ -58,6 +59,7 @@ export default function GeneralSettings() {
       reset({
         name: data.name || "",
         email: data.email || "",
+        country: data.country || "",
         currency: data.currency || "",
         logo: data.logo || "",
         primaryColor: data.primaryColor || "#000000",
@@ -105,6 +107,7 @@ export default function GeneralSettings() {
     values.heroImage,
     values.name,
     values.email,
+    values.country,
     values.currency,
     values.primaryColor,
     values.timezone,
@@ -203,6 +206,7 @@ export default function GeneralSettings() {
             <ul className="mt-2 space-y-1 text-sm text-blue-700">
               {!values.logo && <li>• Upload your store logo</li>}
               {!values.heroImage && <li>• Upload a hero image</li>}
+              {!values.country && <li>• Please enter country</li>}
               {!values.currency && <li>• Chose store currency</li>}
               {!values.heroCTA && <li>• Add hero CTA</li>}
               {!values.heroTitle && (
@@ -229,7 +233,10 @@ export default function GeneralSettings() {
 
         {/* Store basics */}
         <Input label="Store Name" {...register("name")} />
-        <Input label="Support Email" {...register("email")} />
+        <div className="grid md:grid-cols-2 gap-4">
+          <Input label="Support Email" {...register("email")} />
+          <Input label="Country" {...register("country")} />
+        </div>
 
         {/* Row: Currency + Color + Timezone */}
         <div className="grid md:grid-cols-3 gap-4">
