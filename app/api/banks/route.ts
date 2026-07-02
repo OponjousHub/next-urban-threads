@@ -22,7 +22,7 @@ export async function GET() {
 
     const provider = getPaymentProvider(config.provider);
 
-    const banks = await provider.getBanks(tenant.country);
+    const banks = await provider.getBanks(config.countryCode);
 
     return NextResponse.json(banks);
   } catch (error) {

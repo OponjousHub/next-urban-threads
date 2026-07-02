@@ -665,6 +665,9 @@ enum StoreType {
 enum currencyEnum {
   NGN
   USD
+  KES
+  GHS
+  ZAR
 }
 
 enum ReviewStatus {
