@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { ProfileSection } from "@/components/admin/settings/profile-section";
 import { useTenant } from "@/store/tenant-provider-context";
 import VendorSettingsForm from "./vendor-settings-form";
 
@@ -27,13 +26,10 @@ type Props = {
 };
 
 export default function SettingsPage({ vendor }: Props) {
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState("profile");
   const { tenant, storeMode } = useTenant();
 
-  const tabs = [
-    { id: "general", label: "General" },
-    { id: "profile", label: "Profile" },
-  ];
+  const tabs = [{ id: "profile", label: "General Store Profile" }];
 
   return (
     <div className="flex gap-8 w-[80rem] mx-auto p-6">
@@ -69,8 +65,7 @@ export default function SettingsPage({ vendor }: Props) {
         </div>
 
         {/* Tab Content */}
-        {activeTab === "general" && <VendorSettingsForm vendor={vendor} />}
-        {activeTab === "profile" && <ProfileSection />}
+        {activeTab === "profile" && <VendorSettingsForm vendor={vendor} />}
       </main>
     </div>
   );

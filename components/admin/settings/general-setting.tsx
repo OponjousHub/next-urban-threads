@@ -55,7 +55,6 @@ export default function GeneralSettings() {
     async function load() {
       const res = await fetch("/api/admin/settings");
       const data = await res.json();
-      console.log("TENANT SETTING FETCHING", data);
       reset({
         name: data.name || "",
         email: data.email || "",
