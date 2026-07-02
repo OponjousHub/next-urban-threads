@@ -1,10 +1,14 @@
+import { PaymentProvider } from "@prisma/client";
+
 import { FlutterwaveProvider } from "./flutterwave";
 import { PaystackProvider } from "./paystack";
 
-export function getPaymentProvider(currency: string) {
-  if (currency === "NGN") {
-    return new PaystackProvider();
-  }
+export function getPaymentProvider(provider: PaymentProvider) {
+  switch (provider) {
+    case PaymentProvider.PAYSTACK:
+      return new PaystackProvider();
 
-  return new FlutterwaveProvider();
+    default:
+      return new FlutterwaveProvider();
+  }
 }

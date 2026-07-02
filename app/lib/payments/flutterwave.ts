@@ -1,5 +1,11 @@
 import axios from "axios";
 import { PaymentProvider } from "@/types/payment";
+import {
+  Bank,
+  VerifyBankAccountResult,
+  TransferRecipient,
+  TransferResult,
+} from "./types";
 
 type VerifyResponse = {
   success: boolean;
@@ -67,5 +73,42 @@ export class FlutterwaveProvider implements PaymentProvider {
       transactionId: data?.id, // 🔥 REQUIRED FOR REFUNDS
       txRef: data?.tx_ref,
     };
+  }
+
+  // =======================
+  // Verify Account
+  // =======================
+
+  async verifyBankAccount(
+    bankCode: string,
+    accountNumber: string,
+  ): Promise<VerifyBankAccountResult> {
+    const res = await axios.post(
+      `${this.baseUrl}/accounts/resolve`,
+      {
+        account_number: accountNumber,
+        account_bank: bankCode,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+        },
+      },
+    );
+
+    return {
+      accountName: res.data.data.account_name,
+    };
+  }
+
+  // =======================
+  // Transfer
+  // =======================
+  async transfer(
+    recipient: TransferRecipient,
+    amount: number,
+    narration: string,
+  ): Promise<TransferResult> {
+    throw new Error("Not implemented yet");
   }
 }

@@ -1,5 +1,11 @@
 import axios from "axios";
 import { VerifyPaymentResult } from "@/types/payment";
+import {
+  Bank,
+  VerifyBankAccountResult,
+  TransferRecipient,
+  TransferResult,
+} from "./types";
 
 export type InitializePaymentParams = {
   email: string;
@@ -63,5 +69,55 @@ export class PaystackProvider {
       authorizationUrl: data.authorization_url,
       reference: data.reference,
     };
+  }
+
+  // =======================
+  // Fetch Banks
+  // =======================
+
+  async getBanks(): Promise<Bank[]> {
+    const res = await axios.get(`${this.baseUrl}/bank`, {
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+      },
+    });
+
+    return res.data.data.map((bank: any) => ({
+      code: bank.code,
+      name: bank.name,
+    }));
+  }
+
+  // =======================
+  // Verify Account
+  // =======================
+  async verifyBankAccount(
+    bankCode: string,
+    accountNumber: string,
+  ): Promise<VerifyBankAccountResult> {
+    const res = await axios.get(`${this.baseUrl}/bank/resolve`, {
+      params: {
+        account_number: accountNumber,
+        bank_code: bankCode,
+      },
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+      },
+    });
+
+    return {
+      accountName: res.data.data.account_name,
+    };
+  }
+
+  // =======================
+  // Verify Account
+  // =======================
+  async transfer(
+    recipient: TransferRecipient,
+    amount: number,
+    narration: string,
+  ): Promise<TransferResult> {
+    throw new Error("Not implemented yet");
   }
 }
