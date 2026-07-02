@@ -227,6 +227,20 @@ export default function VendorSettingsForm({ vendor }: Props) {
             </ul>
           </div>
 
+          {/*Celebrate comletion*/}
+          {percentage === 100 && (
+            <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-4">
+              <p className="font-medium text-green-700">
+                🎉 Congratulations! Your store profile is fully complete.
+              </p>
+
+              <p className="mt-1 text-sm text-green-600">
+                Customers are more likely to trust and buy from stores with
+                complete business information.
+              </p>
+            </div>
+          )}
+
           {/*Banner and Logo*/}
           <div className="grid md:grid-cols-2 gap-6">
             <ImageUpload
