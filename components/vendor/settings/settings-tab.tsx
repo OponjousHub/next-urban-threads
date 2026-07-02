@@ -23,9 +23,14 @@ type Vendor = {
 
 type Props = {
   vendor: Vendor;
+  bankAccount: {
+    bankName: string;
+    accountName: string;
+    accountNumber: string;
+  } | null;
 };
 
-export default function SettingsPage({ vendor }: Props) {
+export default function SettingsPage({ vendor, bankAccount }: Props) {
   const [activeTab, setActiveTab] = useState("profile");
   const { tenant, storeMode } = useTenant();
 
