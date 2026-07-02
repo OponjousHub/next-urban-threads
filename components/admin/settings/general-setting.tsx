@@ -98,6 +98,28 @@ export default function GeneralSettings() {
   const heroImage = watch("heroImage");
   const logo = watch("logo");
 
+  const values = watch();
+
+  const fields = [
+    values.logo,
+    values.heroImage,
+    values.name,
+    values.email,
+    values.currency,
+    values.primaryColor,
+    values.timezone,
+    values.heroTitle,
+    values.heroSubtitle,
+    values.address,
+    values.heroCTA,
+  ];
+
+  const completed = fields.filter(
+    (value) => value && value.toString().trim() !== "",
+  ).length;
+
+  const percentage = Math.round((completed / fields.length) * 100);
+
   async function uploadImage(file: File, field: "logo" | "heroImage") {
     const formData = new FormData();
     formData.append("image", file); // ✅ FIXED
@@ -131,10 +153,80 @@ export default function GeneralSettings() {
     }
   }
 
+  const progressColor =
+    percentage < 40
+      ? "bg-red-500"
+      : percentage < 80
+        ? "bg-yellow-500"
+        : "bg-green-500";
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="bg-white border rounded-2xl shadow-sm p-6 space-y-6">
         <h2 className="text-sm font-semibold">Store Information</h2>
+
+        {/*Completion bar*/}
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">
+                Store Profile Completion
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                A complete store profile builds customer trust and improves your
+                storefront.
+              </p>
+            </div>
+
+            <span className="text-2xl font-bold text-[var(--color-primary)]">
+              {percentage}%
+            </span>
+          </div>
+
+          <div className="mt-5 h-3 overflow-hidden rounded-full bg-gray-200">
+            <div
+              className={`h-full rounded-full ${progressColor} transition-all duration-500`}
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+
+          <p className="mt-3 text-sm text-gray-500">
+            {completed} of {fields.length} sections completed.
+          </p>
+        </div>
+
+        <div className="mt-5 rounded-xl bg-blue-50 p-4">
+          <p className="font-medium text-blue-900">Complete these items:</p>
+
+          <ul className="mt-2 space-y-1 text-sm text-blue-700">
+            {!values.logo && <li>• Upload your store logo</li>}
+            {!values.heroImage && <li>• Upload a hero image</li>}
+            {!values.currency && <li>• Chose store currency</li>}
+            {!values.heroCTA && <li>• Add hero CTA</li>}
+            {!values.heroTitle && (
+              <li>
+                • Add hero <title></title>
+              </li>
+            )}
+            {!values.address && <li>• Add your business address</li>}
+            {!values.heroSubtitle && <li>• Add hero sub title</li>}
+          </ul>
+        </div>
+
+        {/*Celebrate comletion*/}
+        {percentage === 100 && (
+          <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-4">
+            <p className="font-medium text-green-700">
+              🎉 Congratulations! Your store profile is fully complete.
+            </p>
+
+            <p className="mt-1 text-sm text-green-600">
+              Customers are more likely to trust and buy from stores with
+              complete business information.
+            </p>
+          </div>
+        )}
 
         {/* Store basics */}
         <Input label="Store Name" {...register("name")} />
