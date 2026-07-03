@@ -26,6 +26,7 @@ type Props = {
   vendor: Vendor;
   bankAccount: {
     bankName: string;
+    bankCode: string;
     accountName: string;
     accountNumber: string;
   } | null;

@@ -19,7 +19,6 @@ export default async function VendorSettingsPage() {
       vendorId: vendor.id,
     },
   });
-
   const safeVendor = {
     ...vendor,
     createdAt: vendor.createdAt.toISOString(),

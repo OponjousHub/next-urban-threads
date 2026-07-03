@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import BankSelector from "@/components/sheared/bank-selector";
@@ -9,8 +9,8 @@ type Props = {
   bankAccount: {
     bankCode: string;
     bankName: string;
-    accountName: string;
     accountNumber: string;
+    accountName: string;
   } | null;
 };
 
@@ -25,18 +25,25 @@ export default function PayoutSection({ bankAccount }: Props) {
   const [form, setForm] = useState({
     bankName: bankAccount?.bankName || "",
     bankCode: bankAccount?.bankCode || "",
-    accountName: bankAccount?.accountName || "",
     accountNumber: bankAccount?.accountNumber || "",
+    accountName: bankAccount?.accountName || "",
   });
+
+  const lastVerified = useRef("");
 
   //Watch the ccount number to call for verification once it is 10
   useEffect(() => {
-    if (form.bankCode && form.accountNumber.length === 10) {
-      verifyAccount();
-    } else {
+    if (!form.bankCode || form.accountNumber.length !== 10) {
       setVerified(false);
       setVerificationError("");
+      return;
     }
+
+    const timer = setTimeout(() => {
+      verifyAccount();
+    }, 700);
+
+    return () => clearTimeout(timer);
   }, [form.bankCode, form.accountNumber]);
 
   function update(field: string, value: string) {
@@ -48,6 +55,13 @@ export default function PayoutSection({ bankAccount }: Props) {
 
   // Verification function
   async function verifyAccount() {
+    // Don't verify the same account twice
+    const key = `${form.bankCode}-${form.accountNumber}`;
+    if (lastVerified.current === key) {
+      return;
+    }
+    lastVerified.current = key;
+
     setVerifying(true);
 
     setVerified(false);
@@ -77,6 +91,9 @@ export default function PayoutSection({ bankAccount }: Props) {
       }
 
       update("accountName", data.accountName);
+
+      // ✅ Only remember successful verification
+      lastVerified.current = key;
 
       setVerified(true);
     } catch {
@@ -114,7 +131,6 @@ export default function PayoutSection({ bankAccount }: Props) {
       setLoading(false);
     }
   }
-
   return (
     <div className="rounded-2xl border bg-white p-6 shadow-sm">
       <h2 className="text-lg font-semibold">Payout Settings</h2>
@@ -131,13 +147,6 @@ export default function PayoutSection({ bankAccount }: Props) {
 
             update("bankCode", bank.code);
           }}
-        />
-
-        <input
-          value={form.accountName}
-          onChange={(e) => update("accountName", e.target.value)}
-          placeholder="Account Name"
-          className="rounded-lg border p-3"
         />
 
         <input
@@ -161,6 +170,12 @@ export default function PayoutSection({ bankAccount }: Props) {
             <span className="text-red-600">{verificationError}</span>
           )}
         </div>
+        <input
+          value={form.accountName}
+          onChange={(e) => update("accountName", e.target.value)}
+          placeholder="Account Name"
+          className="rounded-lg border p-3"
+        />
       </div>
 
       <div className="mt-8 flex justify-end">
