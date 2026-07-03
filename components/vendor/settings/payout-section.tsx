@@ -7,6 +7,7 @@ import BankSelector from "@/components/sheared/bank-selector";
 
 type Props = {
   bankAccount: {
+    bankCode: string;
     bankName: string;
     accountName: string;
     accountNumber: string;
@@ -23,6 +24,7 @@ export default function PayoutSection({ bankAccount }: Props) {
 
   const [form, setForm] = useState({
     bankName: bankAccount?.bankName || "",
+    bankCode: bankAccount?.bankCode || "",
     accountName: bankAccount?.accountName || "",
     accountNumber: bankAccount?.accountNumber || "",
   });
@@ -144,12 +146,27 @@ export default function PayoutSection({ bankAccount }: Props) {
           placeholder="Account Number"
           className="rounded-lg border p-3"
         />
+        <div className="mt-2 text-sm">
+          {verifying && (
+            <span className="text-blue-600">Verifying account...</span>
+          )}
+
+          {verified && (
+            <span className="font-medium text-green-600">
+              ✓ Verified Account
+            </span>
+          )}
+
+          {!verified && verificationError && (
+            <span className="text-red-600">{verificationError}</span>
+          )}
+        </div>
       </div>
 
       <div className="mt-8 flex justify-end">
         <button
           onClick={save}
-          disabled={loading}
+          disabled={loading || verifying || !verified}
           className="rounded-xl bg-black px-6 py-3 text-white"
         >
           {loading ? "Saving..." : "Save Bank Details"}
