@@ -16,7 +16,7 @@ import { useTenant } from "@/store/tenant-provider-context";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
-  const { tenant, storeMode } = useTenant();
+  const { storeMode } = useTenant();
 
   const tabs = [
     { id: "general", label: "General" },

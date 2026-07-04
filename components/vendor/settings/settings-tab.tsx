@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTenant } from "@/store/tenant-provider-context";
 import VendorSettingsForm from "./vendor-settings-form";
+import VendorPoliciesPage from "./policy-form";
 import PayoutSection from "./payout-section";
 
 type Vendor = {
@@ -39,6 +40,7 @@ export default function SettingsPage({ vendor, bankAccount }: Props) {
   const tabs = [
     { id: "profile", label: "General Store Profile" },
     { id: "payout", label: "Payout" },
+    { id: "policy", label: "Shipping and returns" },
   ];
 
   return (
@@ -77,6 +79,7 @@ export default function SettingsPage({ vendor, bankAccount }: Props) {
         {/* Tab Content */}
         {activeTab === "profile" && <VendorSettingsForm vendor={vendor} />}
         {activeTab === "payout" && <PayoutSection bankAccount={bankAccount} />}
+        {activeTab === "policy" && <VendorPoliciesPage />}
       </main>
     </div>
   );

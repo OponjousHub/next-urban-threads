@@ -22,8 +22,8 @@ export default function PolicyEditor({ endpoint }: Props) {
 
         const data = await res.json();
 
-        setShipping(data.shippingPolicy ?? "");
-        setReturns(data.returnPolicy ?? "");
+        setShipping(data?.shippingPolicy ?? "");
+        setReturns(data?.returnPolicy ?? "");
       } finally {
         setLoadingData(false);
       }

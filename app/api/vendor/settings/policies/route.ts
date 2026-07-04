@@ -11,15 +11,20 @@ export async function POST(req: Request) {
 
   const { shippingPolicy, returnPolicy } = await req.json();
 
-  await prisma.tenant.update({
-    where: { id: vendor.id },
+  await prisma.vendor.update({
+    where: {
+      id: vendor.id,
+    },
+
     data: {
       shippingPolicy,
       returnPolicy,
     },
   });
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({
+    success: true,
+  });
 }
 
 export async function GET() {
@@ -29,8 +34,11 @@ export async function GET() {
     return NextResponse.json({ error: "Vendor not found!" }, { status: 401 });
   }
 
-  const data = await prisma.tenant.findUnique({
-    where: { id: vendor.id },
+  const data = await prisma.vendor.findUnique({
+    where: {
+      id: vendor.id,
+    },
+
     select: {
       shippingPolicy: true,
       returnPolicy: true,
