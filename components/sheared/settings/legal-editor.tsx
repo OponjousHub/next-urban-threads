@@ -1,0 +1,100 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import RichTextEditor from "@/components/ui/rich-text-editor";
+import { appToast } from "@/utils/appToast";
+
+type FormData = {
+  termsOfService?: string;
+  privacyPolicy?: string;
+};
+
+type Props = {
+  endpoint: string;
+};
+
+export default function LegalEditor({ endpoint }: Props) {
+  const { handleSubmit, setValue, watch } = useForm<FormData>();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      const res = await fetch(endpoint);
+      const data = await res.json();
+
+      setValue("termsOfService", data.termsOfService);
+      setValue("privacyPolicy", data.privacyPolicy);
+    }
+
+    load();
+  }, [setValue, endpoint]);
+
+  const terms = watch("termsOfService");
+  const privacy = watch("privacyPolicy");
+
+  async function onSubmit(data: FormData) {
+    try {
+      setLoading(true);
+
+      const res = await fetch(endpoint, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) throw new Error();
+      appToast.success(
+        "Legal pages updated",
+        "Terms & Privacy saved successfully",
+      );
+    } catch {
+      appToast.error("Update failed", "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+      <div>
+        <h2 className="text-lg font-semibold mb-2">Terms of Service</h2>
+        <RichTextEditor
+          value={terms}
+          onChange={(val) => setValue("termsOfService", val)}
+        />
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold mb-2">Privacy Policy</h2>
+        <RichTextEditor
+          value={privacy}
+          onChange={(val) => setValue("privacyPolicy", val)}
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className={`px-5 py-2 rounded-md text-white text-sm transition
+    ${
+      loading
+        ? "bg-gray-400 cursor-not-allowed opacity-70"
+        : "bg-[var(--color-primary)] hover:opacity-90"
+    }
+  `}
+      >
+        {loading ? (
+          <span className="flex items-center gap-2 justify-center">
+            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            Saving...
+          </span>
+        ) : (
+          "Save changes"
+        )}
+      </button>
+    </form>
+  );
+}
