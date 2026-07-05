@@ -137,6 +137,7 @@ model Vendor {
   returnPolicy    String?
   shippingPolicy  String?
   privacyPolicy   String?
+  termsOfService  String?
   terms           String?
   address         String?
   city            String?

@@ -5,6 +5,7 @@ import { useTenant } from "@/store/tenant-provider-context";
 import VendorSettingsForm from "./vendor-settings-form";
 import VendorPoliciesPage from "./policy-form";
 import PayoutSection from "./payout-section";
+import VendorLegalSettings from "./legal-settings";
 
 type Vendor = {
   id: string;
@@ -41,6 +42,7 @@ export default function SettingsPage({ vendor, bankAccount }: Props) {
     { id: "profile", label: "General Store Profile" },
     { id: "payout", label: "Payout" },
     { id: "policy", label: "Shipping and returns" },
+    { id: "legal", label: "Legal Settings" },
   ];
 
   return (
@@ -80,6 +82,7 @@ export default function SettingsPage({ vendor, bankAccount }: Props) {
         {activeTab === "profile" && <VendorSettingsForm vendor={vendor} />}
         {activeTab === "payout" && <PayoutSection bankAccount={bankAccount} />}
         {activeTab === "policy" && <VendorPoliciesPage />}
+        {activeTab === "policy" && <VendorLegalSettings />}
       </main>
     </div>
   );
