@@ -82,7 +82,7 @@ export default function SettingsPage({ vendor, bankAccount }: Props) {
         {activeTab === "profile" && <VendorSettingsForm vendor={vendor} />}
         {activeTab === "payout" && <PayoutSection bankAccount={bankAccount} />}
         {activeTab === "policy" && <VendorPoliciesPage />}
-        {activeTab === "policy" && <VendorLegalSettings />}
+        {activeTab === "legal" && <VendorLegalSettings />}
       </main>
     </div>
   );

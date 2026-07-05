@@ -129,6 +129,9 @@ model Vendor {
   twitterUrl      String?
   youtubeUrl      String?
   websiteUrl      String?
+  tiktokUrl       String?
+  linkedinUrl     String?
+  whatsapp        String?
 
   bankName        String?
   accountNumber   String?
