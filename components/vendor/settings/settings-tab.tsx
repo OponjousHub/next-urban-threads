@@ -6,6 +6,7 @@ import VendorSettingsForm from "./vendor-settings-form";
 import VendorPoliciesPage from "./policy-form";
 import PayoutSection from "./payout-section";
 import VendorLegalSettings from "./legal-settings";
+import SocialSection from "./social-section";
 
 type Vendor = {
   id: string;
@@ -24,6 +25,17 @@ type Vendor = {
   storeSlug: string | null;
 };
 
+type Social = {
+  facebookUrl: string | null;
+  instagramUrl: string | null;
+  twitterUrl: string | null;
+  tiktokUrl: string | null;
+  youtubeUrl: string | null;
+  linkedinUrl: string | null;
+  websiteUrl: string | null;
+  whatsapp: string | null;
+};
+
 type Props = {
   vendor: Vendor;
   bankAccount: {
@@ -32,9 +44,10 @@ type Props = {
     accountName: string;
     accountNumber: string;
   } | null;
+  social: Social | null;
 };
 
-export default function SettingsPage({ vendor, bankAccount }: Props) {
+export default function SettingsPage({ vendor, bankAccount, social }: Props) {
   const [activeTab, setActiveTab] = useState("profile");
   const { tenant, storeMode } = useTenant();
 
@@ -43,6 +56,7 @@ export default function SettingsPage({ vendor, bankAccount }: Props) {
     { id: "payout", label: "Payout" },
     { id: "policy", label: "Shipping and returns" },
     { id: "legal", label: "Legal Settings" },
+    { id: "social", label: "Social Media" },
   ];
 
   return (
@@ -83,6 +97,7 @@ export default function SettingsPage({ vendor, bankAccount }: Props) {
         {activeTab === "payout" && <PayoutSection bankAccount={bankAccount} />}
         {activeTab === "policy" && <VendorPoliciesPage />}
         {activeTab === "legal" && <VendorLegalSettings />}
+        {activeTab === "social" && <SocialSection social={social} />}
       </main>
     </div>
   );

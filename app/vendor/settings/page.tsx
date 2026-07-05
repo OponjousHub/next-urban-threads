@@ -25,6 +25,17 @@ export default async function VendorSettingsPage() {
     updatedAt: vendor.updatedAt.toISOString(),
   };
 
+  const social = {
+    facebookUrl: vendor.facebookUrl,
+    instagramUrl: vendor.instagramUrl,
+    twitterUrl: vendor.twitterUrl,
+    tiktokUrl: vendor.tiktokUrl,
+    youtubeUrl: vendor.youtubeUrl,
+    linkedinUrl: vendor.linkedinUrl,
+    websiteUrl: vendor.websiteUrl,
+    whatsapp: vendor.whatsapp,
+  };
+
   return (
     <>
       <VendorHeaderUI
@@ -33,7 +44,11 @@ export default async function VendorSettingsPage() {
         vendor={vendor}
       />
 
-      <SettingsPage vendor={safeVendor} bankAccount={bankAccount} />
+      <SettingsPage
+        vendor={safeVendor}
+        bankAccount={bankAccount}
+        social={social}
+      />
     </>
   );
 }
