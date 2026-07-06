@@ -1,8 +1,12 @@
+"use client";
+
+import { Package2, Star, MessageSquare, CalendarDays } from "lucide-react";
+
 type Props = {
   products: number;
   reviews: number;
   rating: number;
-  joined: Date;
+  joined: Date | string;
 };
 
 export default function VendorStats({
@@ -11,36 +15,102 @@ export default function VendorStats({
   rating,
   joined,
 }: Props) {
+  const joinedDate = typeof joined === "string" ? new Date(joined) : joined;
+
+  const stats = [
+    {
+      icon: Package2,
+      label: "Products",
+      value: products,
+      bg: "bg-green-100",
+      color: "text-green-600",
+    },
+    {
+      icon: Star,
+      label: "Rating",
+      value: rating.toFixed(1),
+      bg: "bg-yellow-100",
+      color: "text-yellow-500",
+    },
+    {
+      icon: MessageSquare,
+      label: "Reviews",
+      value: reviews,
+      bg: "bg-blue-100",
+      color: "text-blue-600",
+    },
+    {
+      icon: CalendarDays,
+      label: "Joined",
+      value: joinedDate.toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      }),
+      bg: "bg-purple-100",
+      color: "text-purple-600",
+    },
+  ];
+
   return (
-    <div className="mt-10 grid grid-cols-2 gap-4 rounded-2xl border bg-white p-6 shadow-sm md:grid-cols-4">
-      <div>
-        <p className="text-3xl font-bold">{products}</p>
+    <section className="-mt-16 relative z-30">
+      <div className="mx-auto max-w-6xl rounded-3xl border border-gray-100 bg-white shadow-2xl">
+        <div className="grid grid-cols-2 md:grid-cols-4">
+          {stats.map((item, index) => {
+            const Icon = item.icon;
 
-        <p className="text-sm text-gray-500">Products</p>
-      </div>
+            return (
+              <div
+                key={item.label}
+                className={`
+                  relative
+                  flex
+                  flex-col
+                  items-center
+                  justify-center
+                  px-8
+                  py-10
+                  transition-all
+                  duration-300
+                  hover:bg-gray-50
 
-      <div>
-        <p className="text-3xl font-bold">{rating.toFixed(1)}</p>
+                  ${
+                    index !== stats.length - 1
+                      ? "md:border-r border-gray-200"
+                      : ""
+                  }
+                `}
+              >
+                {/* Icon */}
 
-        <p className="text-sm text-gray-500">Rating</p>
-      </div>
+                <div
+                  className={`
+                    mb-6
+                    flex
+                    h-16
+                    w-16
+                    items-center
+                    justify-center
+                    rounded-full
+                    ${item.bg}
+                  `}
+                >
+                  <Icon className={`h-8 w-8 ${item.color}`} />
+                </div>
 
-      <div>
-        <p className="text-3xl font-bold">{reviews}</p>
+                {/* Value */}
 
-        <p className="text-sm text-gray-500">Reviews</p>
-      </div>
+                <h3 className="text-5xl font-bold tracking-tight text-gray-900">
+                  {item.value}
+                </h3>
 
-      <div>
-        <p className="text-xl font-semibold">
-          {joined.toLocaleDateString("en-US", {
-            month: "short",
-            year: "numeric",
+                {/* Label */}
+
+                <p className="mt-3 text-base text-gray-500">{item.label}</p>
+              </div>
+            );
           })}
-        </p>
-
-        <p className="text-sm text-gray-500">Joined</p>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

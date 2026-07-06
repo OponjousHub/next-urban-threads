@@ -48,6 +48,7 @@ model User {
   tenant                       Tenant         @relation(fields: [tenantId], references: [id])
   wishlistItem                 WishlistItem[]
   refundRequest                RefundRequest[]
+  storeFollow                  StoreFollow[]
 }
 
 model Product {
@@ -332,6 +333,7 @@ model Tenant {
   WishlistItem       WishlistItem[]
   vendors            Vendor[]
   VendorApplication   VendorApplication[]
+  storeFollow        StoreFollow[]
 }
 
 model Session {
@@ -616,6 +618,20 @@ model VendorPayout {
 
   @@index([vendorId, status])
   @@index([tenantId, status])
+}
+
+model StoreFollow {
+  id         String   @id @default(cuid())
+
+  userId     String
+  tenantId   String
+
+  createdAt  DateTime @default(now())
+
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
 }
 
 enum Priority {

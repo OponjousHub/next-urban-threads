@@ -1,81 +1,107 @@
+"use client";
+
 import Link from "next/link";
 
-import { Globe, Instagram, Facebook, Youtube, Linkedin } from "lucide-react";
+import { Globe } from "lucide-react";
+
+import {
+  FaFacebook,
+  FaInstagram,
+  FaYoutube,
+  FaWhatsapp,
+  FaXTwitter,
+  FaLinkedin,
+} from "react-icons/fa6";
 
 type Props = {
   vendor: {
-    websiteUrl: string | null;
-    facebookUrl: string | null;
-    instagramUrl: string | null;
-    twitterUrl: string | null;
-    youtubeUrl: string | null;
-    linkedinUrl: string | null;
-    whatsapp: string | null;
+    websiteUrl?: string | null;
+    facebookUrl?: string | null;
+    instagramUrl?: string | null;
+    youtubeUrl?: string | null;
+    whatsapp?: string | null;
   };
 };
 
 export default function VendorSocialLinks({ vendor }: Props) {
+  console.log("VENDOR SOCIAL LINKS", vendor);
+  const links = [
+    {
+      href: vendor.websiteUrl,
+      label: "Website",
+      icon: Globe,
+      color: "",
+    },
+    {
+      href: vendor.facebookUrl,
+      label: "Facebook",
+      icon: FaFacebook,
+      color: "text-blue-500",
+    },
+    {
+      href: vendor.instagramUrl,
+      label: "Instagram",
+      icon: FaInstagram,
+      color: "text-pink-500",
+    },
+    {
+      href: vendor.youtubeUrl,
+      label: "YouTube",
+      icon: FaYoutube,
+      color: "text-red-500",
+    },
+    {
+      href: vendor.whatsapp
+        ? `https://wa.me/${vendor.whatsapp.replace(/\D/g, "")}`
+        : null,
+      label: "WhatsApp",
+      icon: FaWhatsapp,
+      color: "text-green-500",
+    },
+  ].filter((item) => item.href);
+
+  if (!links.length) return null;
+
   return (
-    <div className="mt-6 flex flex-wrap gap-3">
-      {vendor.websiteUrl && (
-        <Link
-          href={vendor.websiteUrl}
-          target="_blank"
-          className="rounded-full border p-3 hover:bg-gray-100"
-        >
-          <Globe size={18} />
-        </Link>
-      )}
+    <div className="flex flex-wrap gap-4 justify-center">
+      {links.map((item) => {
+        const Icon = item.icon;
 
-      {vendor.facebookUrl && (
-        <Link
-          href={vendor.facebookUrl}
-          target="_blank"
-          className="rounded-full border p-3 hover:bg-gray-100"
-        >
-          <Facebook size={18} />
-        </Link>
-      )}
+        return (
+          <Link
+            key={item.label}
+            href={item.href!}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              group
+              inline-flex
+              items-center
+              gap-3
+              rounded-full
+              border
+              border-white/50
+              bg-white/10
+              px-6
+              py-3
+              backdrop-blur-md
+              text-white
+              transition-all
+              duration-300
+              hover:bg-white
+              hover:text-black
+              hover:shadow-xl
+              hover:scale-105
+            "
+          >
+            <Icon
+              className={`h-5 w-5 ${item.color} transition-transform duration-300 group-hover:scale-110`}
+            />
 
-      {vendor.instagramUrl && (
-        <Link
-          href={vendor.instagramUrl}
-          target="_blank"
-          className="rounded-full border p-3 hover:bg-gray-100"
-        >
-          <Instagram size={18} />
-        </Link>
-      )}
-
-      {vendor.youtubeUrl && (
-        <Link
-          href={vendor.youtubeUrl}
-          target="_blank"
-          className="rounded-full border p-3 hover:bg-gray-100"
-        >
-          <Youtube size={18} />
-        </Link>
-      )}
-
-      {vendor.linkedinUrl && (
-        <Link
-          href={vendor.linkedinUrl}
-          target="_blank"
-          className="rounded-full border p-3 hover:bg-gray-100"
-        >
-          <Linkedin size={18} />
-        </Link>
-      )}
-
-      {vendor.whatsapp && (
-        <Link
-          href={`https://wa.me/${vendor.whatsapp.replace(/\D/g, "")}`}
-          target="_blank"
-          className="rounded-full border p-3 hover:bg-gray-100"
-        >
-          💬
-        </Link>
-      )}
+            <span className="font-medium">{item.label}</span>
+          </Link>
+        );
+      })}
     </div>
   );
 }
