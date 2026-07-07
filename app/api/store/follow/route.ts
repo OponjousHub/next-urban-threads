@@ -4,9 +4,9 @@ import { getAuthPayload } from "@/lib/server/auth";
 
 export async function POST(req: Request) {
   try {
-    const { user } = await getAuthPayload();
+    const { userId } = await getAuthPayload();
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json(
         { message: "Please login first." },
         { status: 401 },
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const existing = await prisma.storeFollow.findUnique({
       where: {
         userId_tenantId: {
-          userId: user.id,
+          userId,
           tenantId,
         },
       },
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 
     await prisma.storeFollow.create({
       data: {
-        userId: user.id,
+        userId,
         tenantId,
       },
     });
