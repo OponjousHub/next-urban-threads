@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
-import { getAuthPayload } from "@/app/lib/auth";
+import { getAuthPayload } from "@/lib/server/auth";
 
 export async function GET(req: Request) {
   try {
-    const { user } = await getAuthPayload();
+    const { userId } = await getAuthPayload();
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({
         following: false,
       });
@@ -30,7 +30,7 @@ export async function GET(req: Request) {
     const follow = await prisma.storeFollow.findUnique({
       where: {
         userId_tenantId: {
-          userId: user.id,
+          userId,
           tenantId,
         },
       },
