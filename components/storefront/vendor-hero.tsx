@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-
+import ShareStoreButton from "../store/share-store-button";
 import {
   Home,
   ChevronRight,
@@ -66,26 +66,11 @@ export default function VendorHero({
 
         {/* ACTIONS */}
 
-        <div className="hidden md:flex items-center gap-4">
-          <button
-            className="
-              inline-flex
-              items-center
-              gap-2
-              rounded-xl
-              border
-              bg-white
-              px-6
-              py-3
-              font-medium
-              shadow-sm
-              transition
-              hover:shadow-md
-            "
-          >
-            <Share2 size={18} />
-            Share
-          </button>
+        <div className="hidden md:flex items-center gap-4 mt-2">
+          <ShareStoreButton
+            title={vendor.name}
+            description={vendor.description}
+          />
 
           <button
             className="
