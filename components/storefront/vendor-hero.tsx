@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import ShareStoreButton from "../store/share-store-button";
-// import FollowStoreButton from "./follow-store-button";
+import FollowStoreButton from "../store/follow-store-button";
+import { useTenant } from "@/store/tenant-provider-context";
 import {
   Home,
   ChevronRight,
@@ -29,6 +30,7 @@ export default function VendorHero({
   averageRating,
   totalReviews,
 }: Props) {
+  const { tenant } = useTenant();
   const joined = new Date(vendor.createdAt).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
@@ -73,7 +75,7 @@ export default function VendorHero({
             description={vendor.description}
           />
 
-          <FollowStoreButton tenantId={vendor.id} />
+          <FollowStoreButton tenantId={tenant.id} />
         </div>
       </div>
 
