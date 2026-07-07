@@ -38,6 +38,13 @@ export default async function VendorStorePage({ params }: Props) {
     notFound();
   }
 
+  // Count the followers
+  const followerCount = await prisma.storeFollow.count({
+    where: {
+      tenantId: vendor.tenantId,
+    },
+  });
+
   const allReviews = vendor.products.flatMap((product) => product.reviews);
 
   const totalReviews = allReviews.length;
@@ -63,6 +70,7 @@ export default async function VendorStorePage({ params }: Props) {
         vendor={safeVendor}
         averageRating={averageRating}
         totalReviews={totalReviews}
+        followerCount={followerCount}
       />
 
       {/* PAGE CONTENT */}
@@ -77,14 +85,4 @@ export default async function VendorStorePage({ params }: Props) {
       </main>
     </>
   );
-
-  // return (
-  //   <main className="mx-auto max-w-7xl px-6 py-8">
-  //     <VendorHero
-  //       vendor={safeVendor}
-  //       averageRating={averageRating}
-  //       totalReviews={totalReviews}
-  //     />
-  //   </main>
-  // );
 }

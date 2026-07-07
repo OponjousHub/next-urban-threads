@@ -1,11 +1,18 @@
 "use client";
 
-import { Package2, Star, MessageSquare, CalendarDays } from "lucide-react";
+import {
+  Package2,
+  Star,
+  MessageSquare,
+  CalendarDays,
+  Users,
+} from "lucide-react";
 
 type Props = {
   products: number;
   reviews: number;
   rating: number;
+  followers: number;
   joined: Date | string;
 };
 
@@ -13,6 +20,7 @@ export default function VendorStats({
   products,
   reviews,
   rating,
+  followers,
   joined,
 }: Props) {
   const joinedDate = typeof joined === "string" ? new Date(joined) : joined;
@@ -40,6 +48,13 @@ export default function VendorStats({
       color: "text-blue-600",
     },
     {
+      icon: Users,
+      label: "Followers",
+      value: followers,
+      bg: "bg-pink-100",
+      color: "text-pink-600",
+    },
+    {
       icon: CalendarDays,
       label: "Joined",
       value: joinedDate.toLocaleDateString("en-US", {
@@ -54,7 +69,7 @@ export default function VendorStats({
   return (
     <section className="-mt-16 relative z-30">
       <div className="mx-auto max-w-6xl rounded-3xl border border-gray-100 bg-white shadow-2xl">
-        <div className="grid grid-cols-2 md:grid-cols-4">
+        <div className="grid grid-cols-2 md:grid-cols-5">
           {stats.map((item, index) => {
             const Icon = item.icon;
 

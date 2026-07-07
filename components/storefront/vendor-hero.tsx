@@ -23,12 +23,14 @@ type Props = {
   vendor: any;
   averageRating: number;
   totalReviews: number;
+  followerCount: number;
 };
 
 export default function VendorHero({
   vendor,
   averageRating,
   totalReviews,
+  followerCount,
 }: Props) {
   const { tenant } = useTenant();
   const joined = new Date(vendor.createdAt).toLocaleDateString("en-US", {
@@ -230,6 +232,7 @@ export default function VendorHero({
             products={vendor.products.length}
             reviews={totalReviews}
             rating={averageRating}
+            followers={followerCount}
             joined={vendor.createdAt}
           />
         </div>

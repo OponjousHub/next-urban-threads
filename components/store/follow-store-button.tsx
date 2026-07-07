@@ -88,9 +88,6 @@ export default function FollowStoreButton({ tenantId }: Props) {
         shadow-md
 
         ${
-          //   following
-          //     ? "bg-red-500 text-white hover:bg-red-600"
-          //     : "bg-[var(--color-primary)] text-white hover:opacity-90"
           following
             ? "bg-green-600 text-white hover:bg-green-700"
             : "bg-[var(--color-primary)] text-white hover:opacity-90"
