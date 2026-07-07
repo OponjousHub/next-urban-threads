@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import ShareStoreButton from "../store/share-store-button";
+// import FollowStoreButton from "./follow-store-button";
 import {
   Home,
   ChevronRight,
@@ -72,25 +73,7 @@ export default function VendorHero({
             description={vendor.description}
           />
 
-          <button
-            className="
-              inline-flex
-              items-center
-              gap-2
-              rounded-xl
-              bg-[var(--color-primary)]
-              px-7
-              py-3
-              font-semibold
-              text-white
-              shadow-md
-              transition
-              hover:opacity-90
-            "
-          >
-            <Heart size={18} />
-            Follow
-          </button>
+          <FollowStoreButton tenantId={vendor.id} />
         </div>
       </div>
 
