@@ -68,7 +68,7 @@ export default function VendorStats({
 
   return (
     <section className="-mt-16 relative z-30">
-      <div className="mx-auto max-w-6xl rounded-3xl border border-gray-100 bg-white shadow-2xl">
+      <div className="mx-auto max-w-7xl rounded-3xl border border-gray-100 bg-white shadow-2xl">
         <div className="grid grid-cols-2 md:grid-cols-5">
           {stats.map((item, index) => {
             const Icon = item.icon;
@@ -114,7 +114,11 @@ export default function VendorStats({
 
                 {/* Value */}
 
-                <h3 className="text-5xl font-bold tracking-tight text-gray-900">
+                <h3
+                  className={`font-bold tracking-tight text-gray-900 ${
+                    item.label === "Joined" ? "text-2xl" : "text-5xl"
+                  }`}
+                >
                   {item.value}
                 </h3>
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import ShareStoreButton from "../store/share-store-button";
 import FollowStoreButton from "../store/follow-store-button";
 import { useTenant } from "@/store/tenant-provider-context";
+import { useState } from "react";
 import {
   Home,
   ChevronRight,
@@ -33,6 +34,8 @@ export default function VendorHero({
   followerCount,
 }: Props) {
   const { tenant } = useTenant();
+  const [followers, setFollowers] = useState(followerCount);
+
   const joined = new Date(vendor.createdAt).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
@@ -77,7 +80,14 @@ export default function VendorHero({
             description={vendor.description}
           />
 
-          <FollowStoreButton tenantId={tenant.id} />
+          <FollowStoreButton
+            tenantId={vendor.tenantId}
+            onFollowersChange={(update) => {
+              setFollowers((current) =>
+                typeof update === "function" ? update(current) : update,
+              );
+            }}
+          />
         </div>
       </div>
 
@@ -232,7 +242,7 @@ export default function VendorHero({
             products={vendor.products.length}
             reviews={totalReviews}
             rating={averageRating}
-            followers={followerCount}
+            followers={followers}
             joined={vendor.createdAt}
           />
         </div>

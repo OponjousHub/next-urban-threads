@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
-
+import VendorProductsSection from "@/components/store/vendor-products-section";
 import VendorHero from "@/components/storefront/vendor-hero";
 
 type Props = {
@@ -76,6 +76,7 @@ export default async function VendorStorePage({ params }: Props) {
       {/* PAGE CONTENT */}
       <main className="mx-auto max-w-7xl px-6 pb-16">
         {/* Products */}
+        <VendorProductsSection products={safeVendor.products} />
 
         {/* Tabs */}
 
