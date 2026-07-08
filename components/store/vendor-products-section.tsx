@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import ProductCard from "@/components/product/product-card";
+import ProductCard from "../products/product-card";
+import { cloudinaryImage } from "@/utils/cloudinary-url";
 
 type Product = {
   id: string;
@@ -11,6 +12,7 @@ type Product = {
   discountedPrice?: number | null;
   thumbnail?: string | null;
   averageRating: number;
+  images: string[];
   reviewCount: number;
   createdAt: string | Date;
   category?: {
@@ -139,9 +141,20 @@ export default function VendorProductsSection({ products }: Props) {
         </div>
       ) : (
         <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-3 xl:grid-cols-4">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {filteredProducts.map((product) => {
+            const imageUrl =
+              product.images?.length > 0
+                ? cloudinaryImage(product.images[0], "card")
+                : "/placeholder.png";
+
+            return (
+              <ProductCard
+                key={product.id}
+                product={product}
+                imageUrl={imageUrl}
+              />
+            );
+          })}
         </div>
       )}
     </section>
