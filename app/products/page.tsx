@@ -11,6 +11,7 @@ import { ProductSkeleton } from "@/components/products/productSkeleton";
 import QuickViewModal from "@/components/products/quickViewModal";
 import { useTenant } from "@/store/tenant-provider-context";
 import ProductCard from "@/components/products/product-card";
+import { Product } from "@/components/products/product-card";
 
 type Category = {
   id: string;
@@ -19,19 +20,7 @@ type Category = {
   image?: string | null;
 };
 
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  images: string[];
-  averageRating: number;
-  reviewCount: number;
-  category: Category;
-  vendor?: {
-    id: string;
-    storeName: string;
-  };
-};
+
 
 export default function AllProductsPage() {
   const searchParams = useSearchParams();

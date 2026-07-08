@@ -3,23 +3,7 @@
 import { useMemo, useState } from "react";
 import ProductCard from "../products/product-card";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
-
-type Product = {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  discountedPrice?: number | null;
-  thumbnail?: string | null;
-  averageRating: number;
-  images: string[];
-  reviewCount: number;
-  createdAt: string | Date;
-  category?: {
-    id: string;
-    name: string;
-  } | null;
-};
+import { Product } from "../products/product-card";
 
 type Props = {
   products: Product[];
@@ -29,6 +13,7 @@ export default function VendorProductsSection({ products }: Props) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("newest");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const categories = useMemo(() => {
     return [
@@ -152,6 +137,7 @@ export default function VendorProductsSection({ products }: Props) {
                 key={product.id}
                 product={product}
                 imageUrl={imageUrl}
+                setSelectedProduct={setSelectedProduct}
               />
             );
           })}
