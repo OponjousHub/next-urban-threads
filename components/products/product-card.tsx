@@ -4,29 +4,7 @@ import Link from "next/link";
 import { ProductRating } from "@/utils/product-rating";
 import { useTenant } from "@/store/tenant-provider-context";
 import { useSearchParams } from "next/navigation";
-
-type Category = {
-  id: string;
-  name: string;
-  slug: string;
-  image?: string | null;
-};
-
-export type Product = {
-  id: string;
-  name: string;
-  price: number;
-  images: string[];
-  averageRating: number;
-  reviewCount: number;
-  discountedPrice: number;
-  createdAt: Date;
-  category: Category;
-  vendor?: {
-    id: string;
-    storeName: string;
-  };
-};
+import { Product } from "@/types/product";
 
 type Props = {
   product: Product;

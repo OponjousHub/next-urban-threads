@@ -6,15 +6,7 @@ import { ProductRating } from "@/utils/product-rating";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
 import Link from "next/link";
 import { useTenant } from "@/store/tenant-provider-context";
-
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  images: string[];
-  averageRating: number;
-  reviewCount: number;
-};
+import { Product } from "@/types/product";
 
 type Props = {
   product: Product | null;

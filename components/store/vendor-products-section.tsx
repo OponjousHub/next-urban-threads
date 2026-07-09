@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import ProductCard from "../products/product-card";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
-import { Product } from "../products/product-card";
+import { Product } from "@/types/product";
 
 type Props = {
   products: Product[];
@@ -11,10 +11,10 @@ type Props = {
 
 export default function VendorProductsSection({ products }: Props) {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState<undefined | string>("all");
   const [sort, setSort] = useState("newest");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
+  console.log("RAW PRODUCTS", products);
   const categories = useMemo(() => {
     return [
       "all",
@@ -53,7 +53,7 @@ export default function VendorProductsSection({ products }: Props) {
         break;
 
       case "rating":
-        data.sort((a, b) => b.averageRating - a.averageRating);
+        data.sort((a, b) => (b.averageRating ?? 0) - (a.averageRating ?? 0));
         break;
 
       default:
@@ -65,7 +65,7 @@ export default function VendorProductsSection({ products }: Props) {
 
     return data;
   }, [products, search, category, sort]);
-
+  console.log("FILTERED PRODUCT", filteredProducts);
   return (
     <section id="products" className="mt-20">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -127,6 +127,8 @@ export default function VendorProductsSection({ products }: Props) {
       ) : (
         <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-3 xl:grid-cols-4">
           {filteredProducts.map((product) => {
+            console.log("PRODUCT INSIDE THE MAP", products);
+
             const imageUrl =
               product.images?.length > 0
                 ? cloudinaryImage(product.images[0], "card")

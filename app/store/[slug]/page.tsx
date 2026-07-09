@@ -28,6 +28,7 @@ export default async function VendorStorePage({ params }: Props) {
         },
 
         include: {
+          category: true,
           reviews: true,
         },
       },
@@ -58,9 +59,27 @@ export default async function VendorStorePage({ params }: Props) {
   const safeVendor = {
     ...vendor,
 
-    products: new Array(vendor.products.length),
-
     createdAt: vendor.createdAt.toISOString(),
+
+    products: vendor.products.map((product) => ({
+      ...product,
+
+      price: Number(product.price),
+      discountedPrice: product.discountedPrice
+        ? Number(product.discountedPrice)
+        : null,
+
+      videos: Array.isArray(product.videos)
+        ? (product.videos as {
+            url: string;
+            public_id: string;
+          }[])
+        : [],
+
+      createdAt: product.createdAt.toISOString(),
+
+      updatedAt: product.updatedAt.toISOString(),
+    })),
   };
 
   return (
