@@ -18,13 +18,13 @@ export default function VendorContactSection({ vendor }: Props) {
 
   return (
     <section className="mt-20">
-      <div className="rounded-3xl border bg-gradient-to-br from-gray-50 to-white p-10 shadow-sm">
+      <div className="rounded-3xl border bg-gradient-to-br from-gray-50 to-white p-6 shadow-sm">
         <div className="max-w-3xl">
           <span className="rounded-full bg-black px-4 py-1 text-xs font-semibold uppercase tracking-wider text-white">
             Need Help?
           </span>
 
-          <h2 className="mt-5 text-4xl font-bold">Contact {vendor.name}</h2>
+          <h2 className="mt-4 text-3xl font-bold">Contact {vendor.name}</h2>
 
           <p className="mt-4 text-lg leading-8 text-gray-600">
             Have questions before placing your order? Need product

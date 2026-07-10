@@ -8,6 +8,7 @@ import VendorProductsSection from "./vendor-products-section";
 import VendorAboutSection from "./vendor-about-section";
 import VendorReviewsSection from "./vendor-reviews-section";
 import VendorPoliciesSection from "./vendor-policies-section";
+import VendorContactSection from "./vendor-contact-section";
 
 type Props = {
   vendor: any;
@@ -81,6 +82,7 @@ export default function VendorStoreContent({
           privacyPolicy={vendor.privacyPolicy}
         />
       )}
+      <VendorContactSection vendor={vendor} />
     </>
   );
 }
