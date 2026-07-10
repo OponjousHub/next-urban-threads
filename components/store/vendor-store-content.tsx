@@ -7,6 +7,7 @@ import VendorTabs from "./vendor-tabs";
 import VendorProductsSection from "./vendor-products-section";
 import VendorAboutSection from "./vendor-about-section";
 import VendorReviewsSection from "./vendor-reviews-section";
+import VendorPoliciesSection from "./vendor-policies-section";
 
 type Props = {
   vendor: any;
@@ -73,11 +74,12 @@ export default function VendorStoreContent({
       )}
 
       {tab === "policies" && (
-        <div className="mt-20 rounded-3xl border bg-white p-10 text-center">
-          <h2 className="text-2xl font-bold">Policies</h2>
-
-          <p className="mt-4 text-gray-500">Coming next...</p>
-        </div>
+        <VendorPoliciesSection
+          shippingPolicy={vendor.shippingPolicy}
+          returnPolicy={vendor.returnPolicy}
+          termsOfService={vendor.termsOfService}
+          privacyPolicy={vendor.privacyPolicy}
+        />
       )}
     </>
   );
