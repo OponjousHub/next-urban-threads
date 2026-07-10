@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import VendorProductsSection from "@/components/store/vendor-products-section";
 import VendorHero from "@/components/storefront/vendor-hero";
 import VendorAboutSection from "@/components/store/vendor-about-section";
+import VendorReviewsSection from "@/components/store/vendor-reviews-section";
 
 type Props = {
   params: Promise<{
@@ -30,7 +31,16 @@ export default async function VendorStorePage({ params }: Props) {
 
         include: {
           category: true,
-          reviews: true,
+          reviews: {
+            include: {
+              user: {
+                select: {
+                  name: true,
+                  avatarUrl: true, // or avatar if that's your field
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -108,6 +118,16 @@ export default async function VendorStorePage({ params }: Props) {
     })),
   };
 
+  const safeLatestReviews = latestReviews.map((review) => ({
+    ...review,
+    createdAt: review.createdAt.toISOString(),
+
+    user: {
+      name: review.user?.name ?? "Anonymous",
+      avatar: review.user?.avatarUrl ?? null,
+    },
+  }));
+
   return (
     <>
       {/* FULL-WIDTH HERO */}
@@ -134,6 +154,16 @@ export default async function VendorStorePage({ params }: Props) {
         />
 
         {/* Reviews */}
+        <VendorReviewsSection
+          averageRating={averageRating}
+          reviewCount={totalReviews}
+          rating1={rating1}
+          rating2={rating2}
+          rating3={rating3}
+          rating4={rating4}
+          rating5={rating5}
+          reviews={safeLatestReviews}
+        />
       </main>
     </>
   );
