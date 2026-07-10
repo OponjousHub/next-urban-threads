@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
 import VendorHero from "@/components/storefront/vendor-hero";
 import VendorStoreContent from "@/components/store/vendor-store-content";
+import SimilarStoresSection from "@/components/store/similar-stores-section";
 
 type Props = {
   params: Promise<{
@@ -58,6 +59,34 @@ export default async function VendorStorePage({ params }: Props) {
     })),
   );
 
+  // Load Similar vendor
+  const similarVendors = await prisma.vendor.findMany({
+    where: {
+      id: {
+        not: vendor.id,
+      },
+      products: {
+        some: {},
+      },
+    },
+
+    include: {
+      _count: {
+        select: {
+          products: true,
+        },
+      },
+
+      products: {
+        select: {
+          averageRating: true,
+        },
+      },
+    },
+
+    take: 4,
+  });
+
   //Computing rating counts
   const rating5 = allReviews.filter((r) => r.rating === 5).length;
   const rating4 = allReviews.filter((r) => r.rating === 4).length;
@@ -71,6 +100,25 @@ export default async function VendorStorePage({ params }: Props) {
       tenantId: vendor.tenantId,
     },
   });
+
+  // Count the followers for Similar vendor links
+  const similarVendorFollowers = await prisma.storeFollow.groupBy({
+    by: ["tenantId"],
+
+    _count: {
+      tenantId: true,
+    },
+
+    where: {
+      tenantId: {
+        in: similarVendors.map((v) => v.tenantId),
+      },
+    },
+  });
+
+  if (!similarVendorFollowers) {
+    notFound();
+  }
 
   // const allReviews = vendor.products.flatMap((product) => product.reviews);
 
@@ -126,6 +174,52 @@ export default async function VendorStorePage({ params }: Props) {
     },
   }));
 
+  const safeSimilarVendors = similarVendors.map((store) => {
+    const ratings = store.products
+      .map((p) => p.averageRating ?? 0)
+      .filter((r) => r > 0);
+
+    const averageRating =
+      ratings.length === 0
+        ? 0
+        : ratings.reduce((a, b) => a + b, 0) / ratings.length;
+
+    const followerCount =
+      similarVendorFollowers.find((f) => f.tenantId === store.tenantId)?._count
+        .tenantId ?? 0;
+
+    return {
+      id: store.id,
+      slug: store.slug,
+      name: store.name,
+      logo: store.logo,
+      banner: store.banner,
+      averageRating,
+      productCount: store._count.products,
+      followerCount,
+    };
+  });
+  //   const ratings = store.products
+  //     .map((p) => p.averageRating ?? 0)
+  //     .filter((r) => r > 0);
+
+  //   const averageRating =
+  //     ratings.length === 0
+  //       ? 0
+  //       : ratings.reduce((a, b) => a + b, 0) / ratings.length;
+
+  //   return {
+  //     id: store.id,
+  //     slug: store.slug,
+  //     name: store.name,
+  //     logo: store.logo,
+  //     banner: store.banner,
+  //     averageRating,
+  //     productCount: store._count.products,
+  //     followerCount: store._count.followers,
+  //   };
+  // });
+
   return (
     <>
       {/* FULL-WIDTH HERO */}
@@ -150,6 +244,7 @@ export default async function VendorStorePage({ params }: Props) {
           rating4={rating4}
           rating5={rating5}
         />
+        <SimilarStoresSection stores={safeSimilarVendors} />
       </main>
     </>
   );
