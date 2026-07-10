@@ -48,13 +48,27 @@ export default function SimilarStoresSection({ stores }: Props) {
 
             <div className="relative px-6 pb-6">
               <div className="-mt-10 mb-4">
-                <Image
+                {/* <Image
                   src={store.logo || "/images/default-store-logo.jpg"}
                   alt={store.name}
                   width={72}
                   height={72}
                   className="rounded-full border-4 border-white bg-white object-cover shadow-lg"
-                />
+                /> */}
+
+                {store.logo ? (
+                  <Image
+                    src={store.logo}
+                    alt={store.name}
+                    width={72}
+                    height={72}
+                    className="object-cover rounded-full"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center rounded-full h-24 w-24 bg-gradient-to-br from-gray-800 to-gray-600 text-4xl font-bold text-white p-6">
+                    {store.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
               </div>
 
               <h3 className="text-xl font-semibold">{store.name}</h3>

@@ -96,7 +96,7 @@ export default function VendorHero({
       ============================ */}
 
       <div className="relative overflow-hidden rounded-3xl bg">
-        <div className="relative h-[520px] w-full">
+        <div className="relative h-[640px] sm:h-[700px] md:h-[620px] lg:h-[520px] w-full">
           <Image
             src={vendor.banner || "/img/defaul-store-banner.jpg"}
             alt={vendor.name}
@@ -116,32 +116,41 @@ export default function VendorHero({
           {/* CONTENT */}
 
           <div className="absolute inset-0 flex items-center">
-            {/* <div className="w-full px-10 lg:px-16"> */}
-            <div className="mx-auto flex h-full max-w-7xl items-center px-6 lg:px-8">
+            <div className="mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
               <div className="max-w-5xl">
                 <div
                   className="
-                    rounded-[32px]
-                    border
-                    border-white/30
-                    bg-white/10
-                    p-8
-                    backdrop-blur-xl
-                    shadow-2xl
+                  rounded-3xl
+                  border
+                  border-white/20
+                  bg-white/10
+                  p-5
+                  sm:p-6
+                  lg:p-8
+                  backdrop-blur-xl
+                  shadow-2xl
                   "
                 >
-                  <div className="flex flex-col lg:flex-row gap-8">
+                  <div className="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-6 lg:gap-8">
                     {/* LOGO */}
 
                     <div className="shrink-0">
-                      <div className="rounded-full border-4 border-white bg-white p-1 shadow-2xl">
-                        <Image
-                          src={vendor.logo || "/images/default-store-logo.png"}
-                          alt={vendor.name}
-                          width={170}
-                          height={170}
-                          className="rounded-full object-cover"
-                        />
+                      <div className="shrink-0">
+                        <div className="rounded-full border-4 border-white bg-white p-1 shadow-2xl">
+                          {vendor.logo ? (
+                            <Image
+                              src={vendor.logo}
+                              alt={vendor.name}
+                              width={96}
+                              height={96}
+                              className="h-24 w-24 rounded-full object-cover md:h-48 md:w-48"
+                            />
+                          ) : (
+                            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-gray-800 to-gray-600 text-3xl font-bold text-white md:h-48 md:w-48 md:text-6xl">
+                              {vendor.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -149,7 +158,7 @@ export default function VendorHero({
 
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-4">
-                        <h1 className="text-5xl font-bold tracking-tight text-white">
+                        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
                           {vendor.name}
                         </h1>
 
@@ -160,8 +169,7 @@ export default function VendorHero({
                             gap-2
                             rounded-full
                             bg-blue-500
-                            px-4
-                            py-2
+                            px-3 py-1.5 sm:px-4 sm:py-2
                             text-sm
                             font-semibold
                             text-white
@@ -197,7 +205,7 @@ export default function VendorHero({
                       </div>
                       {/* LOCATION + JOINED */}
 
-                      <div className="mt-6 flex flex-wrap items-center gap-8 text-white/90">
+                      <div className="mt-5 flex flex-wrap justify-center lg:justify-start items-center gap-4 text-white/90">
                         <div className="flex items-center gap-3">
                           <MapPin size={18} />
 
