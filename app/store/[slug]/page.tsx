@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
 import VendorProductsSection from "@/components/store/vendor-products-section";
 import VendorHero from "@/components/storefront/vendor-hero";
+import VendorAboutSection from "@/components/store/vendor-about-section";
 
 type Props = {
   params: Promise<{
@@ -100,6 +101,12 @@ export default async function VendorStorePage({ params }: Props) {
         {/* Tabs */}
 
         {/* About */}
+        <VendorAboutSection
+          vendor={safeVendor}
+          averageRating={averageRating}
+          totalReviews={totalReviews}
+          followers={followerCount}
+        />
 
         {/* Reviews */}
       </main>
