@@ -40,6 +40,23 @@ export default async function VendorStorePage({ params }: Props) {
     notFound();
   }
 
+  // Compute review infor
+  const allReviews = vendor.products.flatMap((product) =>
+    product.reviews.map((review) => ({
+      ...review,
+      product: {
+        name: product.name,
+      },
+    })),
+  );
+
+  //Computing rating counts
+  const rating5 = allReviews.filter((r) => r.rating === 5).length;
+  const rating4 = allReviews.filter((r) => r.rating === 4).length;
+  const rating3 = allReviews.filter((r) => r.rating === 3).length;
+  const rating2 = allReviews.filter((r) => r.rating === 2).length;
+  const rating1 = allReviews.filter((r) => r.rating === 1).length;
+
   // Count the followers
   const followerCount = await prisma.storeFollow.count({
     where: {
@@ -47,7 +64,7 @@ export default async function VendorStorePage({ params }: Props) {
     },
   });
 
-  const allReviews = vendor.products.flatMap((product) => product.reviews);
+  // const allReviews = vendor.products.flatMap((product) => product.reviews);
 
   const totalReviews = allReviews.length;
 
