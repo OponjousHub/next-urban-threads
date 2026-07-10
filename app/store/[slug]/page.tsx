@@ -4,6 +4,7 @@ import VendorProductsSection from "@/components/store/vendor-products-section";
 import VendorHero from "@/components/storefront/vendor-hero";
 import VendorAboutSection from "@/components/store/vendor-about-section";
 import VendorReviewsSection from "@/components/store/vendor-reviews-section";
+import VendorStoreContent from "@/components/store/vendor-store-content";
 
 type Props = {
   params: Promise<{
@@ -141,20 +142,20 @@ export default async function VendorStorePage({ params }: Props) {
       {/* PAGE CONTENT */}
       <main className="mx-auto max-w-7xl px-6 pb-16">
         {/* Products */}
-        <VendorProductsSection products={safeVendor.products} />
+        {/* <VendorProductsSection products={safeVendor.products} /> */}
 
         {/* Tabs */}
 
         {/* About */}
-        <VendorAboutSection
+        {/* <VendorAboutSection
           vendor={safeVendor}
           averageRating={averageRating}
           totalReviews={totalReviews}
           followers={followerCount}
-        />
+        /> */}
 
         {/* Reviews */}
-        <VendorReviewsSection
+        {/* <VendorReviewsSection
           averageRating={averageRating}
           reviewCount={totalReviews}
           rating1={rating1}
@@ -163,6 +164,18 @@ export default async function VendorStorePage({ params }: Props) {
           rating4={rating4}
           rating5={rating5}
           reviews={safeLatestReviews}
+        /> */}
+        <VendorStoreContent
+          vendor={safeVendor}
+          averageRating={averageRating}
+          totalReviews={totalReviews}
+          followers={followerCount}
+          reviews={safeLatestReviews}
+          rating1={rating1}
+          rating2={rating2}
+          rating3={rating3}
+          rating4={rating4}
+          rating5={rating5}
         />
       </main>
     </>
