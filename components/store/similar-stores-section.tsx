@@ -39,7 +39,7 @@ export default function SimilarStoresSection({ stores }: Props) {
           >
             <div className="relative h-36">
               <Image
-                src={store.banner || "/images/default-store-banner.jpg"}
+                src={store.banner || "/img/defaul-store-banner.jpg"}
                 alt={store.name}
                 fill
                 className="object-cover"
@@ -49,7 +49,7 @@ export default function SimilarStoresSection({ stores }: Props) {
             <div className="relative px-6 pb-6">
               <div className="-mt-10 mb-4">
                 <Image
-                  src={store.logo || "/images/default-store-logo.png"}
+                  src={store.logo || "/images/default-store-logo.jpg"}
                   alt={store.name}
                   width={72}
                   height={72}

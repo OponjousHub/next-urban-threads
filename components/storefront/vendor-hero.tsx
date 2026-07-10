@@ -98,7 +98,7 @@ export default function VendorHero({
       <div className="relative overflow-hidden rounded-3xl bg">
         <div className="relative h-[520px] w-full">
           <Image
-            src={vendor.banner || "/images/default-store-banner.jpg"}
+            src={vendor.banner || "/img/defaul-store-banner.jpg"}
             alt={vendor.name}
             fill
             priority
