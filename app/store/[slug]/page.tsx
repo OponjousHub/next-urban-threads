@@ -74,6 +74,14 @@ export default async function VendorStorePage({ params }: Props) {
       : allReviews.reduce((sum, review) => sum + review.rating, 0) /
         totalReviews;
 
+  // Latest reviews: Sort by newest and keep only the latest six:
+  const latestReviews = [...allReviews]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 6);
+
   const safeVendor = {
     ...vendor,
 
