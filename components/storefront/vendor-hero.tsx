@@ -9,8 +9,6 @@ import { useState } from "react";
 import {
   Home,
   ChevronRight,
-  Share2,
-  Heart,
   ShieldCheck,
   Star,
   MapPin,
