@@ -26,7 +26,7 @@ export default function StoreCard({ store }: Props) {
 
       <div className="relative h-44 overflow-hidden">
         <Image
-          src={store.banner || "/img/default-store-banner.jpg"}
+          src={store.banner || "/img/defaul-store-banner.jpg"}
           alt={store.name}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
