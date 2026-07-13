@@ -8,252 +8,231 @@ datasource db {
 }
 
 model User {
-  id                           String         @id @default(cuid())
-  vendorId                     String?
-  email                        String         @unique
-  createdAt                    DateTime       @default(now())
+  id                           String              @id @default(cuid())
+  email                        String              @unique
+  createdAt                    DateTime            @default(now())
   address                      String?
   city                         String?
   country                      String?
   password                     String
   phone                        String?
-  role                         Role           @default(USER)
-  updatedAt                    DateTime       @updatedAt
+  role                         Role                @default(USER)
+  updatedAt                    DateTime            @updatedAt
   deletedAt                    DateTime?
-  isDeleted                    Boolean        @default(false)
+  isDeleted                    Boolean             @default(false)
   avatarUrl                    String?
   name                         String?
-  status                       AccountStatus  @default(ACTIVE)
+  status                       AccountStatus       @default(ACTIVE)
   emailTokenExpiry             DateTime?
   emailVerifyToken             String?
   pendingEmail                 String?
   tenantId                     String
   passwordUpdatedAt            DateTime?
-  twoFactorEnabled             Boolean        @default(false)
+  twoFactorEnabled             Boolean             @default(false)
   twoFactorSecret              String?
   twoFactorTempSecret          String?
   twoFactorTempSecretExpiresAt DateTime?
   recoveryCodes                String[]
   deactivatedAt                DateTime?
-  resetToken                   String?        @unique
+  resetToken                   String?             @unique
   resetTokenExpiry             DateTime?
-  vendorApplications           VendorApplication[]
-  vendor                       Vendor? @relation(fields:[vendorId], references:[id])
+  vendorId                     String?
   addresses                    Address[]
   cartItems                    CartItem[]
   orders                       Order[]
-  products                     Product[]      @relation("UserProduct")
+  products                     Product[]           @relation("UserProduct")
+  refundRequest                RefundRequest[]
   reviews                      Review[]
   session                      Session[]
-  tenant                       Tenant         @relation(fields: [tenantId], references: [id])
-  wishlistItem                 WishlistItem[]
-  refundRequest                RefundRequest[]
   storeFollow                  StoreFollow[]
+  tenant                       Tenant              @relation(fields: [tenantId], references: [id])
+  vendor                       Vendor?             @relation(fields: [vendorId], references: [id])
+  vendorApplications           VendorApplication[]
+  wishlistItem                 WishlistItem[]
 }
 
 model Product {
-  id              String         @id @default(cuid())
-  price           Decimal        @db.Decimal(10, 2)
-  discountedPrice Decimal?       @db.Decimal(10, 2)
+  id              String           @id @default(cuid())
+  price           Decimal          @db.Decimal(10, 2)
+  discountedPrice Decimal?         @db.Decimal(10, 2)
   name            String
   slug            String
   description     String?
   thumbnail       String
   sizes           String[]
   colours         String[]
-  stock           Int            @default(0)
-  instock         Boolean        @default(true)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  stock           Int              @default(0)
+  instock         Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   subCategory     String
   seoTitle        String?
   seoDescription  String?
   deletedAt       DateTime?
   images          String[]
-  videos          Json?
   createdByName   String?
-  featured        Boolean        @default(false)
+  featured        Boolean          @default(false)
   createdById     String?
   tenantId        String
-  averageRating   Float          @default(0)
-  reviewCount     Int            @default(0)
-  rating1Count    Int            @default(0)
-  rating2Count    Int            @default(0)
-  rating3Count    Int            @default(0)
-  rating4Count    Int            @default(0)
-  rating5Count    Int            @default(0)
+  averageRating   Float            @default(0)
+  reviewCount     Int              @default(0)
+  rating1Count    Int              @default(0)
+  rating2Count    Int              @default(0)
+  rating3Count    Int              @default(0)
+  rating4Count    Int              @default(0)
+  rating5Count    Int              @default(0)
   vendorId        String?
-  vendor          Vendor? @relation(fields: [vendorId], references: [id])
   categoryId      String
-  isFlashDeal     Boolean        @default(false)
-  variants        ProductVariant[] 
+  isFlashDeal     Boolean          @default(false)
+  videos          Json?
+  storeMode       StoreMode        @default(SINGLE_VENDOR)
   cartItems       CartItem[]
   orderItems      OrderItem[]
-  category        Category       @relation(fields: [categoryId], references: [id])
-  user            User?          @relation("UserProduct", fields: [createdById], references: [id])
-  tenant          Tenant         @relation(fields: [tenantId], references: [id])
-  storeMode       StoreMode @default(SINGLE_VENDOR)
+  category        Category         @relation(fields: [categoryId], references: [id])
+  user            User?            @relation("UserProduct", fields: [createdById], references: [id])
+  tenant          Tenant           @relation(fields: [tenantId], references: [id])
+  vendor          Vendor?          @relation(fields: [vendorId], references: [id])
+  variants        ProductVariant[]
+  refundItem      RefundItem[]
   reviews         Review[]
   wishlistItem    WishlistItem[]
-  refundItem      RefundItem[]
 
   @@unique([tenantId, slug])
   @@index([tenantId])
 }
 
 model Vendor {
-  id          String   @id @default(cuid())
-  tenantId    String
-  name        String
-  slug        String   @unique
-  logo        String?
-  banner      String?
-  description String?
-
-  email       String?
-  phone       String?
-
+  id               String             @id @default(cuid())
+  name             String
+  banner           String?
+  createdAt        DateTime           @default(now())
+  description      String?
+  email            String?
+  logo             String?
+  phone            String?
+  slug             String             @unique
+  status           VendorStatus       @default(PENDING)
+  updatedAt        DateTime           @updatedAt
+  tenantId         String
   suspensionReason String?
-  adminNotes  String?
-
-  status      VendorStatus @default(PENDING)
-  tenant      Tenant @relation(fields: [tenantId], references: [id])
-
-  payouts     VendorPayout[]
-  products    Product[]
-  users       User[]
-  orders      Order[]
-  coupon      Coupon[]
-
-  facebookUrl     String?
-  instagramUrl    String?
-  twitterUrl      String?
-  youtubeUrl      String?
-  websiteUrl      String?
-  tiktokUrl       String?
-  linkedinUrl     String?
-  whatsapp        String?
-
-  bankName        String?
-  accountNumber   String?
-  accountName     String?
-
-  returnPolicy    String?
-  shippingPolicy  String?
-  privacyPolicy   String?
-  termsOfService  String?
-  terms           String?
-  address         String?
-  city            String?
-  state           String?
-  country         String?
-  bankAccount     VendorBankAccount?
-  storeSlug       String? @unique @db.VarChar(100)
-
-  accentColor     String? @default("#000000")
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  adminNotes       String?
+  accentColor      String?            @default("#000000")
+  accountName      String?
+  accountNumber    String?
+  bankName         String?
+  facebookUrl      String?
+  instagramUrl     String?
+  privacyPolicy    String?
+  returnPolicy     String?
+  shippingPolicy   String?
+  terms            String?
+  twitterUrl       String?
+  websiteUrl       String?
+  youtubeUrl       String?
+  address          String?
+  city             String?
+  country          String?
+  state            String?
+  storeSlug        String?            @unique @db.VarChar(100)
+  termsOfService   String?
+  linkedinUrl      String?
+  tiktokUrl        String?
+  whatsapp         String?
+  coupon           Coupon[]
+  orders           Order[]
+  products         Product[]
+  users            User[]
+  tenant           Tenant             @relation(fields: [tenantId], references: [id])
+  bankAccount      VendorBankAccount?
+  payouts          VendorPayout[]
+  storeFollow      StoreFollow[]
 }
 
 model VendorApplication {
-  id String @id @default(cuid())
-  tenantId    String
-
-  userId String
-  user User @relation(fields: [userId], references: [id])
-
-  businessName String
-  businessEmail String?
-  businessPhone String?
-
-  description String?
-
-  status VendorApplicationStatus @default(PENDING)
-  tenant      Tenant @relation(fields: [tenantId], references: [id])
-
-  reviewedAt DateTime?
-  reviewedBy String?
-
+  id              String                  @id @default(cuid())
+  userId          String
+  businessName    String
+  businessEmail   String?
+  businessPhone   String?
+  description     String?
+  status          VendorApplicationStatus @default(PENDING)
+  reviewedAt      DateTime?
+  reviewedBy      String?
   rejectionReason String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  tenantId        String
+  tenant          Tenant                  @relation(fields: [tenantId], references: [id])
+  user            User                    @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([status])
 }
 
 model VendorBankAccount {
-  id              String   @id @default(cuid())
-
-  vendorId        String   @unique
-  tenantId        String
-
-  bankCode        String
-  bankName        String
-  accountName     String
-  accountNumber   String
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  vendor          Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  tenant          Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  vendorId      String   @unique
+  tenantId      String
+  bankName      String
+  accountName   String
+  accountNumber String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  bankCode      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vendor        Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 }
 
 model Order {
   id                 String               @id @default(cuid())
   userId             String
-  paymentTxRef       String?   // tx_ref (tracking)
   customerEmail      String
   createdAt          DateTime             @default(now())
   status             OrderStatus          @default(PENDING)
   paymentMethod      String
   totalAmount        Decimal
-  discountAmount     Decimal @default(0)
   currency           String
   paymentProvider    PaymentProvider
-  paymentReference   String              @unique
+  paymentReference   String               @unique
   shippingAddressId  String
   paymentStatus      PaymentStatus        @default(PENDING)
-  storeMode          StoreMode @default(SINGLE_VENDOR)
-  couponId           String?
   tenantId           String
   vendorId           String?
-  commissionAmount   Decimal  @default(0) 
-  vendor             Vendor? @relation(fields: [vendorId], references: [id])
-  coupon             Coupon? @relation(fields:[couponId], references:[id])
   refundStatus       RefundStatus         @default(NONE)
+  paymentTxRef       String?
+  storeMode          StoreMode            @default(SINGLE_VENDOR)
+  couponId           String?
+  discountAmount     Decimal              @default(0)
+  commissionAmount   Decimal              @default(0)
+  coupon             Coupon?              @relation(fields: [couponId], references: [id])
   shippingAddress    Address              @relation(fields: [shippingAddressId], references: [id])
   tenant             Tenant               @relation(fields: [tenantId], references: [id])
   user               User                 @relation(fields: [userId], references: [id])
+  vendor             Vendor?              @relation(fields: [vendorId], references: [id])
   items              OrderItem[]
   orderStatusHistory OrderStatusHistory[]
   orderTrackingEvent OrderTrackingEvent[]
-  review             Review[]
   refundRequest      RefundRequest[]
+  review             Review[]
 
   @@index([tenantId, createdAt, status])
 }
 
 model OrderItem {
-  id            String  @id @default(cuid())
-  orderId       String
-  productId     String
-  vendorId      String?
-  quantity      Int
-  price         Decimal @db.Decimal(10, 2)
-  storeMode     StoreMode @default(SINGLE_VENDOR)
-  tenantId      String
-
-  variantId     String?
-  variantColor  String?
-  variantSize   String?
-  image         String?
-
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
+  id           String    @id @default(cuid())
+  orderId      String
+  productId    String
+  quantity     Int
+  price        Decimal   @db.Decimal(10, 2)
+  tenantId     String
+  image        String?
+  variantColor String?
+  variantId    String?
+  variantSize  String?
+  vendorId     String?
+  storeMode    StoreMode @default(SINGLE_VENDOR)
+  order        Order     @relation(fields: [orderId], references: [id])
+  product      Product   @relation(fields: [productId], references: [id])
 }
 
 model Address {
@@ -278,22 +257,20 @@ model Address {
 }
 
 model Tenant {
-  id                 String         @id @default(cuid())
+  id                 String              @id @default(cuid())
   name               String
-  slug               String         @unique
+  slug               String              @unique
   domain             String?
-  isDefault          Boolean        @default(false)
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-  autoApproveReviews Boolean        @default(false)
-  reviewModeration   Boolean        @default(false)
-  reviewPolicy       ReviewPolicy   @default(AFTER_PAYMENT)
-  currency           currencyEnum @default(NGN)      
+  isDefault          Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  autoApproveReviews Boolean             @default(false)
+  reviewPolicy       ReviewPolicy        @default(AFTER_PAYMENT)
   email              String?
   logo               String?
-  timezone           String         @default("UTC")
+  timezone           String              @default("UTC")
   primaryColor       String?
-  storeType          StoreType      @default(SINGLE_VENDOR)
+  storeType          StoreType           @default(SINGLE_VENDOR)
   returnPolicy       String?
   shippingPolicy     String?
   aboutTitle         String?
@@ -301,39 +278,35 @@ model Tenant {
   aboutStory         String?
   aboutImage         String?
   aboutDescription   String?
-  storeMode         StoreMode @default(SINGLE_VENDOR)
-
-   // LEGAL CMS
-  termsOfService   String?  // HTML (TipTap output)
-  privacyPolicy    String?
-  aboutContent     String?  // full rich about page
-  country          String
-
-  heroImage        String?
-  heroTitle        String?
-  heroSubtitle     String?
-  heroCTA          String?
-
-  // Optional
-  termsUpdatedAt   DateTime?
-  privacyUpdatedAt DateTime?
-  vendorBankAccounts VendorBankAccount[]
+  aboutContent       String?
+  privacyPolicy      String?
+  privacyUpdatedAt   DateTime?
+  termsOfService     String?
+  termsUpdatedAt     DateTime?
+  currency           currencyEnum        @default(NGN)
+  heroCTA            String?
+  heroImage          String?
+  heroSubtitle       String?
+  heroTitle          String?
+  storeMode          StoreMode           @default(SINGLE_VENDOR)
+  reviewModeration   Boolean             @default(false)
+  country            String
   address            Address[]
   cartItem           CartItem[]
   categories         Category[]
   contact            Contact[]
   coupon             Coupon[]
-  vendorPayouts      VendorPayout[]
   tenant             FAQ[]
   newsletter         Newsletter[]
   orders             Order[]
   products           Product[]
   review             Review[]
   users              User[]
-  WishlistItem       WishlistItem[]
   vendors            Vendor[]
-  VendorApplication   VendorApplication[]
-  storeFollow        StoreFollow[]
+  VendorApplication  VendorApplication[]
+  vendorBankAccounts VendorBankAccount[]
+  vendorPayouts      VendorPayout[]
+  WishlistItem       WishlistItem[]
 }
 
 model Session {
@@ -351,42 +324,41 @@ model Session {
 }
 
 model Review {
-  id               String       @id @default(cuid())
-  userId           String
-  rating           Int
-  comment          String
-  createdAt        DateTime     @default(now())
-  productId        String
-  tenantId         String
-  storeMode        StoreMode    @default(SINGLE_VENDOR)
-  orderId          String?
-  updatedAt        DateTime     @updatedAt
-  status           ReviewStatus @default(PENDING)
-  repliedAt        DateTime?
-  reply            String?
-  helpfulCount     Int          @default(0)
-  images           String[]
-  title            String?
-  verifiedPurchase Boolean      @default(false)
-  deletedAt        DateTime?
+  id                      String                    @id @default(cuid())
+  userId                  String
+  rating                  Int
+  comment                 String
+  createdAt               DateTime                  @default(now())
+  productId               String
+  tenantId                String
+  orderId                 String?
+  updatedAt               DateTime                  @updatedAt
+  status                  ReviewStatus              @default(PENDING)
+  repliedAt               DateTime?
+  reply                   String?
+  helpfulCount            Int                       @default(0)
+  images                  String[]
+  title                   String?
+  verifiedPurchase        Boolean                   @default(false)
+  storeMode               StoreMode                 @default(SINGLE_VENDOR)
+  deletedAt               DateTime?
+  order                   Order?                    @relation(fields: [orderId], references: [id])
+  product                 Product                   @relation(fields: [productId], references: [id])
+  tenant                  Tenant                    @relation(fields: [tenantId], references: [id])
+  user                    User                      @relation(fields: [userId], references: [id])
   reviewModerationHistory ReviewModerationHistory[]
-  order            Order?       @relation(fields: [orderId], references: [id])
-  product          Product      @relation(fields: [productId], references: [id])
-  tenant           Tenant       @relation(fields: [tenantId], references: [id])
-  user             User         @relation(fields: [userId], references: [id])
 
   @@unique([userId, productId])
   @@index([tenantId])
 }
 
 model ReviewModerationHistory {
-  id         String       @id @default(cuid())
-  reviewId   String
-  action     String
-  note       String?
-  createdAt  DateTime     @default(now())
-
-  review      Review      @relation(fields: [reviewId], references: [id])
+  id        String   @id @default(cuid())
+  reviewId  String
+  action    String
+  note      String?
+  createdAt DateTime @default(now())
+  review    Review   @relation(fields: [reviewId], references: [id])
 
   @@index([reviewId])
 }
@@ -416,8 +388,6 @@ model WishlistItem {
   @@index([tenantId])
 }
 
-
-
 model Category {
   id         String    @id @default(cuid())
   name       String
@@ -440,18 +410,18 @@ model Newsletter {
 }
 
 model Contact {
-  id        String      @id @default(cuid())
+  id        String        @id @default(cuid())
   name      String
   email     String
   message   String
   tenantId  String
-  createdAt DateTime    @default(now())
-  storeMode StoreMode   @default(SINGLE_VENDOR)
-  status    ContactStatus   @default(UNREAD)
-  priority  Priority    @default(NORMAL)
+  createdAt DateTime      @default(now())
+  priority  Priority      @default(NORMAL)
   tag       ContactTag?
-  updatedAt DateTime    @updatedAt
-  tenant    Tenant      @relation(fields: [tenantId], references: [id])
+  updatedAt DateTime      @updatedAt
+  status    ContactStatus @default(UNREAD)
+  storeMode StoreMode     @default(SINGLE_VENDOR)
+  tenant    Tenant        @relation(fields: [tenantId], references: [id])
 }
 
 model FAQ {
@@ -491,147 +461,111 @@ model OrderTrackingEvent {
 }
 
 model RefundRequest {
-  id              String   @id @default(cuid())
+  id              String              @id @default(cuid())
   tenantId        String
   orderId         String
   userId          String
-  vendorId        String?   // null for single vendor
-  storeMode       StoreMode 
-  status          RefundStatus @default(REQUESTED)
-
+  vendorId        String?
+  status          RefundStatus        @default(REQUESTED)
   reason          String
   description     String?
-
   requestedAmount Float
   approvedAmount  Float?
-
   currency        String
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  order           Order    @relation(fields: [orderId], references: [id])
-  user            User     @relation(fields: [userId], references: [id])
-
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  storeMode       StoreMode
   items           RefundItem[]
+  order           Order               @relation(fields: [orderId], references: [id])
+  user            User                @relation(fields: [userId], references: [id])
   transactions    RefundTransaction[]
 }
 
 model RefundItem {
-  id               String   @id @default(cuid())
-  refundRequestId  String
-  productId        String
-  quantity         Int
-  priceAtPurchase  Float
-  product          Product @relation(fields: [productId], references: [id])
-  refundRequest    RefundRequest @relation(fields: [refundRequestId], references: [id])
+  id              String        @id @default(cuid())
+  refundRequestId String
+  productId       String
+  quantity        Int
+  priceAtPurchase Float
+  product         Product       @relation(fields: [productId], references: [id])
+  refundRequest   RefundRequest @relation(fields: [refundRequestId], references: [id])
 }
 
 model RefundTransaction {
-  id               String   @id @default(cuid())
-  refundRequestId  String
-
-  provider         String   // paystack, stripe, flutterwave
-  transactionRef   String?
-  status           String
-
-  createdAt        DateTime @default(now())
-
-  refundRequest    RefundRequest @relation(fields: [refundRequestId], references: [id])
+  id              String        @id @default(cuid())
+  refundRequestId String
+  provider        String
+  transactionRef  String?
+  status          String
+  createdAt       DateTime      @default(now())
+  refundRequest   RefundRequest @relation(fields: [refundRequestId], references: [id])
 }
 
 model ProductVariant {
   id        String   @id @default(cuid())
-
   productId String
+  color     String?
+  size      String?
+  price     Float
+  image     String?
+  stock     Int      @default(0)
+  createdAt DateTime @default(now())
+  colorHex  String?
   product   Product  @relation(fields: [productId], references: [id])
-
-  color     String?   
-  size      String?   
-
-  colorHex  String?   
-  price     Float     // variant price
-  image     String?   // specific image for this variant
-  stock     Int       @default(0)
-
-  createdAt DateTime  @default(now())
 }
 
 model Coupon {
-  id            String   @id @default(cuid())
-
-  code          String   @unique
+  id            String     @id @default(cuid())
+  code          String     @unique
   description   String?
-
   type          CouponType
-
   value         Decimal
-
   minimumAmount Decimal?
-
   usageLimit    Int?
-
-  usedCount     Int      @default(0)
-
+  usedCount     Int        @default(0)
   startsAt      DateTime?
   expiresAt     DateTime?
-
-  active        Boolean  @default(true)
-
+  active        Boolean    @default(true)
   tenantId      String
   vendorId      String?
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  tenant        Tenant   @relation(fields:[tenantId], references:[id])
-
-  vendor        Vendor?  @relation(fields:[vendorId], references:[id])
-
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  tenant        Tenant     @relation(fields: [tenantId], references: [id])
+  vendor        Vendor?    @relation(fields: [vendorId], references: [id])
   orders        Order[]
 }
 
 model VendorPayout {
-  id            String   @id @default(cuid())
-
+  id            String       @id @default(cuid())
   vendorId      String
   tenantId      String
-
   amount        Decimal
-
   status        PayoutStatus @default(PENDING)
-
   reference     String?
-
   bankName      String?
   accountName   String?
   accountNumber String?
-
-  note          String?      // optional admin note
-
-  requestedAt   DateTime @default(now())
+  note          String?
+  requestedAt   DateTime     @default(now())
   approvedAt    DateTime?
   paidAt        DateTime?
-
-  vendor Vendor @relation(fields: [vendorId], references: [id])
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant        Tenant       @relation(fields: [tenantId], references: [id])
+  vendor        Vendor       @relation(fields: [vendorId], references: [id])
 
   @@index([vendorId, status])
   @@index([tenantId, status])
 }
 
 model StoreFollow {
-  id         String   @id @default(cuid())
+  id        String   @id @default(cuid())
+  userId    String
+  vendorId  String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor    Vendor? @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 
-  userId     String
-  tenantId   String
 
-  createdAt  DateTime @default(now())
-
-  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, tenantId])
+  @@unique([userId, vendorId])
 }
 
 enum Priority {
@@ -650,8 +584,8 @@ enum ContactTag {
 enum Role {
   USER
   ADMIN
-  Vendor
   OWNER
+  Vendor
 }
 
 enum OrderStatus {
@@ -727,7 +661,6 @@ enum ContactStatus {
 }
 
 enum RefundStatus {
-  NONE
   REQUESTED
   UNDER_REVIEW
   APPROVED
@@ -735,6 +668,7 @@ enum RefundStatus {
   PROCESSING
   REFUNDED
   FAILED
+  NONE
 }
 
 enum VendorStatus {

@@ -2,20 +2,14 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { Heart } from "lucide-react";
-import toast from "react-hot-toast";
-import { appToast } from "@/utils/appToast";
-
-// type Props = {
-//   tenantId: string;
-// };
 
 type Props = {
-  tenantId: string;
+  vendorId: string;
   onFollowersChange?: React.Dispatch<React.SetStateAction<number>>;
 };
 
 export default function FollowStoreButton({
-  tenantId,
+  vendorId,
   onFollowersChange,
 }: Props) {
   const [following, setFollowing] = useState(false);
@@ -29,7 +23,7 @@ export default function FollowStoreButton({
 
   async function load() {
     try {
-      const res = await fetch(`/api/store/is-following?tenantId=${tenantId}`);
+      const res = await fetch(`/api/store/is-following?vendorId=${vendorId}`);
 
       const data = await res.json();
 
@@ -63,7 +57,7 @@ export default function FollowStoreButton({
             },
 
             body: JSON.stringify({
-              tenantId,
+              vendorId,
             }),
           },
         );
@@ -73,8 +67,6 @@ export default function FollowStoreButton({
         if (!res.ok) {
           throw new Error(data.message);
         }
-
-     
       } catch (err: any) {
         // Rollback
         setFollowing(previous);
@@ -82,7 +74,6 @@ export default function FollowStoreButton({
         if (onFollowersChange) {
           onFollowersChange((prev) => (previous ? prev + 1 : prev - 1));
         }
-
       }
     });
   }

@@ -14,12 +14,12 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
 
-    const tenantId = searchParams.get("tenantId");
+    const vendorId = searchParams.get("vendorId");
 
-    if (!tenantId) {
+    if (!vendorId) {
       return NextResponse.json(
         {
-          message: "Tenant missing.",
+          message: "Vendor missing.",
         },
         {
           status: 400,
@@ -29,9 +29,9 @@ export async function GET(req: Request) {
 
     const follow = await prisma.storeFollow.findUnique({
       where: {
-        userId_tenantId: {
+        userId_vendorId: {
           userId,
-          tenantId,
+          vendorId,
         },
       },
     });

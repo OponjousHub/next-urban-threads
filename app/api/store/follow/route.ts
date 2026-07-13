@@ -13,20 +13,20 @@ export async function POST(req: Request) {
       );
     }
 
-    const { tenantId } = await req.json();
+    const { vendorId } = await req.json();
 
-    if (!tenantId) {
+    if (!vendorId) {
       return NextResponse.json(
-        { message: "Tenant ID is required." },
+        { message: "Vendor ID is required." },
         { status: 400 },
       );
     }
 
     const existing = await prisma.storeFollow.findUnique({
       where: {
-        userId_tenantId: {
+        userId_vendorId: {
           userId,
-          tenantId,
+          vendorId,
         },
       },
     });
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     await prisma.storeFollow.create({
       data: {
         userId,
-        tenantId,
+        vendorId,
       },
     });
 

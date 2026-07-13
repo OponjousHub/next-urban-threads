@@ -14,7 +14,6 @@ export default function VendorProductsSection({ products }: Props) {
   const [category, setCategory] = useState<undefined | string>("all");
   const [sort, setSort] = useState("newest");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  console.log("RAW PRODUCTS", products);
   const categories = useMemo(() => {
     return [
       "all",
@@ -65,7 +64,6 @@ export default function VendorProductsSection({ products }: Props) {
 
     return data;
   }, [products, search, category, sort]);
-  console.log("FILTERED PRODUCT", filteredProducts);
   return (
     <section id="products" className="mt-20">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -127,8 +125,6 @@ export default function VendorProductsSection({ products }: Props) {
       ) : (
         <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-3 xl:grid-cols-4">
           {filteredProducts.map((product) => {
-            console.log("PRODUCT INSIDE THE MAP", products);
-
             const imageUrl =
               product.images?.length > 0
                 ? cloudinaryImage(product.images[0], "card")

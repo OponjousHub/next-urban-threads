@@ -10,11 +10,18 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { tenantId } = await req.json();
+    const { vendorId } = await req.json();
+
+    if (!vendorId) {
+      return NextResponse.json(
+        { message: "Vendor ID is required." },
+        { status: 400 },
+      );
+    }
 
     await prisma.storeFollow.deleteMany({
       where: {
-        tenantId,
+        vendorId,
         userId,
       },
     });

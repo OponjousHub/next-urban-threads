@@ -79,7 +79,7 @@ export default function VendorHero({
           />
 
           <FollowStoreButton
-            tenantId={vendor.tenantId}
+            vendorId={vendor.id}
             onFollowersChange={(update) => {
               setFollowers((current) =>
                 typeof update === "function" ? update(current) : update,

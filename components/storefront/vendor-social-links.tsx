@@ -24,7 +24,6 @@ type Props = {
 };
 
 export default function VendorSocialLinks({ vendor }: Props) {
-  console.log("VENDOR SOCIAL LINKS", vendor);
   const links = [
     {
       href: vendor.websiteUrl,

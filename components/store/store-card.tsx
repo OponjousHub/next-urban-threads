@@ -97,7 +97,7 @@ export default function StoreCard({ store }: Props) {
         {/* Button */}
 
         <Link
-          href={`/store/${store.slug}`}
+          href={`/stores/${store.slug}`}
           className="mt-6 flex h-12 w-full items-center justify-center rounded-xl bg-black font-medium text-white transition hover:bg-gray-800"
         >
           Visit Store
