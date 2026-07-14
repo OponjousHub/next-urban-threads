@@ -12,10 +12,26 @@ export default class ProductService {
     return ProductRepository.create(data, tenantId, storeMode);
   }
 
+  // static async getProducts(options: any) {
+  //   return ProductRepository.findAll({
+  //     ...options,
+  //     include: { category: true },
+  //   });
+  // }
+
   static async getProducts(options: any) {
     return ProductRepository.findAll({
       ...options,
-      include: { category: true },
+      include: {
+        category: true,
+        vendor: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
     });
   }
 

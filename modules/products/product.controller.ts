@@ -47,7 +47,6 @@ export default class ProductController {
       flash,
       videos,
     } = parsed.data;
-    console.log("CONTROLLER VIDEOS", videos);
     const categoryExists = await prisma.category.findUnique({
       where: { id: category },
     });

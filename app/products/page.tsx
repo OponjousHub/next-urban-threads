@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
-import { FiShoppingCart, FiEye } from "react-icons/fi";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
-import { ProductRating } from "@/utils/product-rating";
 import { ProductSkeleton } from "@/components/products/productSkeleton";
 import QuickViewModal from "@/components/products/quickViewModal";
 import { useTenant } from "@/store/tenant-provider-context";

@@ -23,8 +23,6 @@ export default function ProductCard({
 
   const isMultiVendor = tenant.storeMode === "MULTI_VENDOR";
 
-  const isSingleVendor = tenant.storeMode === "SINGLE_VENDOR";
-
   const flash = searchParams.get("flash");
 
   return (
@@ -71,11 +69,27 @@ export default function ProductCard({
 
         {/* ONLY FOR MULTI-VENDOR */}
 
+        {/* ONLY FOR MULTI-VENDOR */}
         {isMultiVendor && product.vendor && (
-          <p className="text-xs text-gray-500">
-            Sold by{" "}
-            <span className="font-medium">{product.vendor.storeName}</span>
-          </p>
+          <Link
+            href={`/stores/${product.vendor.slug}`}
+            className="inline-flex items-center gap-1.5 w-fit text-xs text-gray-500 hover:text-[var(--color-primary)] transition-colors group/store"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-4 h-4 text-gray-400 group-hover/store:text-[var(--color-primary)] transition-colors"
+            >
+              <path d="M3 9.75A2.75 2.75 0 0 1 5.75 7h12.5A2.75 2.75 0 0 1 21 9.75V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.75Zm3.25-4.25h11.5l.75 1.5H5.5l.75-1.5Z" />
+            </svg>
+
+            <span>Sold by</span>
+
+            <span className="font-semibold underline-offset-2 group-hover/store:underline">
+              {product.vendor.name}
+            </span>
+          </Link>
         )}
 
         <ProductRating

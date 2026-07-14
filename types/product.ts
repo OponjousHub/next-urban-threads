@@ -24,7 +24,8 @@ export interface Product {
   updatedAt?: Date | string;
   vendor?: {
     id: string;
-    storeName: string;
+    name: string;
+    slug: string;
   };
   videos?: {
     url: string;
