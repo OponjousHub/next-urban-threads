@@ -12,7 +12,7 @@ type Vendor = {
   logo: string | null;
 
   _count: {
-    followers: number;
+    storeFollow: number;
     products: number;
   };
 };
@@ -99,7 +99,7 @@ export default function TopVendors() {
 
               <div className="text-center">
                 <p className="font-bold text-gray-900">
-                  {vendor._count.followers}
+                  {vendor._count.storeFollow}
                 </p>
                 <p>Followers</p>
               </div>
