@@ -8,7 +8,7 @@ import { Store } from "lucide-react";
 type Vendor = {
   id: string;
   slug: string;
-  storeName: string;
+  name: string;
   logo: string | null;
 
   _count: {
@@ -27,7 +27,7 @@ export default function TopVendors() {
 
   async function loadVendors() {
     try {
-      const res = await fetch("/api/vendors/top");
+      const res = await fetch("/api/vendor/top");
 
       if (!res.ok) return;
 
@@ -38,7 +38,7 @@ export default function TopVendors() {
       setLoading(false);
     }
   }
-console.log("VENDORS", vendors)
+  console.log("VENDORS", vendors);
   if (!loading && vendors.length === 0) {
     return null;
   }
@@ -66,14 +66,14 @@ console.log("VENDORS", vendors)
         {vendors.map((vendor) => (
           <Link
             key={vendor.id}
-            href={`/store/${vendor.slug}`}
+            href={`/stores/${vendor.slug}`}
             className="group rounded-2xl border bg-white p-6 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
           >
             <div className="flex justify-center">
               {vendor.logo ? (
                 <Image
                   src={vendor.logo}
-                  alt={vendor.storeName}
+                  alt={vendor.name}
                   width={72}
                   height={72}
                   className="rounded-full object-cover border"
@@ -86,7 +86,7 @@ console.log("VENDORS", vendors)
             </div>
 
             <h3 className="mt-5 text-center font-semibold text-lg group-hover:text-[var(--color-primary)] transition-colors">
-              {vendor.storeName}
+              {vendor.name}
             </h3>
 
             <div className="mt-4 flex justify-center gap-6 text-sm text-gray-500">
