@@ -93,7 +93,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
 
         {/* Buttons */}
         <div className="mt-6 space-y-3">
-          <FollowStoreButton vendorId={vendor.id} />
+          <FollowStoreButton vendorId={vendor.id} size="compact" />
 
           <Link
             href={`/store/${vendor.slug}`}

@@ -5,11 +5,13 @@ import { Heart } from "lucide-react";
 
 type Props = {
   vendorId: string;
+  size?: "default" | "compact";
   onFollowersChange?: React.Dispatch<React.SetStateAction<number>>;
 };
 
 export default function FollowStoreButton({
   vendorId,
+  size = "default",
   onFollowersChange,
 }: Props) {
   const [following, setFollowing] = useState(false);
@@ -85,14 +87,15 @@ export default function FollowStoreButton({
       className={`
         inline-flex
         items-center
+        justify-center
         gap-2
         rounded-xl
-        px-7
-        py-3
         font-semibold
         transition-all
         duration-300
         shadow-md
+
+        ${size === "compact" ? "px-4 py-2 text-sm" : "px-7 py-3"}
 
         ${
           following
