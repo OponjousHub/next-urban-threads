@@ -49,21 +49,6 @@ export function ProductImageUploader({ images, setImages }: Props) {
     uploadQueue(newItems);
   }
 
-  // Cloudinary Delete function
-  // async function deleteImage(img: ImageItem) {
-  //   await fetch("/api/upload/delete-image", {
-  //     method: "POST",
-  //     body: JSON.stringify({
-  //       public_id: img.public_id,
-  //     }),
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //   });
-
-  //   setImages((prev) => prev.filter((i) => i.public_id !== img.public_id));
-  // }
-
   // Add single file upload function
   async function uploadSingle(item: UploadItem) {
     try {
