@@ -166,7 +166,7 @@ const HeaderClient = ({
             {/* MULTI VENDOR ONLY */}
             {isMultiVendor && (
               <Link
-                href="/vendors"
+                href="/vendor/stores"
                 className="hover:text-[var(--color-primary)] transition"
               >
                 Stores
