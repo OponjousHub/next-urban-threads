@@ -20,11 +20,21 @@ export async function getTopVendors(limit = 4) {
       },
     },
 
-    orderBy: {
-      storeFollow: {
-        _count: "desc",
+    orderBy: [
+      {
+        followers: {
+          _count: "desc",
+        },
       },
-    },
+      {
+        products: {
+          _count: "desc",
+        },
+      },
+      {
+        createdAt: "desc",
+      },
+    ],
 
     take: limit,
   });
