@@ -8,13 +8,13 @@ type VendorCardProps = {
   vendor: {
     id: string;
     slug: string;
-    storeName: string;
+    name: string;
     logo: string | null;
     banner: string | null;
 
     _count: {
       products: number;
-      followers: number;
+      storeFollow: number;
     };
   };
 };
@@ -27,8 +27,8 @@ export default function VendorCard({ vendor }: VendorCardProps) {
         <div className="relative h-36 overflow-hidden bg-gray-100">
           {vendor.banner ? (
             <Image
-              src={vendor.banner}
-              alt={vendor.storeName}
+              src={vendor.banner || "/img/default-store-banner.jpg"}
+              alt={vendor.name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
@@ -47,7 +47,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
             {vendor.logo ? (
               <Image
                 src={vendor.logo}
-                alt={vendor.storeName}
+                alt={vendor.name}
                 fill
                 className="object-cover"
               />
@@ -60,9 +60,9 @@ export default function VendorCard({ vendor }: VendorCardProps) {
         </div>
 
         {/* Store Name */}
-        <Link href={`/store/${vendor.slug}`}>
+        <Link href={`/stores/${vendor.slug}`}>
           <h3 className="mt-4 text-center text-lg font-semibold transition-colors group-hover:text-[var(--color-primary)]">
-            {vendor.storeName}
+            {vendor.name}
           </h3>
         </Link>
 
@@ -85,7 +85,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
               className="mx-auto mb-2 text-[var(--color-primary)]"
             />
 
-            <p className="text-lg font-bold">{vendor._count.followers}</p>
+            <p className="text-lg font-bold">{vendor._count.storeFollow}</p>
 
             <p className="text-xs text-gray-500">Followers</p>
           </div>
@@ -96,7 +96,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
           <FollowStoreButton vendorId={vendor.id} size="compact" />
 
           <Link
-            href={`/store/${vendor.slug}`}
+            href={`/stores/${vendor.slug}`}
             className="block rounded-xl border py-3 text-center font-medium transition hover:bg-gray-50"
           >
             Visit Store

@@ -12,6 +12,7 @@ type Props = {
     search?: string;
     sort?: string;
     page?: string;
+    name: string;
   }>;
 };
 
@@ -35,7 +36,7 @@ export default async function StoresPage({ searchParams }: Props) {
     tenantId: tenant.id,
 
     ...(search && {
-      storeName: {
+      name: {
         contains: search,
         mode: "insensitive" as const,
       },
@@ -54,12 +55,18 @@ export default async function StoresPage({ searchParams }: Props) {
             createdAt: "desc" as const,
           }
         : {
-            followers: {
+            storeFollow: {
               _count: "desc" as const,
             },
           };
 
-  const [vendors, totalVendors] = await Promise.all([
+  const [
+    vendors,
+    filteredVendorCount,
+    totalStores,
+    totalProducts,
+    totalFollowers,
+  ] = await Promise.all([
     prisma.vendor.findMany({
       where,
       orderBy,
@@ -68,7 +75,7 @@ export default async function StoresPage({ searchParams }: Props) {
         _count: {
           select: {
             products: true,
-            followers: true,
+            storeFollow: true,
           },
         },
       },
@@ -77,14 +84,18 @@ export default async function StoresPage({ searchParams }: Props) {
       take,
     }),
 
+    // Number matching the search/filter
     prisma.vendor.count({
       where,
     }),
 
-    // Stats
-  ]);
+    // Marketplace totals
+    prisma.vendor.count({
+      where: {
+        tenantId: tenant.id,
+      },
+    }),
 
-  const [totalProducts, totalFollowers] = await Promise.all([
     prisma.product.count({
       where: {
         tenantId: tenant.id,
@@ -94,7 +105,7 @@ export default async function StoresPage({ searchParams }: Props) {
     prisma.storeFollow.count(),
   ]);
 
-  const totalPages = Math.ceil(totalVendors / take);
+  const totalPages = Math.ceil(filteredVendorCount / take);
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-12">
@@ -113,7 +124,7 @@ export default async function StoresPage({ searchParams }: Props) {
       </div>
 
       <VendorStats
-        totalStores={totalVendors}
+        totalStores={totalStores}
         totalProducts={totalProducts}
         totalFollowers={totalFollowers}
       />
@@ -122,6 +133,29 @@ export default async function StoresPage({ searchParams }: Props) {
         <VendorSearch defaultValue={search} />
 
         <VendorSort currentSort={sort} />
+      </div>
+
+      <div className="mt-10 mb-6 flex items-center justify-between">
+        {search ? (
+          <p className="text-sm text-gray-500">
+            Found{" "}
+            <span className="font-semibold text-gray-900">
+              {filteredVendorCount}
+            </span>{" "}
+            store{filteredVendorCount === 1 ? "" : "s"} for{" "}
+            <span className="font-semibold">"{search}"</span>
+          </p>
+        ) : (
+          <p className="text-sm text-gray-500">
+            Showing{" "}
+            <span className="font-semibold text-gray-900">
+              {vendors.length}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-gray-900">{totalStores}</span>{" "}
+            stores
+          </p>
+        )}
       </div>
 
       {vendors.length === 0 ? <EmptyState /> : <VendorGrid vendors={vendors} />}

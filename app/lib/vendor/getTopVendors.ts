@@ -22,7 +22,7 @@ export async function getTopVendors(limit = 4) {
 
     orderBy: [
       {
-        followers: {
+        storeFollow: {
           _count: "desc",
         },
       },

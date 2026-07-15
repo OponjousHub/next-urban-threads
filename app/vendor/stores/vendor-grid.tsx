@@ -3,12 +3,12 @@ import VendorCard from "./vendor-card";
 type Vendor = {
   id: string;
   slug: string;
-  storeName: string;
+  name: string;
   logo: string | null;
   banner: string | null;
 
   _count: {
-    followers: number;
+    storeFollow: number;
     products: number;
   };
 };
