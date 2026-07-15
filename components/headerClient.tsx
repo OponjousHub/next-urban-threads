@@ -169,7 +169,7 @@ const HeaderClient = ({
                 href="/vendors"
                 className="hover:text-[var(--color-primary)] transition"
               >
-                Vendors
+                Stores
               </Link>
             )}
 
