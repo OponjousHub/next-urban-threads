@@ -1,11 +1,11 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
-import VendorStats from "./vendor-stats";
-import VendorSearch from "./vendor-search";
-import VendorSort from "./vendor-sort";
-import VendorGrid from "./vendor-grid";
-import EmptyState from "./empty-state";
+import VendorStats from "@/app/vendor/stores/vendor-stats";
+import VendorSearch from "@/app/vendor/stores/vendor-search";
+import VendorSort from "@/app/vendor/stores/vendor-sort";
+import VendorGrid from "@/app/vendor/stores/vendor-grid";
+import EmptyState from "@/app/vendor/stores/empty-state";
 
 type Props = {
   searchParams: Promise<{
