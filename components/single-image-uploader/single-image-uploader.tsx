@@ -14,6 +14,7 @@ export default function SingleImageUploader({
   label,
   image,
   onChange,
+  aspect,
   height = 220,
   maxSizeMB = 5,
   acceptedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"],

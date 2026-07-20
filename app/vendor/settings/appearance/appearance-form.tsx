@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import SingleImageUploader from "@/components/single-image-uploader";
+import SingleImageUploader from "@/components/single-image-uploader/single-image-uploader";
 import AppearancePreview from "./appearance-preview";
 import { appToast } from "@/utils/appToast";
 
