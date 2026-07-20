@@ -11,6 +11,7 @@ type Vendor = {
   logo: string | null;
   banner: string | null;
   accentColor: string | null;
+  slug: string;
   // averageRating: number | null;
   _count: {
     products: number;
@@ -162,6 +163,7 @@ export default function AppearanceForm({ vendor }: Props) {
         accentColor={accentColor}
         productCount={vendor._count.products}
         followerCount={vendor._count.storeFollow}
+        storeSlug={vendor.slug}
         // rating={vendor.averageRating ?? 0}
         rating={0}
       />

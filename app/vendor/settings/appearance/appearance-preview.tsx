@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Store, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 
 type Props = {
   storeName: string;
@@ -10,6 +11,7 @@ type Props = {
   accentColor: string;
   productCount: number;
   followerCount: number;
+  storeSlug: string;
   rating?: number;
 };
 
@@ -20,6 +22,7 @@ export default function AppearancePreview({
   accentColor,
   productCount,
   followerCount,
+  storeSlug,
   rating,
 }: Props) {
   return (
@@ -95,15 +98,14 @@ export default function AppearancePreview({
           </div>
 
           {/* Preview Button */}
-          <button
+          <Link
+            href={`/stores/${storeSlug}`}
             className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold text-white transition"
-            style={{
-              backgroundColor: accentColor,
-            }}
+            style={{ backgroundColor: accentColor }}
           >
             <ShoppingBag size={18} />
             Visit Store
-          </button>
+          </Link>
 
           {/* Accent Color Preview */}
           <div className="mt-6">

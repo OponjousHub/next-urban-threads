@@ -24,6 +24,7 @@ export default async function AppearancePage() {
       logo: true,
       banner: true,
       accentColor: true,
+      slug: true,
       // averageRating: true,
       _count: {
         select: {
