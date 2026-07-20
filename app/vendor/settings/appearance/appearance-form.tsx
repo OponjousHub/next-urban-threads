@@ -3,6 +3,7 @@
 import { useState } from "react";
 import SingleImageUploader from "@/components/single-image-uploader";
 import AppearancePreview from "./appearance-preview";
+import { appToast } from "@/utils/appToast";
 
 type Vendor = {
   id: string;
@@ -23,19 +24,23 @@ type Props = {
 
 export default function AppearanceForm({ vendor }: Props) {
   const [logo, setLogo] = useState(vendor.logo);
-
   const [banner, setBanner] = useState(vendor.banner);
-
   const [accentColor, setAccentColor] = useState(
     vendor.accentColor || "#000000",
   );
 
+  const [savedState, setSavedState] = useState({
+    logo: vendor.logo,
+    banner: vendor.banner,
+    accentColor: vendor.accentColor || "#000000",
+  });
+
   const [saving, setSaving] = useState(false);
 
   const hasChanges =
-    logo !== vendor.logo ||
-    banner !== vendor.banner ||
-    accentColor !== (vendor.accentColor || "#000000");
+    logo !== savedState.logo ||
+    banner !== savedState.banner ||
+    accentColor !== savedState.accentColor;
 
   async function saveChanges() {
     try {
@@ -61,9 +66,19 @@ export default function AppearanceForm({ vendor }: Props) {
         throw new Error(data.message);
       }
 
-      // We'll replace this with appToast later if you prefer.
+      setSavedState({
+        logo,
+        banner,
+        accentColor,
+      });
+
+      appToast.success("Success", "Appearance updated successfully.");
     } catch (err) {
       console.error(err);
+      appToast.error(
+        "Fail",
+        err instanceof Error ? err.message : "Something went wrong.",
+      );
     } finally {
       setSaving(false);
     }
@@ -132,7 +147,7 @@ export default function AppearanceForm({ vendor }: Props) {
                 }
               `}
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? "Saving..." : hasChanges ? "Save Changes" : "Saved ✓"}
             </button>
           </div>
         </div>
