@@ -8,6 +8,7 @@ import { UploadStatus, SingleImageUploaderProps } from "@/types/image-uploader";
 
 import UploaderDropzone from "./uploader-dropzone";
 import UploaderPreview from "./uploader-preview";
+import { validateImage } from "./uploader-utils";
 
 export default function SingleImageUploader({
   label,
@@ -32,15 +33,7 @@ export default function SingleImageUploader({
   }, [status]);
 
   async function uploadFile(file: File) {
-    if (!acceptedTypes.includes(file.type)) {
-      appToast.error("Unsupported image format.");
-
-      return;
-    }
-
-    if (file.size > maxSizeMB * 1024 * 1024) {
-      appToast.error(`Image must not exceed ${maxSizeMB}MB.`);
-
+    if (!validateImage(file, acceptedTypes, maxSizeMB)) {
       return;
     }
 
