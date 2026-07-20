@@ -22,7 +22,7 @@ export default function SingleImageUploader({
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
-    if (status === "success") {
+    if (status === "success" || status === "failed") {
       const timer = setTimeout(() => {
         setStatus("idle");
       }, 1000);

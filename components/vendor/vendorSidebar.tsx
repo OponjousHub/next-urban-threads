@@ -14,6 +14,7 @@ import {
   FaStar,
   FaTimes,
   FaTags,
+  FaPalette,
 } from "react-icons/fa";
 
 import { useVendorSidebar } from "@/store/vendor-sidebar-context";
@@ -62,7 +63,7 @@ const links = [
   {
     label: "Appearance",
     href: "/vendor/settings/appearance",
-    icon: FaCog,
+    icon: FaPalette,
   },
   {
     label: "Store Settings",
@@ -156,8 +157,10 @@ export default function VendorSidebar({ vendor }: VendorSidebarProps) {
             const active =
               link.href === "/vendor"
                 ? pathname === "/vendor"
-                : pathname === link.href ||
-                  pathname.startsWith(`${link.href}/`);
+                : link.href === "/vendor/settings"
+                  ? pathname === "/vendor/settings"
+                  : pathname === link.href ||
+                    pathname.startsWith(`${link.href}/`);
 
             return (
               <Link
