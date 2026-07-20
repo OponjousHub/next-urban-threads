@@ -140,6 +140,16 @@ export default function AppearanceForm({ vendor }: Props) {
         banner={banner}
         accentColor={accentColor}
       />
+
+      <AppearancePreview
+        storeName={vendor.name}
+        logo={logo}
+        banner={banner}
+        accentColor={accentColor}
+        productCount={vendor._count.products}
+        followerCount={vendor._count.storeFollow}
+        rating={vendor.averageRating ?? 0}
+      />
     </div>
   );
 }

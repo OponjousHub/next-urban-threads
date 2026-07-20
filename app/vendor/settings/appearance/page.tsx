@@ -24,6 +24,13 @@ export default async function AppearancePage() {
       logo: true,
       banner: true,
       accentColor: true,
+      averageRating: true,
+      _count: {
+        select: {
+          products: true,
+          storeFollow: true,
+        },
+      },
     },
   });
 
