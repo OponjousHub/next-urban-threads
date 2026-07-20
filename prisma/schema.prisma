@@ -146,6 +146,7 @@ model Vendor {
   bankAccount      VendorBankAccount?
   payouts          VendorPayout[]
   storeFollow      StoreFollow[]
+  notificationSettings VendorNotificationSettings?
 }
 
 model VendorApplication {
@@ -566,6 +567,30 @@ model StoreFollow {
 
 
   @@unique([userId, vendorId])
+}
+
+model VendorNotificationSettings {
+  id                 String  @id @default(cuid())
+
+  vendorId           String  @unique
+
+  newOrder           Boolean @default(true)
+  orderCancelled     Boolean @default(true)
+  orderDelivered     Boolean @default(true)
+
+  lowStock           Boolean @default(true)
+  outOfStock         Boolean @default(true)
+
+  newReview          Boolean @default(true)
+  newFollower        Boolean @default(true)
+
+  payoutCompleted    Boolean @default(true)
+  payoutFailed       Boolean @default(true)
+
+  weeklySummary      Boolean @default(false)
+  monthlySummary     Boolean @default(true)
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 }
 
 enum Priority {
