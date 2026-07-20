@@ -86,6 +86,16 @@ export default function SingleImageUploader({
           <>
             <Image src={preview} alt={label} fill className="object-cover" />
 
+            {/* Upload Overlay */}
+            {status === "uploading" && (
+              <div className="absolute inset-0 z-20 bg-black/55 flex flex-col items-center justify-center">
+                <RefreshCcw className="mb-3 h-8 w-8 animate-spin text-white" />
+
+                <p className="text-sm font-medium text-white">Uploading...</p>
+              </div>
+            )}
+
+            {/*Hover action*/}
             <div className="absolute inset-0 bg-black/45 opacity-0 hover:opacity-100 transition flex items-center justify-center gap-3">
               <label className="cursor-pointer rounded-xl bg-white px-4 py-2 font-medium shadow hover:bg-gray-100">
                 Replace
