@@ -43,6 +43,13 @@ export default function AppearanceForm({ vendor }: Props) {
     banner !== savedState.banner ||
     accentColor !== savedState.accentColor;
 
+  // Reset Appearance function
+  function resetChanges() {
+    setLogo(savedState.logo);
+    setBanner(savedState.banner);
+    setAccentColor(savedState.accentColor);
+  }
+
   async function saveChanges() {
     try {
       setSaving(true);
@@ -130,26 +137,61 @@ export default function AppearanceForm({ vendor }: Props) {
               </div>
             </div>
 
-            <button
-              onClick={saveChanges}
-              disabled={!hasChanges || saving}
-              className={`
-                w-full
-                rounded-xl
-                py-3
-                font-semibold
-                text-white
-                transition
+            <p className="text-sm">
+              {hasChanges ? (
+                <span className="text-orange-600">
+                  • You have unsaved changes
+                </span>
+              ) : (
+                <span className="text-green-600">✓ All changes saved</span>
+              )}
+            </p>
 
-                ${
-                  hasChanges
-                    ? "bg-[var(--color-primary)] hover:opacity-90"
-                    : "bg-gray-400 cursor-not-allowed"
-                }
-              `}
-            >
-              {saving ? "Saving..." : hasChanges ? "Save Changes" : "Saved ✓"}
-            </button>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={resetChanges}
+                disabled={!hasChanges || saving}
+                className={`
+      flex-1
+      rounded-xl
+      border
+      py-3
+      font-semibold
+      transition
+
+      ${
+        hasChanges
+          ? "border-gray-300 bg-white hover:bg-gray-50"
+          : "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
+      }
+    `}
+              >
+                Reset
+              </button>
+
+              <button
+                type="button"
+                onClick={saveChanges}
+                disabled={!hasChanges || saving}
+                className={`
+      flex-1
+      rounded-xl
+      py-3
+      font-semibold
+      text-white
+      transition
+
+      ${
+        hasChanges
+          ? "bg-[var(--color-primary)] hover:opacity-90"
+          : "cursor-not-allowed bg-gray-400"
+      }
+    `}
+              >
+                {saving ? "Saving..." : hasChanges ? "Save Changes" : "Saved ✓"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

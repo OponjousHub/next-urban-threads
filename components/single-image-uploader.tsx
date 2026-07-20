@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Upload, RefreshCcw, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { appToast } from "@/utils/appToast";
 
 type UploadStatus = "idle" | "uploading" | "success" | "failed";
@@ -23,6 +23,10 @@ export default function SingleImageUploader({
   const [status, setStatus] = useState<UploadStatus>("idle");
 
   const [preview, setPreview] = useState(image);
+
+  useEffect(() => {
+    setPreview(image);
+  }, [image]);
 
   async function handleFile(file: File) {
     try {
