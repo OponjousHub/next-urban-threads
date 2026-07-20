@@ -4,7 +4,6 @@ import Image from "next/image";
 import { Upload, RefreshCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { appToast } from "@/utils/appToast";
-// import toast from "react-hot-toast";
 
 type UploadStatus = "idle" | "uploading" | "success" | "failed";
 
