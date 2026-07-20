@@ -8,6 +8,9 @@ type Props = {
   logo: string | null;
   banner: string | null;
   accentColor: string;
+  productCount: number;
+  followerCount: number;
+  rating?: number;
 };
 
 export default function AppearancePreview({
@@ -15,6 +18,9 @@ export default function AppearancePreview({
   logo,
   banner,
   accentColor,
+  productCount,
+  followerCount,
+  rating,
 }: Props) {
   return (
     <div className="sticky top-6">
@@ -73,12 +79,12 @@ export default function AppearancePreview({
           {/* Sample Stats */}
           <div className="mt-6 grid grid-cols-3 gap-4">
             <div className="rounded-xl bg-gray-50 p-4 text-center">
-              <p className="text-xl font-bold">248</p>
+              <p className="text-xl font-bold">{productCount}</p>
               <p className="text-xs text-gray-500">Products</p>
             </div>
 
             <div className="rounded-xl bg-gray-50 p-4 text-center">
-              <p className="text-xl font-bold">1.2K</p>
+              <p className="text-xl font-bold">{followerCount}</p>
               <p className="text-xs text-gray-500">Followers</p>
             </div>
 

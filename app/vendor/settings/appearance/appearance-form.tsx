@@ -10,6 +10,11 @@ type Vendor = {
   logo: string | null;
   banner: string | null;
   accentColor: string | null;
+  // averageRating: number | null;
+  _count: {
+    products: number;
+    storeFollow: number;
+  };
 };
 
 type Props = {
@@ -134,12 +139,6 @@ export default function AppearanceForm({ vendor }: Props) {
       </div>
 
       {/* Right Side */}
-      <AppearancePreview
-        storeName={vendor.name}
-        logo={logo}
-        banner={banner}
-        accentColor={accentColor}
-      />
 
       <AppearancePreview
         storeName={vendor.name}
@@ -148,7 +147,8 @@ export default function AppearanceForm({ vendor }: Props) {
         accentColor={accentColor}
         productCount={vendor._count.products}
         followerCount={vendor._count.storeFollow}
-        rating={vendor.averageRating ?? 0}
+        // rating={vendor.averageRating ?? 0}
+        rating={0}
       />
     </div>
   );

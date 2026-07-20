@@ -60,6 +60,11 @@ const links = [
     icon: FaStar,
   },
   {
+    label: "Appearance",
+    href: "/vendor/settings/appearance",
+    icon: FaCog,
+  },
+  {
     label: "Store Settings",
     href: "/vendor/settings",
     icon: FaCog,
