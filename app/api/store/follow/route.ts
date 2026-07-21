@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
+import NotificationService from "@/lib/notifications/notification.service";
 
 export async function POST(req: Request) {
   try {
@@ -42,6 +43,15 @@ export async function POST(req: Request) {
         userId,
         vendorId,
       },
+    });
+
+    await NotificationService.notify({
+      vendorId,
+      setting: "newFollower",
+      type: "FOLLOWER",
+      title: "New Store Follower",
+      message: "Someone started following your store.",
+      link: `/vendor/followers`,
     });
 
     return NextResponse.json({

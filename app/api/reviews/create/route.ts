@@ -85,7 +85,7 @@ export async function POST(req: Request) {
       setting: "newReview",
       type: "REVIEW",
       title: "New Product Review",
-      message: `${user?.name} reviewed ${product.name}.`,
+      message: `${user?.name ?? "A customer"} left a review for "${product.name}".`,
       link: `/vendor/reviews`,
       metadata: {
         reviewId: review.id,

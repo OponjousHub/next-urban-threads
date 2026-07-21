@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
       const order = await prisma.order.update({
         where: { paymentReference: reference },
-        data: { status: "PAID" },
+        data: { paymentStatus: "PAID" },
         include: {
           user: true,
           items: {

@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     if (!signature) {
       return NextResponse.json(
         { message: "Missing Paystack signature" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     if (hash !== signature) {
       return NextResponse.json(
         { message: "Invalid signature" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -50,11 +50,10 @@ export async function POST(req: Request) {
       await prisma.order.update({
         where: { paymentReference: reference },
         data: {
-          status: "PAID",
+          paymentStatus: "PAID",
         },
       });
     }
-    console.log("🔥 Paystack webhook hit");
 
     return NextResponse.json({ received: true });
   } catch (error) {
