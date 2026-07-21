@@ -79,24 +79,29 @@ export default function NotificationForm({ vendorId, settings }: Props) {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
         <div className="space-y-8">
           <NotificationGroup
             title="Orders"
             items={[
               {
                 label: "New Order",
+                description:
+                  "Receive a notification whenever a customer places an order.",
                 checked: form.newOrder,
                 onChange: (v) => update("newOrder", v),
               },
               {
                 label: "Order Cancelled",
+                description: "Be notified when an order is cancelled.",
                 checked: form.orderCancelled,
                 onChange: (v) => update("orderCancelled", v),
               },
               {
                 label: "Order Delivered",
+                description:
+                  "Receive updates when an order is marked as delivered.",
                 checked: form.orderDelivered,
                 onChange: (v) => update("orderDelivered", v),
               },
@@ -108,11 +113,15 @@ export default function NotificationForm({ vendorId, settings }: Props) {
             items={[
               {
                 label: "Low Stock Alert",
+                description:
+                  "Receive a notification when a product is running low on inventory.",
                 checked: form.lowStock,
                 onChange: (v) => update("lowStock", v),
               },
               {
                 label: "Out of Stock",
+                description:
+                  "Get notified immediately when a product goes out of stock.",
                 checked: form.outOfStock,
                 onChange: (v) => update("outOfStock", v),
               },
@@ -124,11 +133,15 @@ export default function NotificationForm({ vendorId, settings }: Props) {
             items={[
               {
                 label: "New Product Review",
+                description:
+                  "Be alerted whenever a customer submits a new product review.",
                 checked: form.newReview,
                 onChange: (v) => update("newReview", v),
               },
               {
                 label: "New Store Follower",
+                description:
+                  "Receive a notification when a customer follows your store.",
                 checked: form.newFollower,
                 onChange: (v) => update("newFollower", v),
               },
@@ -140,11 +153,15 @@ export default function NotificationForm({ vendorId, settings }: Props) {
             items={[
               {
                 label: "Payout Completed",
+                description:
+                  "Be notified when a payout has been successfully processed.",
                 checked: form.payoutCompleted,
                 onChange: (v) => update("payoutCompleted", v),
               },
               {
                 label: "Payout Failed",
+                description:
+                  "Receive an alert if a scheduled payout cannot be completed.",
                 checked: form.payoutFailed,
                 onChange: (v) => update("payoutFailed", v),
               },
@@ -156,11 +173,15 @@ export default function NotificationForm({ vendorId, settings }: Props) {
             items={[
               {
                 label: "Weekly Sales Summary",
+                description:
+                  "Get a weekly overview of your sales, orders, and store performance.",
                 checked: form.weeklySummary,
                 onChange: (v) => update("weeklySummary", v),
               },
               {
                 label: "Monthly Performance Report",
+                description:
+                  "Receive a monthly report with key business insights and growth metrics.",
                 checked: form.monthlySummary,
                 onChange: (v) => update("monthlySummary", v),
               },

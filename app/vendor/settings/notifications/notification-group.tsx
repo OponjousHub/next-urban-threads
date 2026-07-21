@@ -14,26 +14,26 @@ type Props = {
 
 export default function NotificationGroup({ title, items }: Props) {
   return (
-    <div className="space-y-4">
-      {/* Section Title */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-
-        <div className="mt-2 border-b" />
+    <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      {/* Header */}
+      <div className="border-b bg-gray-50 px-6 py-4">
+        <h3 className="text-base font-bold text-gray-900">{title}</h3>
       </div>
 
-      {/* Notification Items */}
-      <div className="space-y-4">
+      {/* Items */}
+      <div className="divide-y divide-gray-100">
         {items.map((item) => (
           <div
             key={item.label}
-            className="flex items-center justify-between rounded-xl border bg-white p-4 transition hover:bg-gray-50"
+            className="flex items-center justify-between px-6 py-5 hover:bg-gray-50 transition-colors"
           >
-            <div>
-              <h4 className="font-medium text-gray-900">{item.label}</h4>
+            <div className="max-w-xl">
+              <p className="font-medium text-gray-900">{item.label}</p>
 
               {item.description && (
-                <p className="mt-1 text-sm text-gray-500">{item.description}</p>
+                <p className="mt-1 text-sm text-gray-500 leading-relaxed">
+                  {item.description}
+                </p>
               )}
             </div>
 
@@ -41,6 +41,7 @@ export default function NotificationGroup({ title, items }: Props) {
             <button
               type="button"
               onClick={() => item.onChange(!item.checked)}
+              aria-pressed={item.checked}
               className={`
                 relative
                 h-7
@@ -48,6 +49,10 @@ export default function NotificationGroup({ title, items }: Props) {
                 rounded-full
                 transition-all
                 duration-300
+                focus:outline-none
+                focus:ring-2
+                focus:ring-[var(--color-primary)]
+                focus:ring-offset-2
 
                 ${item.checked ? "bg-[var(--color-primary)]" : "bg-gray-300"}
               `}
@@ -60,7 +65,7 @@ export default function NotificationGroup({ title, items }: Props) {
                   w-5
                   rounded-full
                   bg-white
-                  shadow
+                  shadow-md
                   transition-all
                   duration-300
 
@@ -71,6 +76,6 @@ export default function NotificationGroup({ title, items }: Props) {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
