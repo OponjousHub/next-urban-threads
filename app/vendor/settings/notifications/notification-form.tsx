@@ -81,7 +81,7 @@ export default function NotificationForm({ vendorId, settings }: Props) {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="space-y-8">
+        <div className="space-y-5 p-8">
           <NotificationGroup
             title="Orders"
             items={[
@@ -190,7 +190,7 @@ export default function NotificationForm({ vendorId, settings }: Props) {
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="border-t bg-gray-50 px-8 py-5 flex justify-end">
         <button
           onClick={save}
           disabled={saving}
