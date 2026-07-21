@@ -193,7 +193,7 @@ model Order {
   status             OrderStatus          @default(PENDING)
   paymentMethod      String
   totalAmount        Decimal
-  currency           String
+  currency           currencyEnum
   paymentProvider    PaymentProvider
   paymentReference   String               @unique
   shippingAddressId  String
@@ -670,6 +670,8 @@ enum StoreType {
 enum currencyEnum {
   NGN
   USD
+  GBP
+  EUR
   KES
   GHS
   ZAR

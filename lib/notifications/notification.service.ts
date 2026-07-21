@@ -1,8 +1,14 @@
 import { prisma } from "@/utils/prisma";
 import { VendorNotificationType } from "@prisma/client";
+import { VendorNotificationSettings } from "@prisma/client";
 
 type NotifyOptions = {
   vendorId: string;
+
+  setting?: keyof Omit<
+    VendorNotificationSettings,
+    "id" | "vendorId" | "createdAt" | "updatedAt"
+  >;
 
   title: string;
 
@@ -27,6 +33,10 @@ export default class NotificationService {
     });
 
     if (!this.isEnabled(settings, options.type)) {
+      return null;
+    }
+
+    if (options.setting && settings && settings[options.setting] === false) {
       return null;
     }
 

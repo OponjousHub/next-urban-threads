@@ -7,6 +7,7 @@ import { resolvePaymentConfig } from "@/app/lib/payments/payment";
 import { getPaymentProvider } from "@/app/lib/payments/factory";
 import { getLoggedInUserId } from "@/lib/auth";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import NotificationService from "@/lib/notifications/notification.service";
 
 export async function POST(req: NextRequest) {
   const tenant = await getDefaultTenant();
@@ -251,6 +252,20 @@ export async function POST(req: NextRequest) {
       where: { id: order.id, tenantId: tenant.id },
       data: { paymentReference },
     });
+
+    if (order.vendorId) {
+      await NotificationService.notify({
+        vendorId: order.vendorId,
+        setting: "newOrder",
+        type: "ORDER",
+        title: "New Order",
+        message: `You received a new order (${order.id.slice(-8)}).`,
+        link: `/vendor/orders/${order.id}`,
+        metadata: {
+          orderId: order.id,
+        },
+      });
+    }
 
     // INITIALIZE TRACKING WITH STATUS = PENDING
     await prisma.orderTrackingEvent.create({
