@@ -146,6 +146,7 @@ model Vendor {
   bankAccount      VendorBankAccount?
   payouts          VendorPayout[]
   storeFollow      StoreFollow[]
+  notifications    VendorNotification[]
   notificationSettings VendorNotificationSettings?
 }
 
@@ -593,6 +594,31 @@ model VendorNotificationSettings {
   vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 }
 
+model VendorNotification {
+  id        String   @id @default(cuid())
+
+  vendorId  String
+
+  title     String
+  message   String
+
+  type      VendorNotificationType
+
+  isRead    Boolean  @default(false)
+
+  link       String?
+
+  metadata   Json?
+
+  createdAt DateTime @default(now())
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+  @@index([vendorId, isRead])
+  @@index([createdAt])
+}
+
 enum Priority {
   LOW
   NORMAL
@@ -718,4 +744,14 @@ enum PayoutStatus {
   APPROVED
   PAID
   REJECTED
+}
+
+enum VendorNotificationType {
+  ORDER
+  INVENTORY
+  REVIEW
+  FOLLOWER
+  PAYOUT
+  REPORT
+  SYSTEM
 }
