@@ -15,6 +15,7 @@ import {
   FaTimes,
   FaTags,
   FaPalette,
+  FaBell,
 } from "react-icons/fa";
 
 import { useVendorSidebar } from "@/store/vendor-sidebar-context";
@@ -39,6 +40,11 @@ const links = [
     label: "Orders",
     href: "/vendor/orders",
     icon: FaShoppingCart,
+  },
+  {
+    label: "Notification",
+    href: "/vendor/settings/notifications",
+    icon: FaBell,
   },
   {
     label: "Customers",

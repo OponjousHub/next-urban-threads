@@ -60,8 +60,7 @@ export default function NotificationForm({ vendorId, settings }: Props) {
         },
 
         body: JSON.stringify({
-          vendorId,
-          ...form,
+          form,
         }),
       });
 
