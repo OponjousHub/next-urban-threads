@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
 import AppearanceForm from "./appearance-form";
+import VendorHeaderUI from "@/components/vendor/vendorHeader";
 
 export default async function AppearancePage() {
   const userId = await getLoggedInUserId();
@@ -40,16 +41,15 @@ export default async function AppearancePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Store Appearance</h1>
-
-        <p className="mt-2 text-gray-500">
-          Customize how customers see your storefront.
-        </p>
+    <>
+      <VendorHeaderUI
+        title="Store Appearance"
+        subtitle="Customize how customers see your storefront."
+        vendor={vendor}
+      />
+      <div className="max-w-6xl mx-auto space-y-8">
+        <AppearanceForm vendor={vendor} />
       </div>
-
-      <AppearanceForm vendor={vendor} />
-    </div>
+    </>
   );
 }

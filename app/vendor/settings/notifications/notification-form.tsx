@@ -81,20 +81,6 @@ export default function NotificationForm({ vendorId, settings }: Props) {
   return (
     <div className="space-y-8">
       <div className="rounded-2xl border bg-white p-6 shadow-sm">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="rounded-xl bg-blue-100 p-3">
-            <Bell className="h-6 w-6 text-blue-600" />
-          </div>
-
-          <div>
-            <h2 className="text-lg font-semibold">Notification Preferences</h2>
-
-            <p className="text-sm text-gray-500">
-              Choose the notifications you want to receive.
-            </p>
-          </div>
-        </div>
-
         <div className="space-y-8">
           <NotificationGroup
             title="Orders"
