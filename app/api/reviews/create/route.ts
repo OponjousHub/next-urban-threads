@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
 import { updateProductRating } from "@/lib/calProduct-rating";
+import NotificationService from "@/lib/notifications/notification.service";
 
 export async function POST(req: Request) {
   try {
@@ -49,6 +50,58 @@ export async function POST(req: Request) {
         orderId: hasPurchased.id,
         verifiedPurchase: true,
         status: "APPROVED",
+      },
+    });
+
+    const product = await prisma.product.findUnique({
+      where: {
+        id: productId,
+      },
+      select: {
+        id: true,
+        name: true,
+        vendorId: true,
+      },
+    });
+
+    if (!product || !product.vendorId) {
+      return NextResponse.json(
+        { message: "Product not found." },
+        { status: 404 },
+      );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+      },
+    });
+
+    await NotificationService.notify({
+      vendorId: product.vendorId,
+      setting: "newReview",
+      type: "REVIEW",
+      title: "New Product Review",
+      message: `${user?.name} reviewed ${product.name}.`,
+      link: `/vendor/reviews`,
+      metadata: {
+        reviewId: review.id,
+        productId: product.id,
+      },
+    });
+
+    await NotificationService.notify({
+      vendorId: review.id,
+      setting: "newReview",
+      type: "REVIEW",
+      title: "New Review",
+      message: `You received a new review (${review.id.slice(-8)}).`,
+      link: `/vendor/orders/${review.id}`,
+      metadata: {
+        orderId: review.id,
       },
     });
 

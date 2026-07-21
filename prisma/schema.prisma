@@ -193,7 +193,7 @@ model Order {
   status             OrderStatus          @default(PENDING)
   paymentMethod      String
   totalAmount        Decimal
-  currency           currencyEnum
+  currency           currencyEnum?
   paymentProvider    PaymentProvider
   paymentReference   String               @unique
   shippingAddressId  String
