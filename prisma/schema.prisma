@@ -96,6 +96,7 @@ model Product {
   refundItem      RefundItem[]
   reviews         Review[]
   wishlistItem    WishlistItem[]
+  inventoryLog    InventoryLog[]
 
   @@unique([tenantId, slug])
   @@index([tenantId])
@@ -619,6 +620,17 @@ model VendorNotification {
   @@index([createdAt])
 }
 
+model InventoryLog {
+  id         String   @id @default(cuid())
+  productId  String
+  vendorId   String?
+  change     Int
+  reason     InventoryReason
+  createdAt  DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+}
+
 enum Priority {
   LOW
   NORMAL
@@ -756,4 +768,12 @@ enum VendorNotificationType {
   PAYOUT
   REPORT
   SYSTEM
+}
+
+enum InventoryReason {
+  ORDER
+  RETURN
+  CANCELLED
+  MANUAL
+  RESTOCK
 }
