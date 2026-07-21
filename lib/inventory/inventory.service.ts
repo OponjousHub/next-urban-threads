@@ -21,50 +21,58 @@ export default class InventoryService {
    * Reduce inventory after a successful purchase
    */
   static async decreaseStock({ productId, quantity }: DecreaseStockInput) {
-    const product = await prisma.product.findUnique({
-      where: {
-        id: productId,
-      },
-      select: {
-        id: true,
-        stock: true,
-      },
-    });
-
-    if (!product) {
-      throw new Error("Product not found.");
-    }
-
-    if (product.stock < quantity) {
-      throw new Error("Insufficient stock.");
-    }
-
-    const updated = await prisma.product.update({
-      where: {
-        id: productId,
-      },
-      data: {
-        stock: {
-          decrement: quantity,
+    const updatedProduct = await prisma.$transaction(async (tx) => {
+      const product = await tx.product.findUnique({
+        where: {
+          id: productId,
         },
-      },
-    });
+        select: {
+          id: true,
+          stock: true,
+          instock: true,
+        },
+      });
 
-    // Keep instock in sync
-    if (updated.stock <= 0) {
-      await prisma.product.update({
+      if (!product) {
+        throw new Error("Product not found.");
+      }
+
+      if (product.stock < quantity) {
+        throw new Error("Insufficient stock.");
+      }
+
+      const updated = await tx.product.update({
         where: {
           id: productId,
         },
         data: {
-          instock: false,
+          stock: {
+            decrement: quantity,
+          },
         },
       });
-    }
 
+      // Keep instock synchronized
+      if (updated.stock <= 0 && updated.instock) {
+        await tx.product.update({
+          where: {
+            id: productId,
+          },
+          data: {
+            instock: false,
+          },
+        });
+
+        updated.instock = false;
+      }
+
+      return updated;
+    });
+
+    // Notifications happen AFTER the transaction succeeds
     await checkInventoryNotification(productId);
 
-    return updated;
+    return updatedProduct;
   }
 
   /**
