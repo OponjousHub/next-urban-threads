@@ -8,6 +8,7 @@ import { getPaymentProvider } from "@/app/lib/payments/factory";
 import { getLoggedInUserId } from "@/lib/auth";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import NotificationService from "@/lib/notifications/notification.service";
+import InventoryService from "@/lib/inventory/inventory.service";
 
 export async function POST(req: NextRequest) {
   const tenant = await getDefaultTenant();
@@ -253,6 +254,15 @@ export async function POST(req: NextRequest) {
       data: { paymentReference },
     });
 
+    // Decrease stock after purchase
+    for (const item of orderItems) {
+      await InventoryService.decreaseStock({
+        productId: item.productId,
+        quantity: item.quantity,
+      });
+    }
+
+    // Sends notification on new order
     if (order.vendorId) {
       await NotificationService.notify({
         vendorId: order.vendorId,

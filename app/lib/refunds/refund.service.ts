@@ -2,6 +2,7 @@ import { refundPayment } from "../payments/refundPayment";
 import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import InventoryService from "@/lib/inventory/inventory.service";
 
 export async function createRefundRequest(data: {
   orderId: string;
@@ -17,7 +18,6 @@ export async function createRefundRequest(data: {
 }) {
   const userId = await getLoggedInUserId();
 
-  console.log("DATA DATA DATA", data);
   if (!userId) {
     throw new Error("Unauthorized");
   }
@@ -67,9 +67,6 @@ export async function createRefundRequest(data: {
     0,
   );
 
-  console.log("requestedAmount", requestedAmount);
-  console.log("refundItems", refundItems);
-
   return prisma.refundRequest.create({
     data: {
       tenantId: order.tenantId,
@@ -98,35 +95,16 @@ export async function createRefundRequest(data: {
       },
     },
   });
-
-  // return prisma.refundRequest.create({
-  //   data: {
-  //     tenantId: order.tenantId,
-  //     storeMode: order.storeMode,
-  //     // orderId: order.id,
-  //     order: {
-  //       connect: {
-  //         id: order.id,
-  //       },
-  //     },
-  //     userId: userId,
-  //     vendorId: null,
-  //     reason: data.reason,
-  //     description: data.description,
-  //     requestedAmount,
-  //     currency: tenant.currency, // adjust later per tenant
-  //     items: {
-  //       create: refundItems,
-  //     },
-  //   },
-  // });
 }
 
 export async function approveRefund(refundId: string) {
   const refund = await prisma.refundRequest.findUnique({
-    where: { id: refundId },
+    where: {
+      id: refundId,
+    },
     include: {
       order: true,
+      items: true,
     },
   });
 
@@ -153,12 +131,17 @@ export async function approveRefund(refundId: string) {
   });
 
   if (paymentResult.reference === "already_refunded") {
-    console.log("Refund already processed externally");
-
     await prisma.refundRequest.update({
       where: { id: refundId },
       data: { status: "REFUNDED" },
     });
+
+    for (const item of refund.items) {
+      await InventoryService.increaseStock({
+        productId: item.productId,
+        quantity: item.quantity,
+      });
+    }
 
     return { success: true };
   }
@@ -186,6 +169,14 @@ export async function approveRefund(refundId: string) {
       refundStatus: "REFUNDED",
     },
   });
+
+  // Increament the product
+  for (const item of refund.items) {
+    await InventoryService.increaseStock({
+      productId: item.productId,
+      quantity: item.quantity,
+    });
+  }
 
   return { success: true };
 }

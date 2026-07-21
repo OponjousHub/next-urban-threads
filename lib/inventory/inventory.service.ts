@@ -41,14 +41,15 @@ export default class InventoryService {
         throw new Error("Insufficient stock.");
       }
 
+      const remainingStock = product.stock - quantity;
+
       const updated = await tx.product.update({
         where: {
           id: productId,
         },
         data: {
-          stock: {
-            decrement: quantity,
-          },
+          stock: remainingStock,
+          instock: remainingStock > 0,
         },
       });
 
