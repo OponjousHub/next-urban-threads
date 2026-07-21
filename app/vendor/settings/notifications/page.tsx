@@ -4,6 +4,7 @@ import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
 
 import NotificationForm from "./notification-form";
+import VendorHeaderUI from "@/components/vendor/vendorHeader";
 
 export default async function NotificationsPage() {
   const userId = await getLoggedInUserId();
@@ -47,13 +48,11 @@ export default async function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Notification Settings</h1>
-
-        <p className="mt-1 text-sm text-gray-500">
-          Choose which notifications you'd like to receive about your store.
-        </p>
-      </div>
+      <VendorHeaderUI
+        title="Notification Settings"
+        subtitle="Choose which notifications you'd like to receive about your store."
+        vendor={vendor}
+      />
 
       <NotificationForm vendorId={vendor.id} settings={settings} />
     </div>
