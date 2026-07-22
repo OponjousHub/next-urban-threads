@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 import {
   Bell,
   Package,
@@ -38,23 +39,11 @@ function getIcon(type: string) {
 
 export default async function VendorNotificationsPage() {
   const userId = await getLoggedInUserId();
+  const { vendor } = await getCurrentVendor();
 
   if (!userId) {
     redirect("/login");
   }
-
-  const vendor = await prisma.vendor.findFirst({
-    where: {
-      users: {
-        some: {
-          id: userId,
-        },
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
 
   if (!vendor) {
     redirect("/vendor");

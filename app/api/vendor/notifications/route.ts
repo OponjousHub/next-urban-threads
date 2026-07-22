@@ -1,27 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
+import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 
 export async function GET(req: Request) {
   try {
     const userId = await getLoggedInUserId();
+    const { vendor } = await getCurrentVendor();
 
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-
-    const vendor = await prisma.vendor.findFirst({
-      where: {
-        users: {
-          some: {
-            id: userId,
-          },
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
 
     if (!vendor) {
       return NextResponse.json(

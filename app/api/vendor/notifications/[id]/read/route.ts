@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
+import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 
 export async function PATCH(
   req: Request,
@@ -8,24 +9,13 @@ export async function PATCH(
 ) {
   try {
     const userId = await getLoggedInUserId();
+    const { vendor } = await getCurrentVendor();
 
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     // Find the vendor that owns this user
-    const vendor = await prisma.vendor.findFirst({
-      where: {
-        users: {
-          some: {
-            id: userId,
-          },
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
 
     if (!vendor) {
       return NextResponse.json(

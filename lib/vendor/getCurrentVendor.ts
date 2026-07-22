@@ -26,6 +26,10 @@ export async function getCurrentVendor() {
     where: { id: user?.vendorId },
   });
 
+  if (!vendor) {
+    throw new Error("Vendor not found");
+  }
+
   return {
     vendorId: user.vendorId,
     role: user.role,
