@@ -12,13 +12,6 @@ export default class ProductService {
     return ProductRepository.create(data, tenantId, storeMode);
   }
 
-  // static async getProducts(options: any) {
-  //   return ProductRepository.findAll({
-  //     ...options,
-  //     include: { category: true },
-  //   });
-  // }
-
   static async getProducts(options: any) {
     return ProductRepository.findAll({
       ...options,
@@ -50,6 +43,8 @@ export default class ProductService {
 
   static async updateProduct(id: string, data: any) {
     const tenant = await getDefaultTenant();
+    // const { stock, ...rest } = data;
+    // console.log("STOCK DATA" stock);
 
     if (!tenant) {
       throw new Error("Default tenant not found");

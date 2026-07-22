@@ -4,188 +4,111 @@ import { getLoggedInUserId } from "@/lib/auth";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import InventoryService from "@/lib/inventory/inventory.service";
 
-export async function createRefundRequest(data: {
-  orderId: string;
-  userId: string;
-  tenantId: string;
-  reason: string;
-  description?: string;
-  items: {
-    productId: string;
-    quantity: number;
-    priceAtPurchase: number;
-  }[];
-}) {
-  const userId = await getLoggedInUserId();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  const tenant = await getDefaultTenant();
-  if (!tenant) {
-    throw new Error("Default tenant not found");
-  }
-
-  // Fetch order from DB (SOURCE OF TRUTH)
-  const order = await prisma.order.findUnique({
-    where: { id: data.orderId },
-    include: {
-      items: {
-        include: {
-          product: true,
-        },
-      },
-    },
-  });
-
-  if (!order) throw new Error("Order not found");
-
-  //  Validate ownership
-  if (order.userId !== userId) {
-    throw new Error("Not your order");
-  }
-
-  //  Calculate refund safely from DB
-
-  const refundItems = data.items.map((item) => ({
-    productId: item.productId,
-    quantity: Number(item.quantity),
-    priceAtPurchase: Number(item.priceAtPurchase),
-  }));
-
-  if (
-    refundItems.some(
-      (item) => Number.isNaN(item.priceAtPurchase) || item.priceAtPurchase <= 0,
-    )
-  ) {
-    throw new Error("Invalid refund item price");
-  }
-
-  const requestedAmount = refundItems.reduce(
-    (sum, item) => sum + item.priceAtPurchase * item.quantity,
-    0,
-  );
-
-  return prisma.refundRequest.create({
-    data: {
-      tenantId: order.tenantId,
-      storeMode: order.storeMode,
-
-      order: {
-        connect: {
-          id: order.id,
-        },
-      },
-
-      user: {
-        connect: {
-          id: userId,
-        },
-      },
-
-      vendorId: null,
-      reason: data.reason,
-      description: data.description,
-      requestedAmount,
-      currency: tenant.currency,
-
-      items: {
-        create: refundItems,
-      },
-    },
-  });
-}
-
-export async function approveRefund(refundId: string) {
+export async function createRefundRequest(refundId: string) {
   const refund = await prisma.refundRequest.findUnique({
     where: {
       id: refundId,
     },
     include: {
       order: true,
-      items: true,
+      items: {
+        include: {
+          product: {
+            select: {
+              id: true,
+              vendorId: true,
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
 
-  if (!refund) throw new Error("Refund not found");
+  if (!refund) {
+    throw new Error("Refund not found");
+  }
 
-  // ✅ PREVENT DOUBLE / INVALID REFUNDS
   if (refund.status !== "REQUESTED") {
-    return { error: "Refund already processed or invalid state" };
+    return {
+      error: "Refund already processed or invalid state",
+    };
   }
 
   // STEP 1: mark as processing
-  const refundStatus = await prisma.refundRequest.update({
-    where: { id: refundId },
+  await prisma.refundRequest.update({
+    where: {
+      id: refundId,
+    },
     data: {
       status: "PROCESSING",
       approvedAmount: refund.requestedAmount,
     },
   });
 
-  // STEP 2: call payment gateway
+  // STEP 2: refund through payment provider
   const paymentResult = await refundPayment({
-    amount: refund.approvedAmount ?? refund.requestedAmount,
+    amount: refund.requestedAmount,
     reference: refund.order.paymentReference!,
   });
 
-  if (paymentResult.reference === "already_refunded") {
+  // Gateway failed
+  if (!paymentResult.success) {
     await prisma.refundRequest.update({
-      where: { id: refundId },
-      data: { status: "REFUNDED" },
+      where: {
+        id: refundId,
+      },
+      data: {
+        status: "FAILED",
+      },
+    });
+    throw new Error("Refund payment failed.");
+  }
+
+  if (!paymentResult.reference) {
+    throw new Error("Payment gateway did not return a refund reference.");
+  }
+
+  // STEP 3: database transaction
+  await prisma.$transaction(async (tx) => {
+    await tx.refundTransaction.create({
+      data: {
+        refundRequestId: refundId,
+        provider: paymentResult.provider,
+        transactionRef: paymentResult.reference,
+        status: "SUCCESS",
+      },
     });
 
+    await tx.refundRequest.update({
+      where: {
+        id: refundId,
+      },
+      data: {
+        status: "REFUNDED",
+      },
+    });
+
+    await tx.order.update({
+      where: {
+        id: refund.orderId,
+      },
+      data: {
+        refundStatus: "REFUNDED",
+      },
+    });
+
+    // Restore inventory
     for (const item of refund.items) {
       await InventoryService.increaseStock({
+        tx,
         productId: item.productId,
         quantity: item.quantity,
       });
     }
-
-    return { success: true };
-  }
-
-  // STEP 3: save transaction
-  await prisma.refundTransaction.create({
-    data: {
-      refundRequestId: refundId,
-      provider: paymentResult.provider,
-      transactionRef: paymentResult.reference,
-      status: "SUCCESS",
-    },
   });
 
-  // STEP 4: mark refunded
-  await prisma.refundRequest.update({
-    where: { id: refundId },
-    data: { status: "REFUNDED" },
-  });
-
-  // STEP 5: update order
-  await prisma.order.update({
-    where: { id: refund.orderId },
-    data: {
-      refundStatus: "REFUNDED",
-    },
-  });
-
-  // Increament the product
-  for (const item of refund.items) {
-    await InventoryService.increaseStock({
-      productId: item.productId,
-      quantity: item.quantity,
-    });
-  }
-
-  return { success: true };
-}
-
-export async function rejectRefund(refundId: string) {
-  return prisma.refundRequest.update({
-    where: { id: refundId },
-    data: {
-      status: "REJECTED",
-    },
-  });
+  return {
+    success: true,
+  };
 }

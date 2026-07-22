@@ -1,105 +1,158 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/utils/prisma";
 import { checkInventoryNotification } from "../notifications/inventory-notification";
 
 type DecreaseStockInput = {
   productId: string;
   quantity: number;
+  tx?: Prisma.TransactionClient;
 };
 
 type IncreaseStockInput = {
   productId: string;
   quantity: number;
+  tx?: Prisma.TransactionClient;
 };
 
 type AdjustStockInput = {
   productId: string;
   stock: number;
+  tx?: Prisma.TransactionClient;
 };
 
 export default class InventoryService {
   /**
-   * Reduce inventory after a successful purchase
+   * Reduce stock after purchase
    */
-  static async decreaseStock({ productId, quantity }: DecreaseStockInput) {
-    const updatedProduct = await prisma.$transaction(async (tx) => {
-      const product = await tx.product.findUnique({
-        where: {
-          id: productId,
-        },
-        select: {
-          id: true,
-          stock: true,
-          instock: true,
-        },
-      });
+  static async decreaseStock({ productId, quantity, tx }: DecreaseStockInput) {
+    if (tx) {
+      const updated = await this.performDecreaseStock(tx, productId, quantity);
 
-      if (!product) {
-        throw new Error("Product not found.");
-      }
-
-      if (product.stock < quantity) {
-        throw new Error("Insufficient stock.");
-      }
-
-      const remainingStock = product.stock - quantity;
-
-      const updated = await tx.product.update({
-        where: {
-          id: productId,
-        },
-        data: {
-          stock: remainingStock,
-          instock: remainingStock > 0,
-        },
-      });
-
-      // Keep instock synchronized
-      if (updated.stock <= 0 && updated.instock) {
-        await tx.product.update({
-          where: {
-            id: productId,
-          },
-          data: {
-            instock: false,
-          },
-        });
-
-        updated.instock = false;
-      }
+      await checkInventoryNotification(productId);
 
       return updated;
+    }
+
+    const updated = await prisma.$transaction(async (trx) => {
+      return this.performDecreaseStock(trx, productId, quantity);
     });
 
-    // Notifications happen AFTER the transaction succeeds
     await checkInventoryNotification(productId);
-
-    return updatedProduct;
-  }
-
-  /**
-   * Restore inventory (returns, cancelled orders)
-   */
-  static async increaseStock({ productId, quantity }: IncreaseStockInput) {
-    const updated = await prisma.product.update({
-      where: {
-        id: productId,
-      },
-      data: {
-        stock: {
-          increment: quantity,
-        },
-        instock: true,
-      },
-    });
 
     return updated;
   }
 
+  // Helper for decreaseStock
+
+  private static async performDecreaseStock(
+    db: Prisma.TransactionClient,
+    productId: string,
+    quantity: number,
+  ) {
+    const product = await db.product.findUnique({
+      where: {
+        id: productId,
+      },
+      select: {
+        id: true,
+        stock: true,
+      },
+    });
+
+    if (!product) {
+      throw new Error("Product not found.");
+    }
+
+    if (product.stock < quantity) {
+      throw new Error("Insufficient stock.");
+    }
+
+    const remainingStock = product.stock - quantity;
+
+    return db.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        stock: remainingStock,
+        instock: remainingStock > 0,
+      },
+    });
+  }
+
   /**
-   * Manual stock adjustment by vendor/admin
+   * Restore stock after refund/return
    */
-  static async adjustStock({ productId, stock }: AdjustStockInput) {
-    const updated = await prisma.product.update({
+  static async increaseStock({ productId, quantity, tx }: IncreaseStockInput) {
+    if (tx) {
+      return this.performIncreaseStock(tx, productId, quantity);
+    }
+
+    return prisma.$transaction(async (trx) => {
+      return this.performIncreaseStock(trx, productId, quantity);
+    });
+  }
+
+  // Helper for IncreaseStock
+  private static async performIncreaseStock(
+    db: Prisma.TransactionClient,
+    productId: string,
+    quantity: number,
+  ) {
+    const product = await db.product.findUnique({
+      where: {
+        id: productId,
+      },
+      select: {
+        stock: true,
+      },
+    });
+
+    if (!product) {
+      throw new Error("Product not found.");
+    }
+
+    const newStock = product.stock + quantity;
+
+    return db.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        stock: newStock,
+        instock: true,
+      },
+    });
+  }
+
+  /**
+   * Manual stock adjustment
+   */
+  static async adjustStock({ productId, stock, tx }: AdjustStockInput) {
+    if (tx) {
+      const updated = await this.performAdjustStock(tx, productId, stock);
+
+      await checkInventoryNotification(productId);
+
+      return updated;
+    }
+
+    const updated = await prisma.$transaction(async (trx) => {
+      return this.performAdjustStock(trx, productId, stock);
+    });
+
+    await checkInventoryNotification(productId);
+
+    return updated;
+  }
+
+  // Helper for adjustStock
+  private static async performAdjustStock(
+    db: Prisma.TransactionClient,
+    productId: string,
+    stock: number,
+  ) {
+    return db.product.update({
       where: {
         id: productId,
       },
@@ -108,9 +161,5 @@ export default class InventoryService {
         instock: stock > 0,
       },
     });
-
-    await checkInventoryNotification(productId);
-
-    return updated;
   }
 }

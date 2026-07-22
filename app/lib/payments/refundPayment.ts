@@ -62,7 +62,6 @@ async function refundFlutterwave(amount: number, reference: string) {
     );
 
     const data = await res.json();
-    console.log("FLW REFUND FULL RESPONSE:", data);
 
     const isAlreadyRefunded =
       typeof data?.data === "string" &&

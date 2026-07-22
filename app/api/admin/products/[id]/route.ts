@@ -1,6 +1,7 @@
 import { prisma } from "@/utils/prisma";
 import { NextResponse } from "next/server";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import InventoryService from "@/lib/inventory/inventory.service";
 
 type Variant = {
   id?: string;
@@ -17,12 +18,16 @@ export async function PATCH(
   { params }: { params: { id: string } },
 ) {
   const paramsId = await params;
+
   const tenant = await getDefaultTenant();
+
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
+
   try {
     const body = await req.json();
+
     const {
       name,
       category,
@@ -32,79 +37,85 @@ export async function PATCH(
       description,
       sizes,
       colours,
-      stock,
       featured,
       flash,
       videos,
       variants,
     } = body;
 
-    const updated = await prisma.product.update({
-      where: { id: paramsId.id, tenantId: tenant.id },
-      data: {
-        name,
-        category: {
-          connect: { id: category },
-        },
-        subCategory,
-        price,
-        images,
-        description,
-        sizes,
-        colours,
-        stock,
-        featured,
-        videos,
-        isFlashDeal: flash,
-      },
-    });
-
-    // Update variant
-
-    if (variants?.length) {
-      // Remove old variants
-      await prisma.productVariant.deleteMany({
-        where: {
-          productId: paramsId.id,
-        },
-      });
-
-      // Create updated variants
-      await prisma.productVariant.createMany({
-        data: variants.map((variant: Variant) => ({
-          productId: paramsId.id,
-          color: variant.color,
-          colorHex: variant.colorHex,
-          size: variant.size,
-          stock: variant.stock,
-          price: variant.price,
-          image: variant.image || "",
-        })),
-      });
-
-      // Recalculate total stock
-      const totalStock = variants.reduce(
-        (sum: any, variant: Variant) => sum + Number(variant.stock || 0),
-        0,
-      );
-
-      await prisma.product.update({
+    const updated = await prisma.$transaction(async (tx) => {
+      // Update product details
+      const product = await tx.product.update({
         where: {
           id: paramsId.id,
+          tenantId: tenant.id,
         },
-
         data: {
-          stock: totalStock,
-          instock: totalStock > 0,
+          name,
+          category: {
+            connect: {
+              id: category,
+            },
+          },
+          subCategory,
+          price,
+          images,
+          description,
+          sizes,
+          colours,
+          featured,
+          videos,
+          isFlashDeal: flash,
         },
       });
-    }
+
+      // Replace variants
+      if (variants?.length) {
+        await tx.productVariant.deleteMany({
+          where: {
+            productId: paramsId.id,
+          },
+        });
+
+        await tx.productVariant.createMany({
+          data: variants.map((variant: Variant) => ({
+            productId: paramsId.id,
+            color: variant.color,
+            colorHex: variant.colorHex,
+            size: variant.size,
+            stock: variant.stock,
+            price: variant.price,
+            image: variant.image || "",
+          })),
+        });
+
+        // Calculate total inventory
+        const totalStock = variants.reduce(
+          (sum: number, variant: Variant) => sum + Number(variant.stock || 0),
+          0,
+        );
+
+        await InventoryService.adjustStock({
+          tx,
+          productId: paramsId.id,
+          stock: totalStock,
+        });
+      }
+
+      return product;
+    });
 
     return Response.json(updated);
   } catch (err) {
+    console.error(err);
+
     return Response.json(
-      { message: "Failed to update product" },
-      { status: 500 },
+      {
+        message: "Failed to update product",
+      },
+      {
+        status: 500,
+      },
     );
   }
 }
