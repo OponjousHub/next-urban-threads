@@ -114,7 +114,7 @@ export default class InventoryService {
 
     const newStock = product.stock + quantity;
 
-    return db.product.update({
+    const updated = db.product.update({
       where: {
         id: productId,
       },
@@ -123,6 +123,10 @@ export default class InventoryService {
         instock: true,
       },
     });
+
+    await checkInventoryNotification(productId);
+
+    return updated;
   }
 
   /**
