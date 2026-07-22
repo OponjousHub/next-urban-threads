@@ -609,9 +609,12 @@ model VendorNotification {
 
   link       String?
 
+  read       Boolean  @default(false)
+  readAt     DateTime?
+
   metadata   Json?
 
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
 
   vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 
