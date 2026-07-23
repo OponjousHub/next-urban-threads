@@ -103,6 +103,7 @@ export async function createRefundRequest(refundId: string) {
       await InventoryService.increaseStock({
         tx,
         productId: item.productId,
+        variantId: item.variantId,
         quantity: item.quantity,
       });
     }
