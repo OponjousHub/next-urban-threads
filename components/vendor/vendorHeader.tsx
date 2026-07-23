@@ -4,6 +4,7 @@ import { FaBell, FaBars } from "react-icons/fa";
 import { StatusBadge } from "@/lib/status-badge";
 import { VendorHeaderProps } from "@/types/vendor";
 import { useVendorSidebar } from "@/store/vendor-sidebar-context";
+import NotificationBell from "@/components/vendor/notification-bell/notification-bell";
 
 export default function VendorHeaderUI({
   title,
@@ -39,9 +40,10 @@ export default function VendorHeaderUI({
         <div className="flex items-center gap-3">
           {/* Notifications */}
           <button className="relative flex h-10 w-10 items-center justify-center rounded-lg border hover:bg-gray-50">
-            <FaBell size={15} />
+            <NotificationBell />
 
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+            {/* <UserMenu /> */}
           </button>
 
           {/* Vendor Profile */}
