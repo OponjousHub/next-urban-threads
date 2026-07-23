@@ -258,7 +258,7 @@ export async function POST(req: NextRequest) {
     for (const item of orderItems) {
       await InventoryService.decreaseStock({
         productId: item.productId,
-        // variantId: item.variantId,
+        variantId: item.variantId,
         quantity: item.quantity,
       });
     }

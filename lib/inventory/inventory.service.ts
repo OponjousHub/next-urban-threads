@@ -4,6 +4,7 @@ import { checkInventoryNotification } from "../notifications/inventory-notificat
 
 type DecreaseStockInput = {
   productId: string;
+  variantId?: string | null;
   quantity: number;
   tx?: Prisma.TransactionClient;
 };
@@ -24,13 +25,19 @@ export default class InventoryService {
   /**
    * Reduce stock after purchase
    */
-  static async decreaseStock({ productId, quantity, tx }: DecreaseStockInput) {
-    console.log("Decrease stock called", {
-      productId,
-      quantity,
-    });
+  static async decreaseStock({
+    productId,
+    variantId,
+    quantity,
+    tx,
+  }: DecreaseStockInput) {
     if (tx) {
-      const updated = await this.performDecreaseStock(tx, productId, quantity);
+      const updated = await this.performDecreaseStock(
+        tx,
+        productId,
+        variantId,
+        quantity,
+      );
 
       await checkInventoryNotification(productId);
 
@@ -38,7 +45,7 @@ export default class InventoryService {
     }
 
     const updated = await prisma.$transaction(async (trx) => {
-      return this.performDecreaseStock(trx, productId, quantity);
+      return this.performDecreaseStock(trx, productId, variantId, quantity);
     });
 
     await checkInventoryNotification(productId);
@@ -51,41 +58,68 @@ export default class InventoryService {
   private static async performDecreaseStock(
     db: Prisma.TransactionClient,
     productId: string,
+    variantId: string | null | undefined,
     quantity: number,
   ) {
-    const product = await db.product.findUnique({
+    if (!variantId) {
+      throw new Error("Variant ID is required.");
+    }
+
+    // Get the purchased variant
+    const variant = await db.productVariant.findUnique({
       where: {
-        id: productId,
+        id: variantId,
       },
       select: {
         id: true,
         stock: true,
+        productId: true,
       },
     });
-    console.log("Current stock:", product?.stock);
 
-    if (!product) {
-      throw new Error("Product not found.");
+    if (!variant) {
+      throw new Error("Product variant not found.");
     }
 
-    if (product.stock < quantity) {
+    if (variant.stock < quantity) {
       throw new Error("Insufficient stock.");
     }
 
-    const remainingStock = product.stock - quantity;
+    // Reduce variant stock
+    await db.productVariant.update({
+      where: {
+        id: variantId,
+      },
+      data: {
+        stock: variant.stock - quantity,
+      },
+    });
 
-    const updated = db.product.update({
+    // Calculate remaining stock from ALL variants
+    const variants = await db.productVariant.findMany({
+      where: {
+        productId,
+      },
+      select: {
+        stock: true,
+      },
+    });
+
+    const totalStock = variants.reduce(
+      (sum, variant) => sum + variant.stock,
+      0,
+    );
+
+    // Update parent product
+    return db.product.update({
       where: {
         id: productId,
       },
       data: {
-        stock: remainingStock,
-        instock: remainingStock > 0,
+        stock: totalStock,
+        instock: totalStock > 0,
       },
     });
-
-    console.log("Updated stock:", updated.stock);
-    return updated;
   }
 
   /**
