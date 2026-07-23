@@ -11,6 +11,7 @@ type DecreaseStockInput = {
 
 type IncreaseStockInput = {
   productId: string;
+  variantId?: string | null;
   quantity: number;
   tx?: Prisma.TransactionClient;
 };
@@ -125,13 +126,18 @@ export default class InventoryService {
   /**
    * Restore stock after refund/return
    */
-  static async increaseStock({ productId, quantity, tx }: IncreaseStockInput) {
+  static async increaseStock({
+    productId,
+    quantity,
+    variantId,
+    tx,
+  }: IncreaseStockInput) {
     if (tx) {
-      return this.performIncreaseStock(tx, productId, quantity);
+      return this.performIncreaseStock(tx, productId, variantId, quantity);
     }
 
     return prisma.$transaction(async (trx) => {
-      return this.performIncreaseStock(trx, productId, quantity);
+      return this.performIncreaseStock(trx, productId, variantId, quantity);
     });
   }
 
@@ -139,36 +145,61 @@ export default class InventoryService {
   private static async performIncreaseStock(
     db: Prisma.TransactionClient,
     productId: string,
+    variantId: string | null | undefined,
     quantity: number,
   ) {
-    const product = await db.product.findUnique({
+    if (!variantId) {
+      throw new Error("Variant ID is required.");
+    }
+
+    const variant = await db.productVariant.findUnique({
       where: {
-        id: productId,
+        id: variantId,
+      },
+      select: {
+        id: true,
+        stock: true,
+      },
+    });
+
+    if (!variant) {
+      throw new Error("Product variant not found.");
+    }
+
+    // Restore variant stock
+    await db.productVariant.update({
+      where: {
+        id: variantId,
+      },
+      data: {
+        stock: variant.stock + quantity,
+      },
+    });
+
+    // Recalculate total product stock
+    const variants = await db.productVariant.findMany({
+      where: {
+        productId,
       },
       select: {
         stock: true,
       },
     });
 
-    if (!product) {
-      throw new Error("Product not found.");
-    }
+    const totalStock = variants.reduce(
+      (sum, variant) => sum + variant.stock,
+      0,
+    );
 
-    const newStock = product.stock + quantity;
-
-    const updated = db.product.update({
+    return db.product.update({
       where: {
         id: productId,
       },
       data: {
-        stock: newStock,
-        instock: true,
+        stock: totalStock,
+        instock: totalStock > 0,
       },
     });
-
-    await checkInventoryNotification(productId);
-
-    return updated;
   }
 
   /**
