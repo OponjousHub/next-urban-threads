@@ -1,7 +1,9 @@
+import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
 
-export async function getCurrentVendor() {
+export async function getCurrentVendor(include?: Prisma.VendorInclude) {
   const userId = await getLoggedInUserId();
 
   if (!userId) {
@@ -23,7 +25,10 @@ export async function getCurrentVendor() {
   }
 
   const vendor = await prisma.vendor.findUnique({
-    where: { id: user?.vendorId },
+    where: {
+      id: user.vendorId,
+    },
+    include,
   });
 
   if (!vendor) {
@@ -31,7 +36,7 @@ export async function getCurrentVendor() {
   }
 
   return {
-    vendorId: user.vendorId,
+    vendorId: vendor.id,
     role: user.role,
     vendor,
   };
