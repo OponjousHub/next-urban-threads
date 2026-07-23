@@ -55,7 +55,20 @@ export default function NotificationDropdown({
   loading,
   notifications,
   onClose,
+  refresh,
 }: Props) {
+  async function handleNotificationClick(notification: VendorNotification) {
+    if (!notification.read) {
+      await fetch(`/api/vendor/notifications/${notification.id}/read`, {
+        method: "PATCH",
+      });
+
+      await refresh();
+    }
+
+    onClose();
+  }
+
   return (
     <div className="absolute right-0 mt-3 w-[380px] rounded-2xl border bg-white shadow-2xl z-50 overflow-hidden">
       {/* Header */}
@@ -98,7 +111,7 @@ export default function NotificationDropdown({
             <Link
               key={notification.id}
               href={notification.link ?? "/vendor/notifications"}
-              onClick={onClose}
+              onClick={() => handleNotificationClick(notification)}
               className={`flex gap-4 px-5 py-4 border-b hover:bg-gray-50 transition ${
                 !notification.read ? "bg-blue-50/40" : ""
               }`}

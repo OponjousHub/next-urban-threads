@@ -69,8 +69,7 @@ export default function NotificationBell() {
 
   return (
     <div ref={wrapperRef} className="relative">
-      <button
-        type="button"
+      <div
         onClick={() => setOpen((prev) => !prev)}
         className="relative rounded-full p-2 hover:bg-gray-100 transition"
       >
@@ -81,7 +80,7 @@ export default function NotificationBell() {
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-      </button>
+      </div>
 
       {open && (
         <NotificationDropdown

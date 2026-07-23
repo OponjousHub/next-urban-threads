@@ -10,6 +10,7 @@ export async function PATCH(
   try {
     const userId = await getLoggedInUserId();
     const { vendor } = await getCurrentVendor();
+    console.log("Notification ID:", params.id);
 
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -48,7 +49,7 @@ export async function PATCH(
         readAt: new Date(),
       },
     });
-
+    console.log("UPDATED============", updated);
     return NextResponse.json(updated);
   } catch (error) {
     console.error(error);

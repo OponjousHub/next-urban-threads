@@ -25,6 +25,10 @@ export default class InventoryService {
    * Reduce stock after purchase
    */
   static async decreaseStock({ productId, quantity, tx }: DecreaseStockInput) {
+    console.log("Decrease stock called", {
+      productId,
+      quantity,
+    });
     if (tx) {
       const updated = await this.performDecreaseStock(tx, productId, quantity);
 
@@ -58,6 +62,7 @@ export default class InventoryService {
         stock: true,
       },
     });
+    console.log("Current stock:", product?.stock);
 
     if (!product) {
       throw new Error("Product not found.");
@@ -69,7 +74,7 @@ export default class InventoryService {
 
     const remainingStock = product.stock - quantity;
 
-    return db.product.update({
+    const updated = db.product.update({
       where: {
         id: productId,
       },
@@ -78,6 +83,9 @@ export default class InventoryService {
         instock: remainingStock > 0,
       },
     });
+
+    console.log("Updated stock:", updated.stock);
+    return updated;
   }
 
   /**

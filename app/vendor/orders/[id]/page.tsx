@@ -11,13 +11,14 @@ interface OrderDetailsPageProps {
 export default async function OrderDetailsPage({
   params,
 }: OrderDetailsPageProps) {
+  const param = await params;
   const tenant = await getDefaultTenant();
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
 
   const order = await prisma.order.findUnique({
-    where: { id: params.id, tenantId: tenant.id },
+    where: { id: param.id, tenantId: tenant.id },
     include: {
       user: { select: { name: true, email: true } },
       items: {

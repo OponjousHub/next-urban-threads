@@ -12,7 +12,6 @@ import {
   Box,
   ChevronRight,
 } from "lucide-react";
-
 import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
 
@@ -70,7 +69,7 @@ export default async function VendorNotificationsPage() {
         {/* Empty State */}
 
         {notifications.length === 0 && (
-          <div className="rounded-2xl border bg-white py-20 text-center">
+          <div className="rounded-2xl border bg-white py-20 p-10 text-center">
             <Bell className="w-12 h-12 mx-auto text-gray-300" />
 
             <h2 className="mt-4 text-lg font-semibold">No notifications yet</h2>
