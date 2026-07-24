@@ -1,24 +1,18 @@
 import { prisma } from "@/utils/prisma";
-import { VendorNotificationType } from "@prisma/client";
-import { VendorNotificationSettings } from "@prisma/client";
+import {
+  VendorNotificationType,
+  VendorNotificationSettings,
+} from "@prisma/client";
 
 type NotifyOptions = {
   vendorId: string;
-
-  setting?: keyof Omit<
-    VendorNotificationSettings,
-    "id" | "vendorId" | "createdAt" | "updatedAt"
-  >;
-
-  title: string;
-
-  message: string;
-
+  setting?: keyof VendorNotificationSettings;
   type: VendorNotificationType;
-
+  title: string;
+  message: string;
   link?: string;
-
-  metadata?: any;
+  metadata?: Record<string, any>;
+  dedupeKey?: string;
 };
 
 export default class NotificationService {
@@ -40,6 +34,23 @@ export default class NotificationService {
       return null;
     }
 
+    if (options.dedupeKey) {
+      const existing = await prisma.vendorNotification.findFirst({
+        where: {
+          vendorId: options.vendorId,
+          isRead: false,
+          metadata: {
+            path: ["dedupeKey"],
+            equals: options.dedupeKey,
+          },
+        },
+      });
+
+      if (existing) {
+        return existing;
+      }
+    }
+
     return prisma.vendorNotification.create({
       data: {
         vendorId: options.vendorId,
@@ -52,7 +63,10 @@ export default class NotificationService {
 
         link: options.link,
 
-        metadata: options.metadata,
+        metadata: {
+          ...(options.metadata ?? {}),
+          dedupeKey: options.dedupeKey,
+        },
       },
     });
   }
