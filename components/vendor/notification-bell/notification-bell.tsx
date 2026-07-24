@@ -71,12 +71,12 @@ export default function NotificationBell() {
     <div ref={wrapperRef} className="relative">
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className="relative rounded-full p-2 hover:bg-gray-100 transition"
+        className="relative rounded-full p-3 hover:bg-gray-100 transition"
       >
         <Bell className="h-6 w-6" />
 
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white">
+          <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-600 text-[11px] font-semibold text-white">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}

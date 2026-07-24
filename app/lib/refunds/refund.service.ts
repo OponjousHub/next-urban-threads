@@ -1,7 +1,7 @@
 import { refundPayment } from "../payments/refundPayment";
 import { prisma } from "@/utils/prisma";
-import { getLoggedInUserId } from "@/lib/auth";
-import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+// import { getLoggedInUserId } from "@/lib/auth";
+// import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import InventoryService from "@/lib/inventory/inventory.service";
 
 export async function createRefundRequest(refundId: string) {
@@ -10,7 +10,12 @@ export async function createRefundRequest(refundId: string) {
       id: refundId,
     },
     include: {
-      order: true,
+      // order: true,
+      order: {
+        include: {
+          items: true,
+        },
+      },
       items: {
         include: {
           product: {
