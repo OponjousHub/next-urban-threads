@@ -42,14 +42,13 @@ export async function checkInventoryNotification({
       setting: "outOfStock",
       type: "INVENTORY",
       title: "Out of Stock",
-      message: `${product.name}${variantName ? ` (${variantName})` : ""} is now out of stock.`,
+      message: `${product.name}
+${[variant.color, variant.size].filter(Boolean).join(" / ")}
+is now out of stock.`,
       link: `/vendor/products/${product.id}`,
-      dedupeKey: `out-of-stock-${variant.id}`,
       metadata: {
         productId: product.id,
         variantId: variant.id,
-        color: variant.color,
-        size: variant.size,
       },
     });
 
@@ -62,16 +61,14 @@ export async function checkInventoryNotification({
       vendorId: product.vendorId,
       setting: "lowStock",
       type: "INVENTORY",
-      title: "Low Stock Alert",
-      message: `${product.name}${variantName ? ` (${variantName})` : ""} has only ${variant.stock} item${variant.stock === 1 ? "" : "s"} remaining.`,
+      title: "Low Stock",
+      message: `${product.name}
+${[variant.color, variant.size].filter(Boolean).join(" / ")}
+Only ${variant.stock} left.`,
       link: `/vendor/products/${product.id}`,
-      dedupeKey: `low-stock-${variant.id}`,
       metadata: {
         productId: product.id,
         variantId: variant.id,
-        color: variant.color,
-        size: variant.size,
-        stock: variant.stock,
       },
     });
   }

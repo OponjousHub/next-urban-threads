@@ -138,7 +138,7 @@ export default function NotificationDropdown({
                   )}
                 </div>
 
-                <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                <p className="mt-1 whitespace-pre-line text-sm text-gray-600">
                   {notification.message}
                 </p>
 

@@ -53,11 +53,6 @@ export default class InventoryService {
       return this.performDecreaseStock(trx, productId, variantId, quantity);
     });
 
-    await checkInventoryNotification({
-      productId,
-      variantId,
-    });
-
     return updated;
   }
 
@@ -94,7 +89,7 @@ export default class InventoryService {
     }
 
     // Reduce variant stock
-    await db.productVariant.update({
+    const updatedVariant = await db.productVariant.update({
       where: {
         id: variantId,
       },
@@ -117,6 +112,11 @@ export default class InventoryService {
       (sum, variant) => sum + variant.stock,
       0,
     );
+
+    await checkInventoryNotification({
+      productId,
+      variantId: updatedVariant.id,
+    });
 
     // Update parent product
     return db.product.update({

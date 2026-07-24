@@ -71,7 +71,7 @@ export default function NotificationBell() {
     <div ref={wrapperRef} className="relative">
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className="relative rounded-full p-3 hover:bg-gray-100 transition"
+        className="relative rounded-full p-3 hover:bg-gray-100 transition z-50"
       >
         <Bell className="h-6 w-6" />
 
