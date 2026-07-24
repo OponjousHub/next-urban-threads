@@ -18,6 +18,7 @@ type IncreaseStockInput = {
 
 type AdjustStockInput = {
   productId: string;
+  variantId?: string | null;
   stock: number;
   tx?: Prisma.TransactionClient;
 };
@@ -40,7 +41,10 @@ export default class InventoryService {
         quantity,
       );
 
-      await checkInventoryNotification(productId);
+      await checkInventoryNotification({
+        productId,
+        variantId,
+      });
 
       return updated;
     }
@@ -49,7 +53,10 @@ export default class InventoryService {
       return this.performDecreaseStock(trx, productId, variantId, quantity);
     });
 
-    await checkInventoryNotification(productId);
+    await checkInventoryNotification({
+      productId,
+      variantId,
+    });
 
     return updated;
   }
@@ -205,11 +212,19 @@ export default class InventoryService {
   /**
    * Manual stock adjustment
    */
-  static async adjustStock({ productId, stock, tx }: AdjustStockInput) {
+  static async adjustStock({
+    productId,
+    variantId,
+    stock,
+    tx,
+  }: AdjustStockInput) {
     if (tx) {
       const updated = await this.performAdjustStock(tx, productId, stock);
 
-      await checkInventoryNotification(productId);
+      await checkInventoryNotification({
+        productId,
+        variantId,
+      });
 
       return updated;
     }
@@ -218,7 +233,10 @@ export default class InventoryService {
       return this.performAdjustStock(trx, productId, stock);
     });
 
-    await checkInventoryNotification(productId);
+    await checkInventoryNotification({
+      productId,
+      variantId,
+    });
 
     return updated;
   }

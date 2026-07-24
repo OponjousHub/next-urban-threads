@@ -35,6 +35,7 @@ export default function RefundModal({ order, onClose }: Props) {
         ...prev,
         [item.id]: {
           productId: item.product.id,
+          variantId: item.variantId,
           quantity: 1,
           priceAtPurchase: item.price,
         },
