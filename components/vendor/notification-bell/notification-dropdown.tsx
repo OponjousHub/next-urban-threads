@@ -29,7 +29,7 @@ type Props = {
   refresh: () => Promise<void>;
 };
 
-function getIcon(type: string) {
+function getIcon(type: string, title: string) {
   switch (type) {
     case "ORDER":
       return <Package className="w-5 h-5 text-blue-600" />;
@@ -37,14 +37,21 @@ function getIcon(type: string) {
     case "REVIEW":
       return <Star className="w-5 h-5 text-yellow-500" />;
 
-    case "FOLLOW":
+    case "FOLLOWER":
       return <Heart className="w-5 h-5 text-pink-500" />;
 
-    case "LOW_STOCK":
+    case "INVENTORY":
+      if (title === "Out of Stock") {
+        return <Box className="w-5 h-5 text-red-600" />;
+      }
+
       return <AlertTriangle className="w-5 h-5 text-orange-500" />;
 
-    case "OUT_OF_STOCK":
-      return <Box className="w-5 h-5 text-red-600" />;
+    case "PAYOUT":
+      return <Bell className="w-5 h-5 text-green-600" />;
+
+    case "REPORT":
+      return <Bell className="w-5 h-5 text-purple-600" />;
 
     default:
       return <Bell className="w-5 h-5 text-gray-500" />;
@@ -116,7 +123,9 @@ export default function NotificationDropdown({
                 !notification.read ? "bg-blue-50/40" : ""
               }`}
             >
-              <div className="mt-1">{getIcon(notification.type)}</div>
+              <div className="mt-1">
+                {getIcon(notification.type, notification.title)}
+              </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">

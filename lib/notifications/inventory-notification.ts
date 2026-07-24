@@ -40,7 +40,7 @@ export async function checkInventoryNotification({
     await NotificationService.notify({
       vendorId: product.vendorId,
       setting: "outOfStock",
-      type: "OUT_OF_STOCK",
+      type: "INVENTORY",
       title: "Out of Stock",
       message: `${product.name}${variantName ? ` (${variantName})` : ""} is now out of stock.`,
       link: `/vendor/products/${product.id}`,
@@ -61,7 +61,7 @@ export async function checkInventoryNotification({
     await NotificationService.notify({
       vendorId: product.vendorId,
       setting: "lowStock",
-      type: "LOW_STOCK",
+      type: "INVENTORY",
       title: "Low Stock Alert",
       message: `${product.name}${variantName ? ` (${variantName})` : ""} has only ${variant.stock} item${variant.stock === 1 ? "" : "s"} remaining.`,
       link: `/vendor/products/${product.id}`,
