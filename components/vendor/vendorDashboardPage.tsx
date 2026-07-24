@@ -170,8 +170,15 @@ export default function VendorDashboardPage() {
 
         {/* Low Stock Products */}
         <div className="rounded-2xl border bg-white shadow-sm">
-          <div className="border-b p-4">
-            <h2 className="font-semibold">Low Stock Products</h2>
+          <div className="flex items-center justify-between border-b p-4">
+            <h2 className="font-semibold">Inventory Alerts</h2>
+
+            <Link
+              href="/vendor/inventory/low-stock"
+              className="text-sm font-medium text-black hover:underline"
+            >
+              View all
+            </Link>
           </div>
 
           <div>
