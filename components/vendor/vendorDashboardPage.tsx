@@ -21,9 +21,14 @@ type DashboardData = {
 
   lowStockProducts: {
     id: string;
-    name: string;
     stock: number;
-    thumbnail?: string;
+    color: string | null;
+    size: string | null;
+    product: {
+      id: string;
+      name: string;
+      thumbnail: string | null;
+    };
   }[];
 };
 
@@ -171,31 +176,35 @@ export default function VendorDashboardPage() {
 
           <div>
             {dashboard?.lowStockProducts?.length ? (
-              dashboard.lowStockProducts.map((product) => (
+              dashboard.lowStockProducts.map((variant) => (
                 <div
-                  key={product.id}
+                  key={variant.id}
                   className="flex items-center justify-between border-b p-4 last:border-b-0"
                 >
                   <div>
-                    <p className="font-medium">{product.name}</p>
+                    <p className="font-medium">{variant.product.name}</p>
+
+                    <p className="text-sm text-gray-500">
+                      {[variant.color, variant.size]
+                        .filter(Boolean)
+                        .join(" / ")}
+                    </p>
                   </div>
 
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium
-                    ${
-                      product.stock === 0
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      variant.stock === 0
                         ? "bg-red-100 text-red-700"
                         : "bg-orange-100 text-orange-700"
-                    }
-                  `}
+                    }`}
                   >
-                    Stock: {product.stock}
+                    {variant.stock} left
                   </span>
                 </div>
               ))
             ) : (
               <div className="p-6 text-center text-muted-foreground">
-                No low stock products
+                No low stock variants 🎉
               </div>
             )}
           </div>

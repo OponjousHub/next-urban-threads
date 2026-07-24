@@ -47,18 +47,24 @@ export async function GET() {
       },
     });
 
-    const lowStockProducts = await prisma.product.findMany({
+    const lowStockProducts = await prisma.productVariant.findMany({
       where: {
-        vendorId,
         stock: {
+          gt: 0,
           lte: 5,
         },
+        product: {
+          vendorId,
+        },
       },
-      select: {
-        id: true,
-        name: true,
-        stock: true,
-        thumbnail: true,
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            thumbnail: true,
+          },
+        },
       },
       orderBy: {
         stock: "asc",
