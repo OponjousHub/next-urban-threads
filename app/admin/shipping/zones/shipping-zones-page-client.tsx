@@ -162,11 +162,11 @@ export default function ShippingZonesPageClient({ zones }: Props) {
 
                   <td className="px-6 py-5 text-right">
                     <Link
-                      href={`/admin/shipping/zones/${zone.id}`}
+                      href={`/admin/shipping/zones/${zone.id}/edit`}
                       className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
                     >
                       <Settings className="h-4 w-4" />
-                      Manage
+                      Edit
                     </Link>
                   </td>
                 </tr>
