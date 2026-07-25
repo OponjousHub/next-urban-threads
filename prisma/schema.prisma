@@ -310,6 +310,9 @@ model Tenant {
   vendorBankAccounts VendorBankAccount[]
   vendorPayouts      VendorPayout[]
   WishlistItem       WishlistItem[]
+  shippingZone       ShippingZone[]
+  shippingMethods    ShippingMethod[]
+  shippingRate       ShippingRate[]
 }
 
 model Session {
@@ -635,6 +638,76 @@ model InventoryLog {
   createdAt  DateTime @default(now())
 
   product Product @relation(fields: [productId], references: [id])
+}
+
+model ShippingZone {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  active      Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  methods ShippingMethod[]
+  rates   ShippingRate[]
+
+  @@index([tenantId])
+}
+
+model ShippingMethod {
+  id          String   @id @default(cuid())
+  tenantId    String
+  zoneId      String
+
+  name        String
+  description String?
+
+  active      Boolean @default(true)
+
+  estimatedMinDays Int?
+  estimatedMaxDays Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  zone   ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  rates ShippingRate[]
+
+  @@index([tenantId])
+  @@index([zoneId])
+}
+
+model ShippingRate {
+  id String @id @default(cuid())
+
+  tenantId String
+  zoneId String
+  methodId String
+
+  minWeight Float?
+  maxWeight Float?
+
+  minOrderAmount Decimal? @db.Decimal(10,2)
+  maxOrderAmount Decimal? @db.Decimal(10,2)
+
+  price Decimal @db.Decimal(10,2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  zone ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  method ShippingMethod @relation(fields: [methodId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
 }
 
 enum Priority {
