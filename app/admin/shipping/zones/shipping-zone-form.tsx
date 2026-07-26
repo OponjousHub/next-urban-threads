@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { appToast } from "@/utils/appToast";
 
 type ShippingZone = {
   id: string;
@@ -68,11 +69,19 @@ export default function ShippingZoneForm({ initialData }: Props) {
         throw new Error(data.message ?? "Unable to save shipping zone.");
       }
 
+      appToast.success(
+        "Success",
+        editing
+          ? "Shipping zone updated successfully."
+          : "Shipping zone created successfully.",
+      );
+
       router.push("/admin/shipping/zones");
 
       router.refresh();
     } catch (err: any) {
       setError(err.message);
+      appToast.error("Error", err.message);
     } finally {
       setLoading(false);
     }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { appToast } from "@/utils/appToast";
 
 type Zone = {
   id: string;
@@ -105,11 +106,18 @@ export default function ShippingMethodForm({ zones, initialData }: Props) {
 
         throw new Error(data.message ?? "Unable to save shipping method.");
       }
+      appToast.success(
+        "Success",
+        editing
+          ? "Shipping method updated successfully."
+          : "Shipping method created successfully.",
+      );
 
       router.push("/admin/shipping/methods");
       router.refresh();
     } catch (err: any) {
       setError(err.message);
+      appToast.error("Error", err.message);
     } finally {
       setLoading(false);
     }

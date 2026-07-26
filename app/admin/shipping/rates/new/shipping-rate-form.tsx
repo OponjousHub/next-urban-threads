@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { appToast } from "@/utils/appToast";
 
 type Zone = {
   id: string;
@@ -169,11 +170,19 @@ export default function ShippingRateForm({
         throw new Error(data.message ?? "Unable to save shipping rate.");
       }
 
+      appToast.success(
+        "Success",
+        editing
+          ? "Shipping rate updated successfully."
+          : "Shipping rate created successfully.",
+      );
+
       router.push("/admin/shipping/rates");
 
       router.refresh();
     } catch (err: any) {
       setError(err.message);
+      appToast.error("Error", err.message);
     } finally {
       setLoading(false);
     }
