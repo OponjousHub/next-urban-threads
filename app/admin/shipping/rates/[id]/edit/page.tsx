@@ -1,0 +1,99 @@
+import { notFound } from "next/navigation";
+import { prisma } from "@/utils/prisma";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import ShippingRateForm from "../../new/shipping-rate-form";
+
+type Props = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export default async function EditShippingRatePage({ params }: Props) {
+  const { id } = await params;
+
+  const tenant = await getDefaultTenant();
+
+  if (!tenant) {
+    throw new Error("Default tenant not found");
+  }
+
+  const [rate, zones, methods] = await Promise.all([
+    prisma.shippingRate.findFirst({
+      where: {
+        id,
+        tenantId: tenant.id,
+      },
+    }),
+
+    prisma.shippingZone.findMany({
+      where: {
+        tenantId: tenant.id,
+        active: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+
+    prisma.shippingMethod.findMany({
+      where: {
+        tenantId: tenant.id,
+        active: true,
+      },
+      orderBy: [
+        {
+          zone: {
+            name: "asc",
+          },
+        },
+        {
+          name: "asc",
+        },
+      ],
+      select: {
+        id: true,
+        name: true,
+        zoneId: true,
+      },
+    }),
+  ]);
+
+  if (!rate) {
+    notFound();
+  }
+
+  return (
+    <div className="max-w-5xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Edit Shipping Rate</h1>
+
+        <p className="mt-2 text-sm text-gray-500">Update this shipping rate.</p>
+      </div>
+
+      <ShippingRateForm
+        zones={zones}
+        methods={methods}
+        initialData={{
+          id: rate.id,
+          zoneId: rate.zoneId,
+          methodId: rate.methodId,
+          name: rate.name,
+          description: rate.description,
+          amount: rate.amount.toNumber(),
+          minOrderAmount: rate.minOrderAmount?.toNumber() ?? null,
+          maxOrderAmount: rate.maxOrderAmount?.toNumber() ?? null,
+          minWeight: rate.minWeight,
+          maxWeight: rate.maxWeight,
+          priority: rate.priority,
+          active: rate.active,
+          isDefault: rate.isDefault,
+        }}
+      />
+    </div>
+  );
+}
