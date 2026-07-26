@@ -73,7 +73,7 @@ export default async function EditShippingRatePage({ params }: Props) {
       <div className="space-y-6 mt-4">
         <ShippingBreadcrumb current="Edit Shipping Rate" />
       </div>
-      <div className="max-w-5xl">
+      <div className="mx-auto w-full max-w-5xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Edit Shipping Rate</h1>
 

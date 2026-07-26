@@ -255,7 +255,6 @@ export async function DELETE(req: Request, { params }: RouteContext) {
     await prisma.shippingRate.delete({
       where: {
         id,
-        tenantId: tenant.id,
       },
     });
 

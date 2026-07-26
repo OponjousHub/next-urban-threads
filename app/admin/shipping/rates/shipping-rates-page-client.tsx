@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Edit, Plus, Search, Trash2 } from "lucide-react";
 import { useTenant } from "@/store/tenant-provider-context";
+import ConfirmationModal from "@/components/modals/ConfirmationModal";
+import { appToast } from "@/utils/appToast";
 
 type ShippingRate = {
   id: string;
@@ -36,6 +38,11 @@ type Props = {
 
 export default function ShippingRatesPageClient({ rates }: Props) {
   const [search, setSearch] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [rateId, setRateId] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const { tenant } = useTenant();
 
   const filtered = useMemo(() => {
@@ -51,17 +58,26 @@ export default function ShippingRatesPageClient({ rates }: Props) {
   }, [rates, search]);
 
   async function deleteRate(id: string) {
-    if (!confirm("Delete this shipping rate?")) return;
+    try {
+      setDeleting(true);
+      const res = await fetch(`/api/admin/shipping/rates/${id}`, {
+        method: "DELETE",
+      });
 
-    const res = await fetch(`/api/admin/shipping/rates/${id}`, {
-      method: "DELETE",
-    });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message ?? "Unable to delete shipping rate.");
+      }
 
-    if (res.ok) {
-      location.reload();
-    } else {
-      const data = await res.json();
-      alert(data.message ?? "Unable to delete.");
+      appToast.success("Success", "Shipping rate deleted successfully.");
+    } catch (err: any) {
+      console.error(err.message ?? "Unable to delete.");
+      appToast.error(
+        "Failed",
+        err.message || "Could not delete shipping rate!",
+      );
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -205,7 +221,11 @@ export default function ShippingRatesPageClient({ rates }: Props) {
                     </Link>
 
                     <button
-                      onClick={() => deleteRate(rate.id)}
+                      onClick={() => {
+                        setRateId(rate.id);
+                        setShowDeleteModal(true);
+                      }}
+                      disabled={loading}
                       className="rounded-lg border p-2 text-red-600 hover:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -217,6 +237,17 @@ export default function ShippingRatesPageClient({ rates }: Props) {
           </tbody>
         </table>
       </div>
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => deleteRate(rateId)}
+        loading={deleting}
+        loadingText="Deleting..."
+        title="Delete Rate"
+        description="Are you sure you want to delete this Rate? This action cannot be undone."
+        action="Delete Rate"
+        variant="danger"
+      />
     </div>
   );
 }
