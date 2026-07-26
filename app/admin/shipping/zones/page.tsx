@@ -1,6 +1,7 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import ShippingZonesPageClient from "./shipping-zones-page-client";
+import ShippingBreadcrumb from "@/components/shipping/ShippingBreadcrumb";
 
 export default async function ShippingZonesPage() {
   const tenant = await getDefaultTenant();
@@ -31,12 +32,17 @@ export default async function ShippingZonesPage() {
   });
 
   return (
-    <ShippingZonesPageClient
-      zones={zones.map((zone) => ({
-        ...zone,
-        methodCount: zone.methods.length,
-        rateCount: zone.rates.length,
-      }))}
-    />
+    <>
+      <div className="space-y-6">
+        <ShippingBreadcrumb current="Shipping Zones" />
+      </div>
+      <ShippingZonesPageClient
+        zones={zones.map((zone) => ({
+          ...zone,
+          methodCount: zone.methods.length,
+          rateCount: zone.rates.length,
+        }))}
+      />
+    </>
   );
 }
