@@ -44,5 +44,12 @@ export default async function ShippingRatesPage() {
     ],
   });
 
-  return <ShippingRatesPageClient rates={rates} />;
+  const formattedRates = rates.map((rate) => ({
+    ...rate,
+    amount: rate.amount.toNumber(),
+    minOrderAmount: rate.minOrderAmount?.toNumber() ?? null,
+    maxOrderAmount: rate.maxOrderAmount?.toNumber() ?? null,
+  }));
+
+  return <ShippingRatesPageClient rates={formattedRates} />;
 }
