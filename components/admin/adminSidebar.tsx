@@ -15,6 +15,7 @@ import {
   FiSettings,
   FiChevronLeft,
   FiCreditCard,
+  FiTruck,
   FiTag,
 } from "react-icons/fi";
 
@@ -106,6 +107,13 @@ export default function AdminSidebar({
           href="/admin/coupons"
           icon={<FiTag size={20} />}
           label="Coupons"
+          collapsed={collapsed}
+          pathname={pathname}
+        />
+        <SidebarItem
+          href="/admin/shipping"
+          icon={<FiTruck size={20} />}
+          label="Shipping"
           collapsed={collapsed}
           pathname={pathname}
         />

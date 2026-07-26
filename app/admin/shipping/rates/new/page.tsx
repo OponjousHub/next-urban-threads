@@ -48,7 +48,7 @@ export default async function NewShippingRatePage() {
   ]);
 
   return (
-    <div className="max-w-5xl">
+    <div className="mx-auto w-full max-w-5xl px-6 mt-5">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Create Shipping Rate</h1>
 
