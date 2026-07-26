@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Edit, Plus, Search, Trash2 } from "lucide-react";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type ShippingRate = {
   id: string;
@@ -35,6 +36,7 @@ type Props = {
 
 export default function ShippingRatesPageClient({ rates }: Props) {
   const [search, setSearch] = useState("");
+  const { tenant } = useTenant();
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -148,7 +150,8 @@ export default function ShippingRatesPageClient({ rates }: Props) {
                 <td className="px-5 py-4">{rate.method.name}</td>
 
                 <td className="px-5 py-4 font-medium">
-                  ₦{Number(rate.amount).toLocaleString()}
+                  {tenant.currency}
+                  {Number(rate.amount).toLocaleString()}
                 </td>
 
                 <td className="px-5 py-4">
