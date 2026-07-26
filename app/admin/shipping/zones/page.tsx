@@ -33,7 +33,7 @@ export default async function ShippingZonesPage() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-6 mt-4">
         <ShippingBreadcrumb current="Shipping Zones" />
       </div>
       <ShippingZonesPageClient

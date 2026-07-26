@@ -1,6 +1,7 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import ShippingMethodsPageClient from "./shipping-methods-page-client";
+import ShippingBreadcrumb from "@/components/shipping/ShippingBreadcrumb";
 
 export default async function ShippingMethodsPage() {
   const tenant = await getDefaultTenant();
@@ -32,18 +33,23 @@ export default async function ShippingMethodsPage() {
   });
 
   return (
-    <ShippingMethodsPageClient
-      methods={methods.map((method) => ({
-        id: method.id,
-        name: method.name,
-        description: method.description,
-        active: method.active,
-        estimatedMinDays: method.estimatedMinDays,
-        estimatedMaxDays: method.estimatedMaxDays,
-        createdAt: method.createdAt,
-        zone: method.zone,
-        rateCount: method.rates.length,
-      }))}
-    />
+    <>
+      <div className="space-y-6 mt-4">
+        <ShippingBreadcrumb current="Shipping Methods" />{" "}
+      </div>
+      <ShippingMethodsPageClient
+        methods={methods.map((method) => ({
+          id: method.id,
+          name: method.name,
+          description: method.description,
+          active: method.active,
+          estimatedMinDays: method.estimatedMinDays,
+          estimatedMaxDays: method.estimatedMaxDays,
+          createdAt: method.createdAt,
+          zone: method.zone,
+          rateCount: method.rates.length,
+        }))}
+      />
+    </>
   );
 }

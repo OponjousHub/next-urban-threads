@@ -1,6 +1,7 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import ShippingRatesPageClient from "./shipping-rates-page-client";
+import ShippingBreadcrumb from "@/components/shipping/ShippingBreadcrumb";
 
 export default async function ShippingRatesPage() {
   const tenant = await getDefaultTenant();
@@ -51,5 +52,12 @@ export default async function ShippingRatesPage() {
     maxOrderAmount: rate.maxOrderAmount?.toNumber() ?? null,
   }));
 
-  return <ShippingRatesPageClient rates={formattedRates} />;
+  return (
+    <>
+      <div className="space-y-6 mt-4">
+        <ShippingBreadcrumb current="Shipping Rates" />{" "}
+      </div>
+      <ShippingRatesPageClient rates={formattedRates} />;
+    </>
+  );
 }
