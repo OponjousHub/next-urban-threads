@@ -26,7 +26,7 @@ export async function PATCH(req: Request, { params }: RouteContext) {
 
     const body = await req.json();
 
-    const { name, description, active } = body;
+    const { name, description, country, states, active } = body;
 
     if (!name?.trim()) {
       return NextResponse.json(
@@ -71,6 +71,8 @@ export async function PATCH(req: Request, { params }: RouteContext) {
       },
       data: {
         name: name.trim(),
+        country,
+        states,
         description: description?.trim() || null,
         active,
       },

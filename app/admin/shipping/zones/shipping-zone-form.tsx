@@ -12,7 +12,7 @@ type ShippingZone = {
   name: string;
   description: string | null;
   active: boolean;
-  countries: string[];
+  country: string;
   states: string[];
 };
 
@@ -32,9 +32,7 @@ export default function ShippingZoneForm({ initialData }: Props) {
   const [active, setActive] = useState(initialData?.active ?? true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [countryCode, setCountryCode] = useState(
-    initialData?.countries?.[0] ?? "",
-  );
+  const [countryCode, setCountryCode] = useState(initialData?.country ?? "");
   const states = countryCode ? State.getStatesOfCountry(countryCode) : [];
 
   const [selectedStates, setSelectedStates] = useState<string[]>(
@@ -48,6 +46,11 @@ export default function ShippingZoneForm({ initialData }: Props) {
 
     if (!name.trim()) {
       setError("Zone name is required.");
+      return;
+    }
+
+    if (selectedStates.length === 0) {
+      setError("Select at least one state or province.");
       return;
     }
 
@@ -68,7 +71,7 @@ export default function ShippingZoneForm({ initialData }: Props) {
           body: JSON.stringify({
             name,
             description,
-            countries: [countryCode],
+            country: countryCode,
             states: selectedStates,
             active,
           }),
@@ -121,40 +124,65 @@ export default function ShippingZoneForm({ initialData }: Props) {
               className="w-full rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-black"
             />
           </div>
-          <div>
-            <select
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              className="w-full rounded-lg border p-3"
-            >
-              <option value="">Select Country</option>
+          <div className="flex gap-4">
+            {/* Country */}
+            <div className="flex-1">
+              <label className="mb-2 block text-sm font-medium">Country</label>
 
-              {countries.map((country) => (
-                <option key={country.isoCode} value={country.isoCode}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-            <div className="grid grid-cols-2 gap-2">
-              {states.map((state) => (
-                <label key={state.isoCode} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedStates.includes(state.name)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedStates((prev) => [...prev, state.name]);
-                      } else {
-                        setSelectedStates((prev) =>
-                          prev.filter((s) => s !== state.name),
-                        );
-                      }
-                    }}
-                  />
+              <select
+                value={countryCode}
+                onChange={(e) => {
+                  setCountryCode(e.target.value);
+                  setSelectedStates([]);
+                }}
+                className="w-full rounded-lg border p-3"
+              >
+                <option value="">Select Country</option>
 
-                  {state.name}
-                </label>
-              ))}
+                {countries.map((country) => (
+                  <option key={country.isoCode} value={country.isoCode}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* States */}
+            <div className="flex-1">
+              <label className="mb-2 block text-sm font-medium">
+                States / Provinces
+              </label>
+
+              {countryCode ? (
+                <div className="max-h-52 overflow-y-auto rounded-lg border p-3">
+                  {states.map((state) => (
+                    <label
+                      key={state.isoCode}
+                      className="flex items-center gap-2 py-1"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedStates.includes(state.name)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedStates((prev) => [...prev, state.name]);
+                          } else {
+                            setSelectedStates((prev) =>
+                              prev.filter((s) => s !== state.name),
+                            );
+                          }
+                        }}
+                      />
+
+                      {state.name}
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-lg border p-3 text-sm text-gray-500">
+                  Select a country first.
+                </div>
+              )}
             </div>
           </div>
 

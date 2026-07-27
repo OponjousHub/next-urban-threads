@@ -132,7 +132,14 @@ export async function calculateShipping({
       rateId: rate.id,
       methodId: rate.methodId,
       method: rate.method.name,
-      estimate: rate.method.estimatedDelivery,
+      estimate:
+        rate.method.estimatedMinDays && rate.method.estimatedMaxDays
+          ? `${rate.method.estimatedMinDays}-${rate.method.estimatedMaxDays} Business Days`
+          : rate.method.estimatedMinDays
+            ? `${rate.method.estimatedMinDays} Business Day${
+                rate.method.estimatedMinDays > 1 ? "s" : ""
+              }`
+            : null,
       amount: Number(rate.amount),
     });
   }
