@@ -43,9 +43,48 @@ export default function CheckoutClient({
   const [errors, setErrors] = useState<{ email?: string }>({});
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const [saveAddress, setSaveAddress] = useState(false);
+  const [shippingMethods, setShippingMethods] = useState<any[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<any | null>(null);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null,
   );
+
+  // Recalculate shipping whenever address is selected
+  useEffect(() => {
+    if (!selectedAddressId) return;
+
+    const address = addresses.find((a) => a.id === selectedAddressId);
+
+    if (!address) return;
+
+    calculateShipping(address);
+  }, [selectedAddressId]);
+
+  // Calculate Shipping Address Helper
+  const calculateShipping = async (address: ShippingAddress) => {
+    const res = await fetch("/api/shipping/calculate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        country: address.country,
+        state: address.state,
+        city: address.city,
+
+        items: checkoutItems.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+        })),
+      }),
+    });
+
+    const methods = await res.json();
+
+    setShippingMethods(methods);
+
+    if (methods.length) setSelectedShipping(methods[0]);
+  };
 
   // Form data
   const [formData, setFormData] = useState({
@@ -82,8 +121,11 @@ export default function CheckoutClient({
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
-  const shipping = subtotal > 0 ? 10 : 0;
-  const total = subtotal + shipping;
+  // const shipping = subtotal > 0 ? 10 : 0;
+  // const total = subtotal + shipping;
+
+  const shipping = selectedShipping?.price ?? 0;
+  const total = subtotal + shipping - Number(discountAmount);
 
   const validateEmail = (email: string) => {
     if (!email.trim()) return "Email is required";
@@ -131,8 +173,6 @@ export default function CheckoutClient({
       return;
     }
 
-    // 🔄 Loading toast
-    // const toastId = toast.loading("Placing your order...");
     appToast.loading("Placing your order...");
     setIsLoading(true);
 
@@ -159,6 +199,8 @@ export default function CheckoutClient({
           email: formData.email,
           saveAddress,
           couponId: coupon?.id ?? null,
+          shippingMethodId: selectedShipping?.methodId,
+          shippingCost: selectedShipping?.price,
         }),
       });
 
@@ -297,6 +339,37 @@ export default function CheckoutClient({
             >
               + Add new address
             </button>
+          </div>
+
+          {/*============ Customer choose Shipping*/}
+          <div className="space-y-3">
+            <h3 className="font-semibold">Shipping Method</h3>
+
+            {shippingMethods.map((method) => (
+              <label
+                key={method.methodId}
+                className="flex justify-between border rounded-xl p-4 cursor-pointer"
+              >
+                <input
+                  type="radio"
+                  checked={selectedShipping?.methodId === method.methodId}
+                  onChange={() => setSelectedShipping(method)}
+                />
+
+                <div>
+                  <p>{method.methodName}</p>
+
+                  <p className="text-sm text-gray-500">
+                    {method.estimatedDays}
+                  </p>
+                </div>
+
+                <span>
+                  {tenant.currency}
+                  {method.price}
+                </span>
+              </label>
+            ))}
           </div>
 
           {showNewAddressForm && (

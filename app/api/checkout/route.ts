@@ -34,6 +34,8 @@ export async function POST(req: NextRequest) {
       email,
       saveAddress,
       couponId,
+      shippingMethodId,
+      shippingCost,
     } = await req.json();
     if (!items || items.length === 0) {
       return NextResponse.json({ message: "Cart is empty" }, { status: 400 });
@@ -243,6 +245,8 @@ export async function POST(req: NextRequest) {
         vendorId: products[0]?.vendorId,
         discountAmount,
         couponId: coupon?.id ?? null,
+        shippingMethodId,
+        shippingCost,
         items: {
           create: orderItems,
         },

@@ -201,10 +201,12 @@ model Order {
   paymentStatus      PaymentStatus        @default(PENDING)
   tenantId           String
   vendorId           String?
+  shippingMethodId   String?
   refundStatus       RefundStatus         @default(NONE)
   paymentTxRef       String?
   storeMode          StoreMode            @default(SINGLE_VENDOR)
   couponId           String?
+  shippingCost       Decimal              @default(0)
   discountAmount     Decimal              @default(0)
   commissionAmount   Decimal              @default(0)
   coupon             Coupon?              @relation(fields: [couponId], references: [id])
@@ -212,11 +214,13 @@ model Order {
   tenant             Tenant               @relation(fields: [tenantId], references: [id])
   user               User                 @relation(fields: [userId], references: [id])
   vendor             Vendor?              @relation(fields: [vendorId], references: [id])
+  shippingMethod     ShippingMethod?        @relation(fields: [shippingMethodId], references: [id])
   items              OrderItem[]
   orderStatusHistory OrderStatusHistory[]
   orderTrackingEvent OrderTrackingEvent[]
   refundRequest      RefundRequest[]
   review             Review[]
+
 
   @@index([tenantId, createdAt, status])
 }
@@ -680,6 +684,7 @@ model ShippingMethod {
   zone   ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
 
   rates ShippingRate[]
+  order Order[]
 
   @@index([tenantId])
   @@index([zoneId])
