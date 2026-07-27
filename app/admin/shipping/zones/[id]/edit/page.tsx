@@ -50,6 +50,8 @@ export default async function EditShippingZonePage({ params }: Props) {
             name: zone.name,
             description: zone.description,
             active: zone.active,
+            country: zone.country,
+            states: zone.states,
           }}
         />
       </div>
