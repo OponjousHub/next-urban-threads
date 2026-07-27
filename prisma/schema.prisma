@@ -645,6 +645,8 @@ model ShippingZone {
   tenantId    String
   name        String
   description String?
+  states      String[]
+  country     String
   active      Boolean  @default(true)
 
   createdAt   DateTime @default(now())

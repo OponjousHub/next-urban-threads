@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    const { name, description, active } = body;
+    const { name, description, countries, states, active } = body;
 
     if (!name?.trim()) {
       return NextResponse.json(
@@ -58,6 +58,8 @@ export async function POST(req: Request) {
       data: {
         tenantId: tenant.id,
         name: name.trim(),
+        countries,
+        states,
         description: description?.trim() || null,
         active: active ?? true,
       },

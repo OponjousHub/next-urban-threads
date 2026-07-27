@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { appToast } from "@/utils/appToast";
+import { Country, State } from "country-state-city";
 
 type ShippingZone = {
   id: string;
   name: string;
   description: string | null;
   active: boolean;
+  countries: string[];
+  states: string[];
 };
 
 type Props = {
@@ -19,17 +22,24 @@ type Props = {
 
 export default function ShippingZoneForm({ initialData }: Props) {
   const router = useRouter();
-
   const editing = !!initialData;
+  const countries = Country.getAllCountries();
 
   const [name, setName] = useState(initialData?.name ?? "");
   const [description, setDescription] = useState(
     initialData?.description ?? "",
   );
   const [active, setActive] = useState(initialData?.active ?? true);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [countryCode, setCountryCode] = useState(
+    initialData?.countries?.[0] ?? "",
+  );
+  const states = countryCode ? State.getStatesOfCountry(countryCode) : [];
+
+  const [selectedStates, setSelectedStates] = useState<string[]>(
+    initialData?.states ?? [],
+  );
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -58,6 +68,8 @@ export default function ShippingZoneForm({ initialData }: Props) {
           body: JSON.stringify({
             name,
             description,
+            countries: [countryCode],
+            states: selectedStates,
             active,
           }),
         },
@@ -108,6 +120,42 @@ export default function ShippingZoneForm({ initialData }: Props) {
               placeholder="e.g. Lagos"
               className="w-full rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-black"
             />
+          </div>
+          <div>
+            <select
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value)}
+              className="w-full rounded-lg border p-3"
+            >
+              <option value="">Select Country</option>
+
+              {countries.map((country) => (
+                <option key={country.isoCode} value={country.isoCode}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
+            <div className="grid grid-cols-2 gap-2">
+              {states.map((state) => (
+                <label key={state.isoCode} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedStates.includes(state.name)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedStates((prev) => [...prev, state.name]);
+                      } else {
+                        setSelectedStates((prev) =>
+                          prev.filter((s) => s !== state.name),
+                        );
+                      }
+                    }}
+                  />
+
+                  {state.name}
+                </label>
+              ))}
+            </div>
           </div>
 
           <div>

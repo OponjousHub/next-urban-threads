@@ -294,7 +294,8 @@ export default async function ShippingDashboardPage() {
                   <p className="text-sm text-gray-500">{rate.method.name}</p>
 
                   <p className="mt-1 font-semibold">
-                    ₦{rate.amount.toNumber().toLocaleString()}
+                    {tenant.currency}
+                    {rate.amount.toNumber().toLocaleString()}
                   </p>
                 </div>
               ))
