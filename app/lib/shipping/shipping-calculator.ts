@@ -57,16 +57,6 @@ export async function calculateShipping({
   // 2. Find matching shipping zone
   // ----------------------------------------
 
-  //   const zone = await prisma.shippingZone.findFirst({
-  //     where: {
-  //       tenantId,
-  //       active: true,
-  //       country,
-  //       states: {
-  //         has: state,
-  //       },
-  //     },
-  //   });
   const zones = await prisma.shippingZone.findMany({
     where: {
       tenantId,
@@ -81,12 +71,6 @@ export async function calculateShipping({
   const zone = zones.find((z) =>
     z.states.some((s) => s.trim().toLowerCase() === state.trim().toLowerCase()),
   );
-
-  console.log("PRINT ZONE===========", {
-    country,
-    state,
-    zone,
-  });
 
   if (!zone) {
     return [];
@@ -124,18 +108,32 @@ export async function calculateShipping({
   // 4. Filter applicable rates
   // ----------------------------------------
 
-  const available: AvailableShippingMethod[] = [];
+  const methods = new Map<string, AvailableShippingMethod>();
 
   for (const rate of rates) {
+    // -------------------------
+    // Check minimum order
+    // -------------------------
     if (rate.minOrderAmount && subtotal < Number(rate.minOrderAmount)) {
       continue;
     }
 
+    // -------------------------
+    // Check maximum order
+    // -------------------------
     if (rate.maxOrderAmount && subtotal > Number(rate.maxOrderAmount)) {
       continue;
     }
 
-    available.push({
+    // -------------------------
+    // Already picked a rate
+    // for this shipping method?
+    // -------------------------
+    if (methods.has(rate.methodId)) {
+      continue;
+    }
+
+    methods.set(rate.methodId, {
       rateId: rate.id,
       methodId: rate.methodId,
       method: rate.method.name,
@@ -151,5 +149,5 @@ export async function calculateShipping({
     });
   }
 
-  return available;
+  return [...methods.values()];
 }
