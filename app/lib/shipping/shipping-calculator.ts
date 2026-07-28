@@ -102,8 +102,6 @@ export async function calculateShipping({
     ],
   });
 
-  console.log("RATES", rates);
-
   // ----------------------------------------
   // 4. Filter applicable rates
   // ----------------------------------------
@@ -124,18 +122,27 @@ export async function calculateShipping({
       continue;
     }
 
+    // Making the estimated delivery period smart
+    const min = rate.method.estimatedMinDays;
+    const max = rate.method.estimatedMaxDays;
+
+    let estimate: string | null = null;
+
+    if (min && max) {
+      if (min === max) {
+        estimate = min === 1 ? "1 Business Day" : `${min} Business Days`;
+      } else {
+        estimate = `${min}-${max} Business Days`;
+      }
+    } else if (min) {
+      estimate = min === 1 ? "1 Business Day" : `${min} Business Days`;
+    }
+
     methods.set(rate.methodId, {
       rateId: rate.id,
       methodId: rate.methodId,
       method: rate.method.name,
-      estimate:
-        rate.method.estimatedMinDays && rate.method.estimatedMaxDays
-          ? `${rate.method.estimatedMinDays}-${rate.method.estimatedMaxDays} Business Days`
-          : rate.method.estimatedMinDays
-            ? `${rate.method.estimatedMinDays} Business Day${
-                rate.method.estimatedMinDays > 1 ? "s" : ""
-              }`
-            : null,
+      estimate: estimate,
       amount: Number(rate.amount),
     });
   }

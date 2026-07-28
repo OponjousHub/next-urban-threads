@@ -127,10 +127,8 @@ export default function CheckoutClient({
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
-  // const shipping = subtotal > 0 ? 10 : 0;
-  // const total = subtotal + shipping;
 
-  const shipping = selectedShipping?.price ?? 0;
+  const shipping = selectedShipping?.amount ?? 0;
   const firstTotal = subtotal - Number(discountAmount);
   const total = firstTotal + shipping;
 
