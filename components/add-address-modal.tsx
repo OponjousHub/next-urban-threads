@@ -11,9 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-// import toast from "react-hot-toast";
 import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
+import { Country, State } from "country-state-city";
 
 type Props = {
   open: boolean;
@@ -25,6 +25,7 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const { tenant } = useTenant();
+  const countries = Country.getAllCountries();
 
   const [form, setForm] = useState({
     fullName: "",
@@ -36,6 +37,7 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
     postalCode: "",
     isDefault: false,
   });
+  const states = State.getStatesOfCountry(form.country);
 
   useEffect(() => {
     if (address) {
@@ -58,7 +60,6 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
 
   const handleSubmit = async () => {
     setLoading(true);
-    console.log("FRONTEND FORM", form);
     const url = address ? `/api/addresses/${address.id}` : "/api/addresses";
 
     const method = address ? "PATCH" : "POST";
@@ -128,16 +129,39 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Input
-              placeholder="State (optional)"
+            <select
               value={form.state}
               onChange={(e) => handleChange("state", e.target.value)}
-            />
-            <Input
-              placeholder="Country"
+              className="w-full rounded-lg border p-3"
+              disabled={!form.country}
+            >
+              <option value="">Select State (optional)</option>
+
+              {states.map((state) => (
+                <option key={state.isoCode} value={state.name}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+
+            <select
               value={form.country}
-              onChange={(e) => handleChange("country", e.target.value)}
-            />
+              onChange={(e) => {
+                handleChange("country", e.target.value);
+
+                // Reset state when country changes
+                handleChange("state", "");
+              }}
+              className="w-full rounded-lg border p-3"
+            >
+              <option value="">Select Country</option>
+
+              {countries.map((country) => (
+                <option key={country.isoCode} value={country.isoCode}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

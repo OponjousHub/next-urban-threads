@@ -87,10 +87,8 @@ export default function CheckoutClient({
     }
 
     const methods = await res.json();
-    console.log("METHODS", methods);
 
     setShippingMethods(methods);
-    console.log("SHIPPING METHODS", shippingMethods);
     if (methods.length) setSelectedShipping(methods[0]);
   };
 
@@ -243,7 +241,6 @@ export default function CheckoutClient({
       appToast.dismiss();
     }
   };
-
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
       {/* BILLING DETAILS */}
@@ -374,16 +371,14 @@ export default function CheckoutClient({
                     />
 
                     <div>
-                      <p>{method.methodName}</p>
+                      <p>{method.method}</p>
 
-                      <p className="text-sm text-gray-500">
-                        {method.estimatedDays}
-                      </p>
+                      <p className="text-sm text-gray-500">{method.estimate}</p>
                     </div>
 
                     <span>
                       {tenant.currency}
-                      {method.price}
+                      {method.amount}
                     </span>
                   </label>
                 ))

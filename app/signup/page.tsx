@@ -4,6 +4,7 @@ import { useState } from "react";
 // import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { Country, State } from "country-state-city";
 import {
   FiUser,
   FiMail,
@@ -30,9 +31,18 @@ const initialState = {
 export default function SignupPage() {
   const [form, setForm] = useState(initialState);
   const [isLoading, setIsLoading] = useState(false);
+  const countries = Country.getAllCountries();
+  const states = State.getStatesOfCountry(form.country);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -225,15 +235,24 @@ export default function SignupPage() {
             </label>
             <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
               <FiMapPin className="text-gray-400 mr-2" />
-              <input
-                type="text"
+              <select
                 name="state"
-                placeholder="Delta"
-                className="w-full outline-none text-gray-700"
-                autoComplete="new-state"
                 value={form.state}
                 onChange={handleChange}
-              />
+                disabled={!form.country}
+                className="w-full outline-none text-gray-700 bg-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                autoComplete="address-level1"
+              >
+                <option value="">
+                  {form.country ? "Select State" : "Select Country First"}
+                </option>
+
+                {states.map((state) => (
+                  <option key={state.isoCode} value={state.name}>
+                    {state.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -244,15 +263,29 @@ export default function SignupPage() {
             </label>
             <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
               <FiGlobe className="text-gray-400 mr-2" />
-              <input
-                type="text"
+              <select
                 name="country"
-                placeholder="Nigeria"
-                className="w-full outline-none text-gray-700"
-                autoComplete="new-country"
                 value={form.country}
-                onChange={handleChange}
-              />
+                onChange={(e) => {
+                  handleChange(e);
+
+                  // Reset state when country changes
+                  setForm((prev) => ({
+                    ...prev,
+                    state: "",
+                  }));
+                }}
+                className="w-full outline-none text-gray-700 bg-transparent"
+                autoComplete="country"
+              >
+                <option value="">Select Country</option>
+
+                {countries.map((country) => (
+                  <option key={country.isoCode} value={country.isoCode}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
