@@ -7,6 +7,7 @@ type CartItem = {
 
 type CalculateShippingInput = {
   tenantId: string;
+  country: string;
   state: string;
   items: CartItem[];
 };
@@ -21,6 +22,7 @@ export type AvailableShippingMethod = {
 
 export async function calculateShipping({
   tenantId,
+  country,
   state,
   items,
 }: CalculateShippingInput): Promise<AvailableShippingMethod[]> {
@@ -30,6 +32,7 @@ export async function calculateShipping({
 
   const products = await prisma.product.findMany({
     where: {
+      tenantId,
       id: {
         in: items.map((i) => i.productId),
       },
@@ -37,12 +40,10 @@ export async function calculateShipping({
     select: {
       id: true,
       price: true,
-      weight: true,
     },
   });
 
   let subtotal = 0;
-  let totalWeight = 0;
 
   for (const item of items) {
     const product = products.find((p) => p.id === item.productId);
@@ -50,29 +51,41 @@ export async function calculateShipping({
     if (!product) continue;
 
     subtotal += Number(product.price) * item.quantity;
-
-    totalWeight += (product.weight ?? 0) * item.quantity;
   }
 
   // ----------------------------------------
-  // 2. Find shipping zone
+  // 2. Find matching shipping zone
   // ----------------------------------------
 
-  const zone = await prisma.shippingZone.findFirst({
+  //   const zone = await prisma.shippingZone.findFirst({
+  //     where: {
+  //       tenantId,
+  //       active: true,
+  //       country,
+  //       states: {
+  //         has: state,
+  //       },
+  //     },
+  //   });
+  const zones = await prisma.shippingZone.findMany({
     where: {
       tenantId,
       active: true,
-      OR: [
-        {
-          states: {
-            has: state,
-          },
-        },
-        {
-          isDefault: true,
-        },
-      ],
+      country: {
+        equals: country,
+        mode: "insensitive",
+      },
     },
+  });
+
+  const zone = zones.find((z) =>
+    z.states.some((s) => s.trim().toLowerCase() === state.trim().toLowerCase()),
+  );
+
+  console.log("PRINT ZONE===========", {
+    country,
+    state,
+    zone,
   });
 
   if (!zone) {
@@ -105,8 +118,10 @@ export async function calculateShipping({
     ],
   });
 
+  console.log("RATES", rates);
+
   // ----------------------------------------
-  // 4. Apply conditions
+  // 4. Filter applicable rates
   // ----------------------------------------
 
   const available: AvailableShippingMethod[] = [];
@@ -117,14 +132,6 @@ export async function calculateShipping({
     }
 
     if (rate.maxOrderAmount && subtotal > Number(rate.maxOrderAmount)) {
-      continue;
-    }
-
-    if (rate.minWeight !== null && totalWeight < rate.minWeight) {
-      continue;
-    }
-
-    if (rate.maxWeight !== null && totalWeight > rate.maxWeight) {
       continue;
     }
 

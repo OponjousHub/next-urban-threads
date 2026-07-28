@@ -81,6 +81,7 @@ model Product {
   rating3Count    Int              @default(0)
   rating4Count    Int              @default(0)
   rating5Count    Int              @default(0)
+  weight          Decimal? @db.Decimal(8,2)
   vendorId        String?
   categoryId      String
   isFlashDeal     Boolean          @default(false)

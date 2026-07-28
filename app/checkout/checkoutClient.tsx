@@ -79,10 +79,18 @@ export default function CheckoutClient({
       }),
     });
 
+    if (!res.ok) {
+      const error = await res.json();
+      console.log(error);
+      setShippingMethods([]);
+      return;
+    }
+
     const methods = await res.json();
+    console.log("METHODS", methods);
 
     setShippingMethods(methods);
-
+    console.log("SHIPPING METHODS", shippingMethods);
     if (methods.length) setSelectedShipping(methods[0]);
   };
 
@@ -344,11 +352,47 @@ export default function CheckoutClient({
 
           {/*============ Customer choose Shipping*/}
           <div className="space-y-3">
-            <h3 className="font-semibold">Shipping Method</h3>
+            <div className="space-y-3">
+              <h3 className="font-semibold">Shipping Method</h3>
+
+              {shippingMethods.length === 0 ? (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  Sorry, we don't currently have a shipping option for your
+                  selected address. Please choose another address or contact
+                  support.
+                </div>
+              ) : (
+                shippingMethods.map((method) => (
+                  <label
+                    key={method.rateId}
+                    className="flex justify-between border rounded-xl p-4 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      checked={selectedShipping?.methodId === method.methodId}
+                      onChange={() => setSelectedShipping(method)}
+                    />
+
+                    <div>
+                      <p>{method.methodName}</p>
+
+                      <p className="text-sm text-gray-500">
+                        {method.estimatedDays}
+                      </p>
+                    </div>
+
+                    <span>
+                      {tenant.currency}
+                      {method.price}
+                    </span>
+                  </label>
+                ))
+              )}
+            </div>
 
             {shippingMethods.map((method) => (
               <label
-                key={method.methodId}
+                key={method.rateId}
                 className="flex justify-between border rounded-xl p-4 cursor-pointer"
               >
                 <input
