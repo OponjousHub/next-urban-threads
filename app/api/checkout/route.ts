@@ -137,6 +137,7 @@ export async function POST(req: NextRequest) {
 
       const lineTotal = product.price.mul(item.quantity);
       totalAmount = totalAmount.plus(lineTotal);
+      totalAmount = totalAmount.plus(new Prisma.Decimal(shippingCost));
 
       const variant = product.variants.find((v) => v.id === item.variantId);
 

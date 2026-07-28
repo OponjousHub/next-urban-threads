@@ -125,7 +125,8 @@ export default function CheckoutClient({
   // const total = subtotal + shipping;
 
   const shipping = selectedShipping?.price ?? 0;
-  const total = subtotal + shipping - Number(discountAmount);
+  const firstTotal = subtotal - Number(discountAmount);
+  const total = firstTotal + shipping;
 
   const validateEmail = (email: string) => {
     if (!email.trim()) return "Email is required";
