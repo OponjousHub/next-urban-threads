@@ -384,32 +384,6 @@ export default function CheckoutClient({
                 ))
               )}
             </div>
-
-            {shippingMethods.map((method) => (
-              <label
-                key={method.rateId}
-                className="flex justify-between border rounded-xl p-4 cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  checked={selectedShipping?.methodId === method.methodId}
-                  onChange={() => setSelectedShipping(method)}
-                />
-
-                <div>
-                  <p>{method.methodName}</p>
-
-                  <p className="text-sm text-gray-500">
-                    {method.estimatedDays}
-                  </p>
-                </div>
-
-                <span>
-                  {tenant.currency}
-                  {method.price}
-                </span>
-              </label>
-            ))}
           </div>
 
           {showNewAddressForm && (

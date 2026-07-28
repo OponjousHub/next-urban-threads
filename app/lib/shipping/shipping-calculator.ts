@@ -111,24 +111,15 @@ export async function calculateShipping({
   const methods = new Map<string, AvailableShippingMethod>();
 
   for (const rate of rates) {
-    // -------------------------
-    // Check minimum order
-    // -------------------------
     if (rate.minOrderAmount && subtotal < Number(rate.minOrderAmount)) {
       continue;
     }
 
-    // -------------------------
-    // Check maximum order
-    // -------------------------
     if (rate.maxOrderAmount && subtotal > Number(rate.maxOrderAmount)) {
       continue;
     }
 
-    // -------------------------
-    // Already picked a rate
-    // for this shipping method?
-    // -------------------------
+    // Skip if we've already chosen a rate for this shipping method
     if (methods.has(rate.methodId)) {
       continue;
     }
