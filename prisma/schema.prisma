@@ -50,6 +50,7 @@ model User {
   vendorApplications           VendorApplication[]
   wishlistItem                 WishlistItem[]
   adminNotificationSettings    AdminNotificationSettings[]
+  adminNotification            AdminNotification[]
 }
 
 model Product {
@@ -659,6 +660,33 @@ model AdminNotificationSettings {
   monthlySummary Boolean @default(true)
 
   admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
+
+model AdminNotification {
+  id String @id @default(cuid())
+
+  adminId String
+
+  title String
+  message String
+
+  type AdminNotificationType
+
+  isRead Boolean @default(false)
+
+  link String?
+
+  readAt DateTime?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([adminId, isRead])
+  @@index([createdAt])
 }
 
 model InventoryLog {
