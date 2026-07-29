@@ -35,10 +35,21 @@ export async function POST(req: NextRequest) {
       saveAddress,
       couponId,
       shippingMethodId,
-      shippingCost,
     } = await req.json();
     if (!items || items.length === 0) {
       return NextResponse.json({ message: "Cart is empty" }, { status: 400 });
+    }
+
+    // Look up the shipping rate
+    const shippingRate = await prisma.shippingRate.findFirst({
+      where: {
+        methodId: shippingMethodId,
+        active: true,
+      },
+    });
+
+    if (!shippingRate) {
+      throw new Error("Invalid shipping method");
     }
 
     let shippingAddressId: string;
@@ -132,6 +143,7 @@ export async function POST(req: NextRequest) {
       const product = products.find((p) => p.id === item.productId);
       if (!product) throw new Error("Product not found");
 
+      const shippingCost = shippingRate.amount;
       const lineTotal = product.price.mul(item.quantity);
       totalAmount = totalAmount.plus(lineTotal);
       totalAmount = totalAmount.plus(new Prisma.Decimal(shippingCost));
@@ -156,6 +168,7 @@ export async function POST(req: NextRequest) {
         image: variant?.image || product.images?.[0],
       };
     });
+    console.log("ORDER ITEMS", orderItems);
 
     // Validate Coupon
     if (coupon) {
@@ -225,7 +238,7 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-
+    console.log("ORDERITEMSSSSSSssssss", orderItems);
     const paymentReference = crypto.randomUUID();
 
     const order = await prisma.order.create({
@@ -244,7 +257,7 @@ export async function POST(req: NextRequest) {
         discountAmount,
         couponId: coupon?.id ?? null,
         shippingMethodId,
-        shippingCost,
+        shippingCost: shippingRate.amount,
         items: {
           create: orderItems,
         },
