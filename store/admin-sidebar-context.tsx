@@ -10,7 +10,7 @@ type SidebarContextType = {
 
 const SidebarContext = createContext<SidebarContextType | null>(null);
 
-export function VendorSidebarProvider({
+export function AdminSidebarProvider({
   children,
 }: {
   children: React.ReactNode;
@@ -34,9 +34,7 @@ export function useAdminSidebar() {
   const context = useContext(SidebarContext);
 
   if (!context) {
-    throw new Error(
-      "useVendorSidebar must be used inside VendorSidebarProvider",
-    );
+    throw new Error("useAdminSidebar must be used inside AdminSidebarProvider");
   }
 
   return context;

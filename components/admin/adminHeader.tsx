@@ -16,7 +16,7 @@ export default async function AdminHeader({ title, subtitle }: Props) {
         select: {
           name: true,
           email: true,
-          image: true,
+          avatarUrl: true,
         },
       })
     : null;

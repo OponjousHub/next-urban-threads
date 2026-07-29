@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/admin/adminSidebar";
-import AdminTopbar from "./adminTopbar";
 
 type User = {
   name: string;
@@ -48,8 +47,6 @@ export default function AdminLayout({
 
       {/* Right side */}
       <div className="flex flex-col flex-1">
-        <AdminTopbar toggle={() => setMobileOpen(!mobileOpen)} user={user} />
-
         <main className="flex-1 mb-10 overflow-y-auto bg-gray-50">
           {children}
         </main>

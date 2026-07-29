@@ -2,6 +2,7 @@ import "@/app/globals.css";
 import { redirect } from "next/navigation";
 import { getAuthPayload } from "@/lib/server/auth";
 import AdminLayout from "@/components/admin/adminLayout";
+import { AdminSidebarProvider } from "@/store/admin-sidebar-context";
 
 export default async function AdminRootLayout({
   children,
@@ -17,5 +18,9 @@ export default async function AdminRootLayout({
   if (role !== "ADMIN" && role !== "OWNER") {
     redirect("/");
   }
-  return <AdminLayout>{children}</AdminLayout>;
+  return (
+    <AdminSidebarProvider>
+      <AdminLayout>{children}</AdminLayout>
+    </AdminSidebarProvider>
+  );
 }
