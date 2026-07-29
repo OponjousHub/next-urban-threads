@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { appToast } from "@/utils/appToast";
 import { useTenant } from "@/store/tenant-provider-context";
+import { Country, State } from "country-state-city";
 
 type ShippingAddress = {
   id: string;
@@ -17,6 +18,7 @@ type ShippingAddress = {
   country: string;
   phone?: string | null;
   isDefault: boolean;
+  // postalCode: string;
 };
 
 type CheckoutItem = {
@@ -57,11 +59,21 @@ export default function CheckoutClient({
 
     if (!address) return;
 
-    calculateShipping(address);
+    calculateShipping({
+      country: formData.country,
+      state: formData.state,
+      city: formData.city,
+    });
   }, [selectedAddressId]);
 
   // Calculate Shipping Address Helper
-  const calculateShipping = async (address: ShippingAddress) => {
+  const calculateShipping = async (address: {
+    country: string;
+    state: string;
+    city: string;
+  }) => {
+    setShippingMethods([]);
+    setSelectedShipping(null);
     const res = await fetch("/api/shipping/calculate", {
       method: "POST",
       headers: {
@@ -104,6 +116,35 @@ export default function CheckoutClient({
     country: "",
     paymentMethod: "credit-card",
   });
+
+  const currentAddress: ShippingAddress = {
+    id: "",
+    fullName: formData.fullName,
+    street: formData.street,
+    city: formData.city,
+    state: formData.state,
+    country: formData.country,
+    phone: formData.phone,
+    isDefault: false,
+  };
+
+  // Calculating  the shipping when user enters new address
+  useEffect(() => {
+    // Only for the "new address" form
+    if (selectedAddressId) return;
+
+    // Don't calculate until both are selected
+    if (!formData.country || !formData.state) return;
+
+    calculateShipping({
+      country: formData.country,
+      state: formData.state,
+      city: formData.city,
+    });
+  }, [selectedAddressId, formData.country, formData.state]);
+
+  const countries = Country.getAllCountries();
+  const states = State.getStatesOfCountry(formData.country);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -239,6 +280,7 @@ export default function CheckoutClient({
       appToast.dismiss();
     }
   };
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
       {/* BILLING DETAILS */}
@@ -345,45 +387,6 @@ export default function CheckoutClient({
             </button>
           </div>
 
-          {/*============ Customer choose Shipping*/}
-          <div className="space-y-3">
-            <div className="space-y-3">
-              <h3 className="font-semibold">Shipping Method</h3>
-
-              {shippingMethods.length === 0 ? (
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                  Sorry, we don't currently have a shipping option for your
-                  selected address. Please choose another address or contact
-                  support.
-                </div>
-              ) : (
-                shippingMethods.map((method) => (
-                  <label
-                    key={method.rateId}
-                    className="flex justify-between border rounded-xl p-4 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      checked={selectedShipping?.methodId === method.methodId}
-                      onChange={() => setSelectedShipping(method)}
-                    />
-
-                    <div>
-                      <p>{method.method}</p>
-
-                      <p className="text-sm text-gray-500">{method.estimate}</p>
-                    </div>
-
-                    <span>
-                      {tenant.currency}
-                      {method.amount}
-                    </span>
-                  </label>
-                ))
-              )}
-            </div>
-          </div>
-
           {showNewAddressForm && (
             <div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -463,14 +466,25 @@ export default function CheckoutClient({
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     State
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="state"
                     value={formData.state}
                     onChange={handleChange}
-                    placeholder="Lagos"
-                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
-                  />
+                    disabled={!formData.country}
+                    className="w-full border rounded-lg px-4 py-3 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">
+                      {formData.country
+                        ? "Select State"
+                        : "Select Country First"}
+                    </option>
+
+                    {states.map((state) => (
+                      <option key={state.isoCode} value={state.name}>
+                        {state.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -492,18 +506,75 @@ export default function CheckoutClient({
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Country
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="country"
                     value={formData.country}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e);
+
+                      // Reset state whenever country changes
+                      setFormData((prev) => ({
+                        ...prev,
+                        state: "",
+                      }));
+
+                      setShippingMethods([]);
+                      setSelectedShipping(null);
+                    }}
                     required
-                    className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
-                  />
+                    className="w-full border rounded-lg px-4 py-3 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                  >
+                    <option value="">Select Country</option>
+
+                    {countries.map((country) => (
+                      <option key={country.isoCode} value={country.isoCode}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
           )}
+
+          {/*============ Customer choose Shipping*/}
+          <div className="space-y-3">
+            <div className="space-y-3">
+              <h3 className="font-semibold">Shipping Method</h3>
+
+              {shippingMethods.length === 0 ? (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  Sorry, we don't currently have a shipping option for your
+                  selected address. Please choose another address or contact
+                  support.
+                </div>
+              ) : (
+                shippingMethods.map((method) => (
+                  <label
+                    key={method.rateId}
+                    className="flex justify-between border rounded-xl p-4 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      checked={selectedShipping?.methodId === method.methodId}
+                      onChange={() => setSelectedShipping(method)}
+                    />
+
+                    <div>
+                      <p>{method.method}</p>
+
+                      <p className="text-sm text-gray-500">{method.estimate}</p>
+                    </div>
+
+                    <span>
+                      {tenant.currency}
+                      {method.amount}
+                    </span>
+                  </label>
+                ))
+              )}
+            </div>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
