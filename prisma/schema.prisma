@@ -320,6 +320,8 @@ model Tenant {
   shippingZone       ShippingZone[]
   shippingMethods    ShippingMethod[]
   shippingRate       ShippingRate[]
+  adminNotificationSettings AdminNotificationSettings[]
+  adminNotification AdminNotification[]
 }
 
 model Session {
@@ -637,7 +639,7 @@ model VendorNotification {
 
 model AdminNotificationSettings {
   id String @id @default(cuid())
-
+  tenantId  String @unique
   adminId String @unique
 
   newOrder Boolean @default(true)
@@ -659,13 +661,15 @@ model AdminNotificationSettings {
   monthlySummary Boolean @default(true)
 
   admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
 }
 
 model AdminNotification {
   id String @id @default(cuid())
 
   adminId String
-
+  tenantId  String
   title String
   message String
 
@@ -682,6 +686,8 @@ model AdminNotification {
   createdAt DateTime @default(now())
 
   admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
 
   @@index([adminId])
   @@index([adminId, isRead])
