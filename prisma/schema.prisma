@@ -49,6 +49,7 @@ model User {
   vendor                       Vendor?             @relation(fields: [vendorId], references: [id])
   vendorApplications           VendorApplication[]
   wishlistItem                 WishlistItem[]
+  adminNotificationSettings    AdminNotificationSettings[]
 }
 
 model Product {
@@ -634,6 +635,32 @@ model VendorNotification {
   @@index([createdAt])
 }
 
+model AdminNotificationSettings {
+  id String @id @default(cuid())
+
+  adminId String @unique
+
+  newOrder Boolean @default(true)
+  orderCancelled Boolean @default(true)
+  orderDelivered Boolean @default(true)
+
+  newVendorApplication Boolean @default(true)
+
+  refundRequest Boolean @default(true)
+
+  supportTicket Boolean @default(true)
+
+  lowStock Boolean @default(true)
+  outOfStock Boolean @default(true)
+
+  newCustomer Boolean @default(true)
+
+  weeklySummary Boolean @default(false)
+  monthlySummary Boolean @default(true)
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
+
 model InventoryLog {
   id         String   @id @default(cuid())
   productId  String
@@ -866,4 +893,21 @@ enum InventoryReason {
   CANCELLED
   MANUAL
   RESTOCK
+}
+
+enum AdminNotificationType {
+  NEW_ORDER
+  ORDER_CANCELLED
+  ORDER_DELIVERED
+  NEW_VENDOR_APPLICATION
+  VENDOR_APPROVED
+  VENDOR_REJECTED
+  REFUND_REQUEST
+  REFUND_APPROVED
+  REFUND_REJECTED
+  NEW_SUPPORT_TICKET
+  LOW_STOCK
+  OUT_OF_STOCK
+  NEW_CUSTOMER
+  SYSTEM
 }

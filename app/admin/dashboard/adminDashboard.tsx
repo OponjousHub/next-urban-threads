@@ -50,18 +50,6 @@ export default function AdminDashboard() {
 
       <div className="space-y-8">
         {/* Header */}
-        <div className="px-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {tenant.storeMode === "SINGLE_VENDOR"
-              ? "Dashboard Overview."
-              : "Marketplace Overview."}
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {tenant.storeMode === "SINGLE_VENDOR"
-              ? "Here's what's happening in your store."
-              : "Here's what's happening across all vendors."}
-          </p>
-        </div>
 
         <DashboardKpis
           totalRevenue={data?.revenue}
