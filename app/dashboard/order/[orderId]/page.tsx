@@ -13,6 +13,7 @@ import RefundModal from "@/components/refunds/RefundModal";
 import { RefundRequest } from "@prisma/client";
 import RefundRequestStatus from "@/components/refunds/refundRequestStatusCard";
 import { useTenant } from "@/store/tenant-provider-context";
+import { ShippingMethod } from "@prisma/client";
 
 type OrderItem = {
   id: string;
@@ -26,6 +27,7 @@ type OrderItem = {
   image: string | undefined;
   variantColor: string | undefined;
   variantSize: string | undefined;
+  price: number;
 };
 
 type Order = {
@@ -37,6 +39,10 @@ type Order = {
   items: OrderItem[];
   createdAt: string;
   refundRequest: RefundRequest[];
+  shippingCost: number;
+  shippingMethodId: string;
+  shippingMethod: ShippingMethod;
+  discountAmount: number;
 };
 
 export default function OrderPage({ params }: { params: { orderId: string } }) {
@@ -201,37 +207,118 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
               )}
           </div>
 
-          <div className="mb-6 space-y-1">
-            <p>
-              <span className="font-semibold">Order ID:</span> {order.id}
-            </p>
-            <p>
-              <span className="font-semibold">Status:</span>{" "}
-              <span
-                className={`font-bold ${
-                  order.paymentStatus === PaymentStatus.PAID
-                    ? "text-green-600"
-                    : order.status === "CANCELLED"
-                      ? "text-red-600"
-                      : "text-yellow-600"
-                }`}
-              >
-                {order.status}
-              </span>
-            </p>
-            <p>
-              <span className="font-semibold">Total Amount: </span>
-              {tenant.currency}
-              {order.totalAmount}
-            </p>
-            <p>
-              <span className="font-semibold">Payment Reference:</span>{" "}
-              {order.paymentReference || "N/A"}
-            </p>
-            <p>
-              <span className="font-semibold">Created At:</span>{" "}
-              {new Date(order.createdAt).toLocaleString()}
-            </p>
+          <div className="grid gap-6 lg:grid-cols-2 mb-8">
+            {/* Order Information */}
+            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">Order Information</h2>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Order ID</span>
+                  <span className="font-medium">{order.id}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Status</span>
+
+                  <span
+                    className={`font-semibold ${
+                      order.status === "DELIVERED"
+                        ? "text-green-600"
+                        : order.status === "CANCELLED"
+                          ? "text-red-600"
+                          : "text-yellow-600"
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Payment</span>
+
+                  <span
+                    className={`font-semibold ${
+                      order.paymentStatus === PaymentStatus.PAID
+                        ? "text-green-600"
+                        : "text-yellow-600"
+                    }`}
+                  >
+                    {order.paymentStatus}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Payment Reference</span>
+                  <span className="font-medium">
+                    {order.paymentReference || "N/A"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Placed On</span>
+                  <span>
+                    {new Date(order.createdAt).toLocaleDateString()}{" "}
+                    {new Date(order.createdAt).toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Summary */}
+            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Subtotal</span>
+
+                  <span>
+                    {tenant.currency}
+                    {Number(order.totalAmount) -
+                      Number(order.shippingCost ?? 0) +
+                      Number(order.discountAmount ?? 0)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Shipping Method</span>
+
+                  <span>
+                    {order.shippingMethod?.name || "Standard Delivery"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Shipping Fee</span>
+
+                  <span>
+                    {tenant.currency}
+                    {Number(order.shippingCost ?? 0).toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Discount</span>
+
+                  <span className="text-green-600">
+                    -{tenant.currency}
+                    {Number(order.discountAmount ?? 0).toFixed(2)}
+                  </span>
+                </div>
+
+                <hr />
+
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total Paid</span>
+
+                  <span>
+                    {tenant.currency}
+                    {Number(order.totalAmount).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <CustomerTrackingTimeline orderId={order.id} />
@@ -259,14 +346,14 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                       Quantity: {item.quantity}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Price: {tenant.currency}
-                      {item.product.price}
+                      Unit Price: {tenant.currency}
+                      {Number(item.price).toFixed(2)}
                     </p>
                   </div>
                   <div>
                     <p className="font-bold">
                       {tenant.currency}
-                      {item.product.price * item.quantity}
+                      {(Number(item.price) * item.quantity).toFixed(2)}
                     </p>
 
                     {order.status === "DELIVERED" && (
