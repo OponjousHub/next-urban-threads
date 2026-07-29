@@ -9,6 +9,14 @@ import CouponInput from "@/components/cart/coupon-input";
 import { useState, useEffect } from "react";
 import { Country, State } from "country-state-city";
 
+export type AvailableShippingMethod = {
+  rateId: string;
+  methodId: string;
+  method: string;
+  estimate: string | null;
+  amount: number;
+};
+
 export default function CartPage() {
   const [estimatedShipping, setEstimatedShipping] = useState(0);
   const [country, setCountry] = useState("");
