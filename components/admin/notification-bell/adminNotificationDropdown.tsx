@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CheckCheck } from "lucide-react";
-import AdminNotificationItem from "./AdminNotificationItem";
+import AdminNotificationItem from "./adminNotificationItem";
 import type { AdminNotification } from "./AdminNotificationBell";
 
 type Props = {
