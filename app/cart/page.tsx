@@ -273,13 +273,24 @@ export default function CartPage() {
             </div>
           </div>
 
-          <div className="flex justify-between text-gray-500">
-            <span>Shipping</span>
-            <span>Calculated at checkout</span>
-          </div>
+          {selectedMethod ? (
+            <div className="flex justify-between">
+              <span>Estimated Shipping</span>
+              <span>
+                {tenant.currency}
+                {estimatedShipping.toFixed(2)}
+              </span>
+            </div>
+          ) : (
+            <div className="flex justify-between text-gray-500">
+              <span>Shipping</span>
+              <span>Calculated at checkout</span>
+            </div>
+          )}
           <hr className="my-3" />
           <div className="flex justify-between font-semibold text-gray-900 text-lg">
-            <span>Total</span>
+            <span>{selectedMethod ? "Estimated Total" : "Total"}</span>
+
             <span>
               {tenant.currency}
               {total.toFixed(2)}
