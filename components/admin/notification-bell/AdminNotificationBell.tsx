@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FaBell } from "react-icons/fa";
-import AdminNotificationDropdown from "./AdminNotificationDropdown";
+import AdminNotificationDropdown from "./adminNotificationDropdown";
 
 export type AdminNotification = {
   id: string;
