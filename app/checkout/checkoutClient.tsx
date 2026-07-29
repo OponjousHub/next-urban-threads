@@ -59,12 +59,14 @@ export default function CheckoutClient({
 
     if (!address) return;
 
+    if (!address.country || !address.state) return;
+
     calculateShipping({
-      country: formData.country,
-      state: formData.state,
-      city: formData.city,
+      country: address.country,
+      state: address.state,
+      city: address.city ?? "",
     });
-  }, [selectedAddressId]);
+  }, [selectedAddressId, addresses]);
 
   // Calculate Shipping Address Helper
   const calculateShipping = async (address: {
@@ -72,6 +74,7 @@ export default function CheckoutClient({
     state: string;
     city: string;
   }) => {
+    console.log("Calculating shipping with", address);
     setShippingMethods([]);
     setSelectedShipping(null);
     const res = await fetch("/api/shipping/calculate", {
@@ -101,7 +104,11 @@ export default function CheckoutClient({
     const methods = await res.json();
 
     setShippingMethods(methods);
-    if (methods.length) setSelectedShipping(methods[0]);
+    if (methods.length > 0) {
+      setSelectedShipping(methods[0]);
+    } else {
+      setSelectedShipping(null);
+    }
   };
 
   // Form data

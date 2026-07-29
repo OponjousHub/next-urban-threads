@@ -297,9 +297,17 @@ export default function CartPage() {
             </span>
           </div>
 
-          <p className="mt-2 text-xs text-gray-500">
-            Shipping and taxes will be calculated during checkout.
-          </p>
+          {selectedMethod && (
+            <p className="mt-2 text-xs text-gray-500">
+              Final shipping cost will be confirmed during checkout after you
+              select your delivery address.
+            </p>
+          )}
+          {!selectedMethod && (
+            <p className="mt-2 text-xs text-gray-500">
+              Select a country and state to estimate shipping.
+            </p>
+          )}
         </div>
         <Link href={"/checkout"}>
           <button

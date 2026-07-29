@@ -71,9 +71,6 @@ export async function POST(req: NextRequest) {
             ...addressData,
             userId,
             tenantId: tenant.id,
-            user: {
-              connect: { id: userId },
-            },
             isDefault: false,
           },
         });
