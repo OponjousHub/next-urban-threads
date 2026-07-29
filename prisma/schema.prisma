@@ -622,7 +622,6 @@ model VendorNotification {
 
   link       String?
 
-  read       Boolean  @default(false)
   readAt     DateTime?
 
   metadata   Json?
