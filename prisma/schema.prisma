@@ -588,7 +588,6 @@ model StoreFollow {
 
 model VendorNotificationSettings {
   id                 String  @id @default(cuid())
-
   vendorId           String  @unique
 
   newOrder           Boolean @default(true)
@@ -598,6 +597,9 @@ model VendorNotificationSettings {
 
   lowStock           Boolean @default(true)
   outOfStock         Boolean @default(true)
+
+  refundRequested  Boolean @default(true)
+  refundProcessed  Boolean @default(true)
 
   newReview          Boolean @default(true)
   newFollower        Boolean @default(true)
@@ -649,7 +651,9 @@ model AdminNotificationSettings {
 
   newVendorApplication Boolean @default(true)
 
-  refundRequest Boolean @default(true)
+  refundRequest     Boolean @default(true)
+  refundRequested   Boolean @default(true)
+  refundProcessed   Boolean @default(true)
 
   supportTicket Boolean @default(true)
 
@@ -812,6 +816,7 @@ enum OrderStatus {
   CANCELLED
   RETURNED
   FAILED
+  REFUND_REJECTED
 }
 
 enum PaymentProvider {
@@ -868,6 +873,7 @@ enum TrackingEventType {
   COURIER_UPDATE
   NOTE
   SYSTEM
+  REFUND
 }
 
 enum ContactStatus {
@@ -920,6 +926,7 @@ enum VendorNotificationType {
   REPORT
   SYSTEM
   PAYMENT
+  REFUND
 }
 
 enum InventoryReason {
@@ -946,4 +953,5 @@ enum AdminNotificationType {
   NEW_CUSTOMER
   SYSTEM
   PAYMENT_RECEIVED
+  REFUNDED
 }

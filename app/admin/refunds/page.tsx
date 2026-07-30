@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { StatusBadge } from "@/lib/status-badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import RefundReviewModal from "@/components/refunds/refundReviewModal";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Refund = {
   id: string;
@@ -18,6 +19,8 @@ export default function RefundsPage() {
   const [refunds, setRefunds] = useState<Refund[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRefund, setSelectedRefund] = useState<string | null>(null);
+
+  const { tenant } = useTenant();
 
   useEffect(() => {
     fetchRefunds();
@@ -64,7 +67,10 @@ export default function RefundsPage() {
               >
                 <td className="p-3">{r.orderId}</td>
                 <td className="p-3">{r.reason}</td>
-                <td className="p-3 font-medium">₦{r.requestedAmount}</td>
+                <td className="p-3 font-medium">
+                  {tenant.currency}
+                  {r.requestedAmount}
+                </td>
                 <td className="p-3">
                   <StatusBadge status={r.status} />
                 </td>

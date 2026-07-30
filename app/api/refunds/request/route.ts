@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createRefundRequest } from "@/app/lib/refunds/refund.service";
+import { submitRefundRequest } from "@/app/lib/refunds/refund.service";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function POST(req: Request) {
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   const body = await req.json();
   // console.log("FUND HAS BEEN REQUESTED", body);
 
-  const refund = await createRefundRequest(body);
+  const refund = await submitRefundRequest(body);
 
   return NextResponse.json(refund);
 }
