@@ -6,6 +6,7 @@ import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
 import NotificationService from "@/lib/notifications/notification.service";
+import { PaymentStatus } from "@prisma/client";
 
 type RouteParams = {
   params: {
@@ -43,6 +44,11 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         tenantId: tenant.id,
       },
       include: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
         items: {
           include: {
             product: true,
@@ -83,9 +89,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json(order);
     }
 
-    if (order.paymentStatus === "PAID") {
+    if (order?.paymentStatus === PaymentStatus.PAID) {
       return NextResponse.json(order);
     }
+
+    // if (order.paymentStatus === "PAID") {
+    //   return NextResponse.json(order);
+    // }
 
     // ---------------------------
     // 5️⃣ Verify with Paystack
@@ -125,14 +135,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       },
     });
 
-    // Load customer
-    const customer = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        name: true,
-      },
-    });
-
     await prisma.orderTrackingEvent.create({
       data: {
         orderId: order.id,
@@ -152,13 +154,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         setting: "paymentReceived",
         type: "PAYMENT",
         title: "Payment Received",
-        message: `Payment has been confirmed for Order #${order.id.slice(-8)}.`,
+        message: `Payment of ${order.currency} ${Number(order.totalAmount).toLocaleString()} has been confirmed for Order #${order.id.slice(-8)}.`,
         link: `/vendor/orders/${order.id}`,
         metadata: {
           orderId: order.id,
-          paymentReference: order.paymentReference,
-          amount: Number(order.totalAmount),
-          currency: order.currency,
+          paymentReference: updatedOrder.paymentReference,
+          amount: Number(updatedOrder.totalAmount),
+          currency: updatedOrder.currency,
         },
       });
     }
@@ -166,15 +168,15 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // Send Notification
     await AdminNotificationService.notify({
       type: "PAYMENT_RECEIVED",
-      title: "Payment Successful",
-      message: `${customer?.name ?? "A customer"} paid ${order.currency} ${Number(order.totalAmount).toLocaleString()}.`,
+      title: "Payment Received",
+      message: `${order.user.name ?? "A customer"} paid ${updatedOrder.currency} ${Number(updatedOrder.totalAmount).toLocaleString()}.`,
       link: `/admin/orders/${order.id}`,
       metadata: {
         orderId: order.id,
         customerId: order.userId,
-        customerName: customer?.name,
-        amount: Number(order.totalAmount),
-        currency: order.currency,
+        customerName: order.user.name,
+        amount: Number(updatedOrder.totalAmount),
+        currency: updatedOrder.currency,
       },
     });
 
