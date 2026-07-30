@@ -502,3 +502,68 @@ export async function rejectRefund(refundId: string, reason?: string) {
     success: true,
   };
 }
+
+export async function cancelRefund(refundId: string, userId: string) {
+  const refund = await prisma.refundRequest.findFirst({
+    where: {
+      id: refundId,
+      userId,
+    },
+  });
+
+  if (!refund) {
+    throw new Error("Refund not found");
+  }
+
+  if (refund.status !== "REQUESTED") {
+    throw new Error("Refund can no longer be cancelled.");
+  }
+
+  await prisma.refundRequest.update({
+    where: {
+      id: refundId,
+    },
+    data: {
+      status: "CANCELLED",
+    },
+  });
+
+  await prisma.orderTrackingEvent.create({
+    data: {
+      tenantId: refund.tenantId,
+      orderId: refund.orderId,
+      status: "REFUND_CANCELLED",
+      type: "REFUND",
+      title: "Refund Cancelled",
+      description: "Customer cancelled the refund request.",
+    },
+  });
+
+  if (refund.vendorId) {
+    await NotificationService.notify({
+      vendorId: refund.vendorId,
+      setting: "refundProcessed",
+      type: "REFUND",
+      title: "Refund Cancelled",
+      message: `Customer cancelled refund request for Order #${refund.orderId.slice(-8)}.`,
+      link: `/vendor/orders/${refund.orderId}`,
+      metadata: {
+        refundId,
+      },
+    });
+  }
+
+  await AdminNotificationService.notify({
+    type: "REFUND_CANCELLED",
+    title: "Refund Cancelled",
+    message: `Customer cancelled refund request for Order #${refund.orderId.slice(-8)}.`,
+    link: `/admin/refunds/${refundId}`,
+    metadata: {
+      refundId,
+    },
+  });
+
+  return {
+    success: true,
+  };
+}
