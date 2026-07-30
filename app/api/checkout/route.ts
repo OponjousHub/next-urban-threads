@@ -9,6 +9,7 @@ import { getLoggedInUserId } from "@/lib/auth";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import NotificationService from "@/lib/notifications/notification.service";
 import InventoryService from "@/lib/inventory/inventory.service";
+import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
 
 export async function POST(req: NextRequest) {
   const tenant = await getDefaultTenant();
@@ -168,7 +169,6 @@ export async function POST(req: NextRequest) {
         image: variant?.image || product.images?.[0],
       };
     });
-    console.log("ORDER ITEMS", orderItems);
 
     // Validate Coupon
     if (coupon) {
@@ -238,8 +238,15 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    console.log("ORDERITEMSSSSSSssssss", orderItems);
     const paymentReference = crypto.randomUUID();
+
+    // Load customer
+    const customer = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        name: true,
+      },
+    });
 
     const order = await prisma.order.create({
       data: {
@@ -261,6 +268,20 @@ export async function POST(req: NextRequest) {
         items: {
           create: orderItems,
         },
+      },
+    });
+
+    await AdminNotificationService.notify({
+      type: "NEW_ORDER",
+      title: "🛒 New Order",
+      message: `${customer?.name ?? "A customer"} placed an order worth ${order.currency} ${Number(order.totalAmount).toLocaleString()}.`,
+      link: `/admin/orders/${order.id}`,
+      metadata: {
+        orderId: order.id,
+        customerId: userId,
+        customerName: customer?.name,
+        total: Number(order.totalAmount),
+        currency: order.currency,
       },
     });
 

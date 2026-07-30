@@ -592,6 +592,7 @@ model VendorNotificationSettings {
   vendorId           String  @unique
 
   newOrder           Boolean @default(true)
+  paymentReceived    Boolean @default(true)
   orderCancelled     Boolean @default(true)
   orderDelivered     Boolean @default(true)
 
@@ -918,6 +919,7 @@ enum VendorNotificationType {
   PAYOUT
   REPORT
   SYSTEM
+  PAYMENT
 }
 
 enum InventoryReason {
@@ -943,4 +945,5 @@ enum AdminNotificationType {
   OUT_OF_STOCK
   NEW_CUSTOMER
   SYSTEM
+  PAYMENT_RECEIVED
 }

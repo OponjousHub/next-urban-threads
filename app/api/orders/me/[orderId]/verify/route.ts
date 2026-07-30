@@ -4,6 +4,8 @@ import { getLoggedInUserId } from "@/lib/auth";
 import { PaystackProvider } from "@/app/lib/payments/paystack";
 import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
+import NotificationService from "@/lib/notifications/notification.service";
 
 type RouteParams = {
   params: {
@@ -123,6 +125,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       },
     });
 
+    // Load customer
+    const customer = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        name: true,
+      },
+    });
+
     await prisma.orderTrackingEvent.create({
       data: {
         orderId: order.id,
@@ -132,6 +142,39 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         title: "Payment confirmed",
         description:
           "Your payment was successful. We are now processing your order.",
+      },
+    });
+
+    // Sends notification on new order
+    if (order.vendorId) {
+      await NotificationService.notify({
+        vendorId: order.vendorId,
+        setting: "paymentReceived",
+        type: "PAYMENT",
+        title: "Payment Received",
+        message: `Payment has been confirmed for Order #${order.id.slice(-8)}.`,
+        link: `/vendor/orders/${order.id}`,
+        metadata: {
+          orderId: order.id,
+          paymentReference: order.paymentReference,
+          amount: Number(order.totalAmount),
+          currency: order.currency,
+        },
+      });
+    }
+
+    // Send Notification
+    await AdminNotificationService.notify({
+      type: "PAYMENT_RECEIVED",
+      title: "Payment Successful",
+      message: `${customer?.name ?? "A customer"} paid ${order.currency} ${Number(order.totalAmount).toLocaleString()}.`,
+      link: `/admin/orders/${order.id}`,
+      metadata: {
+        orderId: order.id,
+        customerId: order.userId,
+        customerName: customer?.name,
+        amount: Number(order.totalAmount),
+        currency: order.currency,
       },
     });
 

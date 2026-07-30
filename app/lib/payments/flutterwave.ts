@@ -1,7 +1,6 @@
 import axios from "axios";
 import { PaymentProvider } from "@/types/payment";
 import {
-  Bank,
   VerifyBankAccountResult,
   TransferRecipient,
   TransferResult,
