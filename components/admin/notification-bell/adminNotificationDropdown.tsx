@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { CheckCheck } from "lucide-react";
 import AdminNotificationItem from "./adminNotificationItem";
-import type { AdminNotification } from "./AdminNotificationBell";
+import type { AdminNotification } from "./adminNotificationBell";
+import Link from "next/link";
 
 type Props = {
   notifications: AdminNotification[];
@@ -76,6 +77,21 @@ export default function AdminNotificationDropdown({
             />
           ))
         )}
+      </div>
+      <div className="flex items-center justify-between border-t p-3">
+        <button
+          onClick={markAllAsRead}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          Mark all as read
+        </button>
+
+        <Link
+          href="/admin/notifications"
+          className="text-sm font-medium text-blue-600 hover:underline"
+        >
+          View all
+        </Link>
       </div>
     </div>
   );

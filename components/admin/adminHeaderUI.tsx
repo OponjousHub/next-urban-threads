@@ -2,7 +2,7 @@
 
 import { FaBars } from "react-icons/fa";
 import { useAdminSidebar } from "@/store/admin-sidebar-context";
-import NotificationBell from "../vendor/notification-bell/notification-bell";
+import AdminNotificationBell from "./notification-bell/adminNotificationBell";
 
 type AdminHeaderProps = {
   title: string;
@@ -48,7 +48,7 @@ export default function AdminHeaderUI({
         <div className="flex items-center gap-3">
           {/* Notifications */}
           <div className="relative">
-            <NotificationBell />
+            <AdminNotificationBell />
 
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
           </div>

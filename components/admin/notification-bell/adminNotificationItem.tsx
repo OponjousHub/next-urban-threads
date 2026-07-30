@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import type { AdminNotification } from "./AdminNotificationBell";
+import type { AdminNotification } from "./adminNotificationBell";
 import { getNotificationIcon } from "./admin-notification-icons";
 import { formatNotificationTime } from "./time";
 
