@@ -601,6 +601,7 @@ model VendorNotificationSettings {
   refundRequested  Boolean @default(true)
   refundProcessed  Boolean @default(true)
   refundApproved   Boolean @default(true)
+  refundCompleted Boolean @default(true)
 
   newReview          Boolean @default(true)
   newFollower        Boolean @default(true)
