@@ -1,145 +1,95 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useTenant } from "@/store/tenant-provider-context";
+import { RefundStatus } from "@prisma/client";
 
 type Props = {
-  order: any;
+  status: RefundStatus;
 };
 
-const steps = ["REQUESTED", "PROCESSING", "REFUNDED", "FAILED"];
+const stages: RefundStatus[] = [
+  "REQUESTED",
+  "APPROVED",
+  "PROCESSING",
+  "REFUNDED",
+];
 
-export default function RefundRequestStatus({ order }: Props) {
-  const { tenant } = useTenant();
-  const refunds = order?.refundRequests ?? order?.refundRequest ?? [];
+export default function RefundRequestStatus({ status }: Props) {
+  const currentIndex = stages.indexOf(status);
 
-  if (!refunds.length) return null;
+  const terminal =
+    status === "REJECTED" || status === "FAILED" || status === "CANCELLED";
 
   return (
-    <section className="mt-10">
-      <h2 className="text-2xl font-semibold mb-4">Refunds</h2>
+    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+      <h2 className="mb-6 text-lg font-semibold">Refund Progress</h2>
 
-      <div className="space-y-6">
-        {refunds.map((refund: any) => {
-          const currentIndex = steps.indexOf(refund.status);
-          const isFailed = refund.status === "FAILED";
+      {/* Main timeline */}
+      {!terminal && (
+        <div className="flex items-center justify-between">
+          {stages.map((stage, index) => {
+            const complete = index <= currentIndex;
 
-          return (
-            <div
-              key={refund.id}
-              className="border rounded-2xl p-6 bg-white shadow-sm"
-            >
-              {/* 🔥 TIMELINE */}
-              <div className="relative mb-6">
-                {/* BASE LINE */}
-                <div className="absolute top-2 left-0 right-0 h-[3px] bg-gray-200" />
-
-                {/* ACTIVE LINE */}
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{
-                    width: `${((currentIndex + 0.5) / steps.length) * 100}%`,
-                  }}
-                  transition={{ duration: 0.6 }}
-                  className={`absolute top-2 left-0 h-[3px] ${
-                    isFailed ? "bg-red-400" : "bg-green-500"
-                  }`}
-                />
-
-                {/* STEPS */}
-                <div className="relative flex justify-between">
-                  {steps.map((step, i) => {
-                    const isActive = i <= currentIndex;
-
-                    return (
-                      <div
-                        key={step}
-                        className="flex flex-col items-center w-full"
-                      >
-                        {/* DOT */}
-                        <motion.div
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{
-                            scale: isActive ? 1.2 : 1,
-                            opacity: 1,
-                          }}
-                          transition={{
-                            duration: 0.3,
-                            delay: i * 0.15,
-                          }}
-                          className={`w-4 h-4 rounded-full z-10 ${
-                            isActive
-                              ? isFailed
-                                ? "bg-red-500"
-                                : "bg-green-500"
-                              : "bg-gray-300"
-                          }`}
-                        />
-
-                        {/* LABEL BELOW DOT ✅ */}
-                        <span
-                          className={`text-xs mt-2 ${
-                            isActive
-                              ? "text-black font-medium"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          {step}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* DETAILS */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <p className="font-semibold capitalize">{refund.reason}</p>
-
-                  <span
-                    className={`text-xs px-3 py-1 rounded-full ${
-                      refund.status === "REFUNDED"
-                        ? "bg-green-100 text-green-700"
-                        : refund.status === "FAILED"
-                          ? "bg-red-100 text-red-700"
-                          : refund.status === "PROCESSING"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-yellow-100 text-yellow-700"
+            return (
+              <div key={stage} className="flex flex-1 items-center">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-semibold
+                    ${
+                      complete
+                        ? "border-green-600 bg-green-600 text-white"
+                        : "border-gray-300 bg-white text-gray-400"
                     }`}
                   >
-                    {refund.status}
+                    {index + 1}
+                  </div>
+
+                  <span className="mt-2 text-xs font-medium">
+                    {stage.replace("_", " ")}
                   </span>
                 </div>
 
-                {refund.description && (
-                  <p className="text-sm text-gray-600">{refund.description}</p>
+                {index !== stages.length - 1 && (
+                  <div
+                    className={`mx-2 h-1 flex-1 rounded
+                    ${index < currentIndex ? "bg-green-600" : "bg-gray-200"}`}
+                  />
                 )}
-
-                <div className="flex gap-4 text-sm text-gray-700">
-                  <p>
-                    <span className="font-medium">Requested: </span>
-                    {tenant.currency}
-                    {refund.requestedAmount}
-                  </p>
-
-                  {refund.approvedAmount && (
-                    <p>
-                      <span className="font-medium">Approved: </span>
-                      {tenant.currency}
-                      {refund.approvedAmount}
-                    </p>
-                  )}
-                </div>
-
-                <p className="text-xs text-gray-400">
-                  {new Date(refund.createdAt).toLocaleString()}
-                </p>
               </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Terminal states */}
+      {status === "REJECTED" && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+          <p className="font-semibold text-red-700">Refund Request Rejected</p>
+
+          <p className="mt-2 text-sm text-red-600">
+            Unfortunately your refund request was not approved.
+          </p>
+        </div>
+      )}
+
+      {status === "FAILED" && (
+        <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
+          <p className="font-semibold text-orange-700">Refund Failed</p>
+
+          <p className="mt-2 text-sm text-orange-600">
+            We couldn't complete the refund. We'll retry shortly.
+          </p>
+        </div>
+      )}
+
+      {status === "CANCELLED" && (
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <p className="font-semibold text-gray-700">Refund Cancelled</p>
+
+          <p className="mt-2 text-sm text-gray-600">
+            This refund request was cancelled.
+          </p>
+        </div>
+      )}
+    </div>
   );
 }

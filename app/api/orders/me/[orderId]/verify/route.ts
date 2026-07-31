@@ -43,6 +43,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         userId,
         tenantId: tenant.id,
       },
+
       include: {
         user: {
           select: {
