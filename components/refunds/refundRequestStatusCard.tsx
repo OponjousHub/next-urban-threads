@@ -101,9 +101,14 @@ export default function RefundRequestStatus({ status, refund }: Props) {
         ]
       : []),
   ];
-
+  console.log("REFUND REQUEST STATUS", {
+    createdAt: refund.createdAt,
+    approvedAt: refund.approvedAt,
+    processedAt: refund.processedAt,
+    refundedAt: refund.refundedAt,
+  });
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border bg-white p-6 shadow-sm mt-6">
       <h2 className="mb-6 text-lg font-semibold">Refund Progress</h2>
 
       {/* Main timeline */}
@@ -143,7 +148,7 @@ export default function RefundRequestStatus({ status, refund }: Props) {
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-6 mt-6">
         {events?.map((event, index) => (
           <div key={index} className="flex gap-4">
             {/* Dot */}

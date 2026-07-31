@@ -150,24 +150,6 @@ export async function submitRefundRequest(data: RefundRequestInput) {
     },
   });
 
-  // Timeline
-  await prisma.orderTrackingEvent.create({
-    data: {
-      tenantId: tenant.id,
-
-      orderId: order.id,
-
-      status: order.status,
-
-      type: "REFUND",
-
-      title: "Refund Requested",
-
-      description:
-        "Your refund request has been submitted and is awaiting review.",
-    },
-  });
-
   // Vendor notification
   if (order.vendorId) {
     await NotificationService.notify({
@@ -270,22 +252,6 @@ export async function approveRefund(refundId: string) {
     },
     data: {
       refundStatus: "APPROVED",
-    },
-  });
-
-  // ----------------------------
-  // Customer Timeline
-  // ----------------------------
-
-  await prisma.orderTrackingEvent.create({
-    data: {
-      tenantId: tenant.id,
-      orderId: refund.orderId,
-      status: "PROCESSING",
-      type: "REFUND",
-      title: "Refund Approved",
-      description:
-        "Your refund request has been approved and will be processed shortly.",
     },
   });
 
@@ -477,19 +443,6 @@ export async function processRefund(refundId: string) {
         quantity: item.quantity,
       });
     }
-
-    // Customer timeline
-    await tx.orderTrackingEvent.create({
-      data: {
-        tenantId: tenant.id,
-        orderId: refund.orderId,
-        status: "REFUNDED",
-        type: "REFUND",
-        title: "Refund Completed",
-        description:
-          "Your refund has been processed successfully. Funds should appear shortly depending on your payment provider.",
-      },
-    });
   });
 
   // ----------------------------------
@@ -572,19 +525,6 @@ export async function rejectRefund(refundId: string, reason?: string) {
     },
   });
 
-  // Customer tracking timeline
-  await prisma.orderTrackingEvent.create({
-    data: {
-      tenantId: refund.tenantId,
-      orderId: refund.orderId,
-      status: "REFUND_REJECTED",
-      type: "REFUND",
-      title: "Refund Request Rejected",
-      description:
-        reason ?? "Your refund request has been reviewed and rejected.",
-    },
-  });
-
   // Vendor
   if (refund.vendorId) {
     await NotificationService.notify({
@@ -649,17 +589,6 @@ export async function cancelRefund(refundId: string, userId: string) {
     },
     data: {
       refundStatus: "CANCELLED",
-    },
-  });
-
-  await prisma.orderTrackingEvent.create({
-    data: {
-      tenantId: refund.tenantId,
-      orderId: refund.orderId,
-      status: "REFUND_CANCELLED",
-      type: "REFUND",
-      title: "Refund Cancelled",
-      description: "Customer cancelled the refund request.",
     },
   });
 
