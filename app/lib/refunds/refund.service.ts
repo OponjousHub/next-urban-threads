@@ -141,6 +141,15 @@ export async function submitRefundRequest(data: RefundRequestInput) {
     },
   });
 
+  await prisma.order.update({
+    where: {
+      id: order.id,
+    },
+    data: {
+      refundStatus: "REQUESTED",
+    },
+  });
+
   // Timeline
   await prisma.orderTrackingEvent.create({
     data: {
@@ -251,6 +260,15 @@ export async function approveRefund(refundId: string) {
     data: {
       status: "APPROVED",
       approvedAmount: refund.requestedAmount,
+    },
+  });
+
+  await prisma.order.update({
+    where: {
+      id: refund.orderId,
+    },
+    data: {
+      refundStatus: "APPROVED",
     },
   });
 
@@ -370,6 +388,15 @@ export async function processRefund(refundId: string) {
     },
   });
 
+  await prisma.order.update({
+    where: {
+      id: refund.orderId,
+    },
+    data: {
+      refundStatus: "PROCESSING",
+    },
+  });
+
   // ----------------------------------
   // Call payment gateway
   // ----------------------------------
@@ -386,6 +413,15 @@ export async function processRefund(refundId: string) {
       },
       data: {
         status: "FAILED",
+      },
+    });
+
+    await prisma.order.update({
+      where: {
+        id: refund.orderId,
+      },
+      data: {
+        refundStatus: "FAILED",
       },
     });
 
@@ -522,6 +558,15 @@ export async function rejectRefund(refundId: string, reason?: string) {
     },
   });
 
+  await prisma.order.update({
+    where: {
+      id: refund.orderId,
+    },
+    data: {
+      refundStatus: "REJECTED",
+    },
+  });
+
   // Customer tracking timeline
   await prisma.orderTrackingEvent.create({
     data: {
@@ -589,6 +634,15 @@ export async function cancelRefund(refundId: string, userId: string) {
     },
     data: {
       status: "CANCELLED",
+    },
+  });
+
+  await prisma.order.update({
+    where: {
+      id: refund.orderId,
+    },
+    data: {
+      refundStatus: "CANCELLED",
     },
   });
 
