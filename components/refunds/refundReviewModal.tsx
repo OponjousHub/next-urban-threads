@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { appToast } from "@/utils/appToast";
+import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
   refundId: string;
@@ -18,6 +19,8 @@ export default function RefundReviewModal({
   const [refund, setRefund] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+
+  const { tenant } = useTenant();
 
   useEffect(() => {
     fetchRefund();
@@ -97,11 +100,10 @@ export default function RefundReviewModal({
             <p>
               <strong>Order:</strong> {refund.orderId}
             </p>
+
             <p>
-              <strong>Status:</strong> {refund.status}
-            </p>
-            <p>
-              <strong>Amount:</strong> ₦{refund.requestedAmount}
+              <strong>Amount:</strong> {tenant.currency}
+              {refund.requestedAmount}
             </p>
           </div>
 
@@ -116,7 +118,8 @@ export default function RefundReviewModal({
                 >
                   <span>{item.product.name}</span>
                   <span>
-                    {item.quantity} × ₦{item.priceAtPurchase}
+                    {item.quantity} × {tenant.currency}
+                    {item.priceAtPurchase}
                   </span>
                 </div>
               ))}
