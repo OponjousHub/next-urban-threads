@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { appToast } from "@/utils/appToast";
 
@@ -36,12 +35,16 @@ export default function RefundReviewModal({
     }
   }
 
-  async function handleAction(type: "approve" | "reject") {
+  async function handleAction(type: "approve" | "reject" | "process") {
     setActionLoading(true);
 
-    const loadingToast = appToast.loading(
-      type === "approve" ? "Approving..." : "Rejecting...",
-    );
+    const labels = {
+      approve: "Approving...",
+      reject: "Rejecting...",
+      process: "Processing refund...",
+    };
+
+    const loadingToast = appToast.loading(labels[type]);
 
     try {
       await fetch(`/api/admin/refunds/${refundId}/${type}`, {
@@ -52,20 +55,20 @@ export default function RefundReviewModal({
 
       appToast.success(
         "Success",
-        type === "approve" ? "Refund approved" : "Refund rejected",
+        type === "approve"
+          ? "Refund approved"
+          : type === "process"
+            ? "Refund processed"
+            : "Refund rejected",
       );
 
+      await fetchRefund(); // refresh modal
+
       onActionComplete();
-      onClose();
     } catch {
       appToast.dismiss(loadingToast);
 
-      appToast.error(
-        "Error",
-        type === "approve"
-          ? "Failed to approve refund"
-          : "Failed to reject refund",
-      );
+      appToast.error("Error", `Failed to ${type} refund`);
     } finally {
       setActionLoading(false);
     }
@@ -129,6 +132,59 @@ export default function RefundReviewModal({
             )}
           </div>
 
+          {/* STATUS CARD */}
+
+          {refund.status === "APPROVED" && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 mb-4">
+              <p className="font-semibold text-blue-700">Refund Approved</p>
+
+              <p className="mt-1 text-sm text-blue-600">
+                This refund has been approved but payment has not yet been sent.
+              </p>
+            </div>
+          )}
+
+          {refund.status === "PROCESSING" && (
+            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 mb-4">
+              <p className="font-semibold text-yellow-700">Processing Refund</p>
+
+              <p className="mt-1 text-sm text-yellow-600">
+                Payment is currently being processed through the payment
+                gateway.
+              </p>
+            </div>
+          )}
+
+          {refund.status === "REFUNDED" && (
+            <div className="rounded-lg border border-green-200 bg-green-50 p-4 mb-4">
+              <p className="font-semibold text-green-700">Refund Completed</p>
+
+              <p className="mt-1 text-sm text-green-600">
+                The customer has been refunded successfully.
+              </p>
+            </div>
+          )}
+
+          {refund.status === "REJECTED" && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4 mb-4">
+              <p className="font-semibold text-red-700">Refund Rejected</p>
+
+              <p className="mt-1 text-sm text-red-600">
+                This refund request has been rejected.
+              </p>
+            </div>
+          )}
+
+          {refund.status === "CANCELLED" && (
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 mb-4">
+              <p className="font-semibold text-gray-700">Refund Cancelled</p>
+
+              <p className="mt-1 text-sm text-gray-600">
+                The customer cancelled this refund request.
+              </p>
+            </div>
+          )}
+
           {/* ACTIONS */}
           <div className="flex gap-3 justify-end">
             {refund.status === "REQUESTED" && (
@@ -148,6 +204,36 @@ export default function RefundReviewModal({
                 >
                   Approve Refund
                 </button>
+              </div>
+            )}
+
+            {refund.status === "APPROVED" && (
+              <div className="flex justify-end">
+                <button
+                  disabled={actionLoading}
+                  onClick={() => handleAction("process")}
+                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+                >
+                  Process Refund
+                </button>
+              </div>
+            )}
+
+            {refund.status === "FAILED" && (
+              <div className="flex justify-end">
+                <button
+                  disabled={actionLoading}
+                  onClick={() => handleAction("process")}
+                  className="px-4 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700"
+                >
+                  Retry Processing
+                </button>
+              </div>
+            )}
+
+            {refund.status === "CANCELLED" && (
+              <div className="text-center py-3 text-gray-600 font-medium">
+                Customer cancelled this refund request.
               </div>
             )}
 
