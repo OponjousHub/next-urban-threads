@@ -260,6 +260,7 @@ export async function approveRefund(refundId: string) {
     data: {
       status: "APPROVED",
       approvedAmount: refund.requestedAmount,
+      approvedAt: new Date(),
     },
   });
 
@@ -385,6 +386,7 @@ export async function processRefund(refundId: string) {
     },
     data: {
       status: "PROCESSING",
+      processedAt: new Date(),
     },
   });
 
@@ -413,6 +415,7 @@ export async function processRefund(refundId: string) {
       },
       data: {
         status: "FAILED",
+        failedAt: new Date(),
       },
     });
 
@@ -452,6 +455,7 @@ export async function processRefund(refundId: string) {
       },
       data: {
         status: "REFUNDED",
+        refundedAt: new Date(),
       },
     });
 
@@ -555,6 +559,7 @@ export async function rejectRefund(refundId: string, reason?: string) {
     },
     data: {
       status: "REJECTED",
+      rejectedAt: new Date(),
     },
   });
 
@@ -634,6 +639,7 @@ export async function cancelRefund(refundId: string, userId: string) {
     },
     data: {
       status: "CANCELLED",
+      cancelledAt: new Date(),
     },
   });
 

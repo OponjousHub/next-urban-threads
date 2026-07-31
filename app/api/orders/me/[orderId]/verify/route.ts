@@ -56,8 +56,16 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           },
         },
         refundRequest: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 1,
           include: {
-            items: true,
+            items: {
+              include: {
+                product: true,
+              },
+            },
           },
         },
       },

@@ -428,7 +428,11 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
           <CustomerTrackingTimeline orderId={order.id} />
           {order.refundStatus !== "NONE" && (
-            <RefundRequestStatus status={order.refundStatus} />
+            // <RefundRequestStatus status={order.refundStatus} />
+            <RefundRequestStatus
+              status={order.refundStatus}
+              refund={order.refundRequest[0]}
+            />
           )}
 
           <h2 className="text-2xl font-semibold mb-3 mt-6">Items</h2>
