@@ -217,41 +217,98 @@ export async function approveRefund(refundId: string) {
     },
     include: {
       order: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      items: {
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
 
   if (!refund) {
-    throw new Error("Refund request not found.");
+    throw new Error("Refund request not found");
   }
 
   if (refund.status !== "REQUESTED") {
-    throw new Error("Refund has already been processed.");
+    throw new Error("Only requested refunds can be approved.");
   }
 
-  // Mark as approved
-  await prisma.refundRequest.update({
+  const approvedRefund = await prisma.refundRequest.update({
     where: {
       id: refund.id,
     },
     data: {
-      status: "PROCESSING",
+      status: "APPROVED",
       approvedAmount: refund.requestedAmount,
     },
   });
+
+  // ----------------------------
+  // Customer Timeline
+  // ----------------------------
 
   await prisma.orderTrackingEvent.create({
     data: {
       tenantId: tenant.id,
       orderId: refund.orderId,
-      status: refund.order.status,
+      status: "PROCESSING",
       type: "REFUND",
       title: "Refund Approved",
       description:
-        "Your refund request has been approved and is being processed.",
+        "Your refund request has been approved and will be processed shortly.",
     },
   });
 
-  return processRefund(refund.id);
+  // ----------------------------
+  // Vendor Notification
+  // ----------------------------
+
+  if (refund.vendorId) {
+    await NotificationService.notify({
+      vendorId: refund.vendorId,
+      setting: "refundApproved",
+      type: "REFUND",
+      title: "Refund Approved",
+      message: `Refund request for Order #${refund.orderId.slice(-8)} has been approved.`,
+      link: `/vendor/refunds/${refund.id}`,
+      metadata: {
+        refundId: refund.id,
+        orderId: refund.orderId,
+      },
+    });
+  }
+
+  // ----------------------------
+  // Admin Notification
+  // ----------------------------
+
+  await AdminNotificationService.notify({
+    type: "REFUND_APPROVED",
+    title: "Refund Approved",
+    message: `Refund request for Order #${refund.orderId.slice(-8)} has been approved.`,
+    link: `/admin/refunds/${refund.id}`,
+    metadata: {
+      refundId: refund.id,
+      orderId: refund.orderId,
+      customerId: refund.userId,
+      customerName: refund.user.name,
+      amount: refund.requestedAmount,
+      currency: refund.currency,
+    },
+  });
+
+  return approvedRefund;
 }
 
 export async function processRefund(refundId: string) {
