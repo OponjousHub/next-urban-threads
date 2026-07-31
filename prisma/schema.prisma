@@ -820,6 +820,7 @@ enum OrderStatus {
   FAILED
   REFUND_REJECTED
   REFUND_CANCELLED
+  REFUNDED
 }
 
 enum PaymentProvider {
