@@ -327,16 +327,14 @@ export async function processRefund(refundId: string) {
       order: {
         include: {
           items: true,
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
         },
       },
-
+      user: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       items: {
         include: {
           product: {
@@ -352,24 +350,33 @@ export async function processRefund(refundId: string) {
   });
 
   if (!refund) {
-    throw new Error("Refund request not found.");
+    throw new Error("Refund not found");
   }
 
-  if (refund.status !== "PROCESSING") {
-    throw new Error("Refund is not awaiting processing.");
+  if (refund.status !== "APPROVED") {
+    throw new Error("Only approved refunds can be processed.");
   }
 
-  if (!refund.order.paymentReference) {
-    throw new Error("Order has no payment reference.");
-  }
+  // ----------------------------------
+  // Mark as PROCESSING
+  // ----------------------------------
 
-  //----------------------------------------
-  // Refund through gateway
-  //----------------------------------------
+  await prisma.refundRequest.update({
+    where: {
+      id: refund.id,
+    },
+    data: {
+      status: "PROCESSING",
+    },
+  });
+
+  // ----------------------------------
+  // Call payment gateway
+  // ----------------------------------
 
   const paymentResult = await refundPayment({
-    amount: refund.requestedAmount,
-    reference: refund.order.paymentReference,
+    amount: refund.approvedAmount ?? refund.requestedAmount,
+    reference: refund.order.paymentReference!,
   });
 
   if (!paymentResult.success) {
@@ -382,22 +389,18 @@ export async function processRefund(refundId: string) {
       },
     });
 
-    throw new Error("Payment gateway refund failed.");
+    throw new Error("Refund payment failed.");
   }
 
   if (!paymentResult.reference) {
     throw new Error("Gateway returned no refund reference.");
   }
 
-  //----------------------------------------
-  // Database Transaction
-  //----------------------------------------
+  // ----------------------------------
+  // Transaction
+  // ----------------------------------
 
   await prisma.$transaction(async (tx) => {
-    //----------------------------------------
-    // Refund Transaction
-    //----------------------------------------
-
     await tx.refundTransaction.create({
       data: {
         refundRequestId: refund.id,
@@ -406,10 +409,6 @@ export async function processRefund(refundId: string) {
         status: "SUCCESS",
       },
     });
-
-    //----------------------------------------
-    // Refund Request
-    //----------------------------------------
 
     await tx.refundRequest.update({
       where: {
@@ -420,10 +419,6 @@ export async function processRefund(refundId: string) {
       },
     });
 
-    //----------------------------------------
-    // Order
-    //----------------------------------------
-
     await tx.order.update({
       where: {
         id: refund.orderId,
@@ -433,10 +428,7 @@ export async function processRefund(refundId: string) {
       },
     });
 
-    //----------------------------------------
-    // Inventory
-    //----------------------------------------
-
+    // Restore inventory
     for (const item of refund.items) {
       await InventoryService.increaseStock({
         tx,
@@ -446,66 +438,57 @@ export async function processRefund(refundId: string) {
       });
     }
 
-    //----------------------------------------
-    // Timeline
-    //----------------------------------------
-
+    // Customer timeline
     await tx.orderTrackingEvent.create({
       data: {
         tenantId: tenant.id,
         orderId: refund.orderId,
-        status: refund.order.status,
+        status: "REFUNDED",
         type: "REFUND",
         title: "Refund Completed",
-        description: "Your refund has been processed successfully.",
+        description:
+          "Your refund has been processed successfully. Funds should appear shortly depending on your payment provider.",
       },
     });
   });
 
-  //----------------------------------------
+  // ----------------------------------
   // Vendor Notification
-  //----------------------------------------
+  // ----------------------------------
 
-  if (refund.order.vendorId) {
+  if (refund.vendorId) {
     await NotificationService.notify({
-      vendorId: refund.order.vendorId,
-
-      setting: "refundProcessed",
-
+      vendorId: refund.vendorId,
+      setting: "refundCompleted",
       type: "REFUND",
-
       title: "Refund Completed",
-
-      message: `Refund processed for Order #${refund.order.id.slice(-8)}.`,
-
+      message: `Refund completed for Order #${refund.orderId.slice(-8)}.`,
       link: `/vendor/refunds/${refund.id}`,
-
       metadata: {
         refundId: refund.id,
-        orderId: refund.order.id,
+        orderId: refund.orderId,
+        amount: refund.approvedAmount ?? refund.requestedAmount,
+        currency: refund.currency,
       },
     });
   }
 
-  //----------------------------------------
+  // ----------------------------------
   // Admin Notification
-  //----------------------------------------
+  // ----------------------------------
 
   await AdminNotificationService.notify({
     type: "REFUNDED",
-
     title: "Refund Completed",
-
-    message: `${refund.order.user.name ?? "Customer"} has been refunded.`,
-
+    message: `Refund completed for Order #${refund.orderId.slice(-8)}.`,
     link: `/admin/refunds/${refund.id}`,
-
     metadata: {
       refundId: refund.id,
-      orderId: refund.order.id,
-      customerId: refund.order.user.id,
-      amount: refund.requestedAmount,
-      currency: refund.order.currency,
+      orderId: refund.orderId,
+      customerId: refund.userId,
+      customerName: refund.user.name,
+      amount: refund.approvedAmount ?? refund.requestedAmount,
+      currency: refund.currency,
     },
   });
 
