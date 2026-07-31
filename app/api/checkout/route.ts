@@ -256,7 +256,7 @@ export async function POST(req: NextRequest) {
         shippingAddressId,
         totalAmount,
         customerEmail: email || shippingAddress?.email || "",
-        currency,
+        currency: tenant.currency,
         paymentProvider: providerKey,
         paymentMethod,
         paymentReference,

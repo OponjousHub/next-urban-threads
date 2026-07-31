@@ -36,7 +36,7 @@ export default function RefundModal({ order, onClose }: Props) {
         [item.id]: {
           productId: item.product.id,
           variantId: item.variantId,
-          quantity: 1,
+          quantity: item.quantity,
           priceAtPurchase: item.price,
         },
       };
@@ -73,7 +73,13 @@ export default function RefundModal({ order, onClose }: Props) {
     setLoading(true);
     const toastId = toast.loading("Submitting refund...");
     try {
-      await fetch("/api/refunds/request", {
+      console.log("FRONTEND REFUND", {
+        orderId: order.id,
+        items: Object.values(selectedItems),
+        reason,
+        description,
+      });
+      const response = await fetch("/api/refunds/request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,6 +91,12 @@ export default function RefundModal({ order, onClose }: Props) {
           description,
         }),
       });
+
+      const res = await response.json();
+
+      if (!response.ok) {
+        throw new Error(res.message || "Could not submit refund request!");
+      }
 
       // toast.success("Refund request submitted", { id: toastId });
       appToast.success(

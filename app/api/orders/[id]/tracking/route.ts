@@ -20,7 +20,6 @@ export async function GET(
       where: { orderId: param.id, tenantId: tenant.id },
       orderBy: { createdAt: "asc" },
     });
-    console.log("THIS IS THE EVENTS +++++=======", events);
 
     return NextResponse.json(events);
   } catch (err) {

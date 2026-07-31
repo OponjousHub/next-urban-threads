@@ -84,13 +84,37 @@ export async function submitRefundRequest(data: RefundRequestInput) {
 
   const requestedAmount = calculateRefundAmount(data.items);
 
+  console.log(
+    "VARIANT INFOR",
+    data.items.map((item) => ({
+      productId: item.productId,
+      variantId: item.variantId,
+    })),
+  );
+
+  const variant = await prisma.productVariant.findUnique({
+    where: {
+      id: data.items[0].variantId!,
+    },
+  });
+
+  console.log("PRINT VARIANT", variant);
+
   // Create refund request + items
   const refund = await prisma.refundRequest.create({
     data: {
       tenantId: tenant.id,
 
-      orderId: order.id,
-      userId: order.userId,
+      order: {
+        connect: {
+          id: order.id,
+        },
+      },
+      user: {
+        connect: {
+          id: order.userId,
+        },
+      },
       vendorId: order.vendorId,
 
       status: "REQUESTED",
@@ -107,7 +131,7 @@ export async function submitRefundRequest(data: RefundRequestInput) {
           productId: item.productId,
           variantId: item.variantId ?? null,
           quantity: item.quantity,
-          priceAtPurchase: item.priceAtPurchase,
+          priceAtPurchase: Number(item.priceAtPurchase),
         })),
       },
     },
