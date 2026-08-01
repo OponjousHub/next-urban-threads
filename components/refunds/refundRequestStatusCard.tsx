@@ -1,10 +1,18 @@
 "use client";
 
-import { RefundStatus, RefundRequest } from "@prisma/client";
+import {
+  RefundStatus,
+  RefundRequest,
+  RefundTrackingEvent,
+} from "@prisma/client";
+
+type RefundWithTracking = RefundRequest & {
+  trackingEvents: RefundTrackingEvent[];
+};
 
 type Props = {
   status: RefundStatus;
-  refund: RefundRequest;
+  refund: RefundWithTracking;
 };
 
 const stages: RefundStatus[] = [
@@ -27,86 +35,8 @@ export default function RefundRequestStatus({ status, refund }: Props) {
   const terminal =
     status === "REJECTED" || status === "FAILED" || status === "CANCELLED";
 
-  const events: RefundTimelineEvent[] = [
-    {
-      title: "Refund Requested",
-      description: "Your refund request has been submitted.",
-      date: refund.createdAt,
-      color: "blue",
-    },
+  const events = refund.trackingEvents;
 
-    ...(refund.approvedAt
-      ? [
-          {
-            title: "Refund Approved",
-            description: "An administrator approved your refund.",
-            date: refund.approvedAt,
-            color: "green",
-          },
-        ]
-      : []),
-
-    ...(refund.processedAt
-      ? [
-          {
-            title: "Processing Refund",
-            description: "The payment gateway is processing your refund.",
-            date: refund.processedAt,
-            color: "yellow",
-          },
-        ]
-      : []),
-
-    ...(refund.refundedAt
-      ? [
-          {
-            title: "Refund Completed",
-            description: "The refund has been sent successfully.",
-            date: refund.refundedAt,
-            color: "green",
-          },
-        ]
-      : []),
-
-    ...(refund.rejectedAt
-      ? [
-          {
-            title: "Refund Rejected",
-            description: "The refund request was rejected.",
-            date: refund.rejectedAt,
-            color: "red",
-          },
-        ]
-      : []),
-
-    ...(refund.failedAt
-      ? [
-          {
-            title: "Refund Failed",
-            description: "The payment gateway could not complete the refund.",
-            date: refund.failedAt,
-            color: "orange",
-          },
-        ]
-      : []),
-
-    ...(refund.cancelledAt
-      ? [
-          {
-            title: "Refund Cancelled",
-            description: "The refund request was cancelled.",
-            date: refund.cancelledAt,
-            color: "gray",
-          },
-        ]
-      : []),
-  ];
-  console.log("REFUND REQUEST STATUS", {
-    createdAt: refund.createdAt,
-    approvedAt: refund.approvedAt,
-    processedAt: refund.processedAt,
-    refundedAt: refund.refundedAt,
-  });
   return (
     <div className="rounded-2xl border bg-white p-6 shadow-sm mt-6">
       <h2 className="mb-6 text-lg font-semibold">Refund Progress</h2>
@@ -167,7 +97,7 @@ export default function RefundRequestStatus({ status, refund }: Props) {
               <p className="text-sm text-gray-500">{event?.description}</p>
 
               <p className="mt-1 text-xs text-gray-400">
-                {new Date(event?.date).toLocaleString()}
+                {new Date(event.createdAt).toLocaleString()}
               </p>
             </div>
           </div>

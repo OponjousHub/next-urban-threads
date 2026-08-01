@@ -14,7 +14,11 @@ import { RefundRequest } from "@prisma/client";
 import RefundRequestStatus from "@/components/refunds/refundRequestStatusCard";
 import { useTenant } from "@/store/tenant-provider-context";
 import { ShippingMethod } from "@prisma/client";
-import { RefundStatus } from "@prisma/client";
+import { RefundStatus, RefundTrackingEvent } from "@prisma/client";
+
+type RefundRequestWithTracking = RefundRequest & {
+  trackingEvents: RefundTrackingEvent[];
+};
 
 type OrderItem = {
   id: string;
@@ -39,7 +43,7 @@ type Order = {
   paymentReference: string | null;
   items: OrderItem[];
   createdAt: string;
-  refundRequest: RefundRequest[];
+  refundRequest: RefundRequestWithTracking[];
   shippingCost: number;
   shippingMethodId: string;
   shippingMethod: ShippingMethod;

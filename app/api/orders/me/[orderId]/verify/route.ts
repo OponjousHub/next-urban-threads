@@ -37,13 +37,46 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // ---------------------------;
     // 2️⃣ Fetch order + items
     // ---------------------------
+    // const order = await prisma.order.findFirst({
+    //   where: {
+    //     id: orderId,
+    //     userId,
+    //     tenantId: tenant.id,
+    //   },
+
+    //   include: {
+    //     user: {
+    //       select: {
+    //         name: true,
+    //       },
+    //     },
+    //     items: {
+    //       include: {
+    //         product: true,
+    //       },
+    //     },
+    //     refundRequest: {
+    //       orderBy: {
+    //         createdAt: "desc",
+    //       },
+    //       take: 1,
+    //       include: {
+    //         items: {
+    //           include: {
+    //             product: true,
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // });
+
     const order = await prisma.order.findFirst({
       where: {
         id: orderId,
         userId,
         tenantId: tenant.id,
       },
-
       include: {
         user: {
           select: {
@@ -55,15 +88,20 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
             product: true,
           },
         },
+
+        shippingMethod: true,
+
         refundRequest: {
           orderBy: {
             createdAt: "desc",
           },
-          take: 1,
+
           include: {
-            items: {
-              include: {
-                product: true,
+            items: true,
+
+            trackingEvents: {
+              orderBy: {
+                createdAt: "asc",
               },
             },
           },
@@ -101,10 +139,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     if (order?.paymentStatus === PaymentStatus.PAID) {
       return NextResponse.json(order);
     }
-
-    // if (order.paymentStatus === "PAID") {
-    //   return NextResponse.json(order);
-    // }
 
     // ---------------------------
     // 5️⃣ Verify with Paystack

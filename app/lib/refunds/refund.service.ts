@@ -475,6 +475,10 @@ export async function processRefund(refundId: string) {
       title: "Refund Completed",
       description:
         "Your refund has been processed successfully. Funds should appear shortly depending on your payment provider.",
+      metadata: {
+        provider: paymentResult.provider,
+        reference: paymentResult.reference,
+      },
     });
   });
 
