@@ -6,7 +6,7 @@ import InventoryService from "@/lib/inventory/inventory.service";
 
 import NotificationService from "@/lib/notifications/notification.service";
 import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
-
+import { createRefundTrackingEvent } from "./refund-tracking.service";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export type RefundRequestInput = {
@@ -150,6 +150,16 @@ export async function submitRefundRequest(data: RefundRequestInput) {
     },
   });
 
+  // Timeline
+  await createRefundTrackingEvent({
+    tenantId: tenant.id,
+    refundRequestId: refund.id,
+    status: "REQUESTED",
+    title: "Refund Requested",
+    description:
+      "Your refund request has been submitted and is awaiting review..",
+  });
+
   // Vendor notification
   if (order.vendorId) {
     await NotificationService.notify({
@@ -253,6 +263,19 @@ export async function approveRefund(refundId: string) {
     data: {
       refundStatus: "APPROVED",
     },
+  });
+
+  // ----------------------------
+  // Customer Timeline
+  // ----------------------------
+
+  await createRefundTrackingEvent({
+    tenantId: tenant.id,
+    refundRequestId: refund.id,
+    status: "APPROVED",
+    title: "Refund Approved",
+    description:
+      "Your refund request has been approved and will be processed shortly.",
   });
 
   // ----------------------------
@@ -443,6 +466,16 @@ export async function processRefund(refundId: string) {
         quantity: item.quantity,
       });
     }
+
+    // Customer timeline
+    await createRefundTrackingEvent({
+      tenantId: tenant.id,
+      refundRequestId: refund.id,
+      status: "REFUNDED",
+      title: "Refund Completed",
+      description:
+        "Your refund has been processed successfully. Funds should appear shortly depending on your payment provider.",
+    });
   });
 
   // ----------------------------------
@@ -525,6 +558,16 @@ export async function rejectRefund(refundId: string, reason?: string) {
     },
   });
 
+  // Customer tracking timeline
+  await createRefundTrackingEvent({
+    tenantId: refund.tenantId,
+    refundRequestId: refund.id,
+    status: "REFUND_REJECTED",
+    title: "Refund Request Rejected",
+    description:
+      reason ?? "Your refund request has been reviewed and rejected.",
+  });
+
   // Vendor
   if (refund.vendorId) {
     await NotificationService.notify({
@@ -590,6 +633,14 @@ export async function cancelRefund(refundId: string, userId: string) {
     data: {
       refundStatus: "CANCELLED",
     },
+  });
+
+  await createRefundTrackingEvent({
+    tenantId: refund.tenantId,
+    refundRequestId: refund.id,
+    status: "REFUND_CANCELLED",
+    title: "Refund Cancelled",
+    description: "Customer cancelled the refund request.",
   });
 
   if (refund.vendorId) {
