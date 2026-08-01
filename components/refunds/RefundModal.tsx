@@ -10,9 +10,10 @@ import { appToast } from "@/utils/appToast";
 type Props = {
   order: any;
   onClose: () => void;
+  onSuccess?: () => void;
 };
 
-export default function RefundModal({ order, onClose }: Props) {
+export default function RefundModal({ order, onClose, onSuccess }: Props) {
   const router = useRouter();
   const { tenant } = useTenant();
 
@@ -103,8 +104,10 @@ export default function RefundModal({ order, onClose }: Props) {
         "Refund request",
         "Refund request submitted successfully",
       );
+
+      onSuccess?.();
+
       onClose();
-      router.refresh();
     } catch (err) {
       // toast.error("Failed to submit refund", { id: toastId });
       appToast.error("Refund request", "Failed to submit refund!");

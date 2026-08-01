@@ -490,12 +490,6 @@ model RefundRequest {
   currency        String
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
-  approvedAt      DateTime?
-  processedAt     DateTime?
-  refundedAt      DateTime?
-  rejectedAt      DateTime?
-  cancelledAt     DateTime?
-  failedAt        DateTime?
   storeMode       StoreMode
   items           RefundItem[]
   order           Order               @relation(fields: [orderId], references: [id])

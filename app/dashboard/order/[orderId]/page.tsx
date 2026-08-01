@@ -69,6 +69,16 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   const [open, setOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
 
+  async function fetchOrder() {
+    const res = await fetch(`/api/orders/me/${orderId}`);
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    setOrder(data);
+  }
+
   useEffect(() => {
     if (!orderId || hasVerified.current) return;
     hasVerified.current = true;
@@ -195,7 +205,11 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
     <>
       <Dialog open={refundOpen} onOpenChange={setRefundOpen}>
         <DialogContent className="max-w-2xl">
-          <RefundModal order={order} onClose={() => setRefundOpen(false)} />
+          <RefundModal
+            order={order}
+            onClose={() => setRefundOpen(false)}
+            onSuccess={fetchOrder}
+          />{" "}
         </DialogContent>
       </Dialog>
       <main className="px-4 py-10">
