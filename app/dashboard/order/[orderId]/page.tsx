@@ -371,9 +371,15 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                 <p className="mt-1 text-sm text-yellow-600">
                   We've received your refund request and it is awaiting review.
                 </p>
+
+                <button
+                  onClick={cancelRefund}
+                  className="mt-4 rounded-lg border border-red-500 px-4 py-2 text-red-600 hover:bg-red-50"
+                >
+                  Cancel Request
+                </button>
               </div>
             )}
-
             {/* APPROVED */}
             {order.refundStatus === "APPROVED" && (
               <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
