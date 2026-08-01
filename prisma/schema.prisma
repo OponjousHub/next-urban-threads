@@ -322,6 +322,7 @@ model Tenant {
   shippingRate       ShippingRate[]
   adminNotificationSettings AdminNotificationSettings[]
   adminNotification AdminNotification[]
+  trackingEvents    RefundTrackingEvent[]
 }
 
 model Session {
@@ -500,6 +501,27 @@ model RefundRequest {
   order           Order               @relation(fields: [orderId], references: [id])
   user            User                @relation(fields: [userId], references: [id])
   transactions    RefundTransaction[]
+  trackingEvents  RefundTrackingEvent[]
+}
+
+model RefundTrackingEvent {
+  id              String        @id @default(cuid())
+  tenantId        String
+
+  refundRequestId String
+  status          RefundStatus
+  title           String
+  description     String?
+  metadata        Json?
+  createdAt       DateTime      @default(now())
+
+  tenant          Tenant        @relation(fields: [tenantId], references: [id])
+  refundRequest   RefundRequest @relation(fields: [refundRequestId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([refundRequestId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model RefundItem {
