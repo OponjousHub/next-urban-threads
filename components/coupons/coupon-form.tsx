@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { appToast } from "@/utils/appToast";
 import { FaArrowLeft } from "react-icons/fa";
 import Link from "next/link";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 type Props = {
   mode?: "create" | "edit";
@@ -82,6 +83,11 @@ export default function CouponForm({
 
   return (
     <>
+      <AdminHeaderUI
+        title={`${mode === "edit" ? "Edit" : "Create"}`}
+        subtitle={`${mode === "edit" ? "Edit this" : "Create"} coupon`}
+      />
+
       <Link
         href={`${basePath}/${coupon?.id} `}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground m-4"
@@ -89,11 +95,7 @@ export default function CouponForm({
         <FaArrowLeft size={12} />
         Back to Coupon details
       </Link>
-      <div className="ml-5 mb-5">
-        <h1 className="text-3xl font-bold">Edit </h1>
 
-        <p className="mt-2 text-gray-500">Edit this coupon</p>
-      </div>
       <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-3">
         {/* LEFT */}
         <div className="lg:col-span-2 space-y-6">

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
 import CouponDetail from "@/components/coupons/coupon-detail";
 import { getAuthPayload } from "@/lib/server/auth";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 type Props = {
   params: Promise<{
@@ -85,6 +86,7 @@ export default async function CouponDetailPage({ params }: Props) {
   const safeAverageOrderValue = Number(averageOrderValue);
   return (
     <>
+      <AdminHeaderUI title="Coupons details" subtitle=" View coupon details" />
       <CouponDetail
         coupon={safeCoupon}
         revenueGenerated={revenueGenerated}

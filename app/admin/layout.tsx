@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getAuthPayload } from "@/lib/server/auth";
 import AdminLayout from "@/components/admin/adminLayout";
 import { AdminSidebarProvider } from "@/store/admin-sidebar-context";
+import AdminHeader from "@/components/admin/adminHeader";
 
 export default async function AdminRootLayout({
   children,

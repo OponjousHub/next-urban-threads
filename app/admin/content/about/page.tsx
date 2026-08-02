@@ -82,57 +82,45 @@ export default function AboutSettings() {
   const image = watch("aboutImage");
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="bg-white p-6 rounded-2xl border space-y-6">
-        <h2 className="text-lg font-semibold">About Page</h2>
+    <>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="bg-white p-6 rounded-2xl border space-y-6">
+          <h2 className="text-lg font-semibold">About Page</h2>
 
-        {/* TITLE */}
-        <div>
-          <label className="text-sm font-medium">Title</label>
-          <input
-            {...register("aboutTitle")}
-            className="mt-1 w-full border px-3 py-2 rounded-lg"
-          />
-        </div>
+          {/* TITLE */}
+          <div>
+            <label className="text-sm font-medium">Title</label>
+            <input
+              {...register("aboutTitle")}
+              className="mt-1 w-full border px-3 py-2 rounded-lg"
+            />
+          </div>
 
-        {/* DESCRIPTION */}
-        <div>
-          <label className="text-sm font-medium">Short Description</label>
-          <textarea
-            {...register("aboutDescription")}
-            className="mt-1 w-full border px-3 py-2 rounded-lg"
-          />
-        </div>
+          {/* DESCRIPTION */}
+          <div>
+            <label className="text-sm font-medium">Short Description</label>
+            <textarea
+              {...register("aboutDescription")}
+              className="mt-1 w-full border px-3 py-2 rounded-lg"
+            />
+          </div>
 
-        {/* STORY */}
-        <div>
-          <label className="text-sm font-medium">Full Story</label>
-          <textarea
-            {...register("aboutStory")}
-            rows={6}
-            className="mt-1 w-full border px-3 py-2 rounded-lg"
-          />
-        </div>
+          {/* STORY */}
+          <div>
+            <label className="text-sm font-medium">Full Story</label>
+            <textarea
+              {...register("aboutStory")}
+              rows={6}
+              className="mt-1 w-full border px-3 py-2 rounded-lg"
+            />
+          </div>
 
-        {/* HERO IMAGE */}
+          {/* HERO IMAGE */}
 
-        <div className="border-2 border-dashed rounded-xl p-6 text-center">
-          {!image ? (
-            <label className="cursor-pointer text-sm text-gray-500">
-              {uploading ? "Uploading..." : "Click to upload image"}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </label>
-          ) : (
-            <div className="flex flex-col items-center gap-3">
-              <img src={image} className="h-20 rounded border" />
-
-              <label className="cursor-pointer text-sm text-[var(--color-primary)] hover:underline">
-                Change
+          <div className="border-2 border-dashed rounded-xl p-6 text-center">
+            {!image ? (
+              <label className="cursor-pointer text-sm text-gray-500">
+                {uploading ? "Uploading..." : "Click to upload image"}
                 <input
                   type="file"
                   accept="image/*"
@@ -140,27 +128,41 @@ export default function AboutSettings() {
                   className="hidden"
                 />
               </label>
+            ) : (
+              <div className="flex flex-col items-center gap-3">
+                <img src={image} className="h-20 rounded border" />
 
-              <button
-                type="button"
-                onClick={() =>
-                  setValue("aboutImage", "", { shouldDirty: true })
-                }
-                className="text-xs text-red-500"
-              >
-                Remove
-              </button>
-            </div>
-          )}
+                <label className="cursor-pointer text-sm text-[var(--color-primary)] hover:underline">
+                  Change
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue("aboutImage", "", { shouldDirty: true })
+                  }
+                  className="text-xs text-red-500"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            className="bg-black text-white px-5 py-2 rounded-md"
+          >
+            {loading ? "Saving..." : "Save"}
+          </button>
         </div>
-
-        <button
-          type="submit"
-          className="bg-black text-white px-5 py-2 rounded-md"
-        >
-          {loading ? "Saving..." : "Save"}
-        </button>
-      </div>
-    </form>
+      </form>
+    </>
   );
 }

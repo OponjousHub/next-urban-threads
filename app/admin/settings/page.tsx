@@ -13,6 +13,7 @@ import AboutSettings from "../content/about/page";
 import LegalSettings from "../content/legal/page";
 import RefundsPage from "../refunds/page";
 import { useTenant } from "@/store/tenant-provider-context";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -33,56 +34,62 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="flex gap-8 max-w-6xl mx-auto p-6">
-      {/* Sidebar */}
-      <aside className="w-56 shrink-0">
-        <div className="bg-white border rounded-2xl p-3 shadow-sm">
-          <nav className="space-y-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
-                  activeTab === tab.id
-                    ? "bg-[var(--color-primary-lightest)] text-[var(--color-primary)] font-medium"
-                    : "text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </aside>
+    <>
+      <AdminHeaderUI
+        title="Settings Page"
+        subtitle="Manage your Settings and more"
+      />
+      <div className="flex gap-8 max-w-6xl mx-auto p-6">
+        {/* Sidebar */}
+        <aside className="w-56 shrink-0">
+          <div className="bg-white border rounded-2xl p-3 shadow-sm">
+            <nav className="space-y-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
+                    activeTab === tab.id
+                      ? "bg-[var(--color-primary-lightest)] text-[var(--color-primary)] font-medium"
+                      : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </aside>
 
-      {/* Content */}
-      <main className="flex-1 space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-semibold capitalize">{activeTab}</h1>
-          <p className="text-sm text-gray-500">
-            Manage your {activeTab} settings
-          </p>
-        </div>
+        {/* Content */}
+        <main className="flex-1 space-y-6">
+          {/* Header */}
+          <div>
+            <h1 className="text-2xl font-semibold capitalize">{activeTab}</h1>
+            <p className="text-sm text-gray-500">
+              Manage your {activeTab} settings
+            </p>
+          </div>
 
-        {/* Tab Content */}
-        {activeTab === "general" && <GeneralSettings />}
-        {activeTab === "profile" && <ProfileSection />}
-        {activeTab === "password" && <ChangePasswordAdmin />}
-        {activeTab === "category" && <ManageCategory />}
-        {activeTab === "newsletter" && <NewsletterAdminPage />}
-        {activeTab === "policies" && <PolicyForm />}
-        {activeTab === "faqs" && <FAQForm />}
-        {activeTab === "about" && <AboutSettings />}
-        {activeTab === "legal" && <LegalSettings />}
-        {activeTab === "refund" && <RefundsPage />}
-        {activeTab === "storeMode" && (
-          <StoreModeToggle
-            initialMode={storeMode === "SINGLE_VENDOR" ? "SINGLE" : "MULTI"}
-          />
-        )}
-      </main>
-    </div>
+          {/* Tab Content */}
+          {activeTab === "general" && <GeneralSettings />}
+          {activeTab === "profile" && <ProfileSection />}
+          {activeTab === "password" && <ChangePasswordAdmin />}
+          {activeTab === "category" && <ManageCategory />}
+          {activeTab === "newsletter" && <NewsletterAdminPage />}
+          {activeTab === "policies" && <PolicyForm />}
+          {activeTab === "faqs" && <FAQForm />}
+          {activeTab === "about" && <AboutSettings />}
+          {activeTab === "legal" && <LegalSettings />}
+          {activeTab === "refund" && <RefundsPage />}
+          {activeTab === "storeMode" && (
+            <StoreModeToggle
+              initialMode={storeMode === "SINGLE_VENDOR" ? "SINGLE" : "MULTI"}
+            />
+          )}
+        </main>
+      </div>
+    </>
   );
 }
 
