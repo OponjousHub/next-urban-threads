@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 /* ---------------- TYPES ---------------- */
 
@@ -122,41 +123,43 @@ export default function AdminOrderTrackingPage() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="grid grid-cols-2 gap-10 p-6">
-      {/* LEFT: QUICK ACTIONS */}
-      <div className="space-y-4 border p-4 rounded-xl">
-        <h2 className="font-semibold text-lg">Update Tracking</h2>
+    <>
+      <AdminHeaderUI title="Orders " subtitle="View customer order tracking" />
+      <div className="grid grid-cols-2 gap-10 p-6">
+        {/* LEFT: QUICK ACTIONS */}
+        <div className="space-y-4 border p-4 rounded-xl">
+          <h2 className="font-semibold text-lg">Update Tracking</h2>
 
-        {/* LOCATION INPUT */}
-        <input
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="Location (e.g. Ikeja, Lagos)"
-          className="border p-2 w-full rounded"
-        />
+          {/* LOCATION INPUT */}
+          <input
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Location (e.g. Ikeja, Lagos)"
+            className="border p-2 w-full rounded"
+          />
 
-        {/* 🔥 ONE CLICK BUTTONS */}
-        <div className="grid grid-cols-2 gap-3">
-          {ORDER_FLOW.map((status) => {
-            const config = STATUS_CONFIG[status];
-            const statusIndex = ORDER_FLOW.indexOf(status);
+          {/* 🔥 ONE CLICK BUTTONS */}
+          <div className="grid grid-cols-2 gap-3">
+            {ORDER_FLOW.map((status) => {
+              const config = STATUS_CONFIG[status];
+              const statusIndex = ORDER_FLOW.indexOf(status);
 
-            const currentStatus = events[0]?.status;
-            const currentIndex = ORDER_FLOW.indexOf(currentStatus);
+              const currentStatus = events[0]?.status;
+              const currentIndex = ORDER_FLOW.indexOf(currentStatus);
 
-            const isLoading = activeStatus === status;
+              const isLoading = activeStatus === status;
 
-            // ❌ Disable if:
-            const isDisabled =
-              activeStatus !== null || // something is being submitted
-              statusIndex <= currentIndex; // already reached or passed
+              // ❌ Disable if:
+              const isDisabled =
+                activeStatus !== null || // something is being submitted
+                statusIndex <= currentIndex; // already reached or passed
 
-            return (
-              <button
-                key={status}
-                onClick={() => handleQuickUpdate(status)}
-                disabled={isDisabled}
-                className={`p-3 rounded text-sm font-medium border transition
+              return (
+                <button
+                  key={status}
+                  onClick={() => handleQuickUpdate(status)}
+                  disabled={isDisabled}
+                  className={`p-3 rounded text-sm font-medium border transition
           ${
             isLoading
               ? "bg-gray-200 cursor-not-allowed"
@@ -165,48 +168,49 @@ export default function AdminOrderTrackingPage() {
                 : "bg-black text-white hover:bg-gray-800"
           }
         `}
-              >
-                {isLoading ? "Updating..." : config.title}
-              </button>
-            );
-          })}
+                >
+                  {isLoading ? "Updating..." : config.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* RIGHT: TIMELINE */}
+        <div className="border p-4 rounded-xl">
+          <h2 className="font-semibold text-lg mb-4">Tracking Timeline</h2>
+
+          {loading ? (
+            <div className="text-gray-500 text-sm">Loading timeline...</div>
+          ) : (
+            <div className="border-l pl-4 space-y-6">
+              {events.map((event, index) => (
+                <div key={event.id} className="relative">
+                  <div
+                    className={`absolute -left-[9px] top-1 w-3 h-3 rounded-full ${
+                      index === 0 ? "bg-black" : "bg-gray-300"
+                    }`}
+                  />
+
+                  <p className="font-semibold">{event.title || event.status}</p>
+
+                  {event.message && (
+                    <p className="text-sm text-gray-600">{event.message}</p>
+                  )}
+
+                  {event.location && (
+                    <p className="text-xs text-gray-500">📍 {event.location}</p>
+                  )}
+
+                  <p className="text-xs text-gray-400">
+                    {new Date(event.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* RIGHT: TIMELINE */}
-      <div className="border p-4 rounded-xl">
-        <h2 className="font-semibold text-lg mb-4">Tracking Timeline</h2>
-
-        {loading ? (
-          <div className="text-gray-500 text-sm">Loading timeline...</div>
-        ) : (
-          <div className="border-l pl-4 space-y-6">
-            {events.map((event, index) => (
-              <div key={event.id} className="relative">
-                <div
-                  className={`absolute -left-[9px] top-1 w-3 h-3 rounded-full ${
-                    index === 0 ? "bg-black" : "bg-gray-300"
-                  }`}
-                />
-
-                <p className="font-semibold">{event.title || event.status}</p>
-
-                {event.message && (
-                  <p className="text-sm text-gray-600">{event.message}</p>
-                )}
-
-                {event.location && (
-                  <p className="text-xs text-gray-500">📍 {event.location}</p>
-                )}
-
-                <p className="text-xs text-gray-400">
-                  {new Date(event.createdAt).toLocaleString()}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    </>
   );
 }

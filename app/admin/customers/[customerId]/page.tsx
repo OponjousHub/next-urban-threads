@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import CustomerDetailUI from "@/components/customers/customerDetailUI";
 import { serializeDecimals } from "@/lib/serialize";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 export default async function AdminCustomerDetailPage({
   params,
@@ -67,9 +68,13 @@ export default async function AdminCustomerDetailPage({
   }
 
   return (
-    <CustomerDetailUI
-      customer={safeCustomer}
-      address={customerAddress?.addresses[0]}
-    />
+    <>
+      <AdminHeaderUI title="Customers " subtitle="View customer details" />
+
+      <CustomerDetailUI
+        customer={safeCustomer}
+        address={customerAddress?.addresses[0]}
+      />
+    </>
   );
 }

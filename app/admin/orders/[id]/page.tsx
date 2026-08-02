@@ -1,6 +1,7 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import OrderDetails from "@/components/order/orderDetails";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 interface OrderDetailsPageProps {
   params: { id: string };
@@ -69,5 +70,10 @@ export default async function OrderDetailsPage({
     })),
   };
 
-  return <OrderDetails order={formattedOrder} basePath={"/admin/orders"} />;
+  return (
+    <>
+      <AdminHeaderUI title="Orders " subtitle="View customer order details" />
+      <OrderDetails order={formattedOrder} basePath={"/admin/orders"} />;
+    </>
+  );
 }

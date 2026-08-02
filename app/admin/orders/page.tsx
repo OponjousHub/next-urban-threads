@@ -3,6 +3,7 @@ import OrderFilters from "@/components/order/order-filters";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { prisma } from "@/utils/prisma";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 type Props = {
   searchParams: Promise<{
@@ -127,23 +128,26 @@ export default async function OrdersPage({ searchParams }: Props) {
   }));
 
   return (
-    <div className="bg-white border-b px-4 py-4 mb-6 rounded-xl shadow-sm">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-800">
-          Orders
-        </h1>
-
-        <div className="flex items-center gap-3 flex-wrap">
-          <OrderFilters basePath={"/admin/orders"} />
-        </div>
-      </div>
-      <OrdersTable
-        basePath={"/admin/orders"}
-        orders={formattedOrders}
-        totalOrders={totalOrders}
-        currentPage={page}
-        totalPages={totalPages}
+    <>
+      <AdminHeaderUI
+        title="Orders "
+        subtitle="View customer orders and status"
       />
-    </div>
+
+      <div className="bg-white border-b px-4 py-4 mb-6 rounded-xl shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
+          <div className="flex items-center gap-3 flex-wrap">
+            <OrderFilters basePath={"/admin/orders"} />
+          </div>
+        </div>
+        <OrdersTable
+          basePath={"/admin/orders"}
+          orders={formattedOrders}
+          totalOrders={totalOrders}
+          currentPage={page}
+          totalPages={totalPages}
+        />
+      </div>
+    </>
   );
 }
