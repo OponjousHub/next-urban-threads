@@ -96,6 +96,8 @@ export class AdminNotificationService {
       where: {
         adminId,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
+
         isRead: false,
       },
     });
