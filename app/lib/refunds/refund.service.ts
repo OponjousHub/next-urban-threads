@@ -644,7 +644,8 @@ export async function cancelRefund(refundId: string, userId: string) {
     refundRequestId: refund.id,
     status: "REFUND_CANCELLED",
     title: "Refund Cancelled",
-    description: "Customer cancelled the refund request.",
+    description:
+      "Customer cancelled the refund request before it was reviewed.",
   });
 
   if (refund.vendorId) {

@@ -35,7 +35,7 @@ export default function RefundRequestStatus({ status, refund }: Props) {
   const terminal =
     status === "REJECTED" || status === "FAILED" || status === "CANCELLED";
 
-  const events = refund.trackingEvents;
+  const events = refund?.trackingEvents;
 
   return (
     <div className="rounded-2xl border bg-white p-6 shadow-sm mt-6">

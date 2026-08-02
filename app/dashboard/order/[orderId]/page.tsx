@@ -159,6 +159,36 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
     fetchReviews();
   }, [order]);
+
+  async function cancelRefund() {
+    if (!order?.refundRequest?.length) return;
+
+    try {
+      const res = await fetch(
+        `/api/refunds/${order.refundRequest[0].id}/cancel`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error();
+      }
+
+      appToast.success(
+        "Refund cancelled",
+        "Your refund request has been cancelled.",
+      );
+
+      fetchOrder();
+    } catch {
+      appToast.error(
+        "Unable to cancel",
+        "This refund can no longer be cancelled.",
+      );
+    }
+  }
+
   /* ------------------------------------
      ✅ CENTERED LOADING STATE
   ------------------------------------- */
@@ -452,10 +482,9 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
           <CustomerTrackingTimeline orderId={order.id} />
           {order.refundStatus !== "NONE" && (
-            // <RefundRequestStatus status={order.refundStatus} />
             <RefundRequestStatus
               status={order.refundStatus}
-              refund={order.refundRequest[0]}
+              refund={order.refundRequest && order.refundRequest[0]}
             />
           )}
 
