@@ -2,6 +2,7 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { notFound } from "next/navigation";
 import ProductDetails from "@/components/products/productDetails";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 export default async function ProductDetailPage({
   params,
@@ -29,5 +30,10 @@ export default async function ProductDetailPage({
     price: Number(product.price),
   };
 
-  return <ProductDetails product={safeProduct} basePath="/admin/products" />;
+  return (
+    <>
+      <AdminHeaderUI title="Product " subtitle="View product details" />
+      <ProductDetails product={safeProduct} basePath="/admin/products" />
+    </>
+  );
 }

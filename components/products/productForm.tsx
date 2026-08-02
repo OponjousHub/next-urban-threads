@@ -8,6 +8,7 @@ import { appToast } from "@/utils/appToast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
@@ -331,451 +332,450 @@ export function ProductForm({ initialData, basePath }: ProductSearchProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold">
-            {isEdit ? "Edit Product" : "Create Product"}
-          </h1>
+    <>
+      <AdminHeaderUI
+        title={`${isEdit ? "Edit" : "Create"} product`}
+        subtitle={`${isEdit ? "Edit " : "Create"} inventory, variants and pricing`}
+      />
+      <div className="min-h-screen bg-gray-50 py-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <form onSubmit={handleSubmit}>
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* LEFT */}
+              <div className="lg:col-span-2 space-y-8">
+                <Section title="Basic Information">
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block mb-2 text-sm font-medium">
+                        Product Name
+                      </label>
 
-          <p className="text-gray-500 mt-2">
-            Manage inventory, variants and pricing
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* LEFT */}
-            <div className="lg:col-span-2 space-y-8">
-              <Section title="Basic Information">
-                <div className="space-y-6">
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      Product Name
-                    </label>
-
-                    <input
-                      required
-                      className="input"
-                      value={form.name}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          name: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      Description
-                    </label>
-
-                    <textarea
-                      rows={5}
-                      className="input"
-                      value={form.description}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          description: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-              </Section>
-
-              <Section title="Pricing">
-                <div>
-                  <label className="block mb-2 text-sm font-medium">
-                    Base Price
-                  </label>
-
-                  <input
-                    type="number"
-                    min="0"
-                    className="input"
-                    value={form.basePrice}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        basePrice: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </Section>
-
-              <Section title="Organization">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <select
-                    value={form.category}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        category: e.target.value,
-                      })
-                    }
-                    className="input"
-                  >
-                    <option value="">Select category</option>
-
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-
-                  <input
-                    className="input"
-                    placeholder="Sub category"
-                    value={form.subCategory}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        subCategory: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </Section>
-
-              <Section title="Variant Builder">
-                {/* SIZES */}
-                <div className="mb-8">
-                  <p className="font-medium mb-3">Sizes</p>
-
-                  {/* PRESET SIZES */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {SIZES.map((size) => {
-                      const active = selectedSizes.includes(size);
-
-                      return (
-                        <button
-                          key={size}
-                          type="button"
-                          onClick={() => toggleSize(size)}
-                          className={`px-4 py-2 rounded-xl border transition ${
-                            active
-                              ? "bg-black text-white border-black"
-                              : "border-gray-300"
-                          }`}
-                        >
-                          {size}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* CUSTOM SIZE */}
-                  <div className="flex gap-3">
-                    <input
-                      value={customSize}
-                      onChange={(e) => setCustomSize(e.target.value)}
-                      placeholder="Add custom size (e.g. 12, 42, XXL)"
-                      className="input"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={addCustomSize}
-                      className="bg-black text-white px-4 rounded-xl"
-                    >
-                      Add
-                    </button>
-                  </div>
-
-                  {/* SELECTED SIZES */}
-                  {selectedSizes.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {selectedSizes.map((size) => (
-                        <div
-                          key={size}
-                          className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-xl"
-                        >
-                          <span>{size}</span>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setSelectedSizes((prev) =>
-                                prev.filter((s) => s !== size),
-                              )
-                            }
-                            className="text-red-500 text-sm"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
+                      <input
+                        required
+                        className="input"
+                        value={form.name}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            name: e.target.value,
+                          })
+                        }
+                      />
                     </div>
-                  )}
-                </div>
 
-                {/* COLORS */}
-                <div>
-                  <p className="font-medium mb-3">Colours</p>
+                    <div>
+                      <label className="block mb-2 text-sm font-medium">
+                        Description
+                      </label>
 
-                  <div className="flex flex-wrap gap-3">
-                    {COLOURS.map((colour) => {
-                      const active = selectedColours.includes(colour.name);
-
-                      return (
-                        <button
-                          key={colour.name}
-                          type="button"
-                          onClick={() => toggleColour(colour.name)}
-                          className={`w-10 h-10 rounded-full border-4 transition ${
-                            active
-                              ? "border-black scale-110"
-                              : "border-gray-200"
-                          }`}
-                          style={{
-                            backgroundColor: colour.hex,
-                          }}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              </Section>
-
-              {/* VARIANT TABLE */}
-              {variants.length > 0 && (
-                <Section title="Variant Inventory">
-                  <div className="overflow-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-3">Variant</th>
-
-                          <th className="text-left py-3">Price</th>
-
-                          <th className="text-left py-3">Stock</th>
-                          <th className="text-left py-3">Image</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {variants.map((variant, index) => (
-                          <tr
-                            key={`${variant.color}-${variant.size}-${index}`}
-                            className="border-b"
-                          >
-                            <td className="py-4">
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className="w-5 h-5 rounded-full border"
-                                  style={{
-                                    backgroundColor: variant.colorHex,
-                                  }}
-                                />
-
-                                <span>
-                                  {variant.color} / {variant.size}
-                                </span>
-                              </div>
-                            </td>
-
-                            <td>
-                              <input
-                                type="number"
-                                min="0"
-                                className="border rounded-lg px-3 py-2 w-28"
-                                value={variant.price}
-                                onChange={(e) =>
-                                  updateVariant(
-                                    index,
-                                    "price",
-                                    Number(e.target.value),
-                                  )
-                                }
-                              />
-                            </td>
-
-                            <td>
-                              <input
-                                type="number"
-                                min="0"
-                                className="border rounded-lg px-3 py-2 w-24"
-                                value={variant.stock}
-                                onChange={(e) =>
-                                  updateVariant(
-                                    index,
-                                    "stock",
-                                    Number(e.target.value),
-                                  )
-                                }
-                              />
-                            </td>
-                            <td className="py-4">
-                              <div className="flex items-center gap-3">
-                                {variant.image ? (
-                                  <img
-                                    src={variant.image}
-                                    alt=""
-                                    className="w-14 h-14 rounded-lg object-cover border"
-                                  />
-                                ) : (
-                                  <div className="w-14 h-14 rounded-lg border bg-gray-100" />
-                                )}
-
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={async (e) => {
-                                    const file = e.target.files?.[0];
-
-                                    if (!file) return;
-
-                                    {
-                                      /*Compress file*/
-                                    }
-                                    const compressedFile =
-                                      await imageCompression(file, {
-                                        maxSizeMB: 1,
-                                        maxWidthOrHeight: 1600,
-                                        useWebWorker: true,
-                                      });
-
-                                    const formData = new FormData();
-
-                                    formData.append("image", compressedFile);
-
-                                    const toastId =
-                                      toast.loading("Uploading...");
-
-                                    try {
-                                      const response = await fetch(
-                                        "/api/upload/image-upload",
-                                        {
-                                          method: "POST",
-                                          body: formData,
-                                        },
-                                      );
-
-                                      const data = await response.json();
-
-                                      if (!response.ok || data.error) {
-                                        throw new Error(
-                                          data.error || "Upload failed",
-                                        );
-                                      }
-
-                                      updateVariant(index, "image", data.url);
-                                      appToast.success(
-                                        "Success",
-                                        "Image uploaded",
-                                      );
-                                    } catch (err) {
-                                      appToast.error("Error", "Upload failed");
-                                    }
-                                  }}
-                                />
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="mt-6 flex justify-end">
-                    <div className="bg-gray-100 rounded-xl px-4 py-3 text-sm">
-                      Total Inventory:
-                      <span className="font-bold ml-2">{totalStock}</span>
+                      <textarea
+                        rows={5}
+                        className="input"
+                        value={form.description}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            description: e.target.value,
+                          })
+                        }
+                      />
                     </div>
                   </div>
                 </Section>
-              )}
 
-              <Section title="Product Images">
-                <ProductImageUploader images={images} setImages={setImages} />
-              </Section>
-              <section
-                className="bg-white p-6 rounded-xl"
-                title="Product Videos"
-              >
-                <p className="text-xl font-semibold pb-4">Product Videos</p>
-                <ProductVideoUploader videos={videos} setVideos={setVideos} />
-              </section>
-            </div>
-
-            {/* RIGHT */}
-            <div className="space-y-6">
-              <Section title="Status">
-                <div className="space-y-5">
-                  <label className="flex items-center justify-between">
-                    <span>Featured Product</span>
+                <Section title="Pricing">
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">
+                      Base Price
+                    </label>
 
                     <input
-                      type="checkbox"
-                      checked={form.featured}
+                      type="number"
+                      min="0"
+                      className="input"
+                      value={form.basePrice}
                       onChange={(e) =>
                         setForm({
                           ...form,
-                          featured: e.target.checked,
+                          basePrice: e.target.value,
                         })
                       }
                     />
-                  </label>
+                  </div>
+                </Section>
 
-                  <label className="flex items-center justify-between">
-                    <span>Flash Deal</span>
-
-                    <input
-                      type="checkbox"
-                      checked={form.flash}
+                <Section title="Organization">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <select
+                      value={form.category}
                       onChange={(e) =>
                         setForm({
                           ...form,
-                          flash: e.target.checked,
+                          category: e.target.value,
+                        })
+                      }
+                      className="input"
+                    >
+                      <option value="">Select category</option>
+
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <input
+                      className="input"
+                      placeholder="Sub category"
+                      value={form.subCategory}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          subCategory: e.target.value,
                         })
                       }
                     />
-                  </label>
-                </div>
-              </Section>
+                  </div>
+                </Section>
 
-              <div className="bg-white border rounded-2xl p-6 shadow-sm">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="font-medium">Variants</span>
+                <Section title="Variant Builder">
+                  {/* SIZES */}
+                  <div className="mb-8">
+                    <p className="font-medium mb-3">Sizes</p>
 
-                  <span className="font-bold">{variants.length}</span>
-                </div>
+                    {/* PRESET SIZES */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {SIZES.map((size) => {
+                        const active = selectedSizes.includes(size);
 
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Total Stock</span>
+                        return (
+                          <button
+                            key={size}
+                            type="button"
+                            onClick={() => toggleSize(size)}
+                            className={`px-4 py-2 rounded-xl border transition ${
+                              active
+                                ? "bg-black text-white border-black"
+                                : "border-gray-300"
+                            }`}
+                          >
+                            {size}
+                          </button>
+                        );
+                      })}
+                    </div>
 
-                  <span className="font-bold">{totalStock}</span>
-                </div>
-              </div>
+                    {/* CUSTOM SIZE */}
+                    <div className="flex gap-3">
+                      <input
+                        value={customSize}
+                        onChange={(e) => setCustomSize(e.target.value)}
+                        placeholder="Add custom size (e.g. 12, 42, XXL)"
+                        className="input"
+                      />
 
-              <div className="flex gap-4">
-                <Link href={basePath} className="flex-1">
-                  <button
-                    type="button"
-                    className="w-full border py-3 rounded-xl"
-                  >
-                    Cancel
-                  </button>
-                </Link>
+                      <button
+                        type="button"
+                        onClick={addCustomSize}
+                        className="bg-black text-white px-4 rounded-xl"
+                      >
+                        Add
+                      </button>
+                    </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-black text-white py-3 rounded-xl"
+                    {/* SELECTED SIZES */}
+                    {selectedSizes.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        {selectedSizes.map((size) => (
+                          <div
+                            key={size}
+                            className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-xl"
+                          >
+                            <span>{size}</span>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setSelectedSizes((prev) =>
+                                  prev.filter((s) => s !== size),
+                                )
+                              }
+                              className="text-red-500 text-sm"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* COLORS */}
+                  <div>
+                    <p className="font-medium mb-3">Colours</p>
+
+                    <div className="flex flex-wrap gap-3">
+                      {COLOURS.map((colour) => {
+                        const active = selectedColours.includes(colour.name);
+
+                        return (
+                          <button
+                            key={colour.name}
+                            type="button"
+                            onClick={() => toggleColour(colour.name)}
+                            className={`w-10 h-10 rounded-full border-4 transition ${
+                              active
+                                ? "border-black scale-110"
+                                : "border-gray-200"
+                            }`}
+                            style={{
+                              backgroundColor: colour.hex,
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                </Section>
+
+                {/* VARIANT TABLE */}
+                {variants.length > 0 && (
+                  <Section title="Variant Inventory">
+                    <div className="overflow-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-3">Variant</th>
+
+                            <th className="text-left py-3">Price</th>
+
+                            <th className="text-left py-3">Stock</th>
+                            <th className="text-left py-3">Image</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {variants.map((variant, index) => (
+                            <tr
+                              key={`${variant.color}-${variant.size}-${index}`}
+                              className="border-b"
+                            >
+                              <td className="py-4">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className="w-5 h-5 rounded-full border"
+                                    style={{
+                                      backgroundColor: variant.colorHex,
+                                    }}
+                                  />
+
+                                  <span>
+                                    {variant.color} / {variant.size}
+                                  </span>
+                                </div>
+                              </td>
+
+                              <td>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  className="border rounded-lg px-3 py-2 w-28"
+                                  value={variant.price}
+                                  onChange={(e) =>
+                                    updateVariant(
+                                      index,
+                                      "price",
+                                      Number(e.target.value),
+                                    )
+                                  }
+                                />
+                              </td>
+
+                              <td>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  className="border rounded-lg px-3 py-2 w-24"
+                                  value={variant.stock}
+                                  onChange={(e) =>
+                                    updateVariant(
+                                      index,
+                                      "stock",
+                                      Number(e.target.value),
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td className="py-4">
+                                <div className="flex items-center gap-3">
+                                  {variant.image ? (
+                                    <img
+                                      src={variant.image}
+                                      alt=""
+                                      className="w-14 h-14 rounded-lg object-cover border"
+                                    />
+                                  ) : (
+                                    <div className="w-14 h-14 rounded-lg border bg-gray-100" />
+                                  )}
+
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+
+                                      if (!file) return;
+
+                                      {
+                                        /*Compress file*/
+                                      }
+                                      const compressedFile =
+                                        await imageCompression(file, {
+                                          maxSizeMB: 1,
+                                          maxWidthOrHeight: 1600,
+                                          useWebWorker: true,
+                                        });
+
+                                      const formData = new FormData();
+
+                                      formData.append("image", compressedFile);
+
+                                      const toastId =
+                                        toast.loading("Uploading...");
+
+                                      try {
+                                        const response = await fetch(
+                                          "/api/upload/image-upload",
+                                          {
+                                            method: "POST",
+                                            body: formData,
+                                          },
+                                        );
+
+                                        const data = await response.json();
+
+                                        if (!response.ok || data.error) {
+                                          throw new Error(
+                                            data.error || "Upload failed",
+                                          );
+                                        }
+
+                                        updateVariant(index, "image", data.url);
+                                        appToast.success(
+                                          "Success",
+                                          "Image uploaded",
+                                        );
+                                      } catch (err) {
+                                        appToast.error(
+                                          "Error",
+                                          "Upload failed",
+                                        );
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="mt-6 flex justify-end">
+                      <div className="bg-gray-100 rounded-xl px-4 py-3 text-sm">
+                        Total Inventory:
+                        <span className="font-bold ml-2">{totalStock}</span>
+                      </div>
+                    </div>
+                  </Section>
+                )}
+
+                <Section title="Product Images">
+                  <ProductImageUploader images={images} setImages={setImages} />
+                </Section>
+                <section
+                  className="bg-white p-6 rounded-xl"
+                  title="Product Videos"
                 >
-                  {loading ? "Saving..." : isEdit ? "Update" : "Create"}
-                </button>
+                  <p className="text-xl font-semibold pb-4">Product Videos</p>
+                  <ProductVideoUploader videos={videos} setVideos={setVideos} />
+                </section>
+              </div>
+
+              {/* RIGHT */}
+              <div className="space-y-6">
+                <Section title="Status">
+                  <div className="space-y-5">
+                    <label className="flex items-center justify-between">
+                      <span>Featured Product</span>
+
+                      <input
+                        type="checkbox"
+                        checked={form.featured}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            featured: e.target.checked,
+                          })
+                        }
+                      />
+                    </label>
+
+                    <label className="flex items-center justify-between">
+                      <span>Flash Deal</span>
+
+                      <input
+                        type="checkbox"
+                        checked={form.flash}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            flash: e.target.checked,
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+                </Section>
+
+                <div className="bg-white border rounded-2xl p-6 shadow-sm">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="font-medium">Variants</span>
+
+                    <span className="font-bold">{variants.length}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Total Stock</span>
+
+                    <span className="font-bold">{totalStock}</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <Link href={basePath} className="flex-1">
+                    <button
+                      type="button"
+                      className="w-full border py-3 rounded-xl"
+                    >
+                      Cancel
+                    </button>
+                  </Link>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 bg-black text-white py-3 rounded-xl"
+                  >
+                    {loading ? "Saving..." : isEdit ? "Update" : "Create"}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
