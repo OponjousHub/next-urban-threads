@@ -36,6 +36,7 @@ export class AdminNotificationService {
       data: admins.map((admin) => ({
         adminId: admin.id,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         type,
         title,
         message,
@@ -57,6 +58,7 @@ export class AdminNotificationService {
         id: notificationId,
         adminId,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
       },
       data: {
         isRead: true,
@@ -77,6 +79,7 @@ export class AdminNotificationService {
         adminId,
         isRead: false,
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
       },
       data: {
         isRead: true,
