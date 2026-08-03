@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
 import ReviewDetail from "@/components/reviews/review-detail";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 type Props = {
   params: Promise<{
@@ -117,6 +118,7 @@ export default async function VendorReviewPage({ params }: Props) {
 
   return (
     <>
+      <AdminHeaderUI title="Reviews" subtitle="View review details" />
       <ReviewDetail
         review={safeReview}
         moderationHistory={moderationHistory}
