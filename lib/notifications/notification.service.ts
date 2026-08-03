@@ -1,4 +1,5 @@
 import { prisma } from "@/utils/prisma";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import {
   VendorNotificationType,
   VendorNotificationSettings,
@@ -20,6 +21,10 @@ export default class NotificationService {
    * Creates a notification if the vendor has enabled it.
    */
   static async notify(options: NotifyOptions) {
+    const tenant = await getDefaultTenant();
+    if (!tenant) {
+      throw new Error("No tenant found");
+    }
     const settings = await prisma.vendorNotificationSettings.findUnique({
       where: {
         vendorId: options.vendorId,
@@ -38,6 +43,8 @@ export default class NotificationService {
       const existing = await prisma.vendorNotification.findFirst({
         where: {
           vendorId: options.vendorId,
+          tenantId: tenant.id,
+          storeMode: tenant.storeMode,
           isRead: false,
           metadata: {
             path: ["dedupeKey"],
@@ -54,13 +61,11 @@ export default class NotificationService {
     return prisma.vendorNotification.create({
       data: {
         vendorId: options.vendorId,
-
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         title: options.title,
-
         message: options.message,
-
         type: options.type,
-
         link: options.link,
 
         metadata: {
@@ -75,9 +80,16 @@ export default class NotificationService {
    * Marks a notification as read.
    */
   static async markAsRead(id: string) {
+    const tenant = await getDefaultTenant();
+    if (!tenant) {
+      throw new Error("No tenant found");
+    }
+
     return prisma.vendorNotification.update({
       where: {
         id,
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
       },
 
       data: {
@@ -90,10 +102,16 @@ export default class NotificationService {
    * Marks all notifications as read.
    */
   static async markAllAsRead(vendorId: string) {
+    const tenant = await getDefaultTenant();
+    if (!tenant) {
+      throw new Error("No tenant found");
+    }
+
     return prisma.vendorNotification.updateMany({
       where: {
         vendorId,
-
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         isRead: false,
       },
 
@@ -107,9 +125,15 @@ export default class NotificationService {
    * Deletes a notification.
    */
   static async delete(id: string) {
+    const tenant = await getDefaultTenant();
+    if (!tenant) {
+      throw new Error("No tenant found");
+    }
     return prisma.vendorNotification.delete({
       where: {
         id,
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
       },
     });
   }
@@ -118,10 +142,15 @@ export default class NotificationService {
    * Returns unread count.
    */
   static async unreadCount(vendorId: string) {
+    const tenant = await getDefaultTenant();
+    if (!tenant) {
+      throw new Error("No tenant found");
+    }
     return prisma.vendorNotification.count({
       where: {
         vendorId,
-
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         isRead: false,
       },
     });
@@ -131,9 +160,15 @@ export default class NotificationService {
    * Returns latest notifications.
    */
   static async latest(vendorId: string, take = 10) {
+    const tenant = await getDefaultTenant();
+    if (!tenant) {
+      throw new Error("No tenant found");
+    }
     return prisma.vendorNotification.findMany({
       where: {
         vendorId,
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
       },
 
       orderBy: {
