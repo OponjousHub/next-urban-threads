@@ -85,18 +85,21 @@ export default function ShippingRatesPageClient({ rates }: Props) {
     <div className="space-y-6">
       {/* Header */}
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Shipping Rates</h1>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center">
+        <div className="relative w-full md:w-1/2">
+          <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
 
-          <p className="mt-2 text-sm text-gray-500">
-            Configure shipping prices and conditions.
-          </p>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search rates..."
+            className="w-full rounded-xl border py-3 pl-11 pr-4"
+          />
         </div>
 
         <Link
           href="/admin/shipping/rates/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-black px-5 py-3 text-white hover:bg-neutral-800"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-black px-5 py-3 text-white hover:bg-neutral-800 md:ml-auto"
         >
           <Plus className="h-4 w-4" />
           New Rate
@@ -104,17 +107,6 @@ export default function ShippingRatesPageClient({ rates }: Props) {
       </div>
 
       {/* Search */}
-
-      <div className="relative">
-        <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
-
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search rates..."
-          className="w-full rounded-xl border py-3 pl-11 pr-4"
-        />
-      </div>
 
       {/* Table */}
 

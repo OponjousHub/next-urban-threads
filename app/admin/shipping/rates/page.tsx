@@ -2,6 +2,7 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import ShippingRatesPageClient from "./shipping-rates-page-client";
 import ShippingBreadcrumb from "@/components/shipping/ShippingBreadcrumb";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 export default async function ShippingRatesPage() {
   const tenant = await getDefaultTenant();
@@ -54,6 +55,10 @@ export default async function ShippingRatesPage() {
 
   return (
     <>
+      <AdminHeaderUI
+        title="Shipping Rates"
+        subtitle="Configure shipping prices and conditions."
+      />
       <div className="space-y-6 mt-4">
         <ShippingBreadcrumb current="Shipping Rates" />{" "}
       </div>

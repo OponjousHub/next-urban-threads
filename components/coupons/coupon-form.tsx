@@ -84,8 +84,8 @@ export default function CouponForm({
   return (
     <>
       <AdminHeaderUI
-        title={`${mode === "edit" ? "Edit" : "Create"}`}
-        subtitle={`${mode === "edit" ? "Edit this" : "Create"} coupon`}
+        title={`Coupons`}
+        subtitle={`${mode === "edit" ? "Edit this" : "Create new"} coupon`}
       />
 
       <Link

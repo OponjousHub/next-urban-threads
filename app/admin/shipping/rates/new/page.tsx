@@ -2,6 +2,7 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import ShippingRateForm from "./shipping-rate-form";
 import ShippingBreadcrumb from "@/components/shipping/ShippingBreadcrumb";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 export default async function NewShippingRatePage() {
   const tenant = await getDefaultTenant();
@@ -50,18 +51,14 @@ export default async function NewShippingRatePage() {
 
   return (
     <>
+      <AdminHeaderUI
+        title="Create Shipping Rate"
+        subtitle="Create a pricing rule for one of your shipping methods."
+      />
       <div className="space-y-6 mt-4">
         <ShippingBreadcrumb current="New Shipping Rate" />
       </div>
       <div className="mx-auto w-full max-w-5xl px-6 mt-5">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Create Shipping Rate</h1>
-
-          <p className="mt-2 text-sm text-gray-500">
-            Create a pricing rule for one of your shipping methods.
-          </p>
-        </div>
-
         <ShippingRateForm zones={zones} methods={methods} />
       </div>
     </>

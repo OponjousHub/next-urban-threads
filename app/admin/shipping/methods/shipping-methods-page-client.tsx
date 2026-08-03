@@ -44,18 +44,20 @@ export default function ShippingMethodsPageClient({ methods }: Props) {
     <div className="space-y-6">
       {/* Header */}
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Shipping Methods</h1>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center">
+        <div className="relative w-full md:w-1/2">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
 
-          <p className="mt-1 text-sm text-gray-500">
-            Configure how orders are delivered within each shipping zone.
-          </p>
+          <input
+            placeholder="Search methods..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border py-2 pl-10 pr-4 outline-none focus:ring-2 focus:ring-black"
+          />
         </div>
-
         <Link
           href="/admin/shipping/methods/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-neutral-800"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-black px-5 py-3 text-white hover:bg-neutral-800 md:ml-auto"
         >
           <Plus className="h-4 w-4" />
           New Method
@@ -64,7 +66,7 @@ export default function ShippingMethodsPageClient({ methods }: Props) {
 
       {/* Search */}
 
-      <div className="rounded-2xl border bg-white p-4 shadow-sm">
+      {/* <div className="rounded-2xl border bg-white p-4 shadow-sm">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
 
@@ -75,7 +77,7 @@ export default function ShippingMethodsPageClient({ methods }: Props) {
             className="w-full rounded-xl border py-2 pl-10 pr-4 outline-none focus:ring-2 focus:ring-black"
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Empty */}
 

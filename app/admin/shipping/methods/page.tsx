@@ -2,6 +2,7 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import ShippingMethodsPageClient from "./shipping-methods-page-client";
 import ShippingBreadcrumb from "@/components/shipping/ShippingBreadcrumb";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 export default async function ShippingMethodsPage() {
   const tenant = await getDefaultTenant();
@@ -34,6 +35,10 @@ export default async function ShippingMethodsPage() {
 
   return (
     <>
+      <AdminHeaderUI
+        title="Shipping Methods"
+        subtitle="Configure how orders are delivered within each shipping zone."
+      />
       <div className="space-y-6 mt-4">
         <ShippingBreadcrumb current="Shipping Methods" />{" "}
       </div>

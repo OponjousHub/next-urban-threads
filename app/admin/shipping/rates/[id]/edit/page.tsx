@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import ShippingRateForm from "../../new/shipping-rate-form";
 import ShippingBreadcrumb from "@/components/shipping/ShippingBreadcrumb";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 type Props = {
   params: Promise<{
@@ -70,18 +71,14 @@ export default async function EditShippingRatePage({ params }: Props) {
 
   return (
     <>
+      <AdminHeaderUI
+        title={`Edit Shipping Rate`}
+        subtitle={`Update this shipping rate.`}
+      />
       <div className="space-y-6 mt-4">
         <ShippingBreadcrumb current="Edit Shipping Rate" />
       </div>
       <div className="mx-auto w-full max-w-5xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Edit Shipping Rate</h1>
-
-          <p className="mt-2 text-sm text-gray-500">
-            Update this shipping rate.
-          </p>
-        </div>
-
         <ShippingRateForm
           zones={zones}
           methods={methods}
