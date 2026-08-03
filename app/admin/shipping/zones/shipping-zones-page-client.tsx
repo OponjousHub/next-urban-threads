@@ -38,28 +38,8 @@ export default function ShippingZonesPageClient({ zones }: Props) {
     <div className="space-y-6">
       {/* Header */}
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Shipping Zones</h1>
-
-          <p className="mt-1 text-sm text-gray-500">
-            Organize destinations into shipping regions.
-          </p>
-        </div>
-
-        <Link
-          href="/admin/shipping/zones/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-neutral-800"
-        >
-          <Plus className="h-4 w-4" />
-          New Zone
-        </Link>
-      </div>
-
-      {/* Search */}
-
-      <div className="rounded-2xl border bg-white p-4 shadow-sm">
-        <div className="relative max-w-md">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between rounded-2xl border bg-white p-4 shadow-sm">
+        <div className="relative w-full md:w-1/2">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
 
           <input
@@ -69,6 +49,13 @@ export default function ShippingZonesPageClient({ zones }: Props) {
             className="w-full rounded-xl border pl-10 pr-4 py-2 outline-none focus:ring-2 focus:ring-black"
           />
         </div>
+        <Link
+          href="/admin/shipping/zones/new"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-neutral-800"
+        >
+          <Plus className="h-4 w-4" />
+          New Zone
+        </Link>
       </div>
 
       {/* Empty State */}

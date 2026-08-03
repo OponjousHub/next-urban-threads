@@ -52,8 +52,8 @@ export default async function NewShippingRatePage() {
   return (
     <>
       <AdminHeaderUI
-        title="Create Shipping Rate"
-        subtitle="Create a pricing rule for one of your shipping methods."
+        title="Shipping Zones"
+        subtitle="Organize destinations into shipping regions."
       />
       <div className="space-y-6 mt-4">
         <ShippingBreadcrumb current="New Shipping Rate" />
