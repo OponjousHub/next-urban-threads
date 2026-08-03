@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/utils/prisma";
 
 import { refundPayment } from "../payments/refundPayment";
@@ -97,8 +96,6 @@ export async function submitRefundRequest(data: RefundRequestInput) {
       id: data.items[0].variantId!,
     },
   });
-
-  console.log("PRINT VARIANT", variant);
 
   // Create refund request + items
   const refund = await prisma.refundRequest.create({

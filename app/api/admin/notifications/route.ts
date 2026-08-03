@@ -23,6 +23,7 @@ export async function GET() {
     const notifications = await prisma.adminNotification.findMany({
       where: {
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
       },
       orderBy: {
         createdAt: "desc",
@@ -33,6 +34,8 @@ export async function GET() {
     const unreadCount = await prisma.adminNotification.count({
       where: {
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
+
         isRead: false,
       },
     });
