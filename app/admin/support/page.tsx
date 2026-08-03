@@ -2,6 +2,7 @@ import { prisma } from "@/utils/prisma";
 import { ContactStatus } from "@prisma/client";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import SupportPageClient from "@/components/admin/support/supportPage-client";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 export default async function SupportPage({
   searchParams,
@@ -71,13 +72,19 @@ export default async function SupportPage({
   });
 
   return (
-    <SupportPageClient
-      messages={messages}
-      allCount={allCount}
-      statusParam={statusParam}
-      urgentCount={urgentCount}
-      priorityParam={priorityParam}
-      unreadCount={unreadCount}
-    />
+    <>
+      <AdminHeaderUI
+        title="Support"
+        subtitle="Manage messages from customers"
+      />
+      <SupportPageClient
+        messages={messages}
+        allCount={allCount}
+        statusParam={statusParam}
+        urgentCount={urgentCount}
+        priorityParam={priorityParam}
+        unreadCount={unreadCount}
+      />
+    </>
   );
 }

@@ -17,9 +17,6 @@ export default async function VendorReviewPage({ params }: Props) {
   const review = await prisma.review.findFirst({
     where: {
       id: reviewId,
-      //   product: {
-      //     vendorId: vendor.id,
-      //   },
     },
     include: {
       user: true,
