@@ -50,6 +50,7 @@ export default function RefundReviewModal({
     const loadingToast = appToast.loading(labels[type]);
 
     try {
+      console.log("THIS IS THE TYPE:", type);
       const response = await fetch(`/api/admin/refunds/${refundId}/${type}`, {
         method: "POST",
       });

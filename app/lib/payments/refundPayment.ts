@@ -3,15 +3,17 @@ type RefundInput = {
   reference: string;
 };
 
-export async function refundPayment({
-  amount,
-  reference,
-}: RefundInput): Promise<{
+export type RefundPaymentResult = {
   success: boolean;
   provider: string;
   reference?: string;
-}> {
-  // 🔀 Detect provider (based on your system)
+};
+
+export async function refundPayment({
+  amount,
+  reference,
+}: RefundInput): Promise<RefundPaymentResult> {
+  // Detect provider based on the payment reference.
   if (reference.startsWith("ps_")) {
     return refundPaystack(amount, reference);
   }
@@ -19,7 +21,14 @@ export async function refundPayment({
   return refundFlutterwave(amount, reference);
 }
 
-async function refundPaystack(amount: number, reference: string) {
+/* ==================================================
+   PAYSTACK
+================================================== */
+
+async function refundPaystack(
+  amount: number,
+  reference: string,
+): Promise<RefundPaymentResult> {
   try {
     const res = await fetch("https://api.paystack.co/refund", {
       method: "POST",
@@ -35,17 +44,39 @@ async function refundPaystack(amount: number, reference: string) {
 
     const data = await res.json();
 
+    console.log("PAYSTACK REFUND RESPONSE:", data);
+
+    if (!res.ok || data.status !== true) {
+      return {
+        success: false,
+        provider: "paystack",
+      };
+    }
+
     return {
-      success: data.status,
+      success: true,
       provider: "paystack",
-      reference: data.data?.reference,
+      reference:
+        data?.data?.reference != null ? String(data.data.reference) : undefined,
     };
-  } catch {
-    return { success: false, provider: "paystack" };
+  } catch (error) {
+    console.error("PAYSTACK REFUND ERROR:", error);
+
+    return {
+      success: false,
+      provider: "paystack",
+    };
   }
 }
 
-async function refundFlutterwave(amount: number, reference: string) {
+/* ==================================================
+   FLUTTERWAVE
+================================================== */
+
+async function refundFlutterwave(
+  amount: number,
+  reference: string,
+): Promise<RefundPaymentResult> {
   try {
     const res = await fetch(
       `https://api.flutterwave.com/v3/transactions/${reference}/refund`,
@@ -63,17 +94,68 @@ async function refundFlutterwave(amount: number, reference: string) {
 
     const data = await res.json();
 
-    const isAlreadyRefunded =
-      typeof data?.data === "string" &&
-      data.data.toLowerCase().includes("already fully refunded");
+    console.log("FLUTTERWAVE REFUND RESPONSE:", data);
 
+    /*
+     * Flutterwave can report that the transaction
+     * has already been fully refunded.
+     */
+    const responseMessage =
+      typeof data?.data === "string"
+        ? data.data
+        : typeof data?.message === "string"
+          ? data.message
+          : "";
+
+    const isAlreadyRefunded = responseMessage
+      .toLowerCase()
+      .includes("already fully refunded");
+
+    /*
+     * Already refunded is still considered successful
+     * from the perspective of our refund workflow.
+     */
+    if (isAlreadyRefunded) {
+      return {
+        success: true,
+        provider: "flutterwave",
+        reference: "already_refunded",
+      };
+    }
+
+    /*
+     * Normal successful Flutterwave refund.
+     *
+     * Flutterwave may return the refund ID as a number,
+     * e.g. 107029.
+     *
+     * ALWAYS convert it to a string here because
+     * RefundTransaction.transactionRef is a String.
+     */
+    if (res.ok && data?.status === "success") {
+      const refundReference = data?.data?.id;
+
+      return {
+        success: true,
+        provider: "flutterwave",
+        reference:
+          refundReference != null ? String(refundReference) : undefined,
+      };
+    }
+
+    /*
+     * Gateway responded but refund was not successful.
+     */
     return {
-      success: data.status === "success" || isAlreadyRefunded,
+      success: false,
       provider: "flutterwave",
-      reference: data?.data?.id ?? "already_refunded",
     };
   } catch (error) {
     console.error("FLW REFUND ERROR:", error);
-    return { success: false, provider: "flutterwave" };
+
+    return {
+      success: false,
+      provider: "flutterwave",
+    };
   }
 }
