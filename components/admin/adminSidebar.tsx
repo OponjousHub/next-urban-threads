@@ -79,15 +79,6 @@ export default function AdminSidebar({
             </button>
           )}
         </div>
-
-        {/* <button
-          onClick={toggle}
-          className="p-2 rounded-lg hover:bg-gray-100 transition"
-        >
-          <FiChevronLeft
-            className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}
-          />
-        </button> */}
       </div>
 
       {/* Nav */}

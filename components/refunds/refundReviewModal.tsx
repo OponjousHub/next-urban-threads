@@ -50,11 +50,19 @@ export default function RefundReviewModal({
     const loadingToast = appToast.loading(labels[type]);
 
     try {
-      await fetch(`/api/admin/refunds/${refundId}/${type}`, {
+      const response = await fetch(`/api/admin/refunds/${refundId}/${type}`, {
         method: "POST",
       });
 
+      const data = await response.json();
+
       appToast.dismiss(loadingToast);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message || data?.error || `Failed to ${type} refund`,
+        );
+      }
 
       appToast.success(
         "Success",
@@ -68,10 +76,19 @@ export default function RefundReviewModal({
       await fetchRefund(); // refresh modal
 
       onActionComplete();
-    } catch {
+    } catch (error) {
       appToast.dismiss(loadingToast);
 
-      appToast.error("Error", `Failed to ${type} refund`);
+      console.error(`Refund ${type} error:`, error);
+
+      appToast.error(
+        "Error",
+        error instanceof Error
+          ? error.message
+          : type === "approve"
+            ? "Failed to approve refund"
+            : "Failed to reject refund",
+      );
     } finally {
       setActionLoading(false);
     }

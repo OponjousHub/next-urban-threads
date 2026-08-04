@@ -249,7 +249,6 @@ export async function approveRefund(refundId: string) {
     data: {
       status: "APPROVED",
       approvedAmount: refund.requestedAmount,
-      approvedAt: new Date(),
     },
   });
 
@@ -323,6 +322,11 @@ export async function processRefund(refundId: string) {
     throw new Error("Default tenant not found");
   }
 
+  /*
+   * --------------------------------------------------
+   * Fetch refund
+   * --------------------------------------------------
+   */
   const refund = await prisma.refundRequest.findFirst({
     where: {
       id: refundId,
@@ -358,74 +362,208 @@ export async function processRefund(refundId: string) {
     throw new Error("Refund not found");
   }
 
+  /*
+   * --------------------------------------------------
+   * Only APPROVED refunds can be processed
+   * --------------------------------------------------
+   */
   if (refund.status !== "APPROVED") {
     throw new Error("Only approved refunds can be processed.");
   }
 
-  // ----------------------------------
-  // Mark as PROCESSING
-  // ----------------------------------
+  const refundAmount = refund.approvedAmount ?? refund.requestedAmount;
 
-  await prisma.refundRequest.update({
-    where: {
-      id: refund.id,
-    },
-    data: {
-      status: "PROCESSING",
-      processedAt: new Date(),
-    },
-  });
-
-  await prisma.order.update({
-    where: {
-      id: refund.orderId,
-    },
-    data: {
-      refundStatus: "PROCESSING",
-    },
-  });
-
-  // ----------------------------------
-  // Call payment gateway
-  // ----------------------------------
-
-  const paymentResult = await refundPayment({
-    amount: refund.approvedAmount ?? refund.requestedAmount,
-    reference: refund.order.paymentReference!,
-  });
-
-  if (!paymentResult.success) {
-    await prisma.refundRequest.update({
+  /*
+   * --------------------------------------------------
+   * Mark refund as PROCESSING
+   * --------------------------------------------------
+   */
+  await prisma.$transaction(async (tx) => {
+    await tx.refundRequest.update({
       where: {
         id: refund.id,
       },
       data: {
-        status: "FAILED",
-        failedAt: new Date(),
+        status: "PROCESSING",
       },
     });
 
-    await prisma.order.update({
+    await tx.order.update({
       where: {
         id: refund.orderId,
       },
       data: {
-        refundStatus: "FAILED",
+        refundStatus: "PROCESSING",
+      },
+    });
+  });
+
+  /*
+   * --------------------------------------------------
+   * Customer refund tracking event
+   * --------------------------------------------------
+   */
+  await createRefundTrackingEvent({
+    tenantId: tenant.id,
+    refundRequestId: refund.id,
+    status: "PROCESSING",
+    title: "Refund Processing",
+    description:
+      "Your refund has been approved and is now being processed by the payment provider.",
+  });
+
+  /*
+   * --------------------------------------------------
+   * Call payment gateway
+   * --------------------------------------------------
+   */
+  let paymentResult;
+
+  try {
+    paymentResult = await refundPayment({
+      amount: refundAmount,
+      reference: refund.order.paymentReference!,
+    });
+
+    console.log("REFUND PAYMENT RESULT:", paymentResult);
+  } catch (error) {
+    console.error("REFUND PAYMENT ERROR:", error);
+
+    /*
+     * Gateway threw an exception.
+     * Make sure the refund does not remain stuck at PROCESSING.
+     */
+    await prisma.$transaction(async (tx) => {
+      await tx.refundRequest.update({
+        where: {
+          id: refund.id,
+        },
+        data: {
+          status: "FAILED",
+        },
+      });
+
+      await tx.order.update({
+        where: {
+          id: refund.orderId,
+        },
+        data: {
+          refundStatus: "FAILED",
+        },
+      });
+    });
+
+    await createRefundTrackingEvent({
+      tenantId: tenant.id,
+      refundRequestId: refund.id,
+      status: "FAILED",
+      title: "Refund Failed",
+      description:
+        "The payment provider could not process the refund. Please contact support if the problem persists.",
+    });
+
+    throw new Error("Refund payment failed.");
+  }
+
+  /*
+   * --------------------------------------------------
+   * Gateway explicitly reported failure
+   * --------------------------------------------------
+   */
+  if (!paymentResult.success) {
+    await prisma.$transaction(async (tx) => {
+      await tx.refundRequest.update({
+        where: {
+          id: refund.id,
+        },
+        data: {
+          status: "FAILED",
+        },
+      });
+
+      await tx.order.update({
+        where: {
+          id: refund.orderId,
+        },
+        data: {
+          refundStatus: "FAILED",
+        },
+      });
+    });
+
+    await createRefundTrackingEvent({
+      tenantId: tenant.id,
+      refundRequestId: refund.id,
+      status: "FAILED",
+      title: "Refund Failed",
+      description: "The payment provider could not complete the refund.",
+      metadata: {
+        provider: paymentResult.provider,
       },
     });
 
     throw new Error("Refund payment failed.");
   }
 
+  /*
+   * --------------------------------------------------
+   * Successful gateway response must contain
+   * a refund reference.
+   * --------------------------------------------------
+   */
   if (!paymentResult.reference) {
+    console.error(
+      "Refund gateway returned success without a reference:",
+      paymentResult,
+    );
+
+    await prisma.$transaction(async (tx) => {
+      await tx.refundRequest.update({
+        where: {
+          id: refund.id,
+        },
+        data: {
+          status: "FAILED",
+        },
+      });
+
+      await tx.order.update({
+        where: {
+          id: refund.orderId,
+        },
+        data: {
+          refundStatus: "FAILED",
+        },
+      });
+    });
+
+    await createRefundTrackingEvent({
+      tenantId: tenant.id,
+      refundRequestId: refund.id,
+      status: "FAILED",
+      title: "Refund Failed",
+      description:
+        "The payment provider confirmed the request but did not return a refund reference.",
+      metadata: {
+        provider: paymentResult.provider,
+      },
+    });
+
     throw new Error("Gateway returned no refund reference.");
   }
 
-  // ----------------------------------
-  // Transaction
-  // ----------------------------------
-
+  /*
+   * --------------------------------------------------
+   * Successful refund
+   * --------------------------------------------------
+   *
+   * paymentResult.reference is already a string according
+   * to the refundPayment() return type.
+   */
   await prisma.$transaction(async (tx) => {
+    /*
+     * Record gateway transaction
+     */
     await tx.refundTransaction.create({
       data: {
         refundRequestId: refund.id,
@@ -435,16 +573,21 @@ export async function processRefund(refundId: string) {
       },
     });
 
+    /*
+     * Mark refund as completed
+     */
     await tx.refundRequest.update({
       where: {
         id: refund.id,
       },
       data: {
         status: "REFUNDED",
-        refundedAt: new Date(),
       },
     });
 
+    /*
+     * Update order refund status
+     */
     await tx.order.update({
       where: {
         id: refund.orderId,
@@ -454,7 +597,9 @@ export async function processRefund(refundId: string) {
       },
     });
 
-    // Restore inventory
+    /*
+     * Restore inventory
+     */
     for (const item of refund.items) {
       await InventoryService.increaseStock({
         tx,
@@ -463,26 +608,35 @@ export async function processRefund(refundId: string) {
         quantity: item.quantity,
       });
     }
-
-    // Customer timeline
-    await createRefundTrackingEvent({
-      tenantId: tenant.id,
-      refundRequestId: refund.id,
-      status: "REFUNDED",
-      title: "Refund Completed",
-      description:
-        "Your refund has been processed successfully. Funds should appear shortly depending on your payment provider.",
-      metadata: {
-        provider: paymentResult.provider,
-        reference: paymentResult.reference,
-      },
-    });
   });
 
-  // ----------------------------------
-  // Vendor Notification
-  // ----------------------------------
+  /*
+   * --------------------------------------------------
+   * Customer refund tracking event
+   * --------------------------------------------------
+   *
+   * This is intentionally AFTER the transaction because
+   * createRefundTrackingEvent() currently uses prisma
+   * rather than the transaction client.
+   */
+  await createRefundTrackingEvent({
+    tenantId: tenant.id,
+    refundRequestId: refund.id,
+    status: "REFUNDED",
+    title: "Refund Completed",
+    description:
+      "Your refund has been processed successfully. Funds should appear shortly depending on your payment provider.",
+    metadata: {
+      provider: paymentResult.provider,
+      reference: paymentResult.reference,
+    },
+  });
 
+  /*
+   * --------------------------------------------------
+   * Vendor Notification
+   * --------------------------------------------------
+   */
   if (refund.vendorId) {
     await NotificationService.notify({
       vendorId: refund.vendorId,
@@ -494,16 +648,17 @@ export async function processRefund(refundId: string) {
       metadata: {
         refundId: refund.id,
         orderId: refund.orderId,
-        amount: refund.approvedAmount ?? refund.requestedAmount,
+        amount: refundAmount,
         currency: refund.currency,
       },
     });
   }
 
-  // ----------------------------------
-  // Admin Notification
-  // ----------------------------------
-
+  /*
+   * --------------------------------------------------
+   * Admin Notification
+   * --------------------------------------------------
+   */
   await AdminNotificationService.notify({
     type: "REFUNDED",
     title: "Refund Completed",
@@ -514,13 +669,23 @@ export async function processRefund(refundId: string) {
       orderId: refund.orderId,
       customerId: refund.userId,
       customerName: refund.user.name,
-      amount: refund.approvedAmount ?? refund.requestedAmount,
+      amount: refundAmount,
       currency: refund.currency,
     },
   });
 
+  /*
+   * --------------------------------------------------
+   * Return
+   * --------------------------------------------------
+   */
   return {
     success: true,
+    refundId: refund.id,
+    orderId: refund.orderId,
+    status: "REFUNDED",
+    provider: paymentResult.provider,
+    reference: paymentResult.reference,
   };
 }
 
@@ -546,7 +711,6 @@ export async function rejectRefund(refundId: string, reason?: string) {
     },
     data: {
       status: "REJECTED",
-      rejectedAt: new Date(),
     },
   });
 
@@ -623,7 +787,6 @@ export async function cancelRefund(refundId: string, userId: string) {
     },
     data: {
       status: "CANCELLED",
-      cancelledAt: new Date(),
     },
   });
 
