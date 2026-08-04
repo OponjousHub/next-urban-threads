@@ -1,6 +1,7 @@
 import { prisma } from "@/utils/prisma";
 import { notFound } from "next/navigation";
 import VendorApprovalReview from "../../../../components/admin/vendors/vendorApplicationReview";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 export default async function VendorReviewPage({
   params,
@@ -21,5 +22,13 @@ export default async function VendorReviewPage({
   if (!application) {
     notFound();
   }
-  return <VendorApprovalReview application={application} />;
+  return (
+    <>
+      <AdminHeaderUI
+        title="Vendor applications"
+        subtitle="Review and approve vendor access."
+      />
+      <VendorApprovalReview application={application} />;
+    </>
+  );
 }

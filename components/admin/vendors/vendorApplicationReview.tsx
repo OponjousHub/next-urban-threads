@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/lib/status-badge";
@@ -100,12 +99,6 @@ export default function VendorApprovalReview({
           >
             ← Back to Applications
           </Link>
-
-          <h1 className="mt-4 text-3xl font-bold">Vendor Application</h1>
-
-          <p className="text-muted-foreground">
-            Review and approve vendor access.
-          </p>
         </div>
 
         <div className="rounded-xl border p-5">
