@@ -18,7 +18,6 @@ export default function AdminLayout({
 
   // ✅ Mobile sidebar state comes from context
   const { open, setOpen } = useAdminSidebar();
-  console.log("Layout sees open =", open);
 
   useEffect(() => {
     const getUser = async () => {

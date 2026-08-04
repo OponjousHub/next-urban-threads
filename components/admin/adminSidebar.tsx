@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTenant } from "@/store/tenant-provider-context";
+import { FiX } from "react-icons/fi";
 import {
   FiHome,
   FiShoppingBag,
@@ -46,18 +47,47 @@ export default function AdminSidebar({
       `}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-6">
+      <div className="flex items-center justify-between border-b px-4 py-5 mt-14 md:mt-0">
         {!collapsed && (
-          <h1 className="text-xl font-bold tracking-tight">Urban Admin</h1>
+          <h1 className="text-xl font-bold tracking-tight">
+            {tenant.name.split(" ")[0]} Admin
+          </h1>
         )}
-        <button
+
+        <div className="flex items-center gap-2">
+          {/* Collapse (desktop only) */}
+          {!isMobile && (
+            <button
+              onClick={toggle}
+              className="rounded-lg p-2 hover:bg-gray-100"
+            >
+              <FiChevronLeft
+                className={`transition-transform ${
+                  collapsed ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+          )}
+
+          {/* Close (mobile only) */}
+          {isMobile && (
+            <button
+              onClick={toggle}
+              className="rounded-lg p-2 hover:bg-gray-100"
+            >
+              <FiX size={20} />
+            </button>
+          )}
+        </div>
+
+        {/* <button
           onClick={toggle}
           className="p-2 rounded-lg hover:bg-gray-100 transition"
         >
           <FiChevronLeft
             className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}
           />
-        </button>
+        </button> */}
       </div>
 
       {/* Nav */}
