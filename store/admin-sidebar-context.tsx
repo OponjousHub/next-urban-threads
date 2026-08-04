@@ -1,32 +1,32 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState, ReactNode } from "react";
 
 type SidebarContextType = {
   open: boolean;
-  setOpen: (open: boolean) => void;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   toggle: () => void;
 };
 
-const SidebarContext = createContext<SidebarContextType | null>(null);
+const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
-export function AdminSidebarProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function AdminSidebarProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const toggle = () => {
+    setOpen((prev) => !prev);
+  };
+
+  const value = useMemo(
+    () => ({
+      open,
+      setOpen,
+      toggle,
+    }),
+    [open],
+  );
 
   return (
-    <SidebarContext.Provider
-      value={{
-        open,
-        setOpen,
-        toggle: () => setOpen((v) => !v),
-      }}
-    >
-      {children}
-    </SidebarContext.Provider>
+    <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
   );
 }
 

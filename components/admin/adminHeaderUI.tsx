@@ -19,16 +19,25 @@ export default function AdminHeaderUI({
   subtitle,
   admin,
 }: AdminHeaderProps) {
-  const { toggle } = useAdminSidebar();
-
+  const { open, setOpen, toggle } = useAdminSidebar();
+  console.log("Layout sees open =", open);
   return (
     <header className="sticky top-0 z-30 border-b bg-white mb-10">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
         {/* LEFT */}
         <div className="flex items-center gap-3">
+          {/* <button
+            onClick={() => {
+              console.log("clicked");
+              toggle;
+            }} */}
           <button
-            onClick={toggle}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border bg-white hover:bg-gray-50 lg:hidden"
+            onClick={() => {
+              toggle();
+              // setOpen(true);
+            }}
+            className="flex h-10 w-10 items-center justify-center rounded-lg
+            border bg-white hover:bg-gray-50 lg:hidden"
           >
             <FaBars size={16} />
           </button>

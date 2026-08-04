@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/admin/adminSidebar";
+import { useAdminSidebar } from "@/store/admin-sidebar-context";
 
 type User = {
   name: string;
@@ -14,8 +15,10 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [user, setUser] = useState<User>();
+
+  // ✅ Mobile sidebar state comes from context
+  const { open, setOpen } = useAdminSidebar();
+  console.log("Layout sees open =", open);
 
   useEffect(() => {
     const getUser = async () => {
@@ -28,7 +31,7 @@ export default function AdminLayout({
           throw new Error("Failed to get user");
         }
 
-        const data = await res.json();
+        await res.json();
       } catch (error) {
         console.error("User fetch error:", error);
       }
@@ -38,38 +41,42 @@ export default function AdminLayout({
   }, []);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 ">
-      {/* Desktop Sidebar */}
-      <AdminSidebar
-        collapsed={collapsed}
-        toggle={() => setCollapsed(!collapsed)}
-      />
+    <>
+      <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        {/* Desktop Sidebar */}
+        <AdminSidebar
+          collapsed={collapsed}
+          toggle={() => setCollapsed(!collapsed)}
+        />
 
-      {/* Right side */}
-      <div className="flex flex-col flex-1">
-        <main className="flex-1 mb-10 overflow-y-auto bg-gray-50">
-          {children}
-        </main>
-      </div>
-
-      {/* Mobile Sidebar */}
-      {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 flex mt-10">
-          {/* Blur backdrop */}
-          <div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-            onClick={() => setMobileOpen(false)}
-          />
-          {/* Mobile sidebar */}
-          <div className="relative z-50">
-            <AdminSidebar
-              collapsed={false}
-              toggle={() => setMobileOpen(false)}
-              isMobile={true}
-            />
-          </div>
+        {/* Right side */}
+        <div className="flex flex-1 flex-col">
+          <main className="mb-10 flex-1 overflow-y-auto bg-gray-50">
+            {children}
+          </main>
         </div>
-      )}
-    </div>
+
+        {/* Mobile Sidebar */}
+        {open && (
+          <div className="fixed inset-0 z-40 flex lg:hidden">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+              onClick={() => setOpen(false)}
+            />
+
+            {/* Sidebar */}
+            <div className="relative z-50">
+              <AdminSidebar
+                collapsed={false}
+                toggle={() => setOpen(false)}
+                onNavigate={() => setOpen(false)}
+                isMobile
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

@@ -23,12 +23,14 @@ interface Props {
   collapsed: boolean;
   toggle: () => void;
   isMobile?: boolean;
+  onNavigate?: () => void;
 }
 
 export default function AdminSidebar({
   collapsed,
   toggle,
   isMobile = false,
+  onNavigate,
 }: Props) {
   const pathname = usePathname();
   const { tenant, storeMode } = useTenant();
@@ -66,6 +68,7 @@ export default function AdminSidebar({
           label="Dashboard"
           collapsed={collapsed}
           pathname={pathname}
+          onNavigate={onNavigate}
         />
         <SidebarItem
           href="/admin/products"
@@ -73,6 +76,7 @@ export default function AdminSidebar({
           label="Products"
           collapsed={collapsed}
           pathname={pathname}
+          onNavigate={onNavigate}
         />
         <SidebarItem
           href="/admin/orders"
@@ -80,6 +84,7 @@ export default function AdminSidebar({
           label="Orders"
           collapsed={collapsed}
           pathname={pathname}
+          onNavigate={onNavigate}
         />
         <SidebarItem
           href="/admin/customers"
@@ -87,6 +92,7 @@ export default function AdminSidebar({
           label="Customers"
           collapsed={collapsed}
           pathname={pathname}
+          onNavigate={onNavigate}
         />
         <SidebarItem
           href="/admin/reviews"
@@ -94,6 +100,7 @@ export default function AdminSidebar({
           label="Reviews"
           collapsed={collapsed}
           pathname={pathname}
+          onNavigate={onNavigate}
         />
 
         <SidebarItem
@@ -102,6 +109,7 @@ export default function AdminSidebar({
           label="Inbox"
           collapsed={collapsed}
           pathname={pathname}
+          onNavigate={onNavigate}
         />
         <SidebarItem
           href="/admin/coupons"
@@ -109,6 +117,7 @@ export default function AdminSidebar({
           label="Coupons"
           collapsed={collapsed}
           pathname={pathname}
+          onNavigate={onNavigate}
         />
         <SidebarItem
           href="/admin/shipping"
@@ -116,6 +125,7 @@ export default function AdminSidebar({
           label="Shipping"
           collapsed={collapsed}
           pathname={pathname}
+          onNavigate={onNavigate}
         />
         {tenant.storeMode === "MULTI_VENDOR" && (
           <SidebarItem
@@ -124,6 +134,7 @@ export default function AdminSidebar({
             label="Vendor Applications"
             collapsed={collapsed}
             pathname={pathname}
+            onNavigate={onNavigate}
           />
         )}
         {tenant.storeMode === "MULTI_VENDOR" && (
@@ -133,6 +144,7 @@ export default function AdminSidebar({
             label="Manage Vendors"
             collapsed={collapsed}
             pathname={pathname}
+            onNavigate={onNavigate}
           />
         )}
         {tenant.storeMode === "MULTI_VENDOR" && (
@@ -142,6 +154,7 @@ export default function AdminSidebar({
             label="Vendor Payouts"
             collapsed={collapsed}
             pathname={pathname}
+            onNavigate={onNavigate}
           />
         )}
         <SidebarItem
@@ -150,6 +163,7 @@ export default function AdminSidebar({
           label="Settings"
           collapsed={collapsed}
           pathname={pathname}
+          onNavigate={onNavigate}
         />
       </nav>
     </aside>
@@ -162,12 +176,14 @@ function SidebarItem({
   label,
   collapsed,
   pathname,
+  onNavigate,
 }: {
   href: string;
   icon: React.ReactNode;
   label: string;
   collapsed: boolean;
   pathname: string;
+  onNavigate?: () => void;
 }) {
   const active =
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
@@ -175,6 +191,7 @@ function SidebarItem({
   return (
     <Link
       href={href}
+      onClick={onNavigate}
       className={`flex items-center gap-3 px-3 py-3 rounded-xl duration-200
         ${
           active
