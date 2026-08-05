@@ -362,6 +362,17 @@ export async function processRefund(refundId: string) {
     throw new Error("Refund not found");
   }
 
+  if (refund.status === "FAILED") {
+    await createRefundTrackingEvent({
+      tenantId: refund.tenantId,
+      refundRequestId: refund.id,
+      status: "PROCESSING",
+      title: "Refund Processing Retry",
+      description:
+        "We are retrying your refund after the previous attempt could not be completed.",
+    });
+  }
+
   /*
    * --------------------------------------------------
    * Only APPROVED refunds can be processed
