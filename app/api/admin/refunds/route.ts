@@ -71,7 +71,7 @@ export async function GET() {
     }),
   ]);
 
-  return NextResponse.json(
+  return NextResponse.json({
     refunds,
     totalRefunds,
     requestedRefunds,
@@ -79,5 +79,5 @@ export async function GET() {
     processingRefunds,
     refundedRefunds,
     failedRefunds,
-  );
+  });
 }
