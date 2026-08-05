@@ -73,6 +73,87 @@ async function refundPaystack(
    FLUTTERWAVE
 ================================================== */
 
+// async function refundFlutterwave(
+//   amount: number,
+//   reference: string,
+// ): Promise<RefundPaymentResult> {
+//   try {
+//     const res = await fetch(
+//       `https://api.flutterwave.com/v3/transactions/${reference}/refund`,
+//       {
+//         method: "POST",
+//         headers: {
+//           Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           amount,
+//         }),
+//       },
+//     );
+
+//     const data = await res.json();
+
+//     console.log("FLUTTERWAVE REFUND RESPONSE:", data);
+
+//     /*
+//      * Flutterwave can report that the transaction
+//      * has already been fully refunded.
+//      */
+//     const responseMessage =
+//       typeof data?.data === "string"
+//         ? data.data
+//         : typeof data?.message === "string"
+//           ? data.message
+//           : "";
+
+//     const isAlreadyRefunded = responseMessage
+//       .toLowerCase()
+//       .includes("already fully refunded");
+
+//     /*
+//      * Already refunded is still considered successful
+//      * from the perspective of our refund workflow.
+//      */
+//     if (isAlreadyRefunded) {
+//       return {
+//         success: true,
+//         provider: "flutterwave",
+//         reference: "already_refunded",
+//       };
+//     }
+
+//     /*
+//      * Normal successful Flutterwave refund.
+//       */
+//     if (res.ok && data?.status === "success") {
+//       const refundReference = data?.data?.id;
+
+//       return {
+//         success: true,
+//         provider: "flutterwave",
+//         reference:
+//           refundReference != null ? String(refundReference) : undefined,
+//       };
+//     }
+
+//     /*
+//      * Gateway responded but refund was not successful.
+//      */
+//     return {
+//       success: false,
+//       provider: "flutterwave",
+//     };
+//   } catch (error) {
+//     console.error("FLW REFUND ERROR:", error);
+
+//     return {
+//       success: false,
+//       provider: "flutterwave",
+//     };
+//   }
+// }
+
 async function refundFlutterwave(
   amount: number,
   reference: string,
@@ -92,14 +173,29 @@ async function refundFlutterwave(
       },
     );
 
-    const data = await res.json();
+    const rawResponse = await res.text();
+
+    console.log("FLUTTERWAVE REFUND HTTP STATUS:", res.status);
+    console.log("FLUTTERWAVE REFUND RAW RESPONSE:", rawResponse);
+
+    let data: any;
+
+    try {
+      data = JSON.parse(rawResponse);
+    } catch {
+      console.error(
+        "FLUTTERWAVE REFUND RESPONSE WAS NOT VALID JSON:",
+        rawResponse,
+      );
+
+      return {
+        success: false,
+        provider: "flutterwave",
+      };
+    }
 
     console.log("FLUTTERWAVE REFUND RESPONSE:", data);
 
-    /*
-     * Flutterwave can report that the transaction
-     * has already been fully refunded.
-     */
     const responseMessage =
       typeof data?.data === "string"
         ? data.data
@@ -111,10 +207,6 @@ async function refundFlutterwave(
       .toLowerCase()
       .includes("already fully refunded");
 
-    /*
-     * Already refunded is still considered successful
-     * from the perspective of our refund workflow.
-     */
     if (isAlreadyRefunded) {
       return {
         success: true,
@@ -123,15 +215,6 @@ async function refundFlutterwave(
       };
     }
 
-    /*
-     * Normal successful Flutterwave refund.
-     *
-     * Flutterwave may return the refund ID as a number,
-     * e.g. 107029.
-     *
-     * ALWAYS convert it to a string here because
-     * RefundTransaction.transactionRef is a String.
-     */
     if (res.ok && data?.status === "success") {
       const refundReference = data?.data?.id;
 
@@ -143,15 +226,17 @@ async function refundFlutterwave(
       };
     }
 
-    /*
-     * Gateway responded but refund was not successful.
-     */
+    console.error("FLUTTERWAVE REFUND FAILED:", {
+      statusCode: res.status,
+      response: data,
+    });
+
     return {
       success: false,
       provider: "flutterwave",
     };
   } catch (error) {
-    console.error("FLW REFUND ERROR:", error);
+    console.error("FLUTTERWAVE REFUND REQUEST ERROR:", error);
 
     return {
       success: false,

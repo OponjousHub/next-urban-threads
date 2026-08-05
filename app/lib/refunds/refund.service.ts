@@ -367,8 +367,21 @@ export async function processRefund(refundId: string) {
    * Only APPROVED refunds can be processed
    * --------------------------------------------------
    */
-  if (refund.status !== "APPROVED") {
-    throw new Error("Only approved refunds can be processed.");
+  if (refund.status !== "APPROVED" && refund.status !== "FAILED") {
+    throw new Error(
+      "Only approved or previously failed refunds can be processed.",
+    );
+  }
+
+  const existingTransaction = await prisma.refundTransaction.findFirst({
+    where: {
+      refundRequestId: refund.id,
+      status: "SUCCESS",
+    },
+  });
+
+  if (existingTransaction) {
+    throw new Error("This refund has already been successfully processed.");
   }
 
   const refundAmount = refund.approvedAmount ?? refund.requestedAmount;
@@ -424,8 +437,6 @@ export async function processRefund(refundId: string) {
       amount: refundAmount,
       reference: refund.order.paymentReference!,
     });
-
-    console.log("REFUND PAYMENT RESULT:", paymentResult);
   } catch (error) {
     console.error("REFUND PAYMENT ERROR:", error);
 
@@ -556,9 +567,6 @@ export async function processRefund(refundId: string) {
    * --------------------------------------------------
    * Successful refund
    * --------------------------------------------------
-   *
-   * paymentResult.reference is already a string according
-   * to the refundPayment() return type.
    */
   await prisma.$transaction(async (tx) => {
     /*

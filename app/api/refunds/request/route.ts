@@ -8,7 +8,6 @@ export async function POST(req: Request) {
     throw new Error("Default tenant not found");
   }
   const body = await req.json();
-  console.log("FUND HAS BEEN REQUESTED", body);
 
   const refund = await submitRefundRequest(body);
 
