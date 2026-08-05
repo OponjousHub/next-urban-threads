@@ -21,5 +21,63 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json(refunds);
+  const [
+    totalRefunds,
+    requestedRefunds,
+    approvedRefunds,
+    processingRefunds,
+    refundedRefunds,
+    failedRefunds,
+  ] = await Promise.all([
+    prisma.refundRequest.count({
+      where: {
+        tenantId: tenant.id,
+      },
+    }),
+
+    prisma.refundRequest.count({
+      where: {
+        tenantId: tenant.id,
+        status: "REQUESTED",
+      },
+    }),
+
+    prisma.refundRequest.count({
+      where: {
+        tenantId: tenant.id,
+        status: "APPROVED",
+      },
+    }),
+
+    prisma.refundRequest.count({
+      where: {
+        tenantId: tenant.id,
+        status: "PROCESSING",
+      },
+    }),
+
+    prisma.refundRequest.count({
+      where: {
+        tenantId: tenant.id,
+        status: "REFUNDED",
+      },
+    }),
+
+    prisma.refundRequest.count({
+      where: {
+        tenantId: tenant.id,
+        status: "FAILED",
+      },
+    }),
+  ]);
+
+  return NextResponse.json(
+    refunds,
+    totalRefunds,
+    requestedRefunds,
+    approvedRefunds,
+    processingRefunds,
+    refundedRefunds,
+    failedRefunds,
+  );
 }
