@@ -1,4 +1,5 @@
 import VendorDetailPage from "@/components/admin/vendors/vendorDetailPage";
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 export default async function Page({
   params,
@@ -7,5 +8,13 @@ export default async function Page({
 }) {
   const { vendorId } = await params;
 
-  return <VendorDetailPage vendorId={vendorId} />;
+  return (
+    <>
+      <AdminHeaderUI
+        title="Vendor Management"
+        subtitle="View vendor details, products, orders and admin note."
+      />
+      <VendorDetailPage vendorId={vendorId} />
+    </>
+  );
 }

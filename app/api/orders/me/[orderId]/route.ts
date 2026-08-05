@@ -21,7 +21,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ message: "Unauthorized!" }, { status: 401 });
   }
   try {
-    const { orderId } = params;
+    const { orderId } = await params;
 
     if (!orderId) {
       return NextResponse.json(

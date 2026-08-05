@@ -37,8 +37,6 @@ export default function VendorProductsPage({ vendorId }: { vendorId: string }) {
         Back to Vendor
       </Link>
 
-      <h1 className="text-3xl font-bold mb-6">Vendor Products</h1>
-
       <div className="bg-white border rounded-xl overflow-hidden">
         <table className="w-full">
           <thead>

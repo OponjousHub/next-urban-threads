@@ -190,8 +190,6 @@ export default function VendorManagementPage() {
 
   return (
     <main className="p-6">
-      <h1 className="mb-6 text-2xl font-bold">Vendor Management</h1>
-
       {/* Search + Filters */}
 
       <div className="mb-6 rounded-xl border bg-white p-4">

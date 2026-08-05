@@ -255,8 +255,6 @@ export default function VendorAprovalPage() {
 
   return (
     <main className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Vendor applications</h1>
-
       <div className="mb-6 rounded-xl border bg-white p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           {/* Search */}

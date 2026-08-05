@@ -1,5 +1,4 @@
-// app/admin/vendors/manage/[vendorId]/orders/page.tsx
-
+import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 import VendorOrdersPage from "@/components/admin/vendors/vendorOrdersPage";
 
 export default async function Page({
@@ -9,5 +8,10 @@ export default async function Page({
 }) {
   const { vendorId } = await params;
 
-  return <VendorOrdersPage vendorId={vendorId} />;
+  return (
+    <>
+      <AdminHeaderUI title="Vendor Orders" subtitle="View Vendor Orders" />
+      <VendorOrdersPage vendorId={vendorId} />
+    </>
+  );
 }
