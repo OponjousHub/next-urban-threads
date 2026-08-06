@@ -86,12 +86,15 @@ export async function POST(req: Request) {
     await AdminNotificationService.notify({
       type: "NEW_SUPPORT_TICKET",
       title: "💬 New Support Message",
-      message: `${user?.name ?? "A customer"} sent a new support message.`,
+      message: `${contact.name} sent a new support message.`,
       link: "/admin/support",
       metadata: {
-        customerId: user?.id,
-        customerName: user?.name,
-        ticketId: contact?.id,
+        contactId: contact.id,
+        customerId: user?.id ?? null,
+        customerName: contact.name,
+        customerEmail: contact.email,
+        priority: contact.priority,
+        tag: contact.tag,
       },
     });
 
