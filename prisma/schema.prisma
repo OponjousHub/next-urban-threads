@@ -953,6 +953,7 @@ enum InventoryReason {
 
 enum AdminNotificationType {
   NEW_ORDER
+  NEW_REVIEW
   ORDER_CANCELLED
   ORDER_DELIVERED
   NEW_VENDOR_APPLICATION

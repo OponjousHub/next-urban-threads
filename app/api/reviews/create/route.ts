@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
 import { updateProductRating } from "@/lib/calProduct-rating";
 import NotificationService from "@/lib/notifications/notification.service";
+import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
 
 export async function POST(req: Request) {
   try {
@@ -90,6 +91,20 @@ export async function POST(req: Request) {
       metadata: {
         reviewId: review.id,
         productId: product.id,
+      },
+    });
+
+    await AdminNotificationService.notify({
+      type: "NEW_REVIEW",
+      title: "⭐ New Review",
+      message: `${user?.name ?? "A customer"} left a review for ${product.name}.`,
+      link: `/admin/reviews/${review.id}`,
+      metadata: {
+        reviewId: review.id,
+        productId: product.id,
+        productName: product.name,
+        customerId: user?.id,
+        customerName: user?.name,
       },
     });
 
