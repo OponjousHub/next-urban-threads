@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { getLoggedInUserId } from "@/lib/auth";
 import { ContactSupportEmail } from "@/app/lib/email/template/contact-support";
 import { sendEmail } from "@/app/lib/email/sendEmail";
 import { detectSupportIntent } from "@/app/admin/support/message-priority-detector";
@@ -8,8 +9,12 @@ import { AdminNotificationService } from "@/app/lib/admin/admin-notification-ser
 
 export async function POST(req: Request) {
   const tenant = await getDefaultTenant();
+  const userId = await getLoggedInUserId();
 
   if (!tenant) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -66,6 +71,10 @@ export async function POST(req: Request) {
       tenantName: tenant.name,
     });
 
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
     // ✅ Send to ADMIN (NOT customer)
     await sendEmail({
       to: tenant.email,
@@ -75,14 +84,14 @@ export async function POST(req: Request) {
 
     // Send admin notification
     await AdminNotificationService.notify({
-      type: "NEW_SUPPORT",
+      type: "NEW_SUPPORT_TICKET",
       title: "💬 New Support Message",
-      message: `${customer?.name ?? "A customer"} sent a new support message.`,
+      message: `${user?.name ?? "A customer"} sent a new support message.`,
       link: "/admin/support",
       metadata: {
-        customerId: customer?.id,
-        customerName: customer?.name,
-        ticketId: ticket?.id,
+        customerId: user?.id,
+        customerName: user?.name,
+        ticketId: contact?.id,
       },
     });
 

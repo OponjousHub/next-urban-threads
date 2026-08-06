@@ -30,6 +30,13 @@ export async function POST(req: Request) {
           some: { productId },
         },
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
 
     if (!hasPurchased) {
@@ -103,7 +110,7 @@ export async function POST(req: Request) {
         reviewId: review.id,
         productId: product.id,
         productName: product.name,
-        customerId: user?.id,
+        customerId: hasPurchased.user?.id,
         customerName: user?.name,
       },
     });
