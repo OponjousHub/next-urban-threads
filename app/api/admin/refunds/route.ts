@@ -32,12 +32,14 @@ export async function GET() {
     prisma.refundRequest.count({
       where: {
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
       },
     }),
 
     prisma.refundRequest.count({
       where: {
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         status: "REQUESTED",
       },
     }),
@@ -46,6 +48,7 @@ export async function GET() {
       where: {
         tenantId: tenant.id,
         status: "APPROVED",
+        storeMode: tenant.storeMode,
       },
     }),
 
@@ -53,6 +56,7 @@ export async function GET() {
       where: {
         tenantId: tenant.id,
         status: "PROCESSING",
+        storeMode: tenant.storeMode,
       },
     }),
 
@@ -60,6 +64,7 @@ export async function GET() {
       where: {
         tenantId: tenant.id,
         status: "REFUNDED",
+        storeMode: tenant.storeMode,
       },
     }),
 
@@ -67,6 +72,7 @@ export async function GET() {
       where: {
         tenantId: tenant.id,
         status: "FAILED",
+        storeMode: tenant.storeMode,
       },
     }),
   ]);

@@ -97,17 +97,16 @@ export default function RefundsPage() {
     <main className="p-6">
       <h1 className="mb-6 text-2xl font-bold">Refund Requests</h1>
 
+      {/* Refund KPIs */}
+      <RefundKpis
+        total={kpis.total}
+        requested={kpis.requested}
+        approved={kpis.approved}
+        processing={kpis.processing}
+        refunded={kpis.refunded}
+        failed={kpis.failed}
+      />
       <div className="overflow-hidden rounded-xl border bg-white">
-        {/* Refund KPIs */}
-        <RefundKpis
-          total={kpis.total}
-          requested={kpis.requested}
-          approved={kpis.approved}
-          processing={kpis.processing}
-          refunded={kpis.refunded}
-          failed={kpis.failed}
-        />
-
         {/* Refund Table */}
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-xs uppercase text-gray-500">
