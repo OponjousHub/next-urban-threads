@@ -22,22 +22,13 @@ export default function AdminNotificationItem({
   const [processing, setProcessing] = useState(false);
 
   async function handleClick() {
-    if (processing) return;
-
-    try {
-      setProcessing(true);
-
-      // ----------------------------------------
-      // Mark notification as read
-      // ----------------------------------------
-
-      if (!notification.isRead) {
+    if (!notification.isRead) {
+      try {
         const res = await fetch("/api/admin/notifications/read", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
           body: JSON.stringify({
             notificationId: notification.id,
           }),
@@ -51,28 +42,17 @@ export default function AdminNotificationItem({
         } else {
           await onRefresh();
         }
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
       }
+    }
 
-      // ----------------------------------------
-      // Close dropdown
-      // ----------------------------------------
+    onClose();
 
-      onClose();
-
-      // ----------------------------------------
-      // Navigate
-      // ----------------------------------------
-
-      if (notification.link) {
-        router.push(notification.link);
-      }
-    } catch (error) {
-      console.error("[ADMIN_NOTIFICATION_CLICK]", error);
-    } finally {
-      setProcessing(false);
+    if (notification.link) {
+      router.push(notification.link);
     }
   }
-
   const Icon = getNotificationIcon(notification.type);
 
   return (
