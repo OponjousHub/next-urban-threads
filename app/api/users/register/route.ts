@@ -38,6 +38,7 @@ export async function POST(req: Request) {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
+
     return res;
   } catch (error: any) {
     console.error("REGISTER ERROR:", error);

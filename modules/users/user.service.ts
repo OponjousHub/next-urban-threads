@@ -5,6 +5,7 @@ import { getLoggedInUserId } from "@/lib/auth";
 import welcomeEmail from "@/app/lib/email/template/welcome";
 import { sendEmail } from "@/app/lib/email/sendEmail";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
 
 export class UserService {
   static async register(data: RegisterInput) {
@@ -47,6 +48,19 @@ export class UserService {
       },
       tenant.id,
     );
+
+    // Admin Notification
+    await AdminNotificationService.notify({
+      type: "NEW_CUSTOMER",
+      title: "👤 New Customer",
+      message: `${user.name ?? "A new customer"} just created an account.`,
+      link: `/admin/customers/${user.id}`,
+      metadata: {
+        customerId: user.id,
+        customerName: user.name,
+        email: user.email,
+      },
+    });
 
     //  Send welcome email
     const template = welcomeEmail(user.name || "Customer");

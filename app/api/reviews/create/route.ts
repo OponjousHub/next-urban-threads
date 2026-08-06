@@ -86,24 +86,24 @@ export async function POST(req: Request) {
       type: "REVIEW",
       title: "New Product Review",
       message: `${user?.name ?? "A customer"} left a review for "${product.name}".`,
-      link: `/vendor/reviews`,
+      link: `/vendor/reviews/${review.id}`,
       metadata: {
         reviewId: review.id,
         productId: product.id,
       },
     });
 
-    await NotificationService.notify({
-      vendorId: review.id,
-      setting: "newReview",
-      type: "REVIEW",
-      title: "New Review",
-      message: `You received a new review (${review.id.slice(-8)}).`,
-      link: `/vendor/orders/${review.id}`,
-      metadata: {
-        orderId: review.id,
-      },
-    });
+    // await NotificationService.notify({
+    //   vendorId: review.id,
+    //   setting: "newReview",
+    //   type: "REVIEW",
+    //   title: "New Review",
+    //   message: `You received a new review (${review.id.slice(-8)}).`,
+    //   link: `/vendor/orders/${review.id}`,
+    //   metadata: {
+    //     orderId: review.id,
+    //   },
+    // });
 
     //Update product rating
     await updateProductRating(review.productId);
