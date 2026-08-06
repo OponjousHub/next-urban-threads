@@ -4,6 +4,7 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { ContactSupportEmail } from "@/app/lib/email/template/contact-support";
 import { sendEmail } from "@/app/lib/email/sendEmail";
 import { detectSupportIntent } from "@/app/admin/support/message-priority-detector";
+import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
 
 export async function POST(req: Request) {
   const tenant = await getDefaultTenant();
@@ -70,6 +71,19 @@ export async function POST(req: Request) {
       to: tenant.email,
       subject: template.subject,
       html: template.html,
+    });
+
+    // Send admin notification
+    await AdminNotificationService.notify({
+      type: "NEW_SUPPORT",
+      title: "💬 New Support Message",
+      message: `${customer?.name ?? "A customer"} sent a new support message.`,
+      link: "/admin/support",
+      metadata: {
+        customerId: customer?.id,
+        customerName: customer?.name,
+        ticketId: ticket?.id,
+      },
     });
 
     return NextResponse.json({ success: true, contact });
