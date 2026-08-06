@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import type { AdminNotification } from "./adminNotificationBell";
 import { getNotificationIcon } from "./admin-notification-icons";
@@ -18,27 +19,57 @@ export default function AdminNotificationItem({
   onClose,
 }: Props) {
   const router = useRouter();
+  const [processing, setProcessing] = useState(false);
 
   async function handleClick() {
-    // Mark as read
-    if (!notification.isRead) {
-      await fetch("/api/admin/notifications/read", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          notificationId: notification.id,
-        }),
-      });
+    if (processing) return;
 
-      await onRefresh();
-    }
+    try {
+      setProcessing(true);
 
-    onClose();
+      // ----------------------------------------
+      // Mark notification as read
+      // ----------------------------------------
 
-    if (notification.link) {
-      router.push(notification.link);
+      if (!notification.isRead) {
+        const res = await fetch("/api/admin/notifications/read", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            notificationId: notification.id,
+          }),
+        });
+
+        if (!res.ok) {
+          console.error(
+            "Failed to mark notification as read:",
+            await res.text(),
+          );
+        } else {
+          await onRefresh();
+        }
+      }
+
+      // ----------------------------------------
+      // Close dropdown
+      // ----------------------------------------
+
+      onClose();
+
+      // ----------------------------------------
+      // Navigate
+      // ----------------------------------------
+
+      if (notification.link) {
+        router.push(notification.link);
+      }
+    } catch (error) {
+      console.error("[ADMIN_NOTIFICATION_CLICK]", error);
+    } finally {
+      setProcessing(false);
     }
   }
 
@@ -46,15 +77,19 @@ export default function AdminNotificationItem({
 
   return (
     <button
+      type="button"
       onClick={handleClick}
-      className={`flex w-full items-start gap-3 border-b p-4 text-left transition hover:bg-gray-50 ${
+      disabled={processing}
+      className={`flex w-full items-start gap-3 border-b p-4 text-left transition hover:bg-gray-50 disabled:cursor-wait ${
         !notification.isRead ? "bg-blue-50" : ""
       }`}
     >
-      <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+      {/* Icon */}
+      <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100">
         <Icon className="h-5 w-5 text-gray-700" />
       </div>
 
+      {/* Content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
           <p
@@ -68,7 +103,7 @@ export default function AdminNotificationItem({
           </p>
 
           {!notification.isRead && (
-            <span className="mt-1 h-2 w-2 rounded-full bg-blue-600" />
+            <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-blue-600" />
           )}
         </div>
 

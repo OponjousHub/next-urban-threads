@@ -187,7 +187,7 @@ export async function submitRefundRequest(data: RefundRequestInput) {
 
     message: `${order.user.name ?? "A customer"} requested a refund.`,
 
-    link: `/admin/refunds/${refund.id}`,
+    link: `/admin/refunds`,
 
     metadata: {
       refundId: refund.id,
@@ -301,7 +301,7 @@ export async function approveRefund(refundId: string) {
     type: "REFUND_APPROVED",
     title: "Refund Approved",
     message: `Refund request for Order #${refund.orderId.slice(-8)} has been approved.`,
-    link: `/admin/refunds/${refund.id}`,
+    link: `/admin/refunds`,
     metadata: {
       refundId: refund.id,
       orderId: refund.orderId,
@@ -682,7 +682,7 @@ export async function processRefund(refundId: string) {
     type: "REFUNDED",
     title: "Refund Completed",
     message: `Refund completed for Order #${refund.orderId.slice(-8)}.`,
-    link: `/admin/refunds/${refund.id}`,
+    link: `/admin/refunds`,
     metadata: {
       refundId: refund.id,
       orderId: refund.orderId,
@@ -772,7 +772,7 @@ export async function rejectRefund(refundId: string, reason?: string) {
     type: "REFUND_REJECTED",
     title: "Refund Rejected",
     message: `Refund request for Order #${refund.orderId.slice(-8)} has been rejected.`,
-    link: `/admin/refunds/${refundId}`,
+    link: `/admin/refunds`,
     metadata: {
       refundId,
       orderId: refund.orderId,
@@ -845,7 +845,7 @@ export async function cancelRefund(refundId: string, userId: string) {
     type: "REFUND_CANCELLED",
     title: "Refund Cancelled",
     message: `Customer cancelled refund request for Order #${refund.orderId.slice(-8)}.`,
-    link: `/admin/refunds/${refundId}`,
+    link: `/admin/refunds`,
     metadata: {
       refundId,
     },
