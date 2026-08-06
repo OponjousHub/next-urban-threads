@@ -97,8 +97,8 @@ export default function RefundsPage() {
   return (
     <>
       <AdminHeaderUI
-        title="Products"
-        subtitle="Manage your inventory and product listings"
+        title="Refund request"
+        subtitle="Manage your refund request listings"
       />
       <main className="p-6">
         <h1 className="mb-6 text-2xl font-bold">Refund Requests</h1>
