@@ -1,8 +1,7 @@
-// "use client";
-
 "use client";
 
 import { useState, useEffect } from "react";
+import { formatCurrency } from "@/lib/formatCurrency";
 import {
   Line,
   XAxis,
@@ -34,11 +33,14 @@ export default function RevenueChart() {
   const [avgTrend, setAvgTrend] = useState<Trend>("neutral");
 
   const [chartData, setChartData] = useState<any[]>([]);
+  const [currency, setCurrency] = useState("NGN");
 
   useEffect(() => {
     async function loadData() {
       const res = await fetch(`/api/admin/revenue?range=${range}`);
       const data = await res.json();
+
+      setCurrency(data.currency || "NGN");
 
       setRevenue(data.revenue);
       setOrders(data.orders);
@@ -95,7 +97,9 @@ export default function RevenueChart() {
         {/* Revenue */}
         <div>
           <p className="text-xs text-gray-500">Revenue</p>
-          <p className="text-xl font-bold">${revenue.toLocaleString()}</p>
+          <p className="text-xl font-bold">
+            {formatCurrency(revenue, currency)}
+          </p>
 
           <span
             className={`flex items-center text-xs font-medium ${getTrendColor(
@@ -125,7 +129,9 @@ export default function RevenueChart() {
         {/* Avg Order */}
         <div>
           <p className="text-xs text-gray-500">Avg Order</p>
-          <p className="text-xl font-bold">${avgOrderValue.toFixed(2)}</p>
+          <p className="text-xl font-bold">
+            {formatCurrency(avgOrderValue, currency)}
+          </p>
 
           <span
             className={`flex items-center text-xs font-medium ${getTrendColor(

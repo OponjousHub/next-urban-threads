@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FiArrowUp, FiArrowDown } from "react-icons/fi";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface Props {
   title: string;
@@ -9,7 +10,8 @@ interface Props {
   decimals?: number;
   prefix?: string;
   suffix?: string;
-  change?: number; // positive or negative
+  currency?: string;
+  change?: number;
   icon?: React.ReactNode;
 }
 
