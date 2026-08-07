@@ -166,8 +166,7 @@ export default function RevenueChart() {
           </p>
 
           <p className="mt-1 text-xl font-bold tracking-tight text-gray-900">
-            {tenant.currency}
-            {revenue.toFixed(2)}
+            {formatCurrency(revenue, currency)}
           </p>
 
           <span
@@ -207,8 +206,7 @@ export default function RevenueChart() {
           </p>
 
           <p className="mt-1 text-xl font-bold tracking-tight text-gray-900">
-            {tenant.currency}
-            {avgOrderValue.toFixed(2)}
+            {formatCurrency(avgOrderValue, currency)}
           </p>
 
           <span
@@ -354,13 +352,8 @@ export default function RevenueChart() {
                   switch (name) {
                     case "revenue":
                       return [
-                        `${tenant.currency}${numericValue.toLocaleString(
-                          undefined,
-                          {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          },
-                        )}`,
+                        formatCurrency(numericValue, currency),
+
                         "Revenue",
                       ];
 
@@ -369,13 +362,7 @@ export default function RevenueChart() {
 
                     case "prevRevenue":
                       return [
-                        `${tenant.currency}${numericValue.toLocaleString(
-                          undefined,
-                          {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          },
-                        )}`,
+                        formatCurrency(numericValue, currency),
                         "Previous period",
                       ];
 
