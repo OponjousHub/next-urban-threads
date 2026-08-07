@@ -4,6 +4,7 @@ import SalesByCategoryChart from "../charts/salesByCategoryChart";
 export default function DashboardSalesByCategory({
   orderStatus,
   catData,
+  currency,
 }: {
   orderStatus: {
     paid: { count: number; revenue: number };
@@ -15,6 +16,7 @@ export default function DashboardSalesByCategory({
     category: string;
     sales: number;
   }[];
+  currency: string;
 }) {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
@@ -22,7 +24,7 @@ export default function DashboardSalesByCategory({
         <SalesByCategoryChart data={catData} />
       </div>
 
-      <OrdersStatusChart orderStatus={orderStatus} />
+      <OrdersStatusChart orderStatus={orderStatus} currency={currency} />
     </section>
   );
 }

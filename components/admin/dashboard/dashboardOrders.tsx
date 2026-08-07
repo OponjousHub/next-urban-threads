@@ -21,17 +21,19 @@ interface Product {
 export default function DashboardAnalytics({
   recentOders,
   products,
+  currency,
 }: {
   recentOders: recentOders[];
   products: Product[];
+  currency: string;
 }) {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
       <div className="h-full">
-        <RecentOrdersTable orders={recentOders} />
+        <RecentOrdersTable orders={recentOders} currency={currency} />
       </div>
       <div className="h-full">
-        <TopProducts products={products} />
+        <TopProducts products={products} currency={currency} />
       </div>
     </section>
   );

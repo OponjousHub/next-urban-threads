@@ -2,6 +2,7 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { useRouter } from "next/navigation";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 const STATUS_COLORS: Record<string, string> = {
   Paid: "#22c55e",
@@ -10,7 +11,15 @@ const STATUS_COLORS: Record<string, string> = {
   Delivered: "#3b82f6",
 };
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  currency,
+}: {
+  active?: boolean;
+  payload?: any[];
+  currency: string;
+}) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
 
@@ -30,6 +39,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 export default function OrdersStatusChart({
   orderStatus,
+  currency,
 }: {
   orderStatus: {
     paid: { count: number; revenue: number };
@@ -37,6 +47,7 @@ export default function OrdersStatusChart({
     cancelled: { count: number; revenue: number };
     delivered: { count: number; revenue: number };
   };
+  currency: string;
 }) {
   const router = useRouter();
   const STATUS_ROUTE: Record<string, string> = {
@@ -115,8 +126,7 @@ export default function OrdersStatusChart({
                   Orders
                 </text>
               </Pie>
-
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip currency={currency} />} />{" "}
             </PieChart>
           </ResponsiveContainer>
         </div>

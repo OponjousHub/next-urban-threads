@@ -27,6 +27,7 @@ export default function AdminDashboard() {
     formattedRecentOrders: [],
     topProducts: [],
     activities: [],
+    currency: "NGN",
   });
   const [loading, setLoading] = useState(true);
   const { tenant } = useTenant();
@@ -68,11 +69,13 @@ export default function AdminDashboard() {
         <DashboardSalesByCategory
           orderStatus={data?.orderStatus}
           catData={data?.salesByCategory}
+          currency={data?.currency}
         />
 
         <DashboardOrders
           recentOders={data?.formattedRecentOrders}
           products={data?.topProducts}
+          currency={data?.currency}
         />
 
         <DashboardInventory

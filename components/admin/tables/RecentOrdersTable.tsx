@@ -1,6 +1,7 @@
 "use client";
 
 import Avatar from "@/utils/avatar";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface Order {
   id: string;
@@ -11,7 +12,13 @@ interface Order {
   date: string | Date;
 }
 
-export default function RecentOrdersTable({ orders }: { orders: Order[] }) {
+export default function RecentOrdersTable({
+  orders,
+  currency,
+}: {
+  orders: Order[];
+  currency: string;
+}) {
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 h-full">
       <div className="flex justify-between items-center mb-6">
@@ -54,7 +61,7 @@ export default function RecentOrdersTable({ orders }: { orders: Order[] }) {
                 </td>
 
                 <td className="py-4 font-medium">
-                  ₦{order.amount.toLocaleString()}
+                  {formatCurrency(order.amount, currency)}{" "}
                 </td>
 
                 <td className="py-4">

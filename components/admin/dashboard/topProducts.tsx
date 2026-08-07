@@ -1,5 +1,7 @@
 "use client";
 
+import { formatCurrency } from "@/lib/formatCurrency";
+
 interface Product {
   id: string;
   name: string;
@@ -8,7 +10,13 @@ interface Product {
   image: string;
 }
 
-export default function TopProducts({ products }: { products: Product[] }) {
+export default function TopProducts({
+  products,
+  currency,
+}: {
+  products: Product[];
+  currency: string;
+}) {
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 h-full">
       <div className="flex justify-between items-center mb-6">
@@ -45,7 +53,7 @@ export default function TopProducts({ products }: { products: Product[] }) {
             </div>
 
             <div className="text-sm font-semibold text-gray-800">
-              ₦{product.revenue.toLocaleString()}
+              {formatCurrency(product.revenue, currency)}{" "}
             </div>
           </div>
         ))}
