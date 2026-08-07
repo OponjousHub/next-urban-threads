@@ -157,7 +157,6 @@ export async function GET(req: Request) {
   ]);
 
   // Creating the chartMap
-  // Creating the chart map
   const chartMap = new Map<
     string,
     {
@@ -190,7 +189,13 @@ export async function GET(req: Request) {
   }
 
   // Build a previous-period chart map
-  const previousChartMap = new Map<string, number>();
+  const previousChartMap = new Map<
+    string,
+    {
+      revenue: number;
+      orders: number;
+    }
+  >();
 
   for (const order of previousChartOrders) {
     const date = new Date(order.createdAt);
@@ -205,7 +210,17 @@ export async function GET(req: Request) {
 
     const revenue = order.totalAmount.toNumber();
 
-    previousChartMap.set(label, (previousChartMap.get(label) ?? 0) + revenue);
+    const existing = previousChartMap.get(label);
+
+    if (existing) {
+      existing.revenue += revenue;
+      existing.orders += 1;
+    } else {
+      previousChartMap.set(label, {
+        revenue,
+        orders: 1,
+      });
+    }
   }
 
   // Build every day in the selected range
@@ -222,11 +237,14 @@ export async function GET(req: Request) {
 
     const current = chartMap.get(label);
 
+    const previous = previousChartMap.get(label);
+
     chartData.push({
       name: label,
       revenue: current?.revenue ?? 0,
       orders: current?.orders ?? 0,
-      prev: previousChartMap.get(label) ?? 0,
+      prevRevenue: previous?.revenue ?? 0,
+      prevOrders: previous?.orders ?? 0,
     });
   }
 

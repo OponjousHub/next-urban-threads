@@ -561,15 +561,25 @@ export default function RevenueChart() {
                 formatter={(value, name) => {
                   const numericValue = Number(value ?? 0);
 
-                  if (name === "revenue") {
-                    return [`$${numericValue.toLocaleString()}`, "Revenue"];
-                  }
+                  switch (name) {
+                    case "revenue":
+                      return [`$${numericValue.toLocaleString()}`, "Revenue"];
 
-                  if (name === "orders") {
-                    return [numericValue.toLocaleString(), "Orders"];
-                  }
+                    case "orders":
+                      return [numericValue.toLocaleString(), "Orders"];
 
-                  return [numericValue.toLocaleString(), String(name ?? "")];
+                    case "prev":
+                      return [
+                        `$${numericValue.toLocaleString()}`,
+                        "Previous period",
+                      ];
+
+                    default:
+                      return [
+                        numericValue.toLocaleString(),
+                        String(name ?? ""),
+                      ];
+                  }
                 }}
               />
 
