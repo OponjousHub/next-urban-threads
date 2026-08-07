@@ -41,6 +41,7 @@ export async function GET(req: Request) {
     currentCustomers,
     previousCustomers,
     chartOrders,
+    previousChartOrders,
     currentReturningRaw,
     previousReturningRaw,
   ] = await Promise.all([
@@ -98,12 +99,27 @@ export async function GET(req: Request) {
       },
     }),
 
-    // Chart data
+    // Current period chart data
     prisma.order.findMany({
       where: {
         ...revenueOrderFilter,
         createdAt: {
           gte: startDate,
+        },
+      },
+      select: {
+        createdAt: true,
+        totalAmount: true,
+      },
+    }),
+
+    // Previous period chart data
+    prisma.order.findMany({
+      where: {
+        ...revenueOrderFilter,
+        createdAt: {
+          gte: previousStartDate,
+          lt: startDate,
         },
       },
       select: {
