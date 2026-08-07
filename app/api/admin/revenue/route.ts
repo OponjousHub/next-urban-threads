@@ -40,7 +40,7 @@ export async function GET(req: Request) {
     previousOrdersData,
     currentCustomers,
     previousCustomers,
-    groupedOrders,
+    chartOrders,
     currentReturningRaw,
     previousReturningRaw,
   ] = await Promise.all([
@@ -99,25 +99,16 @@ export async function GET(req: Request) {
     }),
 
     // Chart data
-    prisma.order.groupBy({
-      by: ["createdAt"],
+    prisma.order.findMany({
       where: {
-        tenantId: tenant.id,
-        status: {
-          in: [
-            OrderStatus.SHIPPED,
-            OrderStatus.DELIVERED,
-            OrderStatus.PROCESSING,
-            OrderStatus.PENDING,
-          ],
+        ...revenueOrderFilter,
+        createdAt: {
+          gte: startDate,
         },
-        createdAt: { gte: startDate },
       },
-      _sum: {
+      select: {
+        createdAt: true,
         totalAmount: true,
-      },
-      _count: {
-        id: true,
       },
     }),
 
@@ -150,25 +141,40 @@ export async function GET(req: Request) {
   ]);
 
   // Creating the chartMap
-  const chartMap: Record<
+  // Creating the chart map
+  const chartMap = new Map<
     string,
-    { name: string; revenue: number; orders: number }
-  > = {};
+    {
+      name: string;
+      revenue: number;
+      orders: number;
+    }
+  >();
 
-  groupedOrders.forEach((row) => {
-    const label = new Date(row.createdAt).toLocaleDateString("en-US", {
+  for (const order of chartOrders) {
+    const label = new Date(order.createdAt).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     });
 
-    chartMap[label] = {
-      name: label,
-      revenue: Number(row._sum.totalAmount ?? 0),
-      orders: row._count.id,
-    };
-  });
+    const existing = chartMap.get(label);
 
-  let chartData = [];
+    const revenue = order.totalAmount.toNumber();
+
+    if (existing) {
+      existing.revenue += revenue;
+      existing.orders += 1;
+    } else {
+      chartMap.set(label, {
+        name: label,
+        revenue,
+        orders: 1,
+      });
+    }
+  }
+
+  // Build every day in the selected range
+  const chartData = [];
 
   for (let i = 0; i < days; i++) {
     const d = new Date(startDate);
@@ -180,7 +186,7 @@ export async function GET(req: Request) {
     });
 
     chartData.push(
-      chartMap[label] || {
+      chartMap.get(label) || {
         name: label,
         revenue: 0,
         orders: 0,
