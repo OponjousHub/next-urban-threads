@@ -25,21 +25,32 @@ export default function KpiCard({
   change,
   icon,
 }: Props) {
-  const [displayValue, setDisplayValue] = useState(0);
-
+  const [displayValue, setDisplayValue] = useState<number | null>(null);
   useEffect(() => {
+    if (!Number.isFinite(value)) {
+      setDisplayValue(null);
+      return;
+    }
+
     let startTimestamp: number | null = null;
-    const duration = 1000;
+    const duration = 700;
 
     const step = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp;
+      if (!startTimestamp) {
+        startTimestamp = timestamp;
+      }
 
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+
       const currentValue = progress * value;
+
       setDisplayValue(currentValue);
 
-      if (progress < 1) requestAnimationFrame(step);
-      else setDisplayValue(value);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        setDisplayValue(value);
+      }
     };
 
     requestAnimationFrame(step);
@@ -78,12 +89,16 @@ export default function KpiCard({
 
           {/* Animated Value */}
           <h3 className="text-3xl font-bold tracking-tight mt-2">
-            {currency
-              ? formatCurrency(displayValue, currency, {
-                  minimumFractionDigits: decimals,
-                  maximumFractionDigits: decimals,
-                })
-              : `${prefix ?? ""}${(displayValue ?? 0).toFixed(decimals)}${suffix ?? ""}`}
+            {displayValue === null ? (
+              <span className="inline-block h-9 w-24 animate-pulse rounded-md bg-gray-100" />
+            ) : currency ? (
+              formatCurrency(displayValue, currency, {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+              })
+            ) : (
+              `${prefix ?? ""}${displayValue.toFixed(decimals)}${suffix ?? ""}`
+            )}
           </h3>
         </div>
 
