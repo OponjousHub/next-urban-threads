@@ -20,6 +20,7 @@ export default function KpiCard({
   value,
   prefix,
   suffix,
+  currency,
   decimals = 0,
   change,
   icon,
@@ -77,9 +78,12 @@ export default function KpiCard({
 
           {/* Animated Value */}
           <h3 className="text-3xl font-bold tracking-tight mt-2">
-            {prefix}
-            {(displayValue ?? 0).toFixed(decimals)}
-            {suffix}
+            {currency
+              ? formatCurrency(displayValue, currency, {
+                  minimumFractionDigits: decimals,
+                  maximumFractionDigits: decimals,
+                })
+              : `${prefix ?? ""}${(displayValue ?? 0).toFixed(decimals)}${suffix ?? ""}`}
           </h3>
         </div>
 
