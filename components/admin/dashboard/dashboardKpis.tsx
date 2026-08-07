@@ -9,6 +9,28 @@ import {
   FiBarChart2,
 } from "react-icons/fi";
 
+interface KpiData {
+  revenue: number;
+  revenueChange: number;
+
+  orders: number;
+  ordersChange: number;
+
+  avgOrderValue: number;
+  avgOrderChange: number;
+
+  customers: number;
+  customersChange: number;
+
+  conversionRate: number;
+  conversionChange: number;
+
+  returningCustomerRate: number;
+  returningCustomerChange: number;
+
+  currency: string;
+}
+
 export default function DashboardAnalytics({
   totalRevenue,
   totalCustomer,
@@ -22,7 +44,7 @@ export default function DashboardAnalytics({
   conversion: number;
   returningCustomerRate: number;
 }) {
-  const [kpiData, setKPIData] = useState<any>(null);
+  const [kpiData, setKPIData] = useState<KpiData | null>(null);
   const [currency, setCurrency] = useState("NGN");
 
   // Fetch Kpi percentage change
@@ -41,7 +63,7 @@ export default function DashboardAnalytics({
     <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
       <KpiCard
         title="Total Revenue"
-        value={kpiData?.revenue ?? 0}
+        value={kpiData?.revenue ?? NaN}
         currency={currency}
         change={kpiData?.revenueChange}
         icon={<FiDollarSign />}
@@ -49,7 +71,7 @@ export default function DashboardAnalytics({
 
       <KpiCard
         title="Average Order Value"
-        value={kpiData?.avgOrderValue ?? 0}
+        value={kpiData?.avgOrderValue ?? NaN}
         currency={currency}
         decimals={2}
         icon={<FiBarChart2 />}
@@ -58,20 +80,20 @@ export default function DashboardAnalytics({
 
       <KpiCard
         title="Total Orders"
-        value={kpiData?.orders}
+        value={kpiData?.orders ?? NaN}
         icon={<FiShoppingBag />}
         change={kpiData?.ordersChange}
       />
 
       <KpiCard
         title="Customers"
-        value={kpiData?.customers}
+        value={kpiData?.customers ?? NaN}
         icon={<FiUsers />}
         change={kpiData?.customersChange}
       />
       <KpiCard
         title="Conversion Rate"
-        value={kpiData?.conversionRate}
+        value={kpiData?.conversionRate ?? NaN}
         suffix="%"
         change={kpiData?.conversionChange}
         decimals={1}
@@ -79,7 +101,7 @@ export default function DashboardAnalytics({
       />
       <KpiCard
         title="Returning Customers"
-        value={kpiData?.returningCustomerRate}
+        value={kpiData?.returningCustomerRate ?? NaN}
         suffix="%"
         decimals={1}
         icon={<FiRepeat />}
