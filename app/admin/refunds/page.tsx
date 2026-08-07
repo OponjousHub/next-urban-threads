@@ -101,8 +101,6 @@ export default function RefundsPage() {
         subtitle="Manage your refund request listings"
       />
       <main className="p-6">
-        <h1 className="mb-6 text-2xl font-bold">Refund Requests</h1>
-
         {/* Refund KPIs */}
         <RefundKpis
           total={kpis.total}
