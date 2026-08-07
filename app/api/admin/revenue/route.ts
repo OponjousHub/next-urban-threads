@@ -189,6 +189,25 @@ export async function GET(req: Request) {
     }
   }
 
+  // Build a previous-period chart map
+  const previousChartMap = new Map<string, number>();
+
+  for (const order of previousChartOrders) {
+    const date = new Date(order.createdAt);
+
+    // Move previous-period dates forward by the selected range
+    date.setDate(date.getDate() + days);
+
+    const label = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+
+    const revenue = order.totalAmount.toNumber();
+
+    previousChartMap.set(label, (previousChartMap.get(label) ?? 0) + revenue);
+  }
+
   // Build every day in the selected range
   const chartData = [];
 
@@ -201,13 +220,14 @@ export async function GET(req: Request) {
       day: "numeric",
     });
 
-    chartData.push(
-      chartMap.get(label) || {
-        name: label,
-        revenue: 0,
-        orders: 0,
-      },
-    );
+    const current = chartMap.get(label);
+
+    chartData.push({
+      name: label,
+      revenue: current?.revenue ?? 0,
+      orders: current?.orders ?? 0,
+      prev: previousChartMap.get(label) ?? 0,
+    });
   }
 
   // DERIVING VALUES FROM PROMISE>ALL VALUES
@@ -294,5 +314,7 @@ export async function GET(req: Request) {
     returningCustomerChange: returningStats.change,
 
     chartData,
+
+    currency: tenant.currency,
   });
 }
