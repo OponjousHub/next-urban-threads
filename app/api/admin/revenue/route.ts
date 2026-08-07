@@ -1,7 +1,7 @@
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
 import { calculateChange } from "@/lib/analytics/calculateChange";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus, PaymentStatus } from "@prisma/client";
 
 function getStartDate(range: string) {
   const now = new Date();
@@ -26,6 +26,15 @@ export async function GET(req: Request) {
   const tenant = await getDefaultTenant();
   if (!tenant) throw new Error("Default tenant not found");
 
+  // Add a reusable filter
+  const revenueOrderFilter = {
+    tenantId: tenant.id,
+    paymentStatus: PaymentStatus.PAID,
+    status: {
+      in: [OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED],
+    },
+  };
+
   const [
     currentOrdersData,
     previousOrdersData,
@@ -38,42 +47,34 @@ export async function GET(req: Request) {
     // Current period orders
     prisma.order.aggregate({
       where: {
-        tenantId: tenant.id,
-        status: {
-          in: [
-            OrderStatus.SHIPPED,
-            OrderStatus.DELIVERED,
-            OrderStatus.CANCELLED,
-            OrderStatus.PENDING,
-            OrderStatus.PROCESSING,
-          ],
+        ...revenueOrderFilter,
+        createdAt: {
+          gte: startDate,
         },
-        createdAt: { gte: startDate },
       },
-      _sum: { totalAmount: true },
-      _count: { id: true },
+      _sum: {
+        totalAmount: true,
+      },
+      _count: {
+        id: true,
+      },
     }),
 
     // Previous period orders
     prisma.order.aggregate({
       where: {
-        tenantId: tenant.id,
-        status: {
-          in: [
-            OrderStatus.SHIPPED,
-            OrderStatus.DELIVERED,
-            OrderStatus.CANCELLED,
-            OrderStatus.PENDING,
-            OrderStatus.PROCESSING,
-          ],
-        },
+        ...revenueOrderFilter,
         createdAt: {
           gte: previousStartDate,
           lt: startDate,
         },
       },
-      _sum: { totalAmount: true },
-      _count: { id: true },
+      _sum: {
+        totalAmount: true,
+      },
+      _count: {
+        id: true,
+      },
     }),
 
     // Current customers
