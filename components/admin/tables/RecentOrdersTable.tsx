@@ -5,19 +5,35 @@ import Avatar from "@/utils/avatar";
 import { FiArrowRight, FiCalendar, FiShoppingBag } from "react-icons/fi";
 import { formatCurrency } from "@/lib/formatCurrency";
 
-interface Order {
+// interface Order {
+//   id: string;
+//   customer: string;
+//   email: string;
+//   amount: number;
+//   status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+//   date: string | Date;
+// }
+
+// interface Props {
+//   orders: Order[];
+//   currency: string;
+// }
+
+type RecentOrder = {
   id: string;
   customer: string;
   email: string;
   amount: number;
-  status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
-  date: string | Date;
-}
+  status: "Paid" | "Pending" | "Cancelled";
+  date: Date | string;
+};
 
-interface Props {
-  orders: Order[];
+type Props = {
+  orders: RecentOrder[];
   currency: string;
-}
+};
+
+type RecentOrderStatus = "Paid" | "Pending" | "Cancelled";
 
 export default function RecentOrdersTable({ orders, currency }: Props) {
   return (
@@ -224,44 +240,33 @@ export default function RecentOrdersTable({ orders, currency }: Props) {
    Status Badge
 ------------------------------------------------------- */
 
-function StatusBadge({ status }: { status: Order["status"] }) {
+function StatusBadge({ status }: { status: RecentOrderStatus }) {
   const styles: Record<
-    Order["status"],
+    RecentOrderStatus,
     {
       wrapper: string;
       dot: string;
     }
   > = {
-    PENDING: {
-      wrapper: "bg-amber-50 text-amber-700 border-amber-200",
-      dot: "bg-amber-500",
+    Paid: {
+      wrapper: "...",
+      dot: "...",
     },
-    PROCESSING: {
-      wrapper: "bg-blue-50 text-blue-700 border-blue-200",
-      dot: "bg-blue-500",
+    Pending: {
+      wrapper: "...",
+      dot: "...",
     },
-    SHIPPED: {
-      wrapper: "bg-indigo-50 text-indigo-700 border-indigo-200",
-      dot: "bg-indigo-500",
-    },
-    DELIVERED: {
-      wrapper: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      dot: "bg-emerald-500",
-    },
-    CANCELLED: {
-      wrapper: "bg-red-50 text-red-700 border-red-200",
-      dot: "bg-red-500",
+    Cancelled: {
+      wrapper: "...",
+      dot: "...",
     },
   };
-
   const style = styles[status];
 
   const label = {
-    PENDING: "Pending",
-    PROCESSING: "Processing",
-    SHIPPED: "Shipped",
-    DELIVERED: "Delivered",
-    CANCELLED: "Cancelled",
+    Paid: "Paid",
+    Pending: "Pending",
+    Cancelled: "Cancelled",
   }[status];
 
   return (
