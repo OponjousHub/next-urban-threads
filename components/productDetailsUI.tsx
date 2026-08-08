@@ -16,6 +16,7 @@ import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
 import { generateId } from "@/utils/generateId";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface Props {
   product: Product;
@@ -301,8 +302,7 @@ export function ProductDetailUI({
           />
 
           <p className="text-2xl font-bold text-[var(--color-primary)]">
-            {tenant.currency}
-            {displayPrice.toLocaleString()}
+            {formatCurrency(displayPrice, tenant.currency)}
           </p>
 
           {selectedVariant && (
@@ -552,8 +552,7 @@ export function ProductDetailUI({
 
                       {p.price && (
                         <p className="mt-2 font-semibold text-black">
-                          {tenant.currency}
-                          {Number(p.price).toLocaleString()}
+                          {formatCurrency(Number(p.price), tenant.currency)}
                         </p>
                       )}
                     </div>
@@ -578,8 +577,7 @@ export function ProductDetailUI({
             <div>
               <p className="text-sm font-medium">{product.name}</p>
               <p className="text-sm text-gray-500">
-                {tenant.currency}
-                {safePrice(product.price).toLocaleString()}
+                {formatCurrency(product.price, tenant.currency)}
               </p>
             </div>
           </div>

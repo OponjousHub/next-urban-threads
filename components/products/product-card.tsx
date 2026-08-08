@@ -5,6 +5,7 @@ import { ProductRating } from "@/utils/product-rating";
 import { useTenant } from "@/store/tenant-provider-context";
 import { useSearchParams } from "next/navigation";
 import { Product } from "@/types/product";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 type Props = {
   product: Product;
@@ -99,9 +100,7 @@ export default function ProductCard({
 
         <div className="flex items-center justify-between mt-1">
           <p className="text-lg font-bold text-[var(--color-primary)]">
-            {tenant.currency}
-
-            {product.price.toLocaleString()}
+            {formatCurrency(product.price, tenant.currency)}
           </p>
         </div>
 
