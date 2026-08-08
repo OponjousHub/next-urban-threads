@@ -8,6 +8,7 @@ import {
   FiClock,
 } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface Activity {
   id: string;
