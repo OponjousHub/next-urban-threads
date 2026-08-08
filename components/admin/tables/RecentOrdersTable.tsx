@@ -1,105 +1,3 @@
-// "use client";
-
-// import Avatar from "@/utils/avatar";
-// import { formatCurrency } from "@/lib/formatCurrency";
-
-// interface Order {
-//   id: string;
-//   customer: string;
-//   email: string;
-//   amount: number;
-//   status: "Paid" | "Pending" | "Cancelled";
-//   date: string | Date;
-// }
-
-// export default function RecentOrdersTable({
-//   orders,
-//   currency,
-// }: {
-//   orders: Order[];
-//   currency: string;
-// }) {
-//   return (
-//     <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 h-full">
-//       <div className="flex justify-between items-center mb-6">
-//         <h3 className="text-lg font-semibold">Recent Orders</h3>
-//         <button className="text-sm text-[var(--color-primary)] hover:underline">
-//           View all
-//         </button>
-//       </div>
-
-//       <div className="overflow-x-auto">
-//         <table className="w-full text-sm">
-//           <thead className="text-left text-gray-500 border-b border-gray-100">
-//             <tr>
-//               <th className="pb-3">Order</th>
-//               <th className="pb-3">Customer</th>
-//               <th className="pb-3">Amount</th>
-//               <th className="pb-3">Status</th>
-//               <th className="pb-3">Date</th>
-//             </tr>
-//           </thead>
-
-//           <tbody>
-//             {orders?.map((order) => (
-//               <tr
-//                 key={order.id}
-//                 className="border-b border-gray-50 hover:bg-gray-50 transition"
-//               >
-//                 <td className="py-4 font-medium text-gray-800">
-//                   {order.id.slice(0, 8)}
-//                 </td>
-
-//                 <td className="py-4">
-//                   <div className="flex items-center gap-3">
-//                     <Avatar name={order.customer} />
-//                     <div>
-//                       <p className="font-medium">{order.customer}</p>
-//                       <p className="text-xs text-gray-500">{order.email}</p>
-//                     </div>
-//                   </div>
-//                 </td>
-
-//                 <td className="py-4 font-medium">
-//                   {formatCurrency(order.amount, currency)}{" "}
-//                 </td>
-
-//                 <td className="py-4">
-//                   <StatusBadge status={order.status} />
-//                 </td>
-
-//                 <td className="py-4 text-gray-500">
-//                   {new Date(order.date).toLocaleDateString("en-US", {
-//                     month: "short",
-//                     day: "numeric",
-//                     year: "numeric",
-//                   })}
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-//     </div>
-//   );
-// }
-
-// function StatusBadge({ status }: { status: Order["status"] }) {
-//   const styles = {
-//     Paid: "bg-green-100 text-green-600",
-//     Pending: "bg-yellow-100 text-yellow-600",
-//     Cancelled: "bg-red-100 text-red-600",
-//   };
-
-//   return (
-//     <span
-//       className={`px-2 py-1 text-xs rounded-full font-medium ${styles[status]}`}
-//     >
-//       {status}
-//     </span>
-//   );
-// }
-
 "use client";
 
 import Link from "next/link";
@@ -112,7 +10,7 @@ interface Order {
   customer: string;
   email: string;
   amount: number;
-  status: "Paid" | "Pending" | "Cancelled";
+  status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
   date: string | Date;
 }
 
@@ -161,7 +59,7 @@ export default function RecentOrdersTable({ orders, currency }: Props) {
         {orders?.length > 0 ? (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/60">
+              <tr className="border-b border-gray-100 bg-gray-50/40">
                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400">
                   Order
                 </th>
@@ -184,28 +82,30 @@ export default function RecentOrdersTable({ orders, currency }: Props) {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-100">
               {orders.map((order) => (
                 <tr
                   key={order.id}
-                  className="group transition-colors duration-200 hover:bg-gray-50/70"
+                  className="group transition-colors duration-200 hover:bg-gray-50/80"
                 >
                   {/* Order */}
                   <td className="px-6 py-4">
                     <Link
                       href={`/admin/orders/${order.id}`}
-                      className="inline-flex items-center gap-2"
+                      className="inline-flex items-center gap-3"
                     >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors group-hover:bg-[var(--color-primary-light)] group-hover:text-[var(--color-primary)]">
-                        <FiShoppingBag size={14} />
-                      </span>
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-400 ring-1 ring-inset ring-gray-200 transition-all duration-200 group-hover:bg-[var(--color-primary-light)] group-hover:text-[var(--color-primary)] group-hover:ring-transparent">
+                        <FiShoppingBag size={15} />
+                      </div>
 
-                      <div>
-                        <p className="text-sm font-semibold text-gray-800 group-hover:text-[var(--color-primary)]">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold tracking-tight text-gray-800 transition-colors group-hover:text-[var(--color-primary)]">
                           #{order.id.slice(0, 8).toUpperCase()}
                         </p>
 
-                        <p className="text-[11px] text-gray-400">Order</p>
+                        <p className="mt-0.5 text-[11px] text-gray-400">
+                          Order
+                        </p>
                       </div>
                     </Link>
                   </td>
@@ -213,14 +113,16 @@ export default function RecentOrdersTable({ orders, currency }: Props) {
                   {/* Customer */}
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <Avatar name={order.customer} />
+                      <div className="shrink-0">
+                        <Avatar name={order.customer} />
+                      </div>
 
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-gray-800">
                           {order.customer}
                         </p>
 
-                        <p className="max-w-[180px] truncate text-xs text-gray-400">
+                        <p className="mt-0.5 max-w-[190px] truncate text-xs text-gray-400">
                           {order.email}
                         </p>
                       </div>
@@ -229,9 +131,9 @@ export default function RecentOrdersTable({ orders, currency }: Props) {
 
                   {/* Amount */}
                   <td className="px-4 py-4">
-                    <span className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm font-semibold tracking-tight text-gray-900">
                       {formatCurrency(order.amount, currency)}
-                    </span>
+                    </p>
                   </td>
 
                   {/* Status */}
@@ -241,14 +143,16 @@ export default function RecentOrdersTable({ orders, currency }: Props) {
 
                   {/* Date */}
                   <td className="px-6 py-4 text-right">
-                    <div className="inline-flex items-center justify-end gap-1.5 text-xs text-gray-500">
-                      <FiCalendar size={13} className="text-gray-400" />
+                    <div className="inline-flex items-center gap-2 text-xs text-gray-500">
+                      <FiCalendar size={13} className="text-gray-300" />
 
-                      {new Date(order.date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                      <span>
+                        {new Date(order.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
                     </div>
                   </td>
                 </tr>
@@ -321,32 +225,51 @@ export default function RecentOrdersTable({ orders, currency }: Props) {
 ------------------------------------------------------- */
 
 function StatusBadge({ status }: { status: Order["status"] }) {
-  const styles = {
-    Paid: {
-      wrapper: "bg-emerald-50 text-emerald-700 ring-emerald-600/10",
-      dot: "bg-emerald-500",
-    },
-
-    Pending: {
-      wrapper: "bg-amber-50 text-amber-700 ring-amber-600/10",
+  const styles: Record<
+    Order["status"],
+    {
+      wrapper: string;
+      dot: string;
+    }
+  > = {
+    PENDING: {
+      wrapper: "bg-amber-50 text-amber-700 border-amber-200",
       dot: "bg-amber-500",
     },
-
-    Cancelled: {
-      wrapper: "bg-red-50 text-red-700 ring-red-600/10",
+    PROCESSING: {
+      wrapper: "bg-blue-50 text-blue-700 border-blue-200",
+      dot: "bg-blue-500",
+    },
+    SHIPPED: {
+      wrapper: "bg-indigo-50 text-indigo-700 border-indigo-200",
+      dot: "bg-indigo-500",
+    },
+    DELIVERED: {
+      wrapper: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      dot: "bg-emerald-500",
+    },
+    CANCELLED: {
+      wrapper: "bg-red-50 text-red-700 border-red-200",
       dot: "bg-red-500",
     },
   };
 
   const style = styles[status];
 
+  const label = {
+    PENDING: "Pending",
+    PROCESSING: "Processing",
+    SHIPPED: "Shipped",
+    DELIVERED: "Delivered",
+    CANCELLED: "Cancelled",
+  }[status];
+
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${style?.wrapper}`}
+      className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium ${style.wrapper}`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${style?.dot}`} />
-
-      {status}
+      <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+      {label}
     </span>
   );
 }
