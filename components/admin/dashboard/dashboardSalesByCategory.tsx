@@ -7,10 +7,11 @@ export default function DashboardSalesByCategory({
   currency,
 }: {
   orderStatus: {
-    paid: { count: number; revenue: number };
     pending: { count: number; revenue: number };
-    cancelled: { count: number; revenue: number };
+    processing: { count: number; revenue: number };
+    shipped: { count: number; revenue: number };
     delivered: { count: number; revenue: number };
+    cancelled: { count: number; revenue: number };
   };
   catData: {
     category: string;
@@ -24,7 +25,10 @@ export default function DashboardSalesByCategory({
         <SalesByCategoryChart data={catData} />
       </div>
 
-      <OrdersStatusChart orderStatus={orderStatus} currency={currency} />
+      <OrdersStatusChart
+        orderStatus={orderStatus}
+        currency={currency}
+      />
     </section>
   );
 }

@@ -6,12 +6,32 @@ export default function DashboardAnalytics({
   orderStatus,
   newCustomers,
 }: {
-  lowstock: { id: string; name: string; stock: number }[];
+  lowstock: {
+    id: string;
+    name: string;
+    stock: number;
+  }[];
   orderStatus: {
-    paid: { count: number; revenue: number };
-    pending: { count: number; revenue: number };
-    cancelled: { count: number; revenue: number };
-    delivered: { count: number; revenue: number };
+    pending: {
+      count: number;
+      revenue: number;
+    };
+    processing: {
+      count: number;
+      revenue: number;
+    };
+    shipped: {
+      count: number;
+      revenue: number;
+    };
+    delivered: {
+      count: number;
+      revenue: number;
+    };
+    cancelled: {
+      count: number;
+      revenue: number;
+    };
   };
   newCustomers: number;
 }) {
