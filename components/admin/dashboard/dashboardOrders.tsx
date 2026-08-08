@@ -1,14 +1,15 @@
 import RecentOrdersTable from "../tables/recentOrdersTable";
 import TopProducts from "@/components/admin/dashboard/topProducts";
 
-interface recentOders {
+type recentOrder = {
   id: string;
   customer: string;
   email: string;
   amount: number;
-  status: "Paid" | "Pending" | "Cancelled";
+  status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  paymentStatus: string;
   date: string | Date;
-}
+};
 
 interface Product {
   id: string;
@@ -19,18 +20,18 @@ interface Product {
 }
 
 export default function DashboardAnalytics({
-  recentOders,
+  recentOrders,
   products,
   currency,
 }: {
-  recentOders: recentOders[];
+  recentOrders: recentOrder[];
   products: Product[];
   currency: string;
 }) {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
       <div className="h-full">
-        <RecentOrdersTable orders={recentOders} currency={currency} />
+        <RecentOrdersTable orders={recentOrders} currency={currency} />
       </div>
       <div className="h-full">
         <TopProducts products={products} currency={currency} />

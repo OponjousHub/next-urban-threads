@@ -8,6 +8,24 @@ import DashboardInventory from "../../../components/admin/dashboard/dashboardInv
 import DashboardSalesByCategory from "../../../components/admin/dashboard/dashboardSalesByCategory";
 import { useTenant } from "@/store/tenant-provider-context";
 
+type RecentOrder = {
+  id: string;
+  customer: string;
+  email: string;
+  amount: number;
+  status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  paymentStatus: string;
+  date: string;
+};
+
+type DashboardProduct = {
+  id: string;
+  name: string;
+  revenue: number;
+  sales: number;
+  image: string;
+};
+
 type OrderStatusStats = {
   pending: {
     count: number;
@@ -57,8 +75,8 @@ type DashboardData = {
     sales: number;
   }[];
 
-  formattedRecentOrders: any[];
-  topProducts: any[];
+  formattedRecentOrders: RecentOrder[];
+  topProducts: DashboardProduct[];
   activities: any[];
 };
 
@@ -92,13 +110,11 @@ export default function AdminDashboard() {
     activities: [],
   });
   const [loading, setLoading] = useState(true);
-  const { tenant } = useTenant();
 
   useEffect(() => {
     async function loadDashboard() {
       const res = await fetch("/api/admin/dashboard");
       const json = await res.json();
-      console.log("Dashboard API response:", json);
       setData(json);
       setLoading(false);
     }
@@ -136,7 +152,7 @@ export default function AdminDashboard() {
         />
 
         <DashboardOrders
-          recentOders={data?.formattedRecentOrders}
+          recentOrders={data?.formattedRecentOrders}
           products={data?.topProducts}
           currency={data?.currency}
         />

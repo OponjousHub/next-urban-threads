@@ -5,29 +5,6 @@ import Avatar from "@/utils/avatar";
 import { FiArrowRight, FiCalendar, FiShoppingBag } from "react-icons/fi";
 import { formatCurrency } from "@/lib/formatCurrency";
 
-// interface Order {
-//   id: string;
-//   customer: string;
-//   email: string;
-//   amount: number;
-//   status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
-//   date: string | Date;
-// }
-
-// interface Props {
-//   orders: Order[];
-//   currency: string;
-// }
-
-type RecentOrder = {
-  id: string;
-  customer: string;
-  email: string;
-  amount: number;
-  status: "Paid" | "Pending" | "Cancelled";
-  date: Date | string;
-};
-
 type Props = {
   orders: RecentOrder[];
   currency: string;
@@ -35,7 +12,18 @@ type Props = {
 
 type RecentOrderStatus = "Paid" | "Pending" | "Cancelled";
 
+type RecentOrder = {
+  id: string;
+  customer: string;
+  email: string;
+  amount: number;
+  status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  paymentStatus: string;
+  date: string | Date;
+};
+
 export default function RecentOrdersTable({ orders, currency }: Props) {
+  console.log("ORDER STATUSssss", orders);
   return (
     <div className="h-full overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm transition-shadow duration-300 hover:shadow-md">
       {/* Header */}
@@ -240,41 +228,53 @@ export default function RecentOrdersTable({ orders, currency }: Props) {
    Status Badge
 ------------------------------------------------------- */
 
-function StatusBadge({ status }: { status: RecentOrderStatus }) {
+function StatusBadge({ status }: { status: RecentOrder["status"] }) {
   const styles: Record<
-    RecentOrderStatus,
+    RecentOrder["status"],
     {
       wrapper: string;
       dot: string;
     }
   > = {
-    Paid: {
-      wrapper: "...",
-      dot: "...",
+    PENDING: {
+      wrapper: "bg-amber-50 text-amber-700",
+      dot: "bg-amber-500",
     },
-    Pending: {
-      wrapper: "...",
-      dot: "...",
+    PROCESSING: {
+      wrapper: "bg-blue-50 text-blue-700",
+      dot: "bg-blue-500",
     },
-    Cancelled: {
-      wrapper: "...",
-      dot: "...",
+    SHIPPED: {
+      wrapper: "bg-indigo-50 text-indigo-700",
+      dot: "bg-indigo-500",
+    },
+    DELIVERED: {
+      wrapper: "bg-emerald-50 text-emerald-700",
+      dot: "bg-emerald-500",
+    },
+    CANCELLED: {
+      wrapper: "bg-red-50 text-red-700",
+      dot: "bg-red-500",
     },
   };
-  const style = styles[status];
 
-  const label = {
-    Paid: "Paid",
-    Pending: "Pending",
-    Cancelled: "Cancelled",
-  }[status];
+  const labels: Record<RecentOrder["status"], string> = {
+    PENDING: "Pending",
+    PROCESSING: "Processing",
+    SHIPPED: "Shipped",
+    DELIVERED: "Delivered",
+    CANCELLED: "Cancelled",
+  };
+
+  const style = styles[status];
 
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium ${style.wrapper}`}
+      className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium ${style?.wrapper}`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
-      {label}
+      <span className={`h-1.5 w-1.5 rounded-full ${style?.dot}`} />
+
+      {labels[status]}
     </span>
   );
 }

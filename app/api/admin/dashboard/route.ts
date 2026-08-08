@@ -128,6 +128,7 @@ export async function GET() {
           user: {
             select: {
               name: true,
+              email: true,
             },
           },
         },
@@ -226,9 +227,9 @@ export async function GET() {
      */
     const formattedRecentOrders = recentOrders.map((order) => ({
       id: order.id,
-      customer: order.user?.name || "Customer",
-      email: order.customerEmail,
-      amount: order.totalAmount.toNumber(),
+      customer: order.user?.name || "Guest Customer",
+      email: order.user?.email || "No email",
+      amount: Number(order.totalAmount),
       status: order.status,
       paymentStatus: order.paymentStatus,
       date: order.createdAt,
