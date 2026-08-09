@@ -15,6 +15,7 @@ import RefundRequestStatus from "@/components/refunds/refundRequestStatusCard";
 import { useTenant } from "@/store/tenant-provider-context";
 import { ShippingMethod } from "@prisma/client";
 import { RefundStatus, RefundTrackingEvent } from "@prisma/client";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 type RefundRequestWithTracking = RefundRequest & {
   trackingEvents: RefundTrackingEvent[];
@@ -315,10 +316,12 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                   <span className="text-gray-500">Subtotal</span>
 
                   <span>
-                    {tenant.currency}
-                    {Number(order.totalAmount) -
-                      Number(order.shippingCost ?? 0) +
-                      Number(order.discountAmount ?? 0)}
+                    {formatCurrency(
+                      Number(order.totalAmount) -
+                        Number(order.shippingCost ?? 0) +
+                        Number(order.discountAmount ?? 0),
+                      tenant.currency,
+                    )}
                   </span>
                 </div>
 
@@ -334,8 +337,10 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                   <span className="text-gray-500">Shipping Fee</span>
 
                   <span>
-                    {tenant.currency}
-                    {Number(order.shippingCost ?? 0).toFixed(2)}
+                    {formatCurrency(
+                      Number(order.shippingCost ?? 0),
+                      tenant.currency,
+                    )}
                   </span>
                 </div>
 
@@ -343,8 +348,11 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                   <span className="text-gray-500">Discount</span>
 
                   <span className="text-green-600">
-                    -{tenant.currency}
-                    {Number(order.discountAmount ?? 0).toFixed(2)}
+                    -{" "}
+                    {formatCurrency(
+                      Number(order.discountAmount ?? 0),
+                      tenant.currency,
+                    )}
                   </span>
                 </div>
 
@@ -354,8 +362,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                   <span>Total Paid</span>
 
                   <span>
-                    {tenant.currency}
-                    {Number(order.totalAmount).toFixed(2)}
+                    {formatCurrency(Number(order.totalAmount), tenant.currency)}
                   </span>
                 </div>
               </div>
@@ -510,14 +517,16 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                       Quantity: {item.quantity}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Unit Price: {tenant.currency}
-                      {Number(item.price).toFixed(2)}
+                      Unit Price:{" "}
+                      {formatCurrency(Number(item.price), tenant.currency)}
                     </p>
                   </div>
                   <div>
                     <p className="font-bold">
-                      {tenant.currency}
-                      {(Number(item.price) * item.quantity).toFixed(2)}
+                      {formatCurrency(
+                        Number(item.price) * item.quantity,
+                        tenant.currency,
+                      )}
                     </p>
 
                     {order.status === "DELIVERED" && (

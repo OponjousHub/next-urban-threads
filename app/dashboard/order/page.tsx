@@ -4,6 +4,7 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 export default async function OrdersPage() {
   const cookieStore = await cookies();
@@ -62,8 +63,7 @@ export default async function OrdersPage() {
               <div>
                 <p className="text-gray-500">Total</p>
                 <p className="font-medium">
-                  {tenant.currency}
-                  {order.totalAmount.toString()}
+                  {formatCurrency(Number(order.totalAmount), tenant.currency)}
                 </p>
               </div>
 
