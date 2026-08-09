@@ -47,26 +47,10 @@ export default function CheckoutClient({
   const [saveAddress, setSaveAddress] = useState(false);
   const [shippingMethods, setShippingMethods] = useState<any[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<any | null>(null);
+  const [shippingLoading, setShippingLoading] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null,
   );
-
-  // Recalculate shipping whenever address is selected
-  useEffect(() => {
-    if (!selectedAddressId) return;
-
-    const address = addresses.find((a) => a.id === selectedAddressId);
-
-    if (!address) return;
-
-    if (!address.country || !address.state) return;
-
-    calculateShipping({
-      country: address.country,
-      state: address.state,
-      city: address.city ?? "",
-    });
-  }, [selectedAddressId, addresses]);
 
   // Calculate Shipping Address Helper
   const calculateShipping = async (address: {
@@ -75,39 +59,56 @@ export default function CheckoutClient({
     city: string;
   }) => {
     console.log("Calculating shipping with", address);
+
+    // Immediately invalidate the previous shipping selection.
     setShippingMethods([]);
     setSelectedShipping(null);
-    const res = await fetch("/api/shipping/calculate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        country: address.country,
-        state: address.state,
-        city: address.city,
+    setShippingLoading(true);
 
-        items: checkoutItems.map((i) => ({
-          productId: i.productId,
-          quantity: i.quantity,
-        })),
-      }),
-    });
+    try {
+      const res = await fetch("/api/shipping/calculate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          country: address.country,
+          state: address.state,
+          city: address.city,
 
-    if (!res.ok) {
-      const error = await res.json();
-      console.log(error);
+          items: checkoutItems.map((i) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+          })),
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => null);
+
+        console.log("Shipping calculation failed:", error);
+
+        setShippingMethods([]);
+        setSelectedShipping(null);
+        return;
+      }
+
+      const methods = await res.json();
+
+      setShippingMethods(methods);
+
+      if (methods.length > 0) {
+        setSelectedShipping(methods[0]);
+      } else {
+        setSelectedShipping(null);
+      }
+    } catch (error) {
+      console.error("Shipping calculation error:", error);
+
       setShippingMethods([]);
-      return;
-    }
-
-    const methods = await res.json();
-
-    setShippingMethods(methods);
-    if (methods.length > 0) {
-      setSelectedShipping(methods[0]);
-    } else {
       setSelectedShipping(null);
+    } finally {
+      setShippingLoading(false);
     }
   };
 
@@ -134,6 +135,26 @@ export default function CheckoutClient({
     phone: formData.phone,
     isDefault: false,
   };
+
+  // Recalculate shipping whenever address is selected
+  useEffect(() => {
+    // Existing saved address selected
+    if (selectedAddressId) return;
+
+    // New address is incomplete
+    if (!formData.country || !formData.state) {
+      setShippingMethods([]);
+      setSelectedShipping(null);
+      setShippingLoading(false);
+      return;
+    }
+
+    calculateShipping({
+      country: formData.country,
+      state: formData.state,
+      city: formData.city,
+    });
+  }, [selectedAddressId, formData.country, formData.state, formData.city]);
 
   // Calculating  the shipping when user enters new address
   useEffect(() => {
@@ -180,6 +201,10 @@ export default function CheckoutClient({
   const firstTotal = subtotal - Number(discountAmount);
   const total = firstTotal + shipping;
 
+  //checkout validity variable
+  const shippingAvailable =
+    !shippingLoading && shippingMethods.length > 0 && selectedShipping !== null;
+
   const validateEmail = (email: string) => {
     if (!email.trim()) return "Email is required";
     if (!email.includes("@")) return "Enter a valid email address";
@@ -223,6 +248,14 @@ export default function CheckoutClient({
 
     if (checkoutItems.length === 0) {
       router.push("/cart");
+      return;
+    }
+
+    if (!shippingAvailable) {
+      appToast.error(
+        "Shipping unavailable",
+        "Please choose an address with an available shipping option.",
+      );
       return;
     }
 
@@ -549,11 +582,21 @@ export default function CheckoutClient({
             <div className="space-y-3">
               <h3 className="font-semibold">Shipping Method</h3>
 
-              {shippingMethods.length === 0 ? (
+              {shippingLoading ? (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 flex items-center gap-3">
+                  <span className="h-4 w-4 rounded-full border-2 border-gray-300 border-t-[var(--color-primary)] animate-spin" />
+                  Checking shipping availability...
+                </div>
+              ) : shippingMethods.length === 0 ? (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                  Sorry, we don't currently have a shipping option for your
-                  selected address. Please choose another address or contact
-                  support.
+                  <p className="font-medium">
+                    Shipping is unavailable for this address.
+                  </p>
+
+                  <p className="mt-1">
+                    Please choose another address or enter a different shipping
+                    location.
+                  </p>
                 </div>
               ) : (
                 shippingMethods.map((method) => (
@@ -612,10 +655,20 @@ export default function CheckoutClient({
 
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-medium py-3 rounded-xl transition"
+            disabled={isLoading || shippingLoading || !shippingAvailable}
+            className={`w-full font-medium py-3 rounded-xl transition ${
+              isLoading || shippingLoading || !shippingAvailable
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white"
+            }`}
           >
-            {isLoading ? "Processing..." : "Place Order"}
+            {isLoading
+              ? "Processing..."
+              : shippingLoading
+                ? "Checking shipping..."
+                : !shippingAvailable
+                  ? "Shipping unavailable"
+                  : "Place Order"}
           </button>
           <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
             <span>🔒 Secure Checkout</span>

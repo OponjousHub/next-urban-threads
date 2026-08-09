@@ -1,22 +1,33 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/utils/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, PaymentStatus, OrderStatus } from "@prisma/client";
 import crypto from "crypto";
+
 import { detectCountryFromHeaders } from "@/app/lib/payments/geo";
 import { resolvePaymentConfig } from "@/app/lib/payments/payment";
 import { getPaymentProvider } from "@/app/lib/payments/factory";
 import { getLoggedInUserId } from "@/lib/auth";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+
 import NotificationService from "@/lib/notifications/notification.service";
 import InventoryService from "@/lib/inventory/inventory.service";
 import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
 
 export async function POST(req: NextRequest) {
-  const tenant = await getDefaultTenant();
-  if (!tenant) {
-    throw new Error("Default tenant not found");
-  }
   try {
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      return NextResponse.json(
+        { message: "Default tenant not found" },
+        { status: 404 },
+      );
+    }
+
+    // ---------------------------------------------------------
+    // 1. Authentication
+    // ---------------------------------------------------------
+
     const userId = await getLoggedInUserId();
 
     if (!userId) {
@@ -26,7 +37,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2️⃣ Request body
+    // ---------------------------------------------------------
+    // 2. Request body
+    // ---------------------------------------------------------
+
     const {
       items,
       shippingAddress,
@@ -37,27 +51,45 @@ export async function POST(req: NextRequest) {
       couponId,
       shippingMethodId,
     } = await req.json();
+
     if (!items || items.length === 0) {
       return NextResponse.json({ message: "Cart is empty" }, { status: 400 });
     }
 
-    // Look up the shipping rate
-    const shippingRate = await prisma.shippingRate.findFirst({
-      where: {
-        methodId: shippingMethodId,
-        active: true,
-      },
-    });
-
-    if (!shippingRate) {
-      throw new Error("Invalid shipping method");
+    if (!shippingMethodId) {
+      return NextResponse.json(
+        {
+          message: "No shipping method is available for the selected address.",
+        },
+        { status: 400 },
+      );
     }
+
+    // ---------------------------------------------------------
+    // 3. Resolve shipping address
+    // ---------------------------------------------------------
 
     let shippingAddressId: string;
 
+    let resolvedShippingAddress: {
+      country: string;
+      state: string | null;
+      city: string;
+    };
+
     if (addressId) {
       const userAddress = await prisma.address.findFirst({
-        where: { id: addressId, userId, tenantId: tenant.id },
+        where: {
+          id: addressId,
+          userId,
+          tenantId: tenant.id,
+        },
+        select: {
+          id: true,
+          country: true,
+          state: true,
+          city: true,
+        },
       });
 
       if (!userAddress) {
@@ -66,7 +98,14 @@ export async function POST(req: NextRequest) {
           { status: 400 },
         );
       }
+
       shippingAddressId = userAddress.id;
+
+      resolvedShippingAddress = {
+        country: userAddress.country,
+        state: userAddress.state,
+        city: userAddress.city,
+      };
     } else {
       if (!shippingAddress) {
         return NextResponse.json(
@@ -74,6 +113,25 @@ export async function POST(req: NextRequest) {
           { status: 400 },
         );
       }
+
+      if (
+        !shippingAddress.country ||
+        !shippingAddress.state ||
+        !shippingAddress.city
+      ) {
+        return NextResponse.json(
+          {
+            message: "Country, state and city are required for shipping.",
+          },
+          { status: 400 },
+        );
+      }
+
+      resolvedShippingAddress = {
+        country: shippingAddress.country,
+        state: shippingAddress.state,
+        city: shippingAddress.city,
+      };
 
       if (saveAddress) {
         const { email: _email, ...addressData } = shippingAddress;
@@ -89,7 +147,7 @@ export async function POST(req: NextRequest) {
 
         shippingAddressId = newAddress.id;
       } else {
-        // ❗ Create a TEMP address (not saved)
+        // Temporary checkout address
         const { email: _email, ...addressData } = shippingAddress;
 
         const tempAddress = await prisma.address.create({
@@ -105,30 +163,193 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 3️⃣ Geo → payment config
-    const country = await detectCountryFromHeaders();
-    const { currency, provider: providerKey } = resolvePaymentConfig(country);
+    // ---------------------------------------------------------
+    // 4. Fetch products
+    // ---------------------------------------------------------
 
-    // 4️⃣ Fetch products
+    const productIds = items.map((item: any) => item.productId).filter(Boolean);
+
     const products = await prisma.product.findMany({
       where: {
         id: {
-          in: items.map((item: any) => item.productId).filter(Boolean),
+          in: productIds,
         },
-
         tenantId: tenant.id,
       },
-
       include: {
         variants: true,
       },
     });
 
-    let totalAmount = new Prisma.Decimal(0);
+    if (products.length !== productIds.length) {
+      return NextResponse.json(
+        { message: "One or more products could not be found." },
+        { status: 400 },
+      );
+    }
+
+    // ---------------------------------------------------------
+    // 5. Calculate merchandise subtotal
+    // ---------------------------------------------------------
+
+    let merchandiseSubtotal = new Prisma.Decimal(0);
+
+    for (const item of items) {
+      const product = products.find((product) => product.id === item.productId);
+
+      if (!product) {
+        return NextResponse.json(
+          { message: "Product not found" },
+          { status: 400 },
+        );
+      }
+
+      const variant = product.variants.find(
+        (variant) => variant.id === item.variantId,
+      );
+
+      // Inventory validation
+      if (variant) {
+        if (item.quantity > variant.stock) {
+          return NextResponse.json(
+            {
+              message: `${product.name} only has ${variant.stock} left`,
+            },
+            { status: 400 },
+          );
+        }
+      } else {
+        if (item.quantity > product.stock) {
+          return NextResponse.json(
+            {
+              message: `${product.name} only has ${product.stock} left`,
+            },
+            { status: 400 },
+          );
+        }
+      }
+
+      merchandiseSubtotal = merchandiseSubtotal.plus(
+        product.price.mul(item.quantity),
+      );
+    }
+
+    // ---------------------------------------------------------
+    // 6. Find the customer's shipping zone
+    // ---------------------------------------------------------
+    //
+    // IMPORTANT:
+    // ShippingZone.country uses ISO country codes such as:
+    // NG, US, GB, etc.
+    //
+    // ShippingZone.states contains state names.
+    // ---------------------------------------------------------
+
+    const shippingZone = await prisma.shippingZone.findFirst({
+      where: {
+        tenantId: tenant.id,
+        active: true,
+        country: resolvedShippingAddress.country,
+        states: {
+          has: resolvedShippingAddress.state || "",
+        },
+      },
+    });
+
+    if (!shippingZone) {
+      return NextResponse.json(
+        {
+          message: "Sorry, we don't currently ship to the selected address.",
+        },
+        { status: 400 },
+      );
+    }
+
+    // ---------------------------------------------------------
+    // 7. Validate the selected shipping method
+    // ---------------------------------------------------------
+    //
+    // The method MUST belong to the shipping zone that matches
+    // the customer's address.
+    // ---------------------------------------------------------
+
+    const shippingMethod = await prisma.shippingMethod.findFirst({
+      where: {
+        id: shippingMethodId,
+        tenantId: tenant.id,
+        zoneId: shippingZone.id,
+        active: true,
+      },
+    });
+
+    if (!shippingMethod) {
+      return NextResponse.json(
+        {
+          message:
+            "The selected shipping method is not available for this address.",
+        },
+        { status: 400 },
+      );
+    }
+
+    // ---------------------------------------------------------
+    // 8. Find an applicable shipping rate
+    // ---------------------------------------------------------
+    //
+    // We DO NOT trust the shipping price sent by the browser.
+    // The server determines the rate itself.
+    // ---------------------------------------------------------
+
+    const shippingRates = await prisma.shippingRate.findMany({
+      where: {
+        tenantId: tenant.id,
+        zoneId: shippingZone.id,
+        methodId: shippingMethod.id,
+        active: true,
+      },
+      orderBy: [
+        {
+          priority: "asc",
+        },
+        {
+          amount: "asc",
+        },
+      ],
+    });
+
+    const applicableRates = shippingRates.filter((rate) => {
+      const subtotal = merchandiseSubtotal.toNumber();
+
+      const minOrderValid =
+        rate.minOrderAmount == null || subtotal >= Number(rate.minOrderAmount);
+
+      const maxOrderValid =
+        rate.maxOrderAmount == null || subtotal <= Number(rate.maxOrderAmount);
+
+      return minOrderValid && maxOrderValid;
+    });
+
+    const shippingRate = applicableRates[0];
+
+    if (!shippingRate) {
+      return NextResponse.json(
+        {
+          message:
+            "Sorry, there is no shipping rate available for the selected address and order.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const shippingCost = new Prisma.Decimal(shippingRate.amount);
+
+    // ---------------------------------------------------------
+    // 9. Coupon
+    // ---------------------------------------------------------
+
     let discountAmount = new Prisma.Decimal(0);
     let coupon = null;
 
-    // Get Coupon
     if (couponId) {
       coupon = await prisma.coupon.findFirst({
         where: {
@@ -140,97 +361,58 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const orderItems = items.map((item: any) => {
-      const product = products.find((p) => p.id === item.productId);
-      if (!product) throw new Error("Product not found");
-
-      const shippingCost = shippingRate.amount;
-      const lineTotal = product.price.mul(item.quantity);
-      totalAmount = totalAmount.plus(lineTotal);
-      totalAmount = totalAmount.plus(new Prisma.Decimal(shippingCost));
-
-      const variant = product.variants.find((v) => v.id === item.variantId);
-
-      return {
-        productId: product.id,
-
-        quantity: item.quantity,
-
-        price: product.price,
-
-        tenantId: tenant.id,
-
-        variantId: variant?.id,
-
-        variantColor: variant?.color,
-
-        variantSize: variant?.size,
-
-        image: variant?.image || product.images?.[0],
-      };
-    });
-
-    // Validate Coupon
     if (coupon) {
       const now = new Date();
 
       if (coupon.startsAt && coupon.startsAt > now) {
-        throw new Error("Coupon is not active yet");
+        return NextResponse.json(
+          { message: "Coupon is not active yet" },
+          { status: 400 },
+        );
       }
 
       if (coupon.expiresAt && coupon.expiresAt < now) {
-        throw new Error("Coupon has expired");
+        return NextResponse.json(
+          { message: "Coupon has expired" },
+          { status: 400 },
+        );
       }
 
       if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-        throw new Error("Coupon usage limit reached");
+        return NextResponse.json(
+          { message: "Coupon usage limit reached" },
+          { status: 400 },
+        );
       }
-    }
 
-    // If Coupon is Valid, Calculate discount on server
-    if (coupon) {
       if (coupon.type === "PERCENTAGE") {
-        discountAmount = totalAmount.mul(Number(coupon.value) / 100);
+        discountAmount = merchandiseSubtotal.mul(Number(coupon.value) / 100);
       }
 
       if (coupon.type === "FIXED") {
         discountAmount = new Prisma.Decimal(coupon.value);
       }
 
-      if (discountAmount.greaterThan(totalAmount)) {
-        discountAmount = totalAmount;
-      }
-
-      totalAmount = totalAmount.minus(discountAmount);
-    }
-
-    for (const item of items) {
-      const product = await prisma.product.findUnique({
-        where: {
-          id: item.productId,
-          tenantId: tenant.id,
-        },
-        include: {
-          variants: true,
-        },
-      });
-
-      if (!product) {
-        throw new Error("Product not found");
-      }
-
-      const variant = product.variants.find((v) => v.id === item.variantId);
-
-      if (variant) {
-        if (item.quantity > variant.stock) {
-          throw new Error(`${product.name} only has ${variant.stock} left`);
-        }
-      } else {
-        if (item.quantity > product.stock) {
-          throw new Error(`${product.name} only has ${product.stock} left`);
-        }
+      if (discountAmount.greaterThan(merchandiseSubtotal)) {
+        discountAmount = merchandiseSubtotal;
       }
     }
+
+    // ---------------------------------------------------------
+    // 10. Final server-side total
+    // ---------------------------------------------------------
+    //
+    // Shipping is added ONCE per order.
+    // Discount applies to merchandise subtotal.
+    // ---------------------------------------------------------
+
+    const discountedSubtotal = merchandiseSubtotal.minus(discountAmount);
+
+    const totalAmount = discountedSubtotal.plus(shippingCost);
+
+    // ---------------------------------------------------------
+    // 11. Email validation
+    // ---------------------------------------------------------
 
     if (!email) {
       return NextResponse.json(
@@ -238,43 +420,106 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
+
+    // ---------------------------------------------------------
+    // 12. Payment configuration
+    // ---------------------------------------------------------
+
+    const country = await detectCountryFromHeaders();
+
+    const { currency, provider: providerKey } = resolvePaymentConfig(country);
+
+    // ---------------------------------------------------------
+    // 13. Create order items
+    // ---------------------------------------------------------
+
+    const orderItems = items.map((item: any) => {
+      const product = products.find((product) => product.id === item.productId);
+
+      if (!product) {
+        throw new Error("Product not found");
+      }
+
+      const variant = product.variants.find(
+        (variant) => variant.id === item.variantId,
+      );
+
+      return {
+        productId: product.id,
+        quantity: item.quantity,
+        price: product.price,
+        tenantId: tenant.id,
+        variantId: variant?.id,
+        variantColor: variant?.color,
+        variantSize: variant?.size,
+        image: variant?.image || product.images?.[0],
+      };
+    });
+
+    // ---------------------------------------------------------
+    // 14. Create payment reference
+    // ---------------------------------------------------------
+
     const paymentReference = crypto.randomUUID();
 
-    // Load customer
+    // ---------------------------------------------------------
+    // 15. Load customer
+    // ---------------------------------------------------------
+
     const customer = await prisma.user.findUnique({
-      where: { id: userId },
+      where: {
+        id: userId,
+      },
       select: {
         name: true,
       },
     });
+
+    // ---------------------------------------------------------
+    // 16. Create order
+    // ---------------------------------------------------------
 
     const order = await prisma.order.create({
       data: {
         userId,
         tenantId: tenant.id,
         storeMode: tenant.storeMode,
+
         shippingAddressId,
+
         totalAmount,
-        customerEmail: email || shippingAddress?.email || "",
+        customerEmail: email,
         currency: tenant.currency,
+
         paymentProvider: providerKey,
         paymentMethod,
         paymentReference,
+
         vendorId: products[0]?.vendorId,
+
         discountAmount,
+
         couponId: coupon?.id ?? null,
-        shippingMethodId,
-        shippingCost: shippingRate.amount,
+
+        shippingMethodId: shippingMethod.id,
+        shippingCost,
+
         items: {
           create: orderItems,
         },
       },
     });
 
+    // ---------------------------------------------------------
+    // 17. Admin notification
+    // ---------------------------------------------------------
+
     await AdminNotificationService.notify({
       type: "NEW_ORDER",
       title: "🛒 New Order",
-      message: `${customer?.name ?? "A customer"} placed an order worth ${order.currency} ${Number(order.totalAmount).toLocaleString()}.`,
+      message: `${customer?.name ?? "A customer"} placed an order worth ${
+        order.currency
+      } ${Number(order.totalAmount).toLocaleString()}.`,
       link: `/admin/orders/${order.id}`,
       metadata: {
         orderId: order.id,
@@ -285,12 +530,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    await prisma.order.update({
-      where: { id: order.id, tenantId: tenant.id },
-      data: { paymentReference },
-    });
+    // ---------------------------------------------------------
+    // 18. Decrease stock
+    // ---------------------------------------------------------
 
-    // Decrease stock after purchase
     for (const item of orderItems) {
       await InventoryService.decreaseStock({
         productId: item.productId,
@@ -299,7 +542,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Sends notification on new order
+    // ---------------------------------------------------------
+    // 19. Vendor notification
+    // ---------------------------------------------------------
+
     if (order.vendorId) {
       await NotificationService.notify({
         vendorId: order.vendorId,
@@ -314,7 +560,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // INITIALIZE TRACKING WITH STATUS = PENDING
+    // ---------------------------------------------------------
+    // 20. Initialize order tracking
+    // ---------------------------------------------------------
+
     await prisma.orderTrackingEvent.create({
       data: {
         orderId: order.id,
@@ -327,7 +576,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 6️⃣ Initialize payment (factory → provider instance)
+    // ---------------------------------------------------------
+    // 21. Initialize payment
+    // ---------------------------------------------------------
+
     const provider = getPaymentProvider(order.paymentProvider);
 
     const payment = await provider.initializePayment({
@@ -337,19 +589,30 @@ export async function POST(req: NextRequest) {
       callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/order/${order.id}`,
     });
 
-    // 7️⃣ Respond
+    // ---------------------------------------------------------
+    // 22. Respond
+    // ---------------------------------------------------------
+
     return NextResponse.json(
       {
         orderId: order.id,
         paymentUrl: payment.authorizationUrl,
       },
-      { status: 201 },
+      {
+        status: 201,
+      },
     );
   } catch (error) {
     console.error("[CHECKOUT_ERROR]", error);
+
     return NextResponse.json(
-      { message: "Failed to create order" },
-      { status: 500 },
+      {
+        message:
+          error instanceof Error ? error.message : "Failed to create order",
+      },
+      {
+        status: 500,
+      },
     );
   }
 }
