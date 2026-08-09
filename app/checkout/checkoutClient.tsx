@@ -9,6 +9,7 @@ import { appToast } from "@/utils/appToast";
 import { useTenant } from "@/store/tenant-provider-context";
 import { Country, State } from "country-state-city";
 import { normalizeCountryCode } from "@/utils/normalizeCountryCode";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 type ShippingAddress = {
   id: string;
@@ -141,16 +142,16 @@ export default function CheckoutClient({
     paymentMethod: "credit-card",
   });
 
-  const currentAddress: ShippingAddress = {
-    id: "",
-    fullName: formData.fullName,
-    street: formData.street,
-    city: formData.city,
-    state: formData.state,
-    country: formData.country,
-    phone: formData.phone,
-    isDefault: false,
-  };
+  // const currentAddress: ShippingAddress = {
+  //   id: "",
+  //   fullName: formData.fullName,
+  //   street: formData.street,
+  //   city: formData.city,
+  //   state: formData.state,
+  //   country: formData.country,
+  //   phone: formData.phone,
+  //   isDefault: false,
+  // };
 
   // Recalculate shipping whenever address is selected
   useEffect(() => {
@@ -633,8 +634,7 @@ export default function CheckoutClient({
                     </div>
 
                     <span>
-                      {tenant.currency}
-                      {method.amount}
+                      {formatCurrency(method.amount, tenant.currency)}
                     </span>
                   </label>
                 ))
@@ -731,45 +731,32 @@ export default function CheckoutClient({
               </div>
 
               <p className="font-semibold text-gray-800">
-                {tenant.currency}
-                {(item.price * item.quantity).toFixed(2)}
+                {formatCurrency(item.price * item.quantity, tenant.currency)}
               </p>
             </div>
           ))}
 
           <div className="flex justify-between mt-3">
             <span>Subtotal</span>
-            <span>
-              {tenant.currency}
-              {subtotal.toFixed(2)}
-            </span>
+            <span>{formatCurrency(subtotal, tenant.currency)}</span>
           </div>
 
           {coupon && (
             <div className="flex justify-between text-green-600">
               <span>Discount ({coupon?.code})</span>
 
-              <span>
-                -{tenant.currency}
-                {discountAmount.toLocaleString()}
-              </span>
+              <span>- {formatCurrency(discountAmount, tenant.currency)}</span>
             </div>
           )}
 
           <div className="flex justify-between">
             <span>Shipping</span>
-            <span>
-              {tenant.currency}
-              {shipping.toFixed(2)}
-            </span>
+            <span>{formatCurrency(shipping, tenant.currency)}</span>
           </div>
 
           <div className="flex justify-between">
             <span>Discounted Amount</span>
-            <span>
-              - {tenant.currency}
-              {discountAmount.toLocaleString()}
-            </span>
+            <span>- {formatCurrency(discountAmount, tenant.currency)}</span>
           </div>
 
           <hr className="my-3" />
@@ -777,9 +764,11 @@ export default function CheckoutClient({
           <div className="flex justify-between font-semibold text-gray-900 text-lg">
             <span>Total</span>
             <span>
-              {tenant.currency}
-              {Number(total.toFixed(2)) -
-                Number(discountAmount.toLocaleString())}
+              {formatCurrency(
+                Number(total.toFixed(2)) -
+                  Number(discountAmount.toLocaleString()),
+                tenant.currency,
+              )}
             </span>
           </div>
         </div>
