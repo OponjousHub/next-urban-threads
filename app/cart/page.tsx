@@ -8,6 +8,7 @@ import { useTenant } from "@/store/tenant-provider-context";
 import CouponInput from "@/components/cart/coupon-input";
 import { useState, useEffect } from "react";
 import { Country, State } from "country-state-city";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 export type AvailableShippingMethod = {
   rateId: string;
@@ -143,8 +144,7 @@ export default function CartPage() {
                     )}
 
                     <p className="text-sm font-medium text-gray-700 mt-1">
-                      {tenant.currency}
-                      {item.price.toFixed(2)}
+                      {formatCurrency(item.price, tenant.currency)}
                     </p>
                   </div>
                 </div>
@@ -169,8 +169,10 @@ export default function CartPage() {
                   </div>
 
                   <p className="text-gray-800 font-semibold">
-                    {tenant.currency}
-                    {(item.price * item.quantity).toFixed(2)}
+                    {formatCurrency(
+                      item.price * item.quantity,
+                      tenant.currency,
+                    )}
                   </p>
 
                   <button
@@ -195,10 +197,7 @@ export default function CartPage() {
         <div className="space-y-3 text-gray-700">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>
-              {tenant.currency}
-              {subtotal.toFixed(2)}
-            </span>
+            <span>{formatCurrency(subtotal, tenant.currency)}</span>
           </div>
 
           <CouponInput subtotal={subtotal} />
@@ -207,10 +206,7 @@ export default function CartPage() {
             <div className="flex justify-between text-green-600">
               <span>Discount ({coupon?.code})</span>
 
-              <span>
-                -{tenant.currency}
-                {discountAmount.toLocaleString()}
-              </span>
+              <span>{formatCurrency(discountAmount, tenant.currency)}</span>
             </div>
           )}
 
@@ -276,10 +272,7 @@ export default function CartPage() {
           {selectedMethod ? (
             <div className="flex justify-between">
               <span>Estimated Shipping</span>
-              <span>
-                {tenant.currency}
-                {estimatedShipping.toFixed(2)}
-              </span>
+              <span>{formatCurrency(estimatedShipping, tenant.currency)}</span>
             </div>
           ) : (
             <div className="flex justify-between text-gray-500">
@@ -290,11 +283,7 @@ export default function CartPage() {
           <hr className="my-3" />
           <div className="flex justify-between font-semibold text-gray-900 text-lg">
             <span>{selectedMethod ? "Estimated Total" : "Total"}</span>
-
-            <span>
-              {tenant.currency}
-              {total.toFixed(2)}
-            </span>
+            <span>{formatCurrency(total, tenant.currency)}</span>
           </div>
 
           {selectedMethod && (

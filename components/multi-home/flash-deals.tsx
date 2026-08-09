@@ -6,6 +6,7 @@ import Link from "next/link";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
 import type { Product } from "@/types/product";
 import { useTenant } from "@/store/tenant-provider-context";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 function FlashDeals() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -78,8 +79,7 @@ function FlashDeals() {
                   </h3>
 
                   <p className="text-red-500 font-bold mt-1">
-                    {tenant.currency}
-                    {product.price.toLocaleString()}
+                    {formatCurrency(product.price, tenant.currency)}
                   </p>
 
                   <Link href={`/products/details/${product.id}`}>

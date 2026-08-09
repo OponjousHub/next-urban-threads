@@ -6,6 +6,7 @@ import Link from "next/link";
 import { cloudinaryImage } from "@/utils/cloudinary-url";
 import type { Product } from "@/types/product";
 import { useTenant } from "@/store/tenant-provider-context";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 function Featured() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -77,8 +78,7 @@ function Featured() {
                   </h3>
 
                   <p className="text-[var(--color-primary)] font-bold">
-                    {tenant.currency}
-                    {product.price.toLocaleString()}
+                    {formatCurrency(product.price, tenant.currency)}
                   </p>
 
                   <Link href={`/products/details/${product.id}`}>
