@@ -7,6 +7,7 @@ import type { DashboardStats } from "@/types/dashboard";
 import SecurityCard from "@/components/security/security-card";
 import Link from "next/link";
 import { useTenant } from "@/store/tenant-provider-context";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 type ShippingAddress = {
   fullName: string;
@@ -106,8 +107,7 @@ function DashboardClient({
             <div>
               <p className="text-sm text-gray-500">Total Spent</p>
               <p className="text-2xl font-bold">
-                {tenant.currency}
-                {+stats.totalSpent}
+                {formatCurrency(+stats.totalSpent, tenant.currency)}
               </p>
             </div>
           </CardContent>
@@ -198,8 +198,10 @@ function DashboardClient({
                     {/* Right section: amount + action */}
                     <div className="flex items-center justify-between sm:flex-col sm:items-end">
                       <p className="font-semibold">
-                        {tenant.currency}
-                        {Number(order.totalAmount).toFixed(2)}
+                        {formatCurrency(
+                          Number(order.totalAmount),
+                          tenant.currency,
+                        )}
                       </p>
                       <Link href={`${`/dashboard/order/${order.id}`}`}>
                         <Button
