@@ -8,22 +8,7 @@ import Image from "next/image";
 import { appToast } from "@/utils/appToast";
 import { useTenant } from "@/store/tenant-provider-context";
 import { Country, State } from "country-state-city";
-
-const normalizeCountryCode = (country: string) => {
-  if (!country) return "";
-
-  // Already an ISO country code
-  if (country.length === 2) {
-    return country.toUpperCase();
-  }
-
-  // Convert stored country name → ISO code
-  const match = Country.getAllCountries().find(
-    (item) => item.name.toLowerCase() === country.trim().toLowerCase(),
-  );
-
-  return match?.isoCode ?? country;
-};
+import { normalizeCountryCode } from "@/utils/normalizeCountryCode";
 
 type ShippingAddress = {
   id: string;
@@ -74,8 +59,6 @@ export default function CheckoutClient({
     state: string;
     city: string;
   }) => {
-    console.log("Calculating shipping with", address);
-
     // Immediately invalidate the previous shipping selection.
     setShippingMethods([]);
     setSelectedShipping(null);
@@ -127,6 +110,23 @@ export default function CheckoutClient({
       setShippingLoading(false);
     }
   };
+
+  // Recalculate shipping whenever a saved address is selected
+  useEffect(() => {
+    if (!selectedAddressId) return;
+
+    const address = addresses.find((a) => a.id === selectedAddressId);
+
+    if (!address) return;
+
+    if (!address.country || !address.state) return;
+
+    calculateShipping({
+      country: normalizeCountryCode(address.country),
+      state: address.state,
+      city: address.city ?? "",
+    });
+  }, [selectedAddressId, addresses]);
 
   // Form data
   const [formData, setFormData] = useState({
