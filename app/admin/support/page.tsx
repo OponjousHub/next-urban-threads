@@ -3,6 +3,8 @@ import { ContactStatus } from "@prisma/client";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import SupportPageClient from "@/components/admin/support/supportPage-client";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { getAuthPayload } from "@/lib/server/auth";
+import { redirect } from "next/navigation";
 
 export default async function SupportPage({
   searchParams,
@@ -14,6 +16,16 @@ export default async function SupportPage({
 }) {
   const tenant = await getDefaultTenant();
 
+  const { userId, role } = await getAuthPayload();
+
+  if (!userId) {
+    redirect("/login");
+  }
+
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
+
   if (!tenant) return <div>No tenant found</div>;
 
   const params = await searchParams;
@@ -21,8 +33,8 @@ export default async function SupportPage({
   const statusParam = params.status?.toUpperCase();
   const priorityParam = params.priority?.toUpperCase();
 
-  const [unreadCount, urgentCount, allCount, resolvedCount] = await Promise.all(
-    [
+  const [unreadCount, urgentCount, allCount, resolvedCount, user] =
+    await Promise.all([
       prisma.contact.count({
         where: {
           tenantId: tenant.id,
@@ -50,8 +62,18 @@ export default async function SupportPage({
           storeMode: tenant.storeMode,
         },
       }),
-    ],
-  );
+
+      prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          name: true,
+          email: true,
+          avatarUrl: true,
+        },
+      }),
+    ]);
 
   const whereClause: any = {
     tenantId: tenant.id,
@@ -71,11 +93,18 @@ export default async function SupportPage({
     orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
   });
 
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
+
   return (
     <>
       <AdminHeaderUI
         title="Support"
         subtitle="Manage messages from customers"
+        admin={admin}
       />
       <SupportPageClient
         messages={messages}

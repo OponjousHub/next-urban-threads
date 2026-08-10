@@ -105,6 +105,8 @@ export default async function CouponDetailPage({ params }: Props) {
 
       commissionAmount: Number(order.commissionAmount ?? 0),
 
+      shippingCost: Number(order.shippingCost ?? 0),
+
       createdAt: order.createdAt.toISOString(),
 
       user: {
