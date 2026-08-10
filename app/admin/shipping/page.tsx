@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { getAuthPayload } from "@/lib/server/auth";
+import { redirect } from "next/navigation";
 import {
   MapPinned,
   Truck,
@@ -12,6 +14,16 @@ import {
 
 export default async function ShippingDashboardPage() {
   const tenant = await getDefaultTenant();
+
+  const { userId, role } = await getAuthPayload();
+
+  if (!userId) {
+    redirect("/login");
+  }
+
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
 
   if (!tenant) {
     throw new Error("Default tenant not found");
@@ -25,6 +37,7 @@ export default async function ShippingDashboardPage() {
     recentZones,
     recentMethods,
     recentRates,
+    user,
   ] = await Promise.all([
     prisma.shippingZone.count({
       where: {
@@ -86,13 +99,32 @@ export default async function ShippingDashboardPage() {
       },
       take: 5,
     }),
+
+    prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+        avatarUrl: true,
+      },
+    }),
   ]);
+  console.log("ADMIN ADMIN admin", user);
+
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
 
   return (
     <>
       <AdminHeaderUI
         title="Shipping"
         subtitle="Manage shipping zones, methods and delivery pricing."
+        admin={admin}
       />
       <div className="space-y-8">
         {/* Header */}
