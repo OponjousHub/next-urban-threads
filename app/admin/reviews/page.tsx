@@ -3,45 +3,69 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 import { Star } from "lucide-react";
+import { getAuthPayload } from "@/lib/server/auth";
+import { redirect } from "next/navigation";
 
 export default async function AdminReviewsPage() {
   const tenant = await getDefaultTenant();
 
+  const { userId, role } = await getAuthPayload();
+
+  if (!userId) {
+    redirect("/login");
+  }
+
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
+
   if (!tenant) {
     throw new Error("Tenant not found");
   }
-
-  const reviews = await prisma.review.findMany({
-    where: {
-      tenantId: tenant.id,
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+  const [reviews, user] = await Promise.all([
+    prisma.review.findMany({
+      where: {
+        tenantId: tenant.id,
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
 
-      product: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          vendor: {
-            select: {
-              id: true,
-              name: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            vendor: {
+              select: {
+                id: true,
+                name: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+
+    prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+        avatarUrl: true,
+      },
+    }),
+  ]);
 
   const totalReviews = reviews.length;
 
@@ -57,9 +81,19 @@ export default async function AdminReviewsPage() {
     (review) => review.status === "REJECTED",
   ).length;
 
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
+
   return (
     <>
-      <AdminHeaderUI title="Reviews" subtitle="Manage product reviews" />
+      <AdminHeaderUI
+        title="Reviews"
+        subtitle="Manage product reviews"
+        admin={admin}
+      />
       <div className="space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">

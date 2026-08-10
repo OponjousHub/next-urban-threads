@@ -2,6 +2,8 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import OrderDetails from "@/components/order/orderDetails";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { getAuthPayload } from "@/lib/server/auth";
+import { redirect } from "next/navigation";
 
 interface OrderDetailsPageProps {
   params: { id: string };
@@ -11,38 +13,62 @@ export default async function OrderDetailsPage({
   params,
 }: OrderDetailsPageProps) {
   const tenant = await getDefaultTenant();
+
+  const { userId, role } = await getAuthPayload();
+
+  if (!userId) {
+    redirect("/login");
+  }
+
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
+
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
 
-  const order = await prisma.order.findUnique({
-    where: { id: params.id, tenantId: tenant.id },
-    include: {
-      user: { select: { name: true, email: true } },
-      items: {
-        select: {
-          id: true,
+  const [order, user] = await Promise.all([
+    prisma.order.findUnique({
+      where: { id: params.id, tenantId: tenant.id },
+      include: {
+        user: { select: { name: true, email: true } },
+        items: {
+          select: {
+            id: true,
 
-          quantity: true,
+            quantity: true,
 
-          price: true,
+            price: true,
 
-          image: true,
+            image: true,
 
-          variantColor: true,
+            variantColor: true,
 
-          variantSize: true,
+            variantSize: true,
 
-          product: {
-            select: {
-              name: true,
-              images: true,
+            product: {
+              select: {
+                name: true,
+                images: true,
+              },
             },
           },
         },
       },
-    },
-  });
+    }),
+
+    prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+        avatarUrl: true,
+      },
+    }),
+  ]);
 
   if (!order) {
     return <p className="p-6 text-gray-500">Order not found</p>;
@@ -70,9 +96,19 @@ export default async function OrderDetailsPage({
     })),
   };
 
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
+
   return (
     <>
-      <AdminHeaderUI title="Orders " subtitle="View customer order details" />
+      <AdminHeaderUI
+        title="Orders "
+        subtitle="View customer order details"
+        admin={admin}
+      />
       <OrderDetails order={formattedOrder} basePath={"/admin/orders"} />;
     </>
   );

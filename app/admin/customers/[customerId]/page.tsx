@@ -4,6 +4,8 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import CustomerDetailUI from "@/components/customers/customerDetailUI";
 import { serializeDecimals } from "@/lib/serialize";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { redirect } from "next/navigation";
+import { getAuthPayload } from "@/lib/server/auth";
 
 export default async function AdminCustomerDetailPage({
   params,
@@ -15,53 +17,82 @@ export default async function AdminCustomerDetailPage({
   const tenant = await getDefaultTenant();
   if (!tenant) throw new Error("Tenant not found");
 
-  const customer = await prisma.user.findFirst({
-    where: {
-      id: customerId,
-      tenantId: tenant.id,
-    },
+  const { userId, role } = await getAuthPayload();
 
-    include: {
-      orders: {
-        where: {
-          tenantId: tenant.id,
-        },
+  if (!userId) {
+    redirect("/login");
+  }
 
-        include: {
-          items: {
-            include: {
-              product: true,
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
+
+  const [customer, customerAddress, user] = await Promise.all([
+    prisma.user.findFirst({
+      where: {
+        id: customerId,
+        tenantId: tenant.id,
+      },
+
+      include: {
+        orders: {
+          where: {
+            tenantId: tenant.id,
+          },
+
+          include: {
+            items: {
+              include: {
+                product: true,
+              },
             },
+          },
+
+          orderBy: {
+            createdAt: "desc",
           },
         },
 
-        orderBy: {
-          createdAt: "desc",
+        reviews: {
+          include: {
+            product: true,
+          },
+
+          orderBy: {
+            createdAt: "desc",
+          },
         },
       },
+    }),
 
-      reviews: {
-        include: {
-          product: true,
-        },
-
-        orderBy: {
-          createdAt: "desc",
-        },
+    prisma.user.findUnique({
+      where: {
+        id: customerId,
       },
-    },
-  });
+      include: {
+        addresses: true,
+      },
+    }),
 
-  const customerAddress = await prisma.user.findUnique({
-    where: {
-      id: customerId,
-    },
-    include: {
-      addresses: true,
-    },
-  });
+    prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+        avatarUrl: true,
+      },
+    }),
+  ]);
 
   const safeCustomer = serializeDecimals(customer);
+
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
 
   if (!customer) {
     notFound();
@@ -69,7 +100,11 @@ export default async function AdminCustomerDetailPage({
 
   return (
     <>
-      <AdminHeaderUI title="Customers " subtitle="View customer details" />
+      <AdminHeaderUI
+        title="Customers"
+        subtitle="View customer details"
+        admin={admin}
+      />
 
       <CustomerDetailUI
         customer={safeCustomer}

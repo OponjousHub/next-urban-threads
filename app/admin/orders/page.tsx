@@ -4,6 +4,8 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { prisma } from "@/utils/prisma";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { getAuthPayload } from "@/lib/server/auth";
+import { redirect } from "next/navigation";
 
 type Props = {
   searchParams: Promise<{
@@ -19,6 +21,16 @@ type Props = {
 export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams;
   const tenant = await getDefaultTenant();
+
+  const { userId, role } = await getAuthPayload();
+
+  if (!userId) {
+    redirect("/login");
+  }
+
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
   if (!tenant) throw new Error("Default tenant not found");
 
   const { status, payment, query, from, to } = params;
@@ -32,7 +44,7 @@ export default async function OrdersPage({ searchParams }: Props) {
 
   const skip = (page - 1) * pageSize;
 
-  const [orders, totalOrders] = await Promise.all([
+  const [orders, totalOrders, user] = await Promise.all([
     prisma.order.findMany({
       skip,
       take: pageSize,
@@ -77,6 +89,7 @@ export default async function OrdersPage({ searchParams }: Props) {
     prisma.order.count({
       where: {
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
 
         ...(status &&
           status !== "ALL" && {
@@ -108,6 +121,17 @@ export default async function OrdersPage({ searchParams }: Props) {
 
       orderBy: { createdAt: "desc" },
     }),
+
+    prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+        avatarUrl: true,
+      },
+    }),
   ]);
 
   const totalPages = Math.ceil(totalOrders / pageSize);
@@ -127,11 +151,18 @@ export default async function OrdersPage({ searchParams }: Props) {
     itemsCount: order.items.length,
   }));
 
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
+
   return (
     <>
       <AdminHeaderUI
         title="Orders "
         subtitle="View customer orders and status"
+        admin={admin}
       />
 
       <div className="bg-white border-b px-4 py-4 mb-6 rounded-xl shadow-sm">

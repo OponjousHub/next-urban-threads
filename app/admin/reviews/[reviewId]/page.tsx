@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/utils/prisma";
-import { getAuthPayload } from "@/lib/server/auth";
 import ReviewDetail from "@/components/reviews/review-detail";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { getAuthPayload } from "@/lib/server/auth";
+import { redirect } from "next/navigation";
 
 type Props = {
   params: Promise<{
@@ -12,7 +13,15 @@ type Props = {
 
 export default async function VendorReviewPage({ params }: Props) {
   const { reviewId } = await params;
-  const { role } = await getAuthPayload();
+  const { userId, role } = await getAuthPayload();
+
+  if (!userId) {
+    redirect("/login");
+  }
+
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
 
   const review = await prisma.review.findFirst({
     where: {
@@ -44,30 +53,43 @@ export default async function VendorReviewPage({ params }: Props) {
     },
   });
 
-  const moderationHistory = await prisma.reviewModerationHistory.findMany({
-    where: {
-      reviewId: reviewId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const [moderationHistory, customerOrders, user] = await Promise.all([
+    prisma.reviewModerationHistory.findMany({
+      where: {
+        reviewId: reviewId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
 
-  const customerOrders = await prisma.order.findMany({
-    where: {
-      userId: review?.userId,
-    },
-    include: {
-      items: {
-        include: {
-          product: true,
+    prisma.order.findMany({
+      where: {
+        userId: review?.userId,
+      },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+
+    prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+        avatarUrl: true,
+      },
+    }),
+  ]);
 
   const totalSpent = customerOrders.reduce(
     (sum, order) => sum + Number(order.totalAmount),
@@ -113,9 +135,19 @@ export default async function VendorReviewPage({ params }: Props) {
     })),
   };
 
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
+
   return (
     <>
-      <AdminHeaderUI title="Reviews" subtitle="View review details" />
+      <AdminHeaderUI
+        title="Reviews"
+        subtitle="View review details"
+        admin={admin}
+      />
       <ReviewDetail
         review={safeReview}
         moderationHistory={moderationHistory}

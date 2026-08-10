@@ -7,6 +7,8 @@ import { prisma } from "@/utils/prisma";
 import Link from "next/link";
 import ProductsTable from "@/components/products/product-table";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { getAuthPayload } from "@/lib/server/auth";
+import { redirect } from "next/navigation";
 
 export default async function ProductsPage({
   searchParams,
@@ -21,6 +23,17 @@ export default async function ProductsPage({
   };
 }) {
   const tenant = await getDefaultTenant();
+
+  const { userId, role } = await getAuthPayload();
+
+  if (!userId) {
+    redirect("/login");
+  }
+
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
+
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
@@ -44,59 +57,73 @@ export default async function ProductsPage({
 
   const skip = (page - 1) * pageSize;
 
-  const products = await prisma.product.findMany({
-    where: {
-      deletedAt: null,
-      tenantId: tenant.id,
-      storeMode: tenant.storeMode,
+  const [products, totalProducts, user] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        deletedAt: null,
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
 
-      ...(q && {
-        OR: [
-          { name: { contains: q, mode: "insensitive" } },
-          { description: { contains: q, mode: "insensitive" } },
-        ],
-      }),
+        ...(q && {
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } },
+          ],
+        }),
 
-      ...(category && {
-        category: {
-          slug: category.toLowerCase(),
-        },
-      }),
+        ...(category && {
+          category: {
+            slug: category.toLowerCase(),
+          },
+        }),
 
-      ...(featured && { featured: featured === "true" }),
+        ...(featured && { featured: featured === "true" }),
 
-      ...(stock === "low" && { stock: { lte: 5 } }),
-      ...(stock === "out" && { stock: 0 }),
-    },
-    orderBy,
-    skip,
-    take: pageSize,
-  });
+        ...(stock === "low" && { stock: { lte: 5 } }),
+        ...(stock === "out" && { stock: 0 }),
+      },
+      orderBy,
+      skip,
+      take: pageSize,
+    }),
+
+    prisma.product.count({
+      where: {
+        deletedAt: null,
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
+
+        ...(q && {
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } },
+          ],
+        }),
+
+        ...(category && {
+          category: {
+            slug: category.toLowerCase(),
+          },
+        }),
+        ...(featured && { featured: featured === "true" }),
+        ...(stock === "low" && { stock: { lte: 5 } }),
+        ...(stock === "out" && { stock: 0 }),
+      },
+    }),
+
+    prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+        avatarUrl: true,
+      },
+    }),
+  ]);
 
   //Get Total count for to get the number of pages
-  const totalProducts = await prisma.product.count({
-    where: {
-      deletedAt: null,
-      tenantId: tenant.id,
-      storeMode: tenant.storeMode,
-
-      ...(q && {
-        OR: [
-          { name: { contains: q, mode: "insensitive" } },
-          { description: { contains: q, mode: "insensitive" } },
-        ],
-      }),
-
-      ...(category && {
-        category: {
-          slug: category.toLowerCase(),
-        },
-      }),
-      ...(featured && { featured: featured === "true" }),
-      ...(stock === "low" && { stock: { lte: 5 } }),
-      ...(stock === "out" && { stock: 0 }),
-    },
-  });
 
   const totalPages = Math.ceil(totalProducts / pageSize);
 
@@ -109,11 +136,18 @@ export default async function ProductsPage({
     cache: "no-store",
   });
 
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
+
   return (
     <>
       <AdminHeaderUI
         title="Products"
         subtitle="Manage your inventory and product listings"
+        admin={admin}
       />
       <div className="space-y-6 sticky top-0 z-30">
         <div className="sticky top-0 z-30 bg-white border-b px-4 py-3 space-y-4">

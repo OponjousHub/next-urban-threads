@@ -3,6 +3,8 @@ import Pagination from "@/components/products/product-pagination";
 import { prisma } from "@/utils/prisma";
 import Link from "next/link";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { redirect } from "next/navigation";
+import { getAuthPayload } from "@/lib/server/auth";
 
 export default async function VendorCustomersPage({
   searchParams,
@@ -14,6 +16,16 @@ export default async function VendorCustomersPage({
   const queryParams = await searchParams;
   const tenant = await getDefaultTenant();
 
+  const { userId, role } = await getAuthPayload();
+
+  if (!userId) {
+    redirect("/login");
+  }
+
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
+
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
@@ -24,7 +36,7 @@ export default async function VendorCustomersPage({
 
   const skip = (page - 1) * pageSize;
 
-  const [customers, allCustomersCount] = await Promise.all([
+  const [customers, allCustomersCount, user] = await Promise.all([
     prisma.user.findMany({
       where: {
         tenantId: tenant.id,
@@ -46,6 +58,17 @@ export default async function VendorCustomersPage({
         tenantId: tenant.id,
         isDeleted: false,
         role: "USER",
+      },
+    }),
+
+    prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+        avatarUrl: true,
       },
     }),
   ]);
@@ -96,11 +119,21 @@ export default async function VendorCustomersPage({
     },
   });
 
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
+
   // const totalPages = Math.ceil(totalCustomersCount / pageSize);
   const totalPages = Math.ceil(allCustomersCount / pageSize);
   return (
     <>
-      <AdminHeaderUI title="Customers " subtitle="Manage your customers" />
+      <AdminHeaderUI
+        title="Customers "
+        subtitle="Manage your customers"
+        admin={admin}
+      />
 
       <div className="space-y-6">
         {/* Stats */}

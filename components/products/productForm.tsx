@@ -84,9 +84,18 @@ function Section({
 type ProductSearchProps = {
   basePath: string;
   initialData?: any;
+  admin?: {
+    name?: string | null;
+    email?: string | null;
+    avatarUrl?: string | null;
+  };
 };
 
-export function ProductForm({ initialData, basePath }: ProductSearchProps) {
+export function ProductForm({
+  initialData,
+  basePath,
+  admin,
+}: ProductSearchProps) {
   const router = useRouter();
 
   const isEdit = !!initialData;
@@ -336,6 +345,7 @@ export function ProductForm({ initialData, basePath }: ProductSearchProps) {
       <AdminHeaderUI
         title={`${isEdit ? "Edit" : "Create"} product`}
         subtitle={`${isEdit ? "Edit " : "Create"} inventory, variants and pricing`}
+        admin={admin}
       />
       <div className="min-h-screen bg-gray-50 py-10">
         <div className="max-w-7xl mx-auto px-6">
