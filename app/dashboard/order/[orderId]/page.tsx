@@ -69,6 +69,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   const [userReviews, setUserReviews] = useState<Record<string, any>>({});
   const [open, setOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
+  const [cancellingRefund, setCancellingRefund] = useState(false);
 
   async function fetchOrder() {
     const res = await fetch(`/api/orders/me/${orderId}`);
@@ -162,7 +163,9 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   }, [order]);
 
   async function cancelRefund() {
-    if (!order?.refundRequest?.length) return;
+    if (!order?.refundRequest?.length || cancellingRefund) return;
+
+    setCancellingRefund(true);
 
     try {
       const res = await fetch(
@@ -181,12 +184,14 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
         "Your refund request has been cancelled.",
       );
 
-      fetchOrder();
+      await fetchOrder();
     } catch {
       appToast.error(
         "Unable to cancel",
         "This refund can no longer be cancelled.",
       );
+    } finally {
+      setCancellingRefund(false);
     }
   }
 
@@ -411,9 +416,17 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
                 <button
                   onClick={cancelRefund}
-                  className="mt-4 rounded-lg border border-red-500 px-4 py-2 text-red-600 hover:bg-red-50"
+                  disabled={cancellingRefund}
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-red-500 px-4 py-2 text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Cancel Request
+                  {cancellingRefund ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+                      Cancelling...
+                    </>
+                  ) : (
+                    "Cancel Request"
+                  )}
                 </button>
               </div>
             )}
