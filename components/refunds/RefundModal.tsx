@@ -6,6 +6,7 @@ import { DialogTitle } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
 import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
+import Image from "next/image";
 
 type Props = {
   order: any;
@@ -137,14 +138,25 @@ export default function RefundModal({ order, onClose, onSuccess }: Props) {
                 onChange={() => toggleItem(item)}
               />
 
-              <img src={item.product.images[0]} className="w-12 h-12 rounded" />
+              <Image
+                src={
+                  item.image || item.product.images?.[0] || "/placeholder.png"
+                }
+                alt={item.product.name}
+                width={14}
+                height={14}
+                className="rounded object-cover w-14 h-14"
+              />
 
               <div className="flex-1">
-                <p>{item.product.name}</p>
-                <p className="text-sm text-gray-500">
-                  {tenant.currency}
-                  {item.product.price} × {item.quantity}
-                </p>
+                <p className="font-medium">{item.product.name}</p>
+                {(item.variantColor || item.variantSize) && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    {item.variantColor && `Color: ${item.variantColor}`}
+                    {item.variantColor && item.variantSize && " • "}
+                    {item.variantSize && `Size: ${item.variantSize}`}
+                  </p>
+                )}
               </div>
 
               {selected && (
