@@ -87,19 +87,12 @@ export default function RefundsPage() {
     }
   }
 
-  console.log("REFUNDSSS", refunds);
-  console.log("REFUND KPIS", kpis);
-
   if (loading) {
     return <p className="p-6">Loading refunds...</p>;
   }
 
   return (
     <>
-      <AdminHeaderUI
-        title="Refund request"
-        subtitle="Manage your refund request listings"
-      />
       <main className="p-6">
         {/* Refund KPIs */}
         <RefundKpis

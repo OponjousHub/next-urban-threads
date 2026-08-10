@@ -20,6 +20,7 @@ export default async function AdminHeader({ title, subtitle }: Props) {
         },
       })
     : null;
+  console.log("ADMIN TOPBAR", admin);
 
   return (
     <AdminHeaderUI

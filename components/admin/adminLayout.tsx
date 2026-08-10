@@ -4,11 +4,6 @@ import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/admin/adminSidebar";
 import { useAdminSidebar } from "@/store/admin-sidebar-context";
 
-type User = {
-  name: string;
-  image?: string | null;
-};
-
 export default function AdminLayout({
   children,
 }: {
@@ -19,25 +14,25 @@ export default function AdminLayout({
   // ✅ Mobile sidebar state comes from context
   const { open, setOpen } = useAdminSidebar();
 
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const res = await fetch("/api/users/me", {
-          cache: "no-store",
-        });
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     try {
+  //       const res = await fetch("/api/users/me", {
+  //         cache: "no-store",
+  //       });
 
-        if (!res.ok) {
-          throw new Error("Failed to get user");
-        }
+  //       if (!res.ok) {
+  //         throw new Error("Failed to get user");
+  //       }
 
-        await res.json();
-      } catch (error) {
-        console.error("User fetch error:", error);
-      }
-    };
+  //       await res.json();
+  //     } catch (error) {
+  //       console.error("User fetch error:", error);
+  //     }
+  //   };
 
-    getUser();
-  }, []);
+  //   getUser();
+  // }, []);
 
   return (
     <>

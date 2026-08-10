@@ -10,7 +10,7 @@ type AdminHeaderProps = {
   admin?: {
     name?: string | null;
     email?: string | null;
-    image?: string | null;
+    avatarUrl?: string | null;
   };
 };
 
@@ -20,6 +20,7 @@ export default function AdminHeaderUI({
   admin,
 }: AdminHeaderProps) {
   const { toggle } = useAdminSidebar();
+  console.log("ADMIN TOPBAR", admin);
   return (
     <header className="sticky top-0 z-30 border-b bg-white mb-10">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
@@ -58,9 +59,9 @@ export default function AdminHeaderUI({
 
           {/* Admin Profile */}
           <div className="flex items-center gap-2 rounded-full border px-2 py-1">
-            {admin?.image ? (
+            {admin?.avatarUrl ? (
               <img
-                src={admin.image}
+                src={admin.avatarUrl}
                 alt={admin.name || "Administrator"}
                 className="h-8 w-8 rounded-full object-cover"
               />
