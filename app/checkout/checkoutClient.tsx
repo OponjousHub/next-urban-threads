@@ -646,6 +646,34 @@ export default function CheckoutClient({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Payment Method
             </label>
+
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="online"
+                  checked={formData.paymentMethod === "online"}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-[var(--color-primary)]"
+                />
+
+                <div>
+                  <p className="font-medium text-gray-900">
+                    Card / Online Payment
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Secure payment through our payment provider
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Payment Method
+            </label>
             <select
               name="paymentMethod"
               value={formData.paymentMethod}
@@ -656,7 +684,7 @@ export default function CheckoutClient({
               <option value="paypal">PayPal</option>
               <option value="bank-transfer">Bank Transfer</option>
             </select>
-          </div>
+          </div> */}
           {!selectedAddressId && (
             <label className="flex items-center gap-2 mt-3 text-sm text-gray-700">
               <input

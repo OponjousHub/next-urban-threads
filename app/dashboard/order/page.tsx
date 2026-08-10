@@ -47,7 +47,10 @@ export default async function OrdersPage() {
       {orders.map((order) => {
         const firstItem = order.items[0];
         const extraItems = order.items.length - 1;
-        console.log(firstItem);
+
+        if (!firstItem) {
+          return null;
+        }
 
         return (
           <div key={order.id} className="border rounded-lg bg-white shadow-sm">
@@ -89,7 +92,11 @@ export default async function OrdersPage() {
             {/* Items preview */}
             <div className="flex items-center gap-4 p-4">
               <Image
-                src={firstItem.product.images[0]}
+                src={
+                  firstItem.image ||
+                  firstItem.product.images?.[0] ||
+                  "/placeholder.png"
+                }
                 alt={firstItem.product.name}
                 width={80}
                 height={80}
@@ -98,6 +105,14 @@ export default async function OrdersPage() {
 
               <div className="flex-1">
                 <p className="font-medium">{firstItem.product.name}</p>
+                {(firstItem.variantColor || firstItem.variantSize) && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    {firstItem.variantColor &&
+                      `Color: ${firstItem.variantColor}`}
+                    {firstItem.variantColor && firstItem.variantSize && " • "}
+                    {firstItem.variantSize && `Size: ${firstItem.variantSize}`}
+                  </p>
+                )}
                 <p className="text-sm text-gray-500">
                   Qty: {firstItem.quantity}
                 </p>
