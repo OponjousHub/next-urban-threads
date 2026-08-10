@@ -2,31 +2,61 @@ import Link from "next/link";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { redirect } from "next/navigation";
 
 export default async function AdminCouponsPage() {
   const { tenant } = await getAuthPayload();
+
+  const { userId, role } = await getAuthPayload();
+
+  if (!userId) {
+    redirect("/login");
+  }
+
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
 
   if (!tenant) {
     throw new Error("Tenant not found");
   }
 
-  const coupons = await prisma.coupon.findMany({
-    where: {
-      tenantId: tenant.id,
-    },
+  const [coupons, user] = await Promise.all([
+    prisma.coupon.findMany({
+      where: {
+        tenantId: tenant.id,
+      },
 
-    include: {
-      vendor: {
-        select: {
-          name: true,
+      include: {
+        vendor: {
+          select: {
+            name: true,
+          },
         },
       },
-    },
 
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+
+    prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+        avatarUrl: true,
+      },
+    }),
+  ]);
+
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
 
   const now = new Date();
 
@@ -47,6 +77,7 @@ export default async function AdminCouponsPage() {
       <AdminHeaderUI
         title="Coupons & Discounts"
         subtitle=" Create and manage discount codes"
+        admin={admin}
       />
       <div className="space-y-6">
         {/* KPI */}

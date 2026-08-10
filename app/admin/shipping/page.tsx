@@ -111,7 +111,6 @@ export default async function ShippingDashboardPage() {
       },
     }),
   ]);
-  console.log("ADMIN ADMIN admin", user);
 
   const admin = {
     name: user?.name,

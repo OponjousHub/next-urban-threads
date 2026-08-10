@@ -13,6 +13,11 @@ type Props = {
   coupon?: any;
   vendorId?: string;
   basePath: string;
+  admin?: {
+    name?: string | null;
+    email?: string | null;
+    avatarUrl?: string | null;
+  };
 };
 
 export default function CouponForm({
@@ -20,6 +25,7 @@ export default function CouponForm({
   coupon,
   vendorId,
   basePath,
+  admin,
 }: Props) {
   const router = useRouter();
 
@@ -86,6 +92,7 @@ export default function CouponForm({
       <AdminHeaderUI
         title={`Coupons`}
         subtitle={`${mode === "edit" ? "Edit this" : "Create new"} coupon`}
+        admin={admin}
       />
 
       <Link

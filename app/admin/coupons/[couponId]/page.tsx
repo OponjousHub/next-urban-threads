@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import CouponDetail from "@/components/coupons/coupon-detail";
 import { getAuthPayload } from "@/lib/server/auth";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { redirect } from "next/navigation";
 
 type Props = {
   params: Promise<{
@@ -14,28 +15,57 @@ export default async function CouponDetailPage({ params }: Props) {
   const { couponId } = await params;
   const { tenant } = await getAuthPayload();
 
-  const coupon = await prisma.coupon.findFirst({
-    where: {
-      id: couponId,
-      tenantId: tenant?.id,
-    },
+  const { userId, role } = await getAuthPayload();
 
-    include: {
-      orders: {
-        include: {
-          user: true,
-        },
+  if (!userId) {
+    redirect("/login");
+  }
 
-        orderBy: {
-          createdAt: "desc",
+  if (role !== "ADMIN" && role !== "OWNER") {
+    redirect("/");
+  }
+
+  const [coupon, user] = await Promise.all([
+    prisma.coupon.findFirst({
+      where: {
+        id: couponId,
+        tenantId: tenant?.id,
+      },
+
+      include: {
+        orders: {
+          include: {
+            user: true,
+          },
+
+          orderBy: {
+            createdAt: "desc",
+          },
         },
       },
-    },
-  });
+    }),
+
+    prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+        avatarUrl: true,
+      },
+    }),
+  ]);
 
   if (!coupon) {
     notFound();
   }
+
+  const admin = {
+    name: user?.name,
+    email: user?.email,
+    avatarUrl: user?.avatarUrl,
+  };
 
   const totalUses = coupon.orders.length;
 
@@ -86,7 +116,11 @@ export default async function CouponDetailPage({ params }: Props) {
   const safeAverageOrderValue = Number(averageOrderValue);
   return (
     <>
-      <AdminHeaderUI title="Coupons details" subtitle=" View coupon details" />
+      <AdminHeaderUI
+        title="Coupons details"
+        subtitle=" View coupon details"
+        admin={admin}
+      />
       <CouponDetail
         coupon={safeCoupon}
         revenueGenerated={revenueGenerated}
