@@ -100,13 +100,6 @@ export default function LoginPage() {
 
       setSuccessMessage("Login successful. Taking you to your dashboard...");
 
-      /*
-       * IMPORTANT:
-       * Do not use a 7-second timeout here.
-       *
-       * The authentication request has already completed,
-       * so redirect immediately.
-       */
       router.replace("/dashboard");
     } catch (err: unknown) {
       const message =

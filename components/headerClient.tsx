@@ -7,9 +7,9 @@ import { useTenant } from "@/store/tenant-provider-context";
 import { useCart } from "@/store/cart-context";
 import UserMenu from "./header-userMenu";
 import { MobileDrawer } from "./header-mobiledrawer";
-import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import HeaderSearch from "./headerSearch";
+import { useRouter, usePathname } from "next/navigation";
 
 type User = {
   id: string;
@@ -37,7 +37,6 @@ const HeaderClient = ({
   role,
   tenantName,
   categories,
-  storeMode,
 }: {
   role: string | null;
   tenantName: string;
@@ -55,6 +54,7 @@ const HeaderClient = ({
   const { isMultiVendor, isSingleVendor } = useTenant();
 
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,24 +65,61 @@ const HeaderClient = ({
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadUser() {
       try {
         const res = await fetch("/api/users/me", {
           credentials: "include",
           cache: "no-store",
         });
+
+        if (cancelled) return;
+
         if (!res.ok) {
           setUser(null);
         } else {
-          setUser(await res.json());
+          const userData = await res.json();
+          setUser(userData);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to load current user:", error);
+          setUser(null);
         }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadUser();
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
+
+  // useEffect(() => {
+  //   async function loadUser() {
+  //     try {
+  //       const res = await fetch("/api/users/me", {
+  //         credentials: "include",
+  //         cache: "no-store",
+  //       });
+  //       if (!res.ok) {
+  //         setUser(null);
+  //       } else {
+  //         setUser(await res.json());
+  //       }
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+
+  //   loadUser();
+  // }, []);
 
   useEffect(() => {
     if (!search.trim()) {
@@ -290,7 +327,12 @@ const HeaderClient = ({
             </Link>
 
             {/* USER */}
-            {user ? (
+            {loading ? (
+              <div
+                className="hidden md:block h-9 w-9 rounded-full bg-gray-200 animate-pulse"
+                aria-label="Loading account"
+              />
+            ) : user ? (
               <UserMenu
                 user={user}
                 onRemoveAvater={handleReloadHeader}
@@ -304,6 +346,7 @@ const HeaderClient = ({
                 >
                   Login
                 </Link>
+
                 <Link
                   className="text-base hover:text-[var(--color-primary)]"
                   href="/signup"
