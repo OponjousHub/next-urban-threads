@@ -20,7 +20,6 @@ export default function AdminHeaderUI({
   admin,
 }: AdminHeaderProps) {
   const { toggle } = useAdminSidebar();
-  console.log("ADMIN TOPBAR", admin);
   return (
     <header className="sticky top-0 z-30 border-b bg-white mb-10">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">

@@ -2,8 +2,8 @@ import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import AddressController from "@/modules/address/address.controller";
-import { AddressInput, AddressSchema } from "@/modules/address/address.schema";
-import AddressService from "@/modules/address/address.service";
+import { AddressSchema } from "@/modules/address/address.schema";
+// import AddressService from "@/modules/address/address.service";
 
 export async function PATCH(
   req: Request,
