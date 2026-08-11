@@ -28,6 +28,5 @@ export default async function SettingsPage() {
   if (!admin) {
     redirect("/login");
   }
-  console.log("ADMIN ADMIN", admin);
   return <SettingsPageUI admin={admin} />;
 }

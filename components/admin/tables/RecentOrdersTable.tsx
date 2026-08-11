@@ -10,8 +10,6 @@ type Props = {
   currency: string;
 };
 
-type RecentOrderStatus = "Paid" | "Pending" | "Cancelled";
-
 type RecentOrder = {
   id: string;
   customer: string;
@@ -23,7 +21,6 @@ type RecentOrder = {
 };
 
 export default function RecentOrdersTable({ orders, currency }: Props) {
-  console.log("ORDER STATUSssss", orders);
   return (
     <div className="h-full overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm transition-shadow duration-300 hover:shadow-md">
       {/* Header */}
