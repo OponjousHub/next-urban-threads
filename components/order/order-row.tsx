@@ -7,6 +7,7 @@ import { Order } from "@/types/order";
 import { OrderStatus } from "@prisma/client";
 import { useTenant } from "@/store/tenant-provider-context";
 import { StatusBadge } from "@/lib/status-badge";
+import { formatCurrency } from "@/lib/formatCurrency";
 import {
   buildOrderActions,
   Action,
@@ -167,8 +168,7 @@ export function OrderRow({
       </td>
 
       <td className="py-3 px-4 font-medium">
-        {tenant.currency}
-        {order.total.toFixed(2)}
+        {formatCurrency(order.total, tenant.currency)}
       </td>
 
       <td className="py-3 px-4">

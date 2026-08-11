@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
 import { StatusBadge } from "@/lib/status-badge";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface OrderItem {
   id: string;
@@ -257,8 +258,7 @@ export default function OrderDetails({
               </p>
 
               <p className="mt-1 text-2xl font-bold text-gray-900">
-                {tenant.currency}
-                {localOrder.totalAmount.toFixed(2)}
+                {formatCurrency(localOrder.totalAmount, tenant.currency)}
               </p>
             </div>
           </div>
@@ -420,8 +420,7 @@ export default function OrderDetails({
                 <span className="text-sm text-gray-500">Total</span>
 
                 <span className="text-xl font-bold text-gray-900">
-                  {tenant.currency}
-                  {localOrder.totalAmount.toFixed(2)}
+                  {formatCurrency(localOrder.totalAmount, tenant.currency)}
                 </span>
               </div>
             </div>
@@ -507,8 +506,7 @@ export default function OrderDetails({
                     )}
 
                     <p className="mt-3 text-sm text-gray-500">
-                      {tenant.currency}
-                      {item.price.toFixed(2)} each
+                      {formatCurrency(item.price, tenant.currency)} each
                     </p>
                   </div>
                 </div>
@@ -516,8 +514,10 @@ export default function OrderDetails({
                 {/* RIGHT */}
                 <div className="text-left sm:text-right">
                   <p className="text-2xl font-bold text-gray-900">
-                    {tenant.currency}
-                    {(item.price * item.quantity).toFixed(2)}
+                    {formatCurrency(
+                      item.price * item.quantity,
+                      tenant.currency,
+                    )}
                   </p>
 
                   <p className="mt-1 text-sm text-gray-500">
