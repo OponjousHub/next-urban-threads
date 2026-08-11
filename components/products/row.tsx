@@ -3,7 +3,7 @@
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { useTenant } from "@/store/tenant-provider-context";
-// import { ConfirmDeleteModal } from "@/app/admin/confirmDeleteModal";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 export default function Row({
   product,
@@ -69,8 +69,7 @@ export default function Row({
         </td>
         {/* Price */}
         <td className="align-middle">
-          {tenant.currency}
-          <span className="font-bold">{product.price.toLocaleString()}</span>
+          {formatCurrency(product.price, tenant.currency)}
         </td>
         {/* Stock */}
         <td className="align-middle">
