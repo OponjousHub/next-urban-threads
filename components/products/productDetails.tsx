@@ -5,6 +5,7 @@ import { appToast } from "@/utils/appToast";
 import { useState } from "react";
 import { useTenant } from "@/store/tenant-provider-context";
 import ConfirmationModal from "../modals/ConfirmationModal";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 export default function ProductDetails({
   product,
@@ -139,8 +140,7 @@ export default function ProductDetails({
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="font-semibold mb-4">Pricing</h3>
             <p className="text-xl font-bold">
-              {tenant.currency}
-              {product.price.toLocaleString()}
+              {formatCurrency(product.price, tenant.currency)}
             </p>
           </div>
 
