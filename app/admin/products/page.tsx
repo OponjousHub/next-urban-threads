@@ -1,6 +1,6 @@
 import ProductSearch from "@/components/products/product-search";
-import { ProductFilters } from "@/components/products/product-filters";
-import ProductSorting from "@/components/products/product-sorting";
+import ProductFilters from "@/components/products/product-filters";
+import ProductSort from "@/components/products/product-sorting";
 import Pagination from "@/components/products/product-pagination";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
@@ -10,19 +10,23 @@ import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 import { getAuthPayload } from "@/lib/server/auth";
 import { redirect } from "next/navigation";
 
-export default async function ProductsPage({
-  searchParams,
-}: {
-  searchParams: {
+type ProductsPageProps = {
+  searchParams: Promise<{
     q?: string;
     category?: string;
     stock?: string;
     featured?: string;
     sort?: string;
     page?: string;
-  };
-}) {
-  const tenant = await getDefaultTenant();
+  }>;
+};
+
+export default async function ProductsPage({
+  searchParams,
+}: ProductsPageProps) {
+  /* =========================================================
+     AUTH
+  ========================================================= */
 
   const { userId, role } = await getAuthPayload();
 
@@ -34,107 +38,213 @@ export default async function ProductsPage({
     redirect("/");
   }
 
+  /* =========================================================
+     TENANT
+  ========================================================= */
+
+  const tenant = await getDefaultTenant();
+
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
 
-  const queryParams = await searchParams;
-  const query = queryParams.q || "";
-  const category = queryParams.category;
-  const { q, stock, featured, sort } = queryParams;
+  /* =========================================================
+     SEARCH PARAMS
+  ========================================================= */
 
-  // Building orderBy for sorting
-  let orderBy: any = { createdAt: "desc" };
+  const params = await searchParams;
 
-  if (sort === "price_asc") orderBy = { price: "asc" };
-  if (sort === "price_desc") orderBy = { price: "desc" };
-  if (sort === "stock") orderBy = { stock: "asc" };
-  if (sort === "newest") orderBy = { createdAt: "desc" };
+  const q = params.q?.trim() || "";
+  const category = params.category || "";
+  const stock = params.stock || "";
+  const featured = params.featured || "";
+  const sort = params.sort || "newest";
 
-  // PAGINATION
-  const page = Number(queryParams.page) || 1;
+  const page = Math.max(Number(params.page) || 1, 1);
   const pageSize = 10;
 
   const skip = (page - 1) * pageSize;
 
-  const [products, totalProducts, user] = await Promise.all([
-    prisma.product.findMany({
-      where: {
-        deletedAt: null,
-        tenantId: tenant.id,
-        storeMode: tenant.storeMode,
+  /* =========================================================
+     SORTING
+  ========================================================= */
 
-        ...(q && {
+  let orderBy:
+    | { createdAt: "asc" | "desc" }
+    | { price: "asc" | "desc" }
+    | { stock: "asc" | "desc" }
+    | { name: "asc" | "desc" };
+
+  switch (sort) {
+    case "price_asc":
+      orderBy = {
+        price: "asc",
+      };
+      break;
+
+    case "price_desc":
+      orderBy = {
+        price: "desc",
+      };
+      break;
+
+    case "stock":
+      orderBy = {
+        stock: "asc",
+      };
+      break;
+
+    case "name_asc":
+      orderBy = {
+        name: "asc",
+      };
+      break;
+
+    case "name_desc":
+      orderBy = {
+        name: "desc",
+      };
+      break;
+
+    case "oldest":
+      orderBy = {
+        createdAt: "asc",
+      };
+      break;
+
+    case "newest":
+    default:
+      orderBy = {
+        createdAt: "desc",
+      };
+      break;
+  }
+
+  /* =========================================================
+     WHERE FILTERS
+  ========================================================= */
+
+  const where = {
+    deletedAt: null,
+
+    tenantId: tenant.id,
+
+    storeMode: tenant.storeMode,
+
+    ...(q
+      ? {
           OR: [
-            { name: { contains: q, mode: "insensitive" } },
-            { description: { contains: q, mode: "insensitive" } },
+            {
+              name: {
+                contains: q,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              description: {
+                contains: q,
+                mode: "insensitive" as const,
+              },
+            },
           ],
-        }),
+        }
+      : {}),
 
-        ...(category && {
+    ...(category
+      ? {
           category: {
             slug: category.toLowerCase(),
           },
-        }),
+        }
+      : {}),
 
-        ...(featured && { featured: featured === "true" }),
+    ...(featured
+      ? {
+          featured: featured === "true",
+        }
+      : {}),
 
-        ...(stock === "low" && { stock: { lte: 5 } }),
-        ...(stock === "out" && { stock: 0 }),
-      },
+    ...(stock === "low"
+      ? {
+          stock: {
+            lte: 5,
+            gt: 0,
+          },
+        }
+      : {}),
+
+    ...(stock === "out"
+      ? {
+          stock: 0,
+        }
+      : {}),
+  };
+
+  /* =========================================================
+     FETCH DATA
+  ========================================================= */
+
+  const [products, totalProducts, user, categories] = await Promise.all([
+    prisma.product.findMany({
+      where,
+
       orderBy,
+
       skip,
       take: pageSize,
     }),
 
     prisma.product.count({
-      where: {
-        deletedAt: null,
-        tenantId: tenant.id,
-        storeMode: tenant.storeMode,
-
-        ...(q && {
-          OR: [
-            { name: { contains: q, mode: "insensitive" } },
-            { description: { contains: q, mode: "insensitive" } },
-          ],
-        }),
-
-        ...(category && {
-          category: {
-            slug: category.toLowerCase(),
-          },
-        }),
-        ...(featured && { featured: featured === "true" }),
-        ...(stock === "low" && { stock: { lte: 5 } }),
-        ...(stock === "out" && { stock: 0 }),
-      },
+      where,
     }),
 
     prisma.user.findUnique({
       where: {
         id: userId,
       },
+
       select: {
         name: true,
         email: true,
         avatarUrl: true,
       },
     }),
+
+    // Categories for the product filter
+    prisma.category.findMany({
+      where: {
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
+      },
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+    }),
   ]);
 
-  //Get Total count for to get the number of pages
+  /* =========================================================
+     PAGINATION
+  ========================================================= */
 
   const totalPages = Math.ceil(totalProducts / pageSize);
 
-  const safeProducts = products.map((p) => ({
-    ...p,
-    price: Number(p.price),
+  /* =========================================================
+     SERIALIZE DECIMALS
+  ========================================================= */
+
+  const safeProducts = products.map((product) => ({
+    ...product,
+    price: Number(product.price),
   }));
 
-  const res = await fetch("http://localhost:3000/api/products", {
-    cache: "no-store",
-  });
+  /* =========================================================
+     ADMIN
+  ========================================================= */
 
   const admin = {
     name: user?.name,
@@ -142,49 +252,109 @@ export default async function ProductsPage({
     avatarUrl: user?.avatarUrl,
   };
 
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
   return (
     <>
       <AdminHeaderUI
         title="Products"
-        subtitle="Manage your inventory and product listings"
+        subtitle="Manage your products, inventory and catalog"
         admin={admin}
       />
-      <div className="space-y-6 sticky top-0 z-30">
-        <div className="sticky top-0 z-30 bg-white border-b px-4 py-3 space-y-4">
-          {/* Top row */}
-          <div className="flex justify-end">
-            <Link href={`/admin/products/new`}>
-              <button className="bg-black text-white px-3 py-2 lg:px-4 rounded-lg text-sm hover:opacity-90">
-                + Add
-              </button>
-            </Link>
-          </div>
 
-          {/* Search row */}
-          <div className="w-full">
-            <ProductSearch basePath="/admin/products" />
-          </div>
+      <div className="space-y-5">
+        {/* =====================================================
+            PRODUCTS TOOLBAR
+        ===================================================== */}
 
-          {/* Filters + Sort */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-            <ProductFilters basePath="/admin/products" />
-            <div className="flex flex-col text-xs text-gray-500">
-              <span>Sort</span>
-              <ProductSorting />
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="p-4 lg:p-5">
+            {/* Search + Add Product */}
+
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+              {/* Search */}
+
+              <div className="min-w-0 flex-1">
+                <ProductSearch basePath="/admin/products" />
+              </div>
+
+              {/* Add Product */}
+
+              <Link
+                href="/admin/products/new"
+                className="
+                  inline-flex
+                  h-11
+                  shrink-0
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-xl
+                  bg-black
+                  px-5
+                  text-sm
+                  font-medium
+                  text-white
+                  shadow-sm
+                  transition
+                  hover:bg-gray-800
+                  active:scale-[0.98]
+                "
+              >
+                <span className="text-lg leading-none">+</span>
+                Add Product
+              </Link>
+            </div>
+
+            {/* Filters + Sort */}
+
+            <div className="mt-5 border-t border-gray-100 pt-5">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                {/* Existing Filters */}
+
+                <div className="min-w-0 flex-1">
+                  <ProductFilters categories={categories} />
+                </div>
+
+                {/* Sort */}
+                <div className="shrink-0">
+                  <ProductSort />
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        {query && (
-          <p className="text-sm text-gray-600">
-            Showing results for{" "}
-            <span className="font-medium text-black">"{query}"</span>
-          </p>
+
+        {/* =====================================================
+            SEARCH RESULT
+        ===================================================== */}
+
+        {q && (
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span>Showing results for</span>
+
+            <span className="rounded-md bg-gray-100 px-2 py-1 font-medium text-gray-900">
+              "{q}"
+            </span>
+          </div>
         )}
+
+        {/* =====================================================
+            PRODUCT TABLE
+        ===================================================== */}
+
         <ProductsTable
           products={safeProducts}
-          query={query}
+          query={q}
           basePath="/admin/products"
         />
+
+        {/* =====================================================
+            PAGINATION
+        ===================================================== */}
+
         <Pagination totalPages={totalPages} />
       </div>
     </>

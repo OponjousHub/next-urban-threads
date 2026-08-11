@@ -37,12 +37,33 @@ export default function ProductSearch({ basePath }: ProductSearchProps) {
 
   return (
     <form className="flex gap-2">
-      <input
-        placeholder="Search products..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        className="input w-[100%] md:w-[40%] focus:ring-[var(--color-primary-ring)]"
-      />
+      <div className="relative w-full">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search products..."
+          className="
+    h-11
+    w-full
+    rounded-xl
+    border
+    border-gray-400
+    bg-white
+    px-4
+    pl-11
+    text-sm
+    text-gray-900
+    placeholder:text-gray-400
+    shadow-sm
+    outline-none
+    transition
+    focus:border-[var(--color-primary)]
+    focus:ring-2
+    focus:ring-[var(--color-primary-ring)]
+  "
+        />
+      </div>
 
       {/* Add clear field button */}
       {query && (
