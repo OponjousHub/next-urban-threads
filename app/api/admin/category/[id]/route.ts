@@ -340,6 +340,7 @@ export async function DELETE(req: Request, { params }: Params) {
      * PostgreSQL's RESTRICT error.
      */
 
+    // Check active products
     const productCount = await prisma.product.count({
       where: {
         categoryId: category.id,
@@ -348,19 +349,35 @@ export async function DELETE(req: Request, { params }: Params) {
       },
     });
 
+    // Active products still exist
     if (productCount > 0) {
       return NextResponse.json(
         {
           error: "Category contains products",
-          message: `This category cannot be deleted because ${productCount} ${
-            productCount === 1 ? "product is" : "products are"
-          } currently assigned to it. Move the products to another category first.`,
+          message: `This category still has ${productCount} ${
+            productCount === 1 ? "product" : "products"
+          } assigned to it. Move all products to another category before deleting.`,
           productCount,
         },
         { status: 409 },
       );
     }
 
+    // Detach soft-deleted products
+    await prisma.product.updateMany({
+      where: {
+        categoryId: category.id,
+        tenantId: tenant.id,
+        deletedAt: {
+          not: null,
+        },
+      },
+      data: {
+        categoryId: null,
+      },
+    });
+
+    // Delete category
     await prisma.category.delete({
       where: {
         id: category.id,

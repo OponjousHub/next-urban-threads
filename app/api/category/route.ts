@@ -9,7 +9,6 @@ export async function GET() {
     if (!tenant) {
       return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
     }
-    console.log("BACKEND CATEGORY FETCH");
     const categories = await prisma.category.findMany({
       where: {
         tenantId: tenant.id,

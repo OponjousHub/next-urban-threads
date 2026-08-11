@@ -85,13 +85,13 @@ model Product {
   rating5Count    Int              @default(0)
   weight          Decimal? @db.Decimal(8,2)
   vendorId        String?
-  categoryId      String
+  categoryId      String?
   isFlashDeal     Boolean          @default(false)
   videos          Json?
   storeMode       StoreMode        @default(SINGLE_VENDOR)
   cartItems       CartItem[]
   orderItems      OrderItem[]
-  category        Category         @relation(fields: [categoryId], references: [id])
+  category        Category?         @relation(fields: [categoryId], references: [id])
   user            User?            @relation("UserProduct", fields: [createdById], references: [id])
   tenant          Tenant           @relation(fields: [tenantId], references: [id])
   vendor          Vendor?          @relation(fields: [vendorId], references: [id])
@@ -409,7 +409,6 @@ model Category {
   name       String
   slug       String    @unique
   image      String?
-  // storeMode  StoreMode  @default(SINGLE_VENDOR)
   tenantId   String
   isFeatured Boolean   @default(true)
   tenant     Tenant    @relation(fields: [tenantId], references: [id])

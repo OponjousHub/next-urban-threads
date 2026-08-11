@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Trash2, Pencil, FolderInput, X, Upload, Loader2 } from "lucide-react";
+import ConfirmationModal from "@/components/modals/ConfirmationModal";
 import { appToast } from "@/utils/appToast";
 
 type Category = {
@@ -52,6 +53,11 @@ export default function CategoriesAdminPage() {
   const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(
     null,
   );
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
+    null,
+  );
+  const [deleting, setDeleting] = useState(false);
 
   /* ---------------- Load Categories ---------------- */
 
@@ -379,19 +385,13 @@ export default function CategoriesAdminPage() {
 
   /* ---------------- Delete ---------------- */
 
-  async function deleteCategory(category: Category) {
-    const confirmed = window.confirm(
-      `Delete "${category.name}"?\n\nThis category can only be deleted when it has no products assigned to it.`,
-    );
-
-    if (!confirmed) return;
-
-    setDeletingCategoryId(category.id);
-
-    const deletingToast = toast.loading("Deleting category...");
+  async function handleDeleteCategory() {
+    if (!categoryToDelete) return;
 
     try {
-      const res = await fetch(`/api/admin/category/${category.id}`, {
+      setDeleting(true);
+
+      const res = await fetch(`/api/admin/category/${categoryToDelete.id}`, {
         method: "DELETE",
       });
 
@@ -403,20 +403,23 @@ export default function CategoriesAdminPage() {
         );
       }
 
-      setCategories((prev) => prev.filter((item) => item.id !== category.id));
+      setCategories((prev) =>
+        prev.filter((category) => category.id !== categoryToDelete.id),
+      );
 
-      toast.success("Category deleted successfully", {
-        id: deletingToast,
-      });
+      appToast.success("Success", "Category deleted successfully");
+
+      setDeleteModalOpen(false);
+      setCategoryToDelete(null);
     } catch (error) {
-      toast.error(
+      console.error("DELETE CATEGORY ERROR:", error);
+
+      appToast.error(
+        "Unable to delete",
         error instanceof Error ? error.message : "Failed to delete category",
-        {
-          id: deletingToast,
-        },
       );
     } finally {
-      setDeletingCategoryId(null);
+      setDeleting(false);
     }
   }
 
@@ -634,16 +637,13 @@ export default function CategoriesAdminPage() {
                     {/* Delete */}
                     <button
                       type="button"
-                      disabled={deletingCategoryId === category.id}
-                      onClick={() => deleteCategory(category)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-red-100 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={() => {
+                        setCategoryToDelete(category);
+                        setDeleteModalOpen(true);
+                      }}
+                      className="text-red-500 hover:text-red-700 text-sm"
                     >
-                      {deletingCategoryId === category.id ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : (
-                        <Trash2 size={14} />
-                      )}
-                      Delete
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
@@ -915,6 +915,27 @@ export default function CategoriesAdminPage() {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        open={deleteModalOpen}
+        onClose={() => {
+          if (!deleting) {
+            setDeleteModalOpen(false);
+            setCategoryToDelete(null);
+          }
+        }}
+        onConfirm={handleDeleteCategory}
+        loading={deleting}
+        loadingText="Deleting..."
+        title="Delete Category"
+        description={
+          categoryToDelete
+            ? `Are you sure you want to delete "${categoryToDelete.name}"? This action cannot be undone.`
+            : "Are you sure you want to delete this category?"
+        }
+        action="Delete Category"
+        variant="danger"
+      />
     </div>
   );
 }
