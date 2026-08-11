@@ -409,6 +409,7 @@ model Category {
   name       String
   slug       String    @unique
   image      String?
+  // storeMode  StoreMode  @default(SINGLE_VENDOR)
   tenantId   String
   isFeatured Boolean   @default(true)
   tenant     Tenant    @relation(fields: [tenantId], references: [id])

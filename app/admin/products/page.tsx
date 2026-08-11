@@ -214,7 +214,7 @@ export default async function ProductsPage({
     prisma.category.findMany({
       where: {
         tenantId: tenant.id,
-        storeMode: tenant.storeMode,
+        // storeMode: tenant.storeMode,
       },
       orderBy: {
         name: "asc",

@@ -72,29 +72,32 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
         {/* Category */}
         <select
           className="
-            h-9
-            rounded-lg
-            border border-gray-200
-            bg-white
-            px-3
-            text-sm
-            font-medium
-            text-gray-700
-            shadow-sm
-            outline-none
-            transition
-            hover:border-gray-300
-            focus:border-[var(--color-primary)]
-            focus:ring-2
-            focus:ring-[var(--color-primary-ring)]
-          "
+          h-9
+          rounded-lg
+          border border-gray-200
+          bg-white
+          px-3
+          text-sm
+          font-medium
+          text-gray-700
+          shadow-sm
+          outline-none
+          transition
+          hover:border-gray-300
+          focus:border-[var(--color-primary)]
+          focus:ring-2
+          focus:ring-[var(--color-primary-ring)]
+        "
           onChange={(e) => updateParam("category", e.target.value)}
           value={searchParams.get("category") || ""}
         >
           <option value="">All Categories</option>
-          <option value="Men">Men</option>
-          <option value="Women">Women</option>
-          <option value="Accessories">Accessories</option>
+
+          {categories.map((category) => (
+            <option key={category.id} value={category.slug}>
+              {category.name}
+            </option>
+          ))}
         </select>
 
         {/* Stock */}
