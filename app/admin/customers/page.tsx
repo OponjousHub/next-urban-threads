@@ -5,6 +5,7 @@ import Link from "next/link";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 import { redirect } from "next/navigation";
 import { getAuthPayload } from "@/lib/server/auth";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 export default async function VendorCustomersPage({
   searchParams,
@@ -187,8 +188,7 @@ export default async function VendorCustomersPage({
                       </td>
                       <td className="px-4 py-4">{customer.orders}</td>
                       <td className="px-4 py-4 font-medium">
-                        {tenant?.currency}
-                        {customer.spent.toLocaleString()}
+                        {formatCurrency(customer.spent, tenant.currency)}
                       </td>
                       <td>
                         <span

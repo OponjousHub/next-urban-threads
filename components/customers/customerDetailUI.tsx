@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCurrency } from "@/lib/formatCurrency";
 import { useTenant } from "@/store/tenant-provider-context";
 
 type Props = {
@@ -69,8 +70,7 @@ export default function CustomerDetailUI({ customer, address }: Props) {
           <p className="text-sm text-gray-500">Total Spend</p>
 
           <p className="mt-2 text-2xl font-bold">
-            {tenant.currency}
-            {totalSpent.toLocaleString()}
+            {formatCurrency(totalSpent, tenant.currency)}
           </p>
         </div>
 
@@ -78,8 +78,7 @@ export default function CustomerDetailUI({ customer, address }: Props) {
           <p className="text-sm text-gray-500">Average Order</p>
 
           <p className="mt-2 text-2xl font-bold">
-            {tenant.currency}
-            {avgOrderValue.toFixed(2)}
+            {formatCurrency(avgOrderValue, tenant.currency)}
           </p>
         </div>
 
@@ -135,8 +134,7 @@ export default function CustomerDetailUI({ customer, address }: Props) {
               {customer.orders.map((order: any) => (
                 <tr key={order.id} className="border-b">
                   <td className="p-4">
-                    {tenant.currency}
-                    {order.id.slice(0, 8)}
+                    {formatCurrency(order.id.slice(0, 8), tenant.currency)}
                   </td>
 
                   <td className="p-4">
@@ -146,8 +144,7 @@ export default function CustomerDetailUI({ customer, address }: Props) {
                   <td className="p-4">{order.status}</td>
 
                   <td className="p-4">
-                    {tenant.currency}
-                    {Number(order.totalAmount).toLocaleString()}
+                    {formatCurrency(Number(order.totalAmount), tenant.currency)}
                   </td>
                 </tr>
               ))}
