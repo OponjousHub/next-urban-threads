@@ -347,6 +347,10 @@ export async function POST(req: NextRequest) {
     // 9. Coupon
     // ---------------------------------------------------------
 
+    // ---------------------------------------------------------
+    // 9. Coupon
+    // ---------------------------------------------------------
+
     let discountAmount = new Prisma.Decimal(0);
     let coupon = null;
 
@@ -355,35 +359,88 @@ export async function POST(req: NextRequest) {
         where: {
           id: couponId,
           tenantId: tenant.id,
-          vendorId: products[0]?.vendorId,
           active: true,
         },
       });
-    }
 
-    if (coupon) {
+      if (!coupon) {
+        return NextResponse.json(
+          {
+            message: "The selected coupon is no longer available.",
+          },
+          { status: 400 },
+        );
+      }
+
       const now = new Date();
+
+      // -------------------------------------------------------
+      // Coupon date validation
+      // -------------------------------------------------------
 
       if (coupon.startsAt && coupon.startsAt > now) {
         return NextResponse.json(
-          { message: "Coupon is not active yet" },
+          {
+            message: "Coupon is not active yet.",
+          },
           { status: 400 },
         );
       }
 
       if (coupon.expiresAt && coupon.expiresAt < now) {
         return NextResponse.json(
-          { message: "Coupon has expired" },
+          {
+            message: "Coupon has expired.",
+          },
           { status: 400 },
         );
       }
 
-      if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+      // -------------------------------------------------------
+      // Coupon usage limit
+      // -------------------------------------------------------
+
+      if (
+        coupon.usageLimit !== null &&
+        coupon.usageLimit !== undefined &&
+        coupon.usedCount >= coupon.usageLimit
+      ) {
         return NextResponse.json(
-          { message: "Coupon usage limit reached" },
+          {
+            message: "Coupon usage limit reached.",
+          },
           { status: 400 },
         );
       }
+
+      // -------------------------------------------------------
+      // Vendor-specific coupon validation
+      //
+      // vendorId === null
+      // => store-wide coupon
+      //
+      // vendorId !== null
+      // => coupon belongs to a specific vendor
+      // -------------------------------------------------------
+
+      if (coupon.vendorId) {
+        const invalidProduct = products.find(
+          (product) => product.vendorId !== coupon!.vendorId,
+        );
+
+        if (invalidProduct) {
+          return NextResponse.json(
+            {
+              message: `Coupon "${coupon.code}" is only valid for products from its assigned vendor.`,
+            },
+            { status: 400 },
+          );
+        }
+      }
+
+      // -------------------------------------------------------
+      // Calculate discount
+      // -------------------------------------------------------
 
       if (coupon.type === "PERCENTAGE") {
         discountAmount = merchandiseSubtotal.mul(Number(coupon.value) / 100);
@@ -392,6 +449,10 @@ export async function POST(req: NextRequest) {
       if (coupon.type === "FIXED") {
         discountAmount = new Prisma.Decimal(coupon.value);
       }
+
+      // -------------------------------------------------------
+      // Never allow discount to exceed merchandise subtotal
+      // -------------------------------------------------------
 
       if (discountAmount.greaterThan(merchandiseSubtotal)) {
         discountAmount = merchandiseSubtotal;
