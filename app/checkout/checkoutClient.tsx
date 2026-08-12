@@ -214,9 +214,12 @@ export default function CheckoutClient({
     0,
   );
 
-  const shipping = selectedShipping?.amount ?? 0;
-  const firstTotal = subtotal - Number(discountAmount);
-  const total = firstTotal + shipping;
+  const shipping = Number(selectedShipping?.amount ?? 0);
+  const discount = Number(discountAmount ?? 0);
+
+  const discountedSubtotal = Math.max(0, subtotal - discount);
+
+  const total = discountedSubtotal + shipping;
 
   //checkout validity variable
   const shippingAvailable =
@@ -670,21 +673,6 @@ export default function CheckoutClient({
             </div>
           </div>
 
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Payment Method
-            </label>
-            <select
-              name="paymentMethod"
-              value={formData.paymentMethod}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
-            >
-              <option value="credit-card">Credit Card</option>
-              <option value="paypal">PayPal</option>
-              <option value="bank-transfer">Bank Transfer</option>
-            </select>
-          </div> */}
           {!selectedAddressId && (
             <label className="flex items-center gap-2 mt-3 text-sm text-gray-700">
               <input
@@ -769,11 +757,10 @@ export default function CheckoutClient({
             <span>{formatCurrency(subtotal, tenant.currency)}</span>
           </div>
 
-          {coupon && (
+          {coupon && discount > 0 && (
             <div className="flex justify-between text-green-600">
-              <span>Discount ({coupon?.code})</span>
-
-              <span>- {formatCurrency(discountAmount, tenant.currency)}</span>
+              <span>Discount ({coupon.code})</span>
+              <span>- {formatCurrency(discount, tenant.currency)}</span>
             </div>
           )}
 
@@ -782,22 +769,11 @@ export default function CheckoutClient({
             <span>{formatCurrency(shipping, tenant.currency)}</span>
           </div>
 
-          <div className="flex justify-between">
-            <span>Discounted Amount</span>
-            <span>- {formatCurrency(discountAmount, tenant.currency)}</span>
-          </div>
-
           <hr className="my-3" />
 
           <div className="flex justify-between font-semibold text-gray-900 text-lg">
             <span>Total</span>
-            <span>
-              {formatCurrency(
-                Number(total.toFixed(2)) -
-                  Number(discountAmount.toLocaleString()),
-                tenant.currency,
-              )}
-            </span>
+            <span>{formatCurrency(total, tenant.currency)}</span>
           </div>
         </div>
         <div className="mt-6 space-y-2 text-sm text-gray-500 border-t pt-4">

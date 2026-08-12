@@ -84,11 +84,15 @@ export default function FeaturedProducts() {
                 key={index}
                 className="overflow-hidden rounded-3xl bg-white shadow-sm"
               >
+                {/* Image skeleton */}
                 <div className="h-[240px] animate-pulse bg-gray-200 sm:h-[280px] lg:h-[300px]" />
 
+                {/* Content skeleton */}
                 <div className="space-y-3 p-5 lg:p-6">
                   <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+
                   <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
+
                   <div className="mt-4 h-6 w-1/3 animate-pulse rounded bg-gray-200" />
                 </div>
               </div>
@@ -101,7 +105,14 @@ export default function FeaturedProducts() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-5 lg:grid-cols-3 lg:gap-8">
+          /*
+           * Desktop:
+           * 4 columns × 2 rows = 8 products
+           *
+           * Mobile:
+           * 2 columns
+           */
+          <div className="grid grid-cols-2 gap-5 lg:grid-cols-4 lg:gap-8">
             {products.map((product) => (
               <Link
                 key={product.id}
@@ -116,7 +127,7 @@ export default function FeaturedProducts() {
                         fill
                         src={cloudinaryImage(product.images[0])}
                         alt={product.name}
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 300px"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                         className="object-cover transition duration-500 group-hover:scale-105"
                       />
                     ) : (
@@ -144,7 +155,7 @@ export default function FeaturedProducts() {
             ))}
           </div>
         )}
-      </section>{" "}
+      </section>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   Plus,
   ArrowRight,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 export default async function ShippingDashboardPage() {
   const tenant = await getDefaultTenant();
@@ -323,8 +324,7 @@ export default async function ShippingDashboardPage() {
                     <p className="text-sm text-gray-500">{rate.method.name}</p>
 
                     <p className="mt-1 font-semibold">
-                      {tenant.currency}
-                      {rate.amount.toNumber().toLocaleString()}
+                      {formatCurrency(rate.amount.toNumber(), tenant.currency)}
                     </p>
                   </div>
                 ))

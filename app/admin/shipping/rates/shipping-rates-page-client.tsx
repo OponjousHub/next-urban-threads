@@ -6,6 +6,7 @@ import { Edit, Plus, Search, Trash2 } from "lucide-react";
 import { useTenant } from "@/store/tenant-provider-context";
 import ConfirmationModal from "@/components/modals/ConfirmationModal";
 import { appToast } from "@/utils/appToast";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 type ShippingRate = {
   id: string;
@@ -158,8 +159,7 @@ export default function ShippingRatesPageClient({ rates }: Props) {
                 <td className="px-5 py-4">{rate.method.name}</td>
 
                 <td className="px-5 py-4 font-medium">
-                  {tenant.currency}
-                  {Number(rate.amount).toLocaleString()}
+                  {formatCurrency(Number(rate.amount), tenant.currency)}
                 </td>
 
                 <td className="px-5 py-4">
