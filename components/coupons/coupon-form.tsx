@@ -96,7 +96,7 @@ export default function CouponForm({
       />
 
       <Link
-        href={`${basePath}/${coupon?.id} `}
+        href={mode === "edit" ? `${basePath}/${coupon?.id}` : basePath}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground m-4"
       >
         <FaArrowLeft size={12} />
