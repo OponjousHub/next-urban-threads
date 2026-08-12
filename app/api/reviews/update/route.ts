@@ -4,7 +4,7 @@ import { getAuthPayload } from "@/lib/server/auth";
 import { updateProductRating } from "@/lib/calProduct-rating";
 
 export async function PATCH(req: Request) {
-  const { rating, comment, reviewId } = await req.json();
+  const { rating, title, comment, reviewId } = await req.json();
 
   const { userId, tenant } = await getAuthPayload();
 
@@ -19,6 +19,7 @@ export async function PATCH(req: Request) {
     },
     data: {
       rating,
+      title,
       comment,
       status: "APPROVED",
     },

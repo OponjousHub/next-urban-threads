@@ -7,7 +7,7 @@ import { AdminNotificationService } from "@/app/lib/admin/admin-notification-ser
 
 export async function POST(req: Request) {
   try {
-    const { rating, comment, productId } = await req.json();
+    const { rating, title, comment, productId } = await req.json();
     const { userId, tenant } = await getAuthPayload();
 
     if (!rating || rating < 1 || rating > 5) {
@@ -50,6 +50,7 @@ export async function POST(req: Request) {
     const review = await prisma.review.create({
       data: {
         rating,
+        title,
         comment,
         userId,
         productId,

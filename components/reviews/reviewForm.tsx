@@ -3,38 +3,61 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { StarRatingInput } from "./starRatingInput";
 import { useRouter } from "next/navigation";
 import { DialogClose } from "@/components/ui/dialog";
-import { X } from "lucide-react";
 import { appToast } from "@/utils/appToast";
 
 interface Props {
   productId: string;
+
   onSuccess?: () => void;
+
   existingReview?: {
     id: string;
     rating: number;
+    title?: string | null;
     comment: string;
   } | null;
 }
 
 export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
   const [rating, setRating] = useState(existingReview?.rating ?? 0);
+
+  const [title, setTitle] = useState(existingReview?.title ?? "");
+
   const [comment, setComment] = useState(existingReview?.comment ?? "");
+
   const [loading, setLoading] = useState(false);
+
   const [existReview, setExistReview] = useState(existingReview);
+
   const router = useRouter();
 
   useEffect(() => {
     setExistReview(existingReview);
+
     setRating(existingReview?.rating ?? 0);
+
+    setTitle(existingReview?.title ?? "");
+
     setComment(existingReview?.comment ?? "");
   }, [existingReview]);
 
   async function handleSubmit() {
     if (!rating) {
       appToast.warning("Warning", "Please select a rating");
+      return;
+    }
+
+    if (!title.trim()) {
+      appToast.warning("Warning", "Please enter a review title");
+      return;
+    }
+
+    if (!comment.trim()) {
+      appToast.warning("Warning", "Please share your experience");
       return;
     }
 
@@ -47,10 +70,15 @@ export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
         `/api/reviews/${isEditing ? "update" : "create"}`,
         {
           method: isEditing ? "PATCH" : "POST",
-          headers: { "Content-Type": "application/json" },
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
           body: JSON.stringify({
             rating,
-            comment,
+            title: title.trim(),
+            comment: comment.trim(),
             productId,
             reviewId: existReview?.id,
           }),
@@ -60,61 +88,113 @@ export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
       const data = await res.json();
 
       if (!res.ok) {
-        appToast.error("Error", `${data.message || "Failed to submit review"}`);
+        appToast.error("Error", data.message || "Failed to submit review");
+
         return;
       }
 
       setExistReview(data.review ?? data);
+
       appToast.success(
-        "SUccess",
+        "Success",
         isEditing
           ? "Review updated successfully"
           : "Review submitted successfully",
       );
 
       setRating(0);
+      setTitle("");
       setComment("");
+
       router.refresh();
+
       onSuccess?.();
-    } catch {
-      appToast.error("Error", "Something went wrong");
+    } catch (error) {
+      console.error("REVIEW SUBMIT ERROR:", error);
+
+      appToast.error(
+        "Error",
+        "Something went wrong while submitting your review",
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="relative p-6 space-y-6">
-      {/* Improved Close Button */}
-      <DialogClose asChild>
-        <button
-          className="absolute right-4 top-4 
-             h-11 w-11 flex items-center justify-center 
-             rounded-full bg-gray-100 
-             hover:bg-red-100 group
-             transition active:scale-95"
+    <div className="space-y-5">
+      {/* Header */}
+      <div>
+        <h3 className="text-xl font-semibold">
+          {existReview ? "Update Review" : "Write a Review"}
+        </h3>
+
+        <p className="mt-1 text-sm text-gray-500">
+          Share your experience with this product.
+        </p>
+      </div>
+
+      {/* Rating */}
+      <div>
+        <label className="mb-2 block text-sm font-medium text-gray-700">
+          Your rating
+        </label>
+
+        <StarRatingInput value={rating} onChange={setRating} />
+      </div>
+
+      {/* Title */}
+      <div>
+        <label
+          htmlFor="review-title"
+          className="mb-2 block text-sm font-medium text-gray-700"
         >
-          <X className="h-5 w-5 text-gray-600 group-hover:text-red-600 transition" />
-        </button>
-      </DialogClose>
+          Review title
+        </label>
 
-      <h3 className="text-xl font-semibold">
-        {existReview ? "Update Review" : "Write a Review"}
-      </h3>
+        <Input
+          id="review-title"
+          type="text"
+          placeholder="e.g. Excellent quality"
+          value={title}
+          maxLength={100}
+          onChange={(e) => setTitle(e.target.value)}
+          disabled={loading}
+        />
 
-      <StarRatingInput value={rating} onChange={setRating} />
+        <div className="mt-1 text-right text-xs text-gray-400">
+          {title.length}/100
+        </div>
+      </div>
 
-      <Textarea
-        placeholder="Share your experience..."
-        value={comment}
-        className="min-h-[120px]"
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-          setComment(e.target.value)
-        }
-      />
+      {/* Comment */}
+      <div>
+        <label
+          htmlFor="review-comment"
+          className="mb-2 block text-sm font-medium text-gray-700"
+        >
+          Your review
+        </label>
 
-      <div className="flex gap-3 justify-end">
-        {/* Cancel Button */}
+        <Textarea
+          id="review-comment"
+          placeholder="Share your experience with this product..."
+          value={comment}
+          className="min-h-[120px]"
+          maxLength={1000}
+          disabled={loading}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setComment(e.target.value)
+          }
+        />
+
+        <div className="mt-1 text-right text-xs text-gray-400">
+          {comment.length}/1000
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex justify-end gap-3">
         <DialogClose asChild>
           <Button
             variant="outline"
@@ -125,7 +205,6 @@ export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
           </Button>
         </DialogClose>
 
-        {/* Submit Button */}
         <Button
           onClick={handleSubmit}
           disabled={loading}
