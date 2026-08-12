@@ -26,6 +26,7 @@ export default async function AdminReviewsPage() {
     prisma.review.findMany({
       where: {
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
       },
       include: {
         user: {
