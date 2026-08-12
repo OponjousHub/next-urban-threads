@@ -396,6 +396,18 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      if (
+        coupon.minimumAmount !== null &&
+        merchandiseSubtotal.lessThan(coupon.minimumAmount)
+      ) {
+        return NextResponse.json(
+          {
+            message: `This coupon requires a minimum order of ${coupon.minimumAmount}.`,
+          },
+          { status: 400 },
+        );
+      }
+
       // -------------------------------------------------------
       // Coupon usage limit
       // -------------------------------------------------------
