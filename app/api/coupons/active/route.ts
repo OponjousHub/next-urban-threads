@@ -1,14 +1,33 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { prisma } from "@/utils/prisma";
 
-export async function GET() {
+import {
+  getCouponCartLines,
+  validateCouponForCart,
+  serializeCoupon,
+  CouponCartItem,
+} from "@/app/lib/coupons/coupon-service";
+
+export async function POST(req: Request) {
   try {
     const tenant = await getDefaultTenant();
 
     if (!tenant) {
-      return NextResponse.json([], { status: 200 });
+      return NextResponse.json([], {
+        status: 200,
+      });
     }
+
+    const body = await req.json();
+
+    const items = (body.items as CouponCartItem[]) ?? [];
+
+    if (!items.length) {
+      return NextResponse.json([]);
+    }
+
+    const lines = await getCouponCartLines(tenant.id, items);
 
     const now = new Date();
 
@@ -16,12 +35,6 @@ export async function GET() {
       where: {
         tenantId: tenant.id,
         active: true,
-
-        ...(tenant.storeMode === "SINGLE_VENDOR"
-          ? {
-              vendorId: null,
-            }
-          : {}),
 
         OR: [
           {
@@ -48,6 +61,17 @@ export async function GET() {
             ],
           },
         ],
+
+        // SINGLE_VENDOR:
+        // Only store-wide coupons.
+        //
+        // MULTI_VENDOR:
+        // Both store-wide and vendor coupons.
+        ...(tenant.storeMode === "SINGLE_VENDOR"
+          ? {
+              vendorId: null,
+            }
+          : {}),
       },
 
       orderBy: {
@@ -60,35 +84,45 @@ export async function GET() {
         description: true,
         type: true,
         value: true,
-        vendorId: true,
+        minimumAmount: true,
         usageLimit: true,
         usedCount: true,
+        startsAt: true,
+        expiresAt: true,
+        active: true,
+        vendorId: true,
       },
     });
 
-    const availableCoupons = coupons
-      .filter(
-        (coupon) =>
-          coupon.usageLimit === null || coupon.usedCount < coupon.usageLimit,
-      )
-      .map((coupon) => ({
-        id: coupon.id,
-        code: coupon.code,
-        description: coupon.description,
-        type: coupon.type,
-        value: Number(coupon.value),
-        vendorId: coupon.vendorId,
-      }));
+    const availableCoupons = [];
+
+    for (const coupon of coupons) {
+      try {
+        validateCouponForCart(
+          coupon,
+          lines.map((line) => ({
+            ...line,
+            remaining: new (require("@prisma/client").Prisma.Decimal)(
+              line.remaining,
+            ),
+          })),
+          tenant.storeMode,
+          now,
+        );
+
+        availableCoupons.push(serializeCoupon(coupon));
+      } catch {
+        // Coupon exists but is not applicable
+        // to this particular cart.
+      }
+    }
 
     return NextResponse.json(availableCoupons);
   } catch (error) {
     console.error("[ACTIVE_COUPONS_ERROR]", error);
 
-    return NextResponse.json(
-      {
-        message: "Failed to load available coupons",
-      },
-      { status: 500 },
-    );
+    return NextResponse.json([], {
+      status: 500,
+    });
   }
 }
