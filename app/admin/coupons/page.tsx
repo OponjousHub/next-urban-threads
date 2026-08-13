@@ -5,11 +5,7 @@ import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 import { redirect } from "next/navigation";
 
 export default async function AdminCouponsPage() {
-  const { userId, role, tenant } = await getAuthPayload();
-
-  // ---------------------------------------------------------
-  // Authentication
-  // ---------------------------------------------------------
+  const { tenant, userId, role } = await getAuthPayload();
 
   if (!userId) {
     redirect("/login");
@@ -23,42 +19,34 @@ export default async function AdminCouponsPage() {
     throw new Error("Tenant not found");
   }
 
-  // ---------------------------------------------------------
-  // Store mode
-  // ---------------------------------------------------------
-
   const isMultiVendor = tenant.storeMode === "MULTI_VENDOR";
-
-  // ---------------------------------------------------------
-  // Fetch coupons
-  //
-  // SINGLE_VENDOR:
-  // Only show store-wide coupons.
-  //
-  // MULTI_VENDOR:
-  // Show store-wide coupons + vendor coupons.
-  // The vendor column tells admin which vendor owns the coupon.
-  // ---------------------------------------------------------
 
   const [coupons, user] = await Promise.all([
     prisma.coupon.findMany({
       where: {
         tenantId: tenant.id,
 
-        ...(tenant.storeMode === "SINGLE_VENDOR"
-          ? {
+        // SINGLE_VENDOR:
+        // Only store-wide coupons.
+        //
+        // MULTI_VENDOR:
+        // Store-wide + vendor coupons.
+        ...(isMultiVendor
+          ? {}
+          : {
               vendorId: null,
-            }
-          : {}),
+            }),
       },
 
-      include: {
-        vendor: {
-          select: {
-            name: true,
-          },
-        },
-      },
+      include: isMultiVendor
+        ? {
+            vendor: {
+              select: {
+                name: true,
+              },
+            },
+          }
+        : undefined,
 
       orderBy: {
         createdAt: "desc",
@@ -69,6 +57,7 @@ export default async function AdminCouponsPage() {
       where: {
         id: userId,
       },
+
       select: {
         name: true,
         email: true,
@@ -76,10 +65,6 @@ export default async function AdminCouponsPage() {
       },
     }),
   ]);
-
-  // ---------------------------------------------------------
-  // Admin
-  // ---------------------------------------------------------
 
   const admin = {
     name: user?.name,
@@ -89,17 +74,10 @@ export default async function AdminCouponsPage() {
 
   const now = new Date();
 
-  // ---------------------------------------------------------
-  // KPIs
-  // ---------------------------------------------------------
-
   const totalCoupons = coupons.length;
 
   const activeCoupons = coupons.filter(
-    (coupon) =>
-      coupon.active &&
-      (!coupon.startsAt || coupon.startsAt <= now) &&
-      (!coupon.expiresAt || coupon.expiresAt > now),
+    (coupon) => coupon.active && (!coupon.expiresAt || coupon.expiresAt > now),
   ).length;
 
   const expiredCoupons = coupons.filter(
@@ -107,10 +85,6 @@ export default async function AdminCouponsPage() {
   ).length;
 
   const totalUses = coupons.reduce((sum, coupon) => sum + coupon.usedCount, 0);
-
-  // ---------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------
 
   return (
     <>
@@ -121,9 +95,7 @@ export default async function AdminCouponsPage() {
       />
 
       <div className="space-y-6">
-        {/* =====================================================
-            KPI CARDS
-        ===================================================== */}
+        {/* KPI */}
 
         <div className="grid gap-4 md:grid-cols-4">
           <div className="rounded-2xl border bg-white p-5 shadow-sm">
@@ -151,30 +123,18 @@ export default async function AdminCouponsPage() {
           </div>
         </div>
 
-        {/* =====================================================
-            ACTIONS
-        ===================================================== */}
+        {/* Actions */}
 
         <div className="flex justify-end">
           <Link
             href="/admin/coupons/new"
-            className="
-              rounded-xl
-              bg-[var(--color-primary)]
-              px-4
-              py-2
-              font-medium
-              text-white
-              hover:opacity-90
-            "
+            className="rounded-xl bg-[var(--color-primary)] px-4 py-2 font-medium text-white hover:opacity-90"
           >
             Create Coupon
           </Link>
         </div>
 
-        {/* =====================================================
-            COUPON TABLE
-        ===================================================== */}
+        {/* Table */}
 
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
           <div className="overflow-x-auto">
@@ -183,7 +143,6 @@ export default async function AdminCouponsPage() {
                 <tr>
                   <th className="px-4 py-3">Code</th>
 
-                  {/* Vendor column only exists in MULTI_VENDOR */}
                   {isMultiVendor && <th className="px-4 py-3">Vendor</th>}
 
                   <th className="px-4 py-3">Type</th>
@@ -212,50 +171,40 @@ export default async function AdminCouponsPage() {
                   </tr>
                 ) : (
                   coupons.map((coupon) => {
-                    const expired = coupon.expiresAt && coupon.expiresAt < now;
-
-                    const notStarted = coupon.startsAt && coupon.startsAt > now;
+                    const expired = Boolean(
+                      coupon.expiresAt && coupon.expiresAt < now,
+                    );
 
                     return (
                       <tr key={coupon.id} className="border-t hover:bg-gray-50">
-                        {/* Code */}
                         <td className="px-4 py-4 font-semibold">
                           {coupon.code}
                         </td>
 
-                        {/* Vendor */}
                         {isMultiVendor && (
                           <td className="px-4 py-4">
                             {coupon.vendor?.name ?? "Store-wide"}
                           </td>
                         )}
 
-                        {/* Type */}
                         <td className="px-4 py-4">{coupon.type}</td>
 
-                        {/* Value */}
                         <td className="px-4 py-4">
                           {coupon.type === "PERCENTAGE"
                             ? `${Number(coupon.value)}%`
                             : Number(coupon.value).toLocaleString()}
                         </td>
 
-                        {/* Usage */}
                         <td className="px-4 py-4">
                           {coupon.usedCount}
 
                           {coupon.usageLimit ? ` / ${coupon.usageLimit}` : ""}
                         </td>
 
-                        {/* Status */}
                         <td className="px-4 py-4">
                           {expired ? (
                             <span className="rounded-full bg-red-100 px-2 py-1 text-xs text-red-700">
                               Expired
-                            </span>
-                          ) : notStarted ? (
-                            <span className="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
-                              Scheduled
                             </span>
                           ) : coupon.active ? (
                             <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
@@ -268,27 +217,16 @@ export default async function AdminCouponsPage() {
                           )}
                         </td>
 
-                        {/* Expiration */}
                         <td className="px-4 py-4">
                           {coupon.expiresAt
                             ? coupon.expiresAt.toLocaleDateString()
                             : "No Expiry"}
                         </td>
 
-                        {/* Action */}
                         <td className="px-4 py-4">
                           <Link
                             href={`/admin/coupons/${coupon.id}`}
-                            className="
-                              inline-flex
-                              rounded-lg
-                              border
-                              px-3
-                              py-2
-                              text-sm
-                              font-medium
-                              hover:bg-gray-50
-                            "
+                            className="inline-flex rounded-lg border px-3 py-2 text-sm font-medium hover:bg-gray-50"
                           >
                             Manage
                           </Link>
