@@ -1,4 +1,5 @@
 "use client";
+
 import React, {
   useState,
   useContext,
@@ -6,10 +7,10 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { CartItem } from "@/types/cart";
+
+import { CartItem, AppliedCoupon } from "@/types/cart";
 import { appToast } from "@/utils/appToast";
 import { useTenant } from "@/store/tenant-provider-context";
-import { AppliedCoupon } from "@/types/cart";
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -18,10 +19,13 @@ interface CartContextType {
   updateQuantity: (id: string, delta: number) => void;
   subTotal: number;
   clearCart: () => void;
+
   coupon: AppliedCoupon | null;
   setCoupon: React.Dispatch<React.SetStateAction<AppliedCoupon | null>>;
+
   discountAmount: number;
   setDiscountAmount: React.Dispatch<React.SetStateAction<number>>;
+
   removeCoupon: () => void;
 }
 
@@ -30,13 +34,22 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartContextProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
+
   const [discountAmount, setDiscountAmount] = useState(0);
 
   const { tenant } = useTenant();
-  const cartKey = `cart_${tenant.storeMode}`;
 
-  // ✅ Load Cart from localStorage
+  const storeMode = tenant?.storeMode ?? "SINGLE_VENDOR";
+
+  const cartKey = `cart_${storeMode}`;
+  const couponKey = `appliedCoupon_${storeMode}`;
+  const discountKey = `discountAmount_${storeMode}`;
+
+  // ---------------------------------------------------------
+  // Load cart for current store mode
+  // ---------------------------------------------------------
 
   useEffect(() => {
     try {
@@ -47,42 +60,91 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
       } else {
         setCartItems([]);
       }
-    } catch (err) {
-      console.error("Error reading cart from localStorage:", err);
+    } catch (error) {
+      console.error("Error reading cart from localStorage:", error);
+      setCartItems([]);
     } finally {
       setIsLoading(false);
     }
   }, [cartKey]);
 
-  // ✅ Save cart to localStorage
+  // ---------------------------------------------------------
+  // Save cart
+  // ---------------------------------------------------------
+
   useEffect(() => {
     if (!isLoading) {
       localStorage.setItem(cartKey, JSON.stringify(cartItems));
     }
-  }, [cartItems, isLoading]);
+  }, [cartItems, isLoading, cartKey]);
 
-  // Persisting Coupon on Local Storage
+  // ---------------------------------------------------------
+  // Restore coupon for current store mode
+  // ---------------------------------------------------------
+
   useEffect(() => {
-    localStorage.setItem("appliedCoupon", JSON.stringify(coupon));
+    try {
+      const storedCoupon = localStorage.getItem(couponKey);
 
-    localStorage.setItem("discountAmount", JSON.stringify(discountAmount));
-  }, [coupon, discountAmount]);
+      const storedDiscount = localStorage.getItem(discountKey);
 
-  // Restore on Refresh
+      if (storedCoupon) {
+        const parsedCoupon = JSON.parse(storedCoupon) as AppliedCoupon;
+
+        // Never restore vendor coupons in SINGLE_VENDOR
+        if (
+          storeMode === "SINGLE_VENDOR" &&
+          (
+            parsedCoupon as AppliedCoupon & {
+              vendorId?: string | null;
+            }
+          ).vendorId
+        ) {
+          localStorage.removeItem(couponKey);
+          localStorage.removeItem(discountKey);
+
+          setCoupon(null);
+          setDiscountAmount(0);
+
+          return;
+        }
+
+        setCoupon(parsedCoupon);
+      } else {
+        setCoupon(null);
+      }
+
+      if (storedDiscount) {
+        setDiscountAmount(Number(JSON.parse(storedDiscount)));
+      } else {
+        setDiscountAmount(0);
+      }
+    } catch (error) {
+      console.error("Error restoring coupon:", error);
+
+      setCoupon(null);
+      setDiscountAmount(0);
+    }
+  }, [couponKey, discountKey, storeMode]);
+
+  // ---------------------------------------------------------
+  // Persist coupon
+  // ---------------------------------------------------------
+
   useEffect(() => {
-    const storedCoupon = localStorage.getItem("appliedCoupon");
-    const storedDiscount = localStorage.getItem("discountAmount");
-
-    if (storedCoupon) {
-      setCoupon(JSON.parse(storedCoupon));
+    if (coupon) {
+      localStorage.setItem(couponKey, JSON.stringify(coupon));
+    } else {
+      localStorage.removeItem(couponKey);
     }
 
-    if (storedDiscount) {
-      setDiscountAmount(JSON.parse(storedDiscount));
-    }
-  }, []);
+    localStorage.setItem(discountKey, JSON.stringify(discountAmount));
+  }, [coupon, discountAmount, couponKey, discountKey]);
 
-  // ✅ Add to Cart
+  // ---------------------------------------------------------
+  // Add to cart
+  // ---------------------------------------------------------
+
   const addToCart = (item: CartItem) => {
     let errorMessage = "";
     let successMessage = "";
@@ -101,7 +163,12 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
         successMessage = "Cart updated";
 
         return prevItems.map((p) =>
-          p.id === item.id ? { ...p, quantity: newQty } : p,
+          p.id === item.id
+            ? {
+                ...p,
+                quantity: newQty,
+              }
+            : p,
         );
       }
 
@@ -130,24 +197,39 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // ✅ Clear cart
+  // ---------------------------------------------------------
+  // Clear cart
+  // ---------------------------------------------------------
+
   const clearCart = () => {
     localStorage.removeItem(cartKey);
+
     setCartItems([]);
+
+    removeCoupon();
   };
 
-  // ✅ Remove item
+  // ---------------------------------------------------------
+  // Remove item
+  // ---------------------------------------------------------
+
   const removeFromCart = (id: string) => {
     setCartItems((prev) => prev.filter((p) => p.id !== id));
   };
 
-  // ✅ Update quantity
+  // ---------------------------------------------------------
+  // Update quantity
+  // ---------------------------------------------------------
+
   const updateQuantity = (id: string, delta: number) => {
     let errorMessage = "";
+
     setCartItems((prev) =>
       prev
         .map((item) => {
-          if (item.id !== id) return item;
+          if (item.id !== id) {
+            return item;
+          }
 
           const newQty = item.quantity + delta;
 
@@ -163,29 +245,37 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
         })
         .filter((item) => item.quantity > 0),
     );
+
     if (errorMessage) {
       appToast.error("Error", errorMessage);
     }
   };
 
-  // ✅ Calculate subtotal correctly
+  // ---------------------------------------------------------
+  // Calculate subtotal
+  // ---------------------------------------------------------
+
   const subTotal = cartItems.reduce(
     (sum, cur) => sum + cur.price * cur.quantity,
     0,
   );
 
+  // ---------------------------------------------------------
   // Remove coupon
+  // ---------------------------------------------------------
+
   function removeCoupon() {
     setCoupon(null);
-
     setDiscountAmount(0);
 
-    localStorage.removeItem("appliedCoupon");
-
-    localStorage.removeItem("discountAmount");
+    localStorage.removeItem(couponKey);
+    localStorage.removeItem(discountKey);
   }
 
-  if (isLoading) return null; // Return nothing during load to avoid Hook mismatch
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <CartContext.Provider
       value={{
@@ -209,8 +299,10 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   const context = useContext(CartContext);
+
   if (!context) {
     throw new Error("useCart must be used within a CartContextProvider");
   }
+
   return context;
 }

@@ -16,7 +16,8 @@ export type CouponData = {
   code: string;
   type: "PERCENTAGE" | "FIXED";
   value: number;
-  description: string;
+  description?: string | null;
+  vendorId?: string | null;
 };
 
 export type AppliedCoupon = {
@@ -24,4 +25,5 @@ export type AppliedCoupon = {
   code: string;
   type: "PERCENTAGE" | "FIXED";
   value: number;
+  vendorId?: string | null;
 };

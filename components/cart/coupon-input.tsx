@@ -14,26 +14,25 @@ type Props = {
 export default function CouponInput({ subtotal }: Props) {
   const [couponCode, setCouponCode] = useState("");
   const [applying, setApplying] = useState(false);
-  const { setCoupon, setDiscountAmount, coupon, removeCoupon } = useCart();
+
+  const { cartItems, setCoupon, setDiscountAmount, coupon, removeCoupon } =
+    useCart();
+
   const [availableCoupons, setAvailableCoupons] = useState<CouponData[]>([]);
+
   const [couponError, setCouponError] = useState("");
 
   const { tenant } = useTenant();
 
   useEffect(() => {
     loadCoupons();
-  }, []);
-
-  // Quick Apply Function
-  async function applyExistingCoupon(code: string) {
-    setCouponCode(code);
-
-    await validateCoupon(code);
-  }
+  }, [cartItems.length, tenant?.storeMode]);
 
   async function loadCoupons() {
     try {
-      const response = await fetch("/api/coupons/active");
+      const response = await fetch("/api/coupons/active", {
+        cache: "no-store",
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -41,20 +40,31 @@ export default function CouponInput({ subtotal }: Props) {
 
       const data = await response.json();
 
-      setAvailableCoupons(data);
+      setAvailableCoupons(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to load coupons:", error);
+      setAvailableCoupons([]);
     }
+  }
+
+  async function applyExistingCoupon(code: string) {
+    setCouponCode(code);
+
+    await validateCoupon(code);
   }
 
   async function validateCoupon(code: string) {
     setCouponError("");
+    setApplying(true);
+
     if (!code.trim()) {
+      setApplying(false);
+
       appToast.error("Coupon Required", "Please enter a coupon code");
+
       return;
     }
 
-    // move ALL your current applyCoupon logic here
     try {
       const response = await fetch("/api/coupons/validate", {
         method: "POST",
@@ -64,6 +74,9 @@ export default function CouponInput({ subtotal }: Props) {
         body: JSON.stringify({
           code,
           subtotal,
+
+          // Needed for vendor-specific coupons
+          productIds: cartItems.map((item) => item.productId),
         }),
       });
 
@@ -85,8 +98,10 @@ export default function CouponInput({ subtotal }: Props) {
         calculatedDiscount = validatedCoupon.value;
       }
 
-      setCoupon(validatedCoupon);
+      // Never allow client-side discount to exceed subtotal
+      calculatedDiscount = Math.min(calculatedDiscount, subtotal);
 
+      setCoupon(validatedCoupon);
       setDiscountAmount(calculatedDiscount);
 
       appToast.success(
@@ -94,23 +109,27 @@ export default function CouponInput({ subtotal }: Props) {
         `${validatedCoupon.code} applied successfully`,
       );
     } catch (err: any) {
-      setCouponError(err.message);
+      setCoupon(null);
+      setDiscountAmount(0);
+
+      setCouponError(err.message || "Could not apply coupon");
+    } finally {
+      setApplying(false);
     }
   }
 
   async function applyCoupon() {
-    setCouponError("");
     await validateCoupon(couponCode);
   }
 
   return (
     <div className="rounded-2xl border bg-white p-5">
-      {/*List Available coupons*/}
       {couponError && (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {couponError}
         </div>
       )}
+
       {availableCoupons.length > 0 && (
         <div className="mb-4 rounded-xl border bg-white p-4">
           <h3 className="mb-3 font-semibold">Available Coupons</h3>
@@ -119,14 +138,7 @@ export default function CouponInput({ subtotal }: Props) {
             {availableCoupons.map((coupon) => (
               <div
                 key={coupon.id}
-                className="
-            flex
-            items-center
-            justify-between
-            rounded-lg
-            border
-            p-3
-          "
+                className="flex items-center justify-between rounded-lg border p-3"
               >
                 <div>
                   <p className="font-medium">{coupon.code}</p>
@@ -134,21 +146,28 @@ export default function CouponInput({ subtotal }: Props) {
                   <p className="text-sm text-gray-500">
                     {coupon.type === "PERCENTAGE"
                       ? `${coupon.value}% off`
-                      : `${tenant?.currency}${coupon.value} off`}
+                      : `${tenant?.currency ?? ""}${coupon.value} off`}
                   </p>
+
+                  {coupon.vendorId && (
+                    <p className="mt-1 text-xs text-gray-400">Vendor coupon</p>
+                  )}
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => applyExistingCoupon(coupon.code)}
+                  disabled={applying}
                   className="
-              rounded-lg
-              bg-[var(--color-primary)]
-              px-4
-              py-2
-              text-white
-              text-sm
-              font-medium
-            "
+                    rounded-lg
+                    bg-[var(--color-primary)]
+                    px-4
+                    py-2
+                    text-sm
+                    font-medium
+                    text-white
+                    disabled:opacity-60
+                  "
                 >
                   Apply
                 </button>
@@ -166,7 +185,6 @@ export default function CouponInput({ subtotal }: Props) {
         </p>
       </div>
 
-      {/*Coupon inputn card*/}
       <div className="flex gap-2">
         <input
           type="text"
@@ -187,16 +205,18 @@ export default function CouponInput({ subtotal }: Props) {
 
         <button
           type="button"
-          onClick={() => applyCoupon()}
+          onClick={applyCoupon}
           disabled={applying}
           className="
-            flex items-center gap-2
+            flex
+            items-center
+            gap-2
             rounded-xl
             bg-[var(--color-primary)]
             px-5
             py-3
-            text-white
             font-medium
+            text-white
             hover:opacity-90
             disabled:opacity-60
           "
@@ -213,38 +233,24 @@ export default function CouponInput({ subtotal }: Props) {
       </div>
 
       {coupon && (
-        <div
-          className="
-            mt-4
-            flex items-center gap-2
-            rounded-xl
-            border border-green-200
-            bg-green-50
-            px-4 py-3
-            text-sm
-            text-green-700
-          "
-        >
-          <FiCheckCircle />
-
-          <span>
-            Coupon <strong>{coupon.code}</strong> applied successfully.
-          </span>
-        </div>
-      )}
-
-      {coupon && (
         <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">{coupon.code}</p>
+            <div className="flex items-center gap-2">
+              <FiCheckCircle className="text-green-600" />
 
-              <p className="text-sm text-green-700">Coupon Applied</p>
+              <div>
+                <p className="font-medium text-green-800">{coupon.code}</p>
+
+                <p className="text-sm text-green-700">
+                  Coupon applied successfully
+                </p>
+              </div>
             </div>
 
             <button
+              type="button"
               onClick={removeCoupon}
-              className="text-sm font-medium text-red-600"
+              className="text-sm font-medium text-red-600 hover:text-red-700"
             >
               Remove
             </button>

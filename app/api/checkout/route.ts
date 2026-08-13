@@ -347,10 +347,6 @@ export async function POST(req: NextRequest) {
     // 9. Coupon
     // ---------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // 9. Coupon
-    // ---------------------------------------------------------
-
     let discountAmount = new Prisma.Decimal(0);
     let coupon = null;
 
@@ -367,6 +363,19 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             message: "The selected coupon is no longer available.",
+          },
+          { status: 400 },
+        );
+      }
+
+      // -------------------------------------------------------
+      // STORE MODE VALIDATION
+      // -------------------------------------------------------
+
+      if (tenant.storeMode === "SINGLE_VENDOR" && coupon.vendorId !== null) {
+        return NextResponse.json(
+          {
+            message: "This coupon is not available in this store.",
           },
           { status: 400 },
         );
@@ -396,6 +405,10 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // -------------------------------------------------------
+      // Minimum order validation
+      // -------------------------------------------------------
+
       if (
         coupon.minimumAmount !== null &&
         merchandiseSubtotal.lessThan(coupon.minimumAmount)
@@ -409,14 +422,10 @@ export async function POST(req: NextRequest) {
       }
 
       // -------------------------------------------------------
-      // Coupon usage limit
+      // Usage limit
       // -------------------------------------------------------
 
-      if (
-        coupon.usageLimit !== null &&
-        coupon.usageLimit !== undefined &&
-        coupon.usedCount >= coupon.usageLimit
-      ) {
+      if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
         return NextResponse.json(
           {
             message: "Coupon usage limit reached.",
@@ -426,16 +435,19 @@ export async function POST(req: NextRequest) {
       }
 
       // -------------------------------------------------------
-      // Vendor-specific coupon validation
-      //
-      // vendorId === null
-      // => store-wide coupon
-      //
-      // vendorId !== null
-      // => coupon belongs to a specific vendor
+      // Vendor-specific coupon
       // -------------------------------------------------------
 
       if (coupon.vendorId) {
+        if (tenant.storeMode !== "MULTI_VENDOR") {
+          return NextResponse.json(
+            {
+              message: "Vendor coupons are not available in this store.",
+            },
+            { status: 400 },
+          );
+        }
+
         const invalidProduct = products.find(
           (product) => product.vendorId !== coupon!.vendorId,
         );
@@ -462,10 +474,7 @@ export async function POST(req: NextRequest) {
         discountAmount = new Prisma.Decimal(coupon.value);
       }
 
-      // -------------------------------------------------------
-      // Never allow discount to exceed merchandise subtotal
-      // -------------------------------------------------------
-
+      // Never discount more than the merchandise subtotal
       if (discountAmount.greaterThan(merchandiseSubtotal)) {
         discountAmount = merchandiseSubtotal;
       }
