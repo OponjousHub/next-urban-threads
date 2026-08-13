@@ -14,19 +14,21 @@ import { useTenant } from "@/store/tenant-provider-context";
 
 interface CartContextType {
   cartItems: CartItem[];
+
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, delta: number) => void;
+
   subTotal: number;
   clearCart: () => void;
 
-  coupon: AppliedCoupon | null;
-  setCoupon: React.Dispatch<React.SetStateAction<AppliedCoupon | null>>;
+  coupons: AppliedCoupon[];
+  setCoupons: React.Dispatch<React.SetStateAction<AppliedCoupon[]>>;
 
   discountAmount: number;
   setDiscountAmount: React.Dispatch<React.SetStateAction<number>>;
 
-  removeCoupon: () => void;
+  removeCoupon: (couponId: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -35,20 +37,18 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
-
+  const [coupons, setCoupons] = useState<AppliedCoupon[]>([]);
   const [discountAmount, setDiscountAmount] = useState(0);
 
   const { tenant } = useTenant();
 
-  const storeMode = tenant?.storeMode ?? "SINGLE_VENDOR";
+  const cartKey = `cart_${tenant.storeMode}`;
 
-  const cartKey = `cart_${storeMode}`;
-  const couponKey = `appliedCoupon_${storeMode}`;
-  const discountKey = `discountAmount_${storeMode}`;
+  const couponKey = `appliedCoupons_${tenant.storeMode}`;
+  const discountKey = `discountAmount_${tenant.storeMode}`;
 
   // ---------------------------------------------------------
-  // Load cart for current store mode
+  // Load cart
   // ---------------------------------------------------------
 
   useEffect(() => {
@@ -79,67 +79,36 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   }, [cartItems, isLoading, cartKey]);
 
   // ---------------------------------------------------------
-  // Restore coupon for current store mode
+  // Restore coupons for current store mode
   // ---------------------------------------------------------
 
   useEffect(() => {
     try {
-      const storedCoupon = localStorage.getItem(couponKey);
-
+      const storedCoupons = localStorage.getItem(couponKey);
       const storedDiscount = localStorage.getItem(discountKey);
 
-      if (storedCoupon) {
-        const parsedCoupon = JSON.parse(storedCoupon) as AppliedCoupon;
+      setCoupons(storedCoupons ? JSON.parse(storedCoupons) : []);
 
-        // Never restore vendor coupons in SINGLE_VENDOR
-        if (
-          storeMode === "SINGLE_VENDOR" &&
-          (
-            parsedCoupon as AppliedCoupon & {
-              vendorId?: string | null;
-            }
-          ).vendorId
-        ) {
-          localStorage.removeItem(couponKey);
-          localStorage.removeItem(discountKey);
-
-          setCoupon(null);
-          setDiscountAmount(0);
-
-          return;
-        }
-
-        setCoupon(parsedCoupon);
-      } else {
-        setCoupon(null);
-      }
-
-      if (storedDiscount) {
-        setDiscountAmount(Number(JSON.parse(storedDiscount)));
-      } else {
-        setDiscountAmount(0);
-      }
+      setDiscountAmount(
+        storedDiscount ? Number(JSON.parse(storedDiscount)) : 0,
+      );
     } catch (error) {
-      console.error("Error restoring coupon:", error);
+      console.error("Error restoring coupons:", error);
 
-      setCoupon(null);
+      setCoupons([]);
       setDiscountAmount(0);
     }
-  }, [couponKey, discountKey, storeMode]);
+  }, [couponKey, discountKey]);
 
   // ---------------------------------------------------------
-  // Persist coupon
+  // Persist coupons
   // ---------------------------------------------------------
 
   useEffect(() => {
-    if (coupon) {
-      localStorage.setItem(couponKey, JSON.stringify(coupon));
-    } else {
-      localStorage.removeItem(couponKey);
-    }
+    localStorage.setItem(couponKey, JSON.stringify(coupons));
 
     localStorage.setItem(discountKey, JSON.stringify(discountAmount));
-  }, [coupon, discountAmount, couponKey, discountKey]);
+  }, [coupons, discountAmount, couponKey, discountKey]);
 
   // ---------------------------------------------------------
   // Add to cart
@@ -206,7 +175,11 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
 
     setCartItems([]);
 
-    removeCoupon();
+    setCoupons([]);
+    setDiscountAmount(0);
+
+    localStorage.removeItem(couponKey);
+    localStorage.removeItem(discountKey);
   };
 
   // ---------------------------------------------------------
@@ -214,7 +187,7 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   // ---------------------------------------------------------
 
   const removeFromCart = (id: string) => {
-    setCartItems((prev) => prev.filter((p) => p.id !== id));
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   // ---------------------------------------------------------
@@ -252,25 +225,25 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
   };
 
   // ---------------------------------------------------------
-  // Calculate subtotal
+  // Subtotal
   // ---------------------------------------------------------
 
   const subTotal = cartItems.reduce(
-    (sum, cur) => sum + cur.price * cur.quantity,
+    (sum, item) => sum + item.price * item.quantity,
     0,
   );
 
   // ---------------------------------------------------------
-  // Remove coupon
+  // Remove ONE coupon
   // ---------------------------------------------------------
 
-  function removeCoupon() {
-    setCoupon(null);
-    setDiscountAmount(0);
+  const removeCoupon = (couponId: string) => {
+    setCoupons((prev) => prev.filter((coupon) => coupon.id !== couponId));
+  };
 
-    localStorage.removeItem(couponKey);
-    localStorage.removeItem(discountKey);
-  }
+  // ---------------------------------------------------------
+  // Loading
+  // ---------------------------------------------------------
 
   if (isLoading) {
     return null;
@@ -280,15 +253,20 @@ export function CartContextProvider({ children }: { children: ReactNode }) {
     <CartContext.Provider
       value={{
         cartItems,
+
         addToCart,
         removeFromCart,
         updateQuantity,
+
         subTotal,
         clearCart,
-        coupon,
-        setCoupon,
+
+        coupons,
+        setCoupons,
+
         discountAmount,
         setDiscountAmount,
+
         removeCoupon,
       }}
     >
