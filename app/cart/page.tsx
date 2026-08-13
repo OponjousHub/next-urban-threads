@@ -35,7 +35,7 @@ export default function CartPage() {
     cartItems,
     removeFromCart,
     updateQuantity,
-    coupon,
+    coupons,
     discountAmount,
     removeCoupon,
   } = useCart();
@@ -203,10 +203,24 @@ export default function CartPage() {
           <CouponInput subtotal={subtotal} />
 
           {discountAmount > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>Discount ({coupon?.code})</span>
+            <div className="space-y-2 text-green-600">
+              {coupons.map((coupon) => (
+                <div key={coupon.id} className="flex justify-between">
+                  <span>Discount ({coupon.code})</span>
 
-              <span>{formatCurrency(discountAmount, tenant.currency)}</span>
+                  <span>
+                    {coupon.type === "PERCENTAGE"
+                      ? `${coupon.value}%`
+                      : formatCurrency(coupon.value, tenant.currency)}
+                  </span>
+                </div>
+              ))}
+
+              <div className="flex justify-between border-t border-green-200 pt-2 font-semibold">
+                <span>Total Discount</span>
+
+                <span>-{formatCurrency(discountAmount, tenant.currency)}</span>
+              </div>
             </div>
           )}
 
