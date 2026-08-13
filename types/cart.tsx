@@ -14,9 +14,10 @@ export interface CartItem {
 export type CouponData = {
   id: string;
   code: string;
+  description: string | null;
   type: "PERCENTAGE" | "FIXED";
   value: number;
-  description?: string | null;
+  minimumAmount?: number | null;
   vendorId?: string | null;
 };
 
