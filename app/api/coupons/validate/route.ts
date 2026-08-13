@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
-
+import { Prisma } from "@prisma/client";
 import {
   CouponCartItem,
   getCouponCartLines,
@@ -153,7 +153,7 @@ export async function POST(req: Request) {
 
     const totalDiscount = calculations.reduce(
       (sum, calculation) => sum.plus(calculation.discountAmount),
-      new (require("@prisma/client").Prisma.Decimal)(0),
+      new Prisma.Decimal(0),
     );
 
     const serializedCandidate = serializeCoupon(candidateCoupon);
