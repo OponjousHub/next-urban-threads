@@ -12,6 +12,11 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import NotificationService from "@/lib/notifications/notification.service";
 import InventoryService from "@/lib/inventory/inventory.service";
 import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
+import {
+  getCouponCartLines,
+  validateCouponForCart,
+  applyCouponDiscountToLines,
+} from "@/app/lib/coupons/coupon-service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,7 +53,7 @@ export async function POST(req: NextRequest) {
       paymentMethod,
       email,
       saveAddress,
-      couponId,
+      couponIds,
       shippingMethodId,
     } = await req.json();
 
@@ -344,142 +349,100 @@ export async function POST(req: NextRequest) {
     const shippingCost = new Prisma.Decimal(shippingRate.amount);
 
     // ---------------------------------------------------------
-    // 9. Coupon
+    // 9. Coupons
     // ---------------------------------------------------------
 
-    let discountAmount = new Prisma.Decimal(0);
-    let coupon = null;
+    const normalizedCouponIds = Array.isArray(couponIds)
+      ? couponIds.filter((id: unknown): id is string => typeof id === "string")
+      : [];
 
-    if (couponId) {
-      coupon = await prisma.coupon.findFirst({
+    const uniqueCouponIds = [...new Set(normalizedCouponIds)];
+
+    if (uniqueCouponIds.length !== normalizedCouponIds.length) {
+      return NextResponse.json(
+        {
+          message: "A coupon cannot be applied more than once.",
+        },
+        { status: 400 },
+      );
+    }
+
+    let discountAmount = new Prisma.Decimal(0);
+
+    const couponCalculations: {
+      couponId: string;
+      code: string;
+      type: "PERCENTAGE" | "FIXED";
+      value: number;
+      vendorId: string | null;
+      discountAmount: Prisma.Decimal;
+    }[] = [];
+
+    if (uniqueCouponIds.length > 0) {
+      const couponRecords = await prisma.coupon.findMany({
         where: {
-          id: couponId,
+          id: {
+            in: uniqueCouponIds,
+          },
           tenantId: tenant.id,
-          active: true,
         },
       });
 
-      if (!coupon) {
+      const couponMap = new Map(
+        couponRecords.map((coupon) => [coupon.id, coupon]),
+      );
+
+      if (couponRecords.length !== uniqueCouponIds.length) {
         return NextResponse.json(
           {
-            message: "The selected coupon is no longer available.",
+            message: "One or more selected coupons are no longer available.",
           },
           { status: 400 },
         );
       }
 
-      // -------------------------------------------------------
-      // STORE MODE VALIDATION
-      // -------------------------------------------------------
+      const couponLines = await getCouponCartLines(
+        tenant.id,
+        items.map((item: any) => ({
+          productId: item.productId,
+          quantity: Number(item.quantity),
+        })),
+      );
 
-      if (tenant.storeMode === "SINGLE_VENDOR" && coupon.vendorId !== null) {
-        return NextResponse.json(
-          {
-            message: "This coupon is not available in this store.",
-          },
-          { status: 400 },
-        );
-      }
+      let workingLines = couponLines.map((line) => ({
+        ...line,
+        remaining: line.remaining,
+      }));
 
-      const now = new Date();
+      for (const couponId of uniqueCouponIds) {
+        const coupon = couponMap.get(couponId);
 
-      // -------------------------------------------------------
-      // Coupon date validation
-      // -------------------------------------------------------
-
-      if (coupon.startsAt && coupon.startsAt > now) {
-        return NextResponse.json(
-          {
-            message: "Coupon is not active yet.",
-          },
-          { status: 400 },
-        );
-      }
-
-      if (coupon.expiresAt && coupon.expiresAt < now) {
-        return NextResponse.json(
-          {
-            message: "Coupon has expired.",
-          },
-          { status: 400 },
-        );
-      }
-
-      // -------------------------------------------------------
-      // Minimum order validation
-      // -------------------------------------------------------
-
-      if (
-        coupon.minimumAmount !== null &&
-        merchandiseSubtotal.lessThan(coupon.minimumAmount)
-      ) {
-        return NextResponse.json(
-          {
-            message: `This coupon requires a minimum order of ${coupon.minimumAmount}.`,
-          },
-          { status: 400 },
-        );
-      }
-
-      // -------------------------------------------------------
-      // Usage limit
-      // -------------------------------------------------------
-
-      if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
-        return NextResponse.json(
-          {
-            message: "Coupon usage limit reached.",
-          },
-          { status: 400 },
-        );
-      }
-
-      // -------------------------------------------------------
-      // Vendor-specific coupon
-      // -------------------------------------------------------
-
-      if (coupon.vendorId) {
-        if (tenant.storeMode !== "MULTI_VENDOR") {
+        if (!coupon) {
           return NextResponse.json(
             {
-              message: "Vendor coupons are not available in this store.",
+              message: "One or more selected coupons are invalid.",
             },
             { status: 400 },
           );
         }
 
-        const invalidProduct = products.find(
-          (product) => product.vendorId !== coupon!.vendorId,
+        const calculation = validateCouponForCart(
+          coupon,
+          workingLines,
+          tenant.storeMode,
         );
 
-        if (invalidProduct) {
-          return NextResponse.json(
-            {
-              message: `Coupon "${coupon.code}" is only valid for products from its assigned vendor.`,
-            },
-            { status: 400 },
-          );
-        }
-      }
+        couponCalculations.push(calculation);
 
-      // -------------------------------------------------------
-      // Calculate discount
-      // -------------------------------------------------------
+        discountAmount = discountAmount.plus(calculation.discountAmount);
 
-      if (coupon.type === "PERCENTAGE") {
-        discountAmount = merchandiseSubtotal.mul(Number(coupon.value) / 100);
-      }
-
-      if (coupon.type === "FIXED") {
-        discountAmount = new Prisma.Decimal(coupon.value);
-      }
-
-      // Never discount more than the merchandise subtotal
-      if (discountAmount.greaterThan(merchandiseSubtotal)) {
-        discountAmount = merchandiseSubtotal;
+        applyCouponDiscountToLines(
+          workingLines,
+          coupon,
+          calculation.discountAmount,
+        );
       }
     }
-
     // ---------------------------------------------------------
     // 10. Final server-side total
     // ---------------------------------------------------------
