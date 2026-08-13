@@ -98,17 +98,7 @@ export async function POST(req: Request) {
 
     for (const coupon of coupons) {
       try {
-        validateCouponForCart(
-          coupon,
-          lines.map((line) => ({
-            ...line,
-            remaining: new (require("@prisma/client").Prisma.Decimal)(
-              line.remaining,
-            ),
-          })),
-          tenant.storeMode,
-          now,
-        );
+        validateCouponForCart(coupon, lines, tenant.storeMode, now);
 
         availableCoupons.push(serializeCoupon(coupon));
       } catch {

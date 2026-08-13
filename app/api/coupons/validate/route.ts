@@ -2,9 +2,49 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
 
+import {
+  CouponCartItem,
+  getCouponCartLines,
+  validateCouponForCart,
+  applyCouponDiscountToLines,
+  serializeCoupon,
+} from "@/app/lib/coupons/coupon-service";
+
 export async function POST(req: Request) {
   try {
-    const { code, subtotal, productIds } = await req.json();
+    const body = await req.json();
+
+    const code = String(body.code ?? "")
+      .trim()
+      .toUpperCase();
+
+    const items = (body.items as CouponCartItem[]) ?? [];
+
+    const appliedCouponIds = Array.isArray(body.appliedCouponIds)
+      ? body.appliedCouponIds.filter(
+          (id: unknown): id is string => typeof id === "string",
+        )
+      : [];
+
+    if (!code) {
+      return NextResponse.json(
+        {
+          valid: false,
+          message: "Coupon code is required.",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (!items.length) {
+      return NextResponse.json(
+        {
+          valid: false,
+          message: "Your cart is empty.",
+        },
+        { status: 400 },
+      );
+    }
 
     const { tenant } = await getAuthPayload();
 
@@ -12,193 +52,137 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           valid: false,
-          message: "Tenant not found",
+          message: "Tenant not found.",
         },
         { status: 400 },
       );
     }
 
-    if (!code?.trim()) {
-      return NextResponse.json(
-        {
-          valid: false,
-          message: "Coupon code is required",
-        },
-        { status: 400 },
-      );
-    }
+    const lines = await getCouponCartLines(tenant.id, items);
 
-    const coupon = await prisma.coupon.findFirst({
+    const allIds = [...appliedCouponIds, code];
+
+    const coupons = await prisma.coupon.findMany({
       where: {
-        code: code.trim().toUpperCase(),
         tenantId: tenant.id,
+        OR: [
+          {
+            id: {
+              in: appliedCouponIds,
+            },
+          },
+          {
+            code,
+          },
+        ],
       },
     });
 
-    if (!coupon) {
+    const couponById = new Map(coupons.map((coupon) => [coupon.id, coupon]));
+
+    const candidateCoupon = coupons.find((coupon) => coupon.code === code);
+
+    if (!candidateCoupon) {
       return NextResponse.json(
         {
           valid: false,
-          message: "Coupon not found",
+          message: "Coupon not found.",
         },
         { status: 404 },
       );
     }
 
-    // ---------------------------------------------------------
-    // STORE MODE
-    // ---------------------------------------------------------
-
-    if (tenant.storeMode === "SINGLE_VENDOR" && coupon.vendorId !== null) {
+    // Prevent applying the same coupon twice.
+    if (appliedCouponIds.includes(candidateCoupon.id)) {
       return NextResponse.json(
         {
           valid: false,
-          message: "This coupon is not available in this store.",
+          message: `Coupon "${candidateCoupon.code}" is already applied.`,
         },
         { status: 400 },
       );
     }
 
-    if (!coupon.active) {
+    // Rebuild the exact current stack.
+    const stackIds = [...appliedCouponIds, candidateCoupon.id];
+
+    if (new Set(stackIds).size !== stackIds.length) {
       return NextResponse.json(
         {
           valid: false,
-          message: "Coupon is inactive",
+          message: "A coupon cannot be applied more than once.",
         },
         { status: 400 },
       );
     }
 
-    const now = new Date();
+    let workingLines = lines.map((line) => ({
+      ...line,
+      remaining: line.remaining,
+    }));
 
-    // ---------------------------------------------------------
-    // DATE VALIDATION
-    // ---------------------------------------------------------
+    const calculations = [];
 
-    if (coupon.startsAt && coupon.startsAt > now) {
-      return NextResponse.json(
-        {
-          valid: false,
-          message: "Coupon has not started yet",
-        },
-        { status: 400 },
-      );
-    }
+    for (const couponId of stackIds) {
+      const coupon = couponById.get(couponId);
 
-    if (coupon.expiresAt && coupon.expiresAt < now) {
-      return NextResponse.json(
-        {
-          valid: false,
-          message: "Coupon has expired",
-        },
-        { status: 400 },
-      );
-    }
-
-    // ---------------------------------------------------------
-    // USAGE LIMIT
-    // ---------------------------------------------------------
-
-    if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
-      return NextResponse.json(
-        {
-          valid: false,
-          message: "Coupon usage limit reached",
-        },
-        { status: 400 },
-      );
-    }
-
-    // ---------------------------------------------------------
-    // MINIMUM ORDER
-    // ---------------------------------------------------------
-
-    if (
-      coupon.minimumAmount !== null &&
-      Number(subtotal) < Number(coupon.minimumAmount)
-    ) {
-      return NextResponse.json(
-        {
-          valid: false,
-          message: `Minimum order amount is ${Number(
-            coupon.minimumAmount,
-          ).toLocaleString()}`,
-        },
-        { status: 400 },
-      );
-    }
-
-    // ---------------------------------------------------------
-    // VENDOR COUPON
-    // ---------------------------------------------------------
-
-    if (coupon.vendorId) {
-      if (tenant.storeMode !== "MULTI_VENDOR") {
+      if (!coupon) {
         return NextResponse.json(
           {
             valid: false,
-            message: "Vendor coupons are not available in this store.",
+            message: "One of the applied coupons is no longer available.",
           },
           { status: 400 },
         );
       }
 
-      if (!Array.isArray(productIds) || productIds.length === 0) {
-        return NextResponse.json(
-          {
-            valid: false,
-            message:
-              "Add products to your cart before applying this vendor coupon.",
-          },
-          { status: 400 },
-        );
-      }
+      const calculation = validateCouponForCart(
+        coupon,
+        workingLines,
+        tenant.storeMode,
+      );
 
-      const matchingProducts = await prisma.product.count({
-        where: {
-          id: {
-            in: productIds,
-          },
-          tenantId: tenant.id,
-          vendorId: coupon.vendorId,
-        },
-      });
+      calculations.push(calculation);
 
-      if (matchingProducts !== productIds.length) {
-        return NextResponse.json(
-          {
-            valid: false,
-            message:
-              "This coupon is only valid for products from its assigned vendor.",
-          },
-          { status: 400 },
-        );
-      }
+      applyCouponDiscountToLines(
+        workingLines,
+        coupon,
+        calculation.discountAmount,
+      );
     }
 
-    // ---------------------------------------------------------
-    // RESPONSE
-    // ---------------------------------------------------------
+    const totalDiscount = calculations.reduce(
+      (sum, calculation) => sum.plus(calculation.discountAmount),
+      new (require("@prisma/client").Prisma.Decimal)(0),
+    );
+
+    const serializedCandidate = serializeCoupon(candidateCoupon);
 
     return NextResponse.json({
       valid: true,
 
-      coupon: {
-        id: coupon.id,
-        code: coupon.code,
-        type: coupon.type,
-        value: Number(coupon.value),
-      },
+      coupon: serializedCandidate,
+
+      totalDiscount: totalDiscount.toNumber(),
+
+      discounts: calculations.map((calculation) => ({
+        couponId: calculation.couponId,
+
+        code: calculation.code,
+
+        discountAmount: calculation.discountAmount.toNumber(),
+      })),
     });
   } catch (error) {
-    console.error("[COUPON_VALIDATE_ERROR]", error);
+    console.error("[VALIDATE_COUPON_ERROR]", error);
 
     return NextResponse.json(
       {
         valid: false,
-        message: "Failed to validate coupon",
+        message:
+          error instanceof Error ? error.message : "Failed to validate coupon.",
       },
-      { status: 500 },
+      { status: 400 },
     );
   }
 }
