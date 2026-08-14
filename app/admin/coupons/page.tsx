@@ -38,15 +38,13 @@ export default async function AdminCouponsPage() {
             }),
       },
 
-      include: isMultiVendor
-        ? {
-            vendor: {
-              select: {
-                name: true,
-              },
-            },
-          }
-        : undefined,
+      include: {
+        vendor: {
+          select: {
+            name: true,
+          },
+        },
+      },
 
       orderBy: {
         createdAt: "desc",

@@ -451,6 +451,17 @@ export async function POST(req: NextRequest) {
     // Discount applies to merchandise subtotal.
     // ---------------------------------------------------------
 
+    console.log("CHECKOUT COUPON DEBUG", {
+      couponIds: uniqueCouponIds,
+      couponCalculations: couponCalculations.map((coupon) => ({
+        id: coupon.couponId,
+        code: coupon.code,
+        discount: coupon.discountAmount.toString(),
+      })),
+      discountAmount: discountAmount.toString(),
+      merchandiseSubtotal: merchandiseSubtotal.toString(),
+    });
+
     const discountedSubtotal = merchandiseSubtotal.minus(discountAmount);
 
     const totalAmount = discountedSubtotal.plus(shippingCost);
@@ -472,7 +483,7 @@ export async function POST(req: NextRequest) {
 
     const country = await detectCountryFromHeaders();
 
-    const { currency, provider: providerKey } = resolvePaymentConfig(country);
+    const { provider: providerKey } = resolvePaymentConfig(country);
 
     // ---------------------------------------------------------
     // 13. Create order items
@@ -544,7 +555,20 @@ export async function POST(req: NextRequest) {
 
         discountAmount,
 
-        couponId: coupon?.id ?? null,
+        // couponId: coupon?.id ?? null,
+        orderCoupons: {
+          create: couponCalculations.map((coupon) => ({
+            couponId: coupon.couponId,
+
+            code: coupon.code,
+
+            type: coupon.type,
+
+            value: coupon.value,
+
+            discountAmount: coupon.discountAmount,
+          })),
+        },
 
         shippingMethodId: shippingMethod.id,
         shippingCost,
@@ -554,6 +578,28 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+
+    // ---------------------------------------------------------
+    // Increment coupon usage
+    // ---------------------------------------------------------
+
+    if (couponCalculations.length > 0) {
+      await prisma.$transaction(
+        couponCalculations.map((coupon) =>
+          prisma.coupon.update({
+            where: {
+              id: coupon.couponId,
+            },
+
+            data: {
+              usedCount: {
+                increment: 1,
+              },
+            },
+          }),
+        ),
+      );
+    }
 
     // ---------------------------------------------------------
     // 17. Admin notification

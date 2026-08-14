@@ -194,7 +194,7 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
       setCancellingRefund(false);
     }
   }
-
+  console.log("ORDER DISCOUNT", order?.discountAmount);
   /* ------------------------------------
      ✅ CENTERED LOADING STATE
   ------------------------------------- */

@@ -42,7 +42,7 @@ export default function CheckoutClient({
 }) {
   const [addresses, setAddresses] =
     useState<ShippingAddress[]>(initialAddresses);
-  const { cartItems, clearCart, coupon, discountAmount } = useCart();
+  const { cartItems, clearCart, coupons, discountAmount } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string }>({});
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
@@ -304,7 +304,7 @@ export default function CheckoutClient({
           paymentMethod: formData.paymentMethod,
           email: formData.email,
           saveAddress,
-          couponId: coupon?.id ?? null,
+          couponIds: coupons.map((c) => c.id),
           shippingMethodId: selectedShipping?.methodId,
           shippingCost: selectedShipping?.price,
         }),
@@ -757,9 +757,12 @@ export default function CheckoutClient({
             <span>{formatCurrency(subtotal, tenant.currency)}</span>
           </div>
 
-          {coupon && discount > 0 && (
+          {coupons.length > 0 && discount > 0 && (
             <div className="flex justify-between text-green-600">
-              <span>Discount ({coupon.code})</span>
+              <span>
+                Discount ({coupons.map((coupon) => coupon.code).join(", ")})
+              </span>
+
               <span>- {formatCurrency(discount, tenant.currency)}</span>
             </div>
           )}
@@ -768,6 +771,10 @@ export default function CheckoutClient({
             <span>Shipping</span>
             <span>{formatCurrency(shipping, tenant.currency)}</span>
           </div>
+          {/* <div className="flex justify-between">
+            <span>Discount</span>
+            <span>{formatCurrency( ---, tenant.currency)}</span>
+          </div> */}
 
           <hr className="my-3" />
 
