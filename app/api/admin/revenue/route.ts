@@ -39,6 +39,8 @@ export async function GET(req: Request) {
   const [
     currentOrdersData,
     previousOrdersData,
+    currentRefunds,
+    previousRefunds,
     currentCustomers,
     previousCustomers,
     chartOrders,
@@ -76,6 +78,39 @@ export async function GET(req: Request) {
       },
       _count: {
         id: true,
+      },
+    }),
+
+    // Current period completed refunds
+    prisma.refundRequest.findMany({
+      where: {
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
+        status: "REFUNDED",
+        updatedAt: {
+          gte: startDate,
+        },
+      },
+      select: {
+        approvedAmount: true,
+        requestedAmount: true,
+      },
+    }),
+
+    // Previous period completed refunds
+    prisma.refundRequest.findMany({
+      where: {
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
+        status: "REFUNDED",
+        updatedAt: {
+          gte: previousStartDate,
+          lt: startDate,
+        },
+      },
+      select: {
+        approvedAmount: true,
+        requestedAmount: true,
       },
     }),
 
@@ -251,10 +286,30 @@ export async function GET(req: Request) {
 
   // DERIVING VALUES FROM PROMISE>ALL VALUES
 
-  const currentRevenue = currentOrdersData._sum.totalAmount?.toNumber?.() ?? 0;
+  const currentGrossRevenue =
+    currentOrdersData._sum.totalAmount?.toNumber?.() ?? 0;
 
-  const previousRevenue =
+  const previousGrossRevenue =
     previousOrdersData._sum.totalAmount?.toNumber?.() ?? 0;
+
+  const currentRefundTotal = currentRefunds.reduce((sum, refund) => {
+    const amount = refund.approvedAmount ?? refund.requestedAmount ?? 0;
+
+    return sum + Number(amount);
+  }, 0);
+
+  const previousRefundTotal = previousRefunds.reduce((sum, refund) => {
+    const amount = refund.approvedAmount ?? refund.requestedAmount ?? 0;
+
+    return sum + Number(amount);
+  }, 0);
+
+  const currentRevenue = Math.max(0, currentGrossRevenue - currentRefundTotal);
+
+  const previousRevenue = Math.max(
+    0,
+    previousGrossRevenue - previousRefundTotal,
+  );
 
   const currentOrders = currentOrdersData._count.id ?? 0;
   const previousOrders = previousOrdersData._count.id ?? 0;
@@ -314,15 +369,33 @@ export async function GET(req: Request) {
     previousReturningRate,
   );
 
-  console.log("===== REVENUE KPI DEBUG =====");
+  console.log("===== REVENUE + REFUND DEBUG =====");
+
   console.log("range:", range);
-  console.log("startDate:", startDate);
-  console.log("previousStartDate:", previousStartDate);
+
+  console.log("currentGrossRevenue:", currentGrossRevenue);
+  console.log("currentRefundTotal:", currentRefundTotal);
   console.log("currentRevenue:", currentRevenue);
+
+  console.log("previousGrossRevenue:", previousGrossRevenue);
+  console.log("previousRefundTotal:", previousRefundTotal);
   console.log("previousRevenue:", previousRevenue);
+
   console.log("currentOrders:", currentOrders);
   console.log("previousOrders:", previousOrders);
-  console.log("=============================");
+
+  console.log("==================================");
+
+  // console.log("===== REVENUE KPI DEBUG =====");
+  // console.log("range:", range);
+  // console.log("startDate:", startDate);
+  // console.log("previousStartDate:", previousStartDate);
+  // console.log("currentRevenue:", currentRevenue);
+  // console.log("previousRevenue:", previousRevenue);
+  // console.log("currentOrders:", currentOrders);
+  // console.log("previousOrders:", previousOrders);
+  // console.log("=============================");
+
   return Response.json({
     revenue: currentRevenue,
     revenueChange: revenueStats.change,

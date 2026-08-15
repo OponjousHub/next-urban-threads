@@ -122,6 +122,7 @@ export default function AdminDashboard() {
   }, []);
   console.log("DASHBOARD API SUMMARY", data.summary);
   console.log("DASHBOARD API TOTAL REVENUE", data.summary?.totalRevenue);
+
   return (
     <>
       {loading && (
