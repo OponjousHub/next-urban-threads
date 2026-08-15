@@ -94,6 +94,7 @@ export async function GET(req: Request) {
       select: {
         approvedAmount: true,
         requestedAmount: true,
+        updatedAt: true,
       },
     }),
 
@@ -111,6 +112,7 @@ export async function GET(req: Request) {
       select: {
         approvedAmount: true,
         requestedAmount: true,
+        updatedAt: true,
       },
     }),
 
@@ -224,6 +226,22 @@ export async function GET(req: Request) {
     }
   }
 
+  // Build a refund map for the current period
+  const refundChartMap = new Map<string, number>();
+
+  for (const refund of currentRefunds) {
+    const date = new Date(refund.updatedAt);
+
+    const label = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+
+    const amount = Number(refund.approvedAmount ?? refund.requestedAmount ?? 0);
+
+    refundChartMap.set(label, (refundChartMap.get(label) ?? 0) + amount);
+  }
+
   // Build a previous-period chart map
   const previousChartMap = new Map<
     string,
@@ -272,12 +290,16 @@ export async function GET(req: Request) {
     });
 
     const current = chartMap.get(label);
-
     const previous = previousChartMap.get(label);
+
+    const grossRevenueForDay = current?.revenue ?? 0;
+    const refundsForDay = refundChartMap.get(label) ?? 0;
+
+    const netRevenueForDay = Math.max(0, grossRevenueForDay - refundsForDay);
 
     chartData.push({
       name: label,
-      revenue: current?.revenue ?? 0,
+      revenue: netRevenueForDay,
       orders: current?.orders ?? 0,
       prevRevenue: previous?.revenue ?? 0,
       prevOrders: previous?.orders ?? 0,
@@ -368,23 +390,34 @@ export async function GET(req: Request) {
     currentReturningRate,
     previousReturningRate,
   );
+  console.log("===== CHART REFUND DEBUG =====");
 
-  console.log("===== REVENUE + REFUND DEBUG =====");
+  console.log("refundChartMap:", Object.fromEntries(refundChartMap));
 
-  console.log("range:", range);
+  console.log(
+    "currentChartNetRevenue:",
+    chartData.reduce((sum, day) => sum + day.revenue, 0),
+  );
 
-  console.log("currentGrossRevenue:", currentGrossRevenue);
-  console.log("currentRefundTotal:", currentRefundTotal);
-  console.log("currentRevenue:", currentRevenue);
+  console.log("currentRevenueKPI:", currentRevenue);
 
-  console.log("previousGrossRevenue:", previousGrossRevenue);
-  console.log("previousRefundTotal:", previousRefundTotal);
-  console.log("previousRevenue:", previousRevenue);
+  console.log("==============================");
+  // console.log("===== REVENUE + REFUND DEBUG =====");
 
-  console.log("currentOrders:", currentOrders);
-  console.log("previousOrders:", previousOrders);
+  // console.log("range:", range);
 
-  console.log("==================================");
+  // console.log("currentGrossRevenue:", currentGrossRevenue);
+  // console.log("currentRefundTotal:", currentRefundTotal);
+  // console.log("currentRevenue:", currentRevenue);
+
+  // console.log("previousGrossRevenue:", previousGrossRevenue);
+  // console.log("previousRefundTotal:", previousRefundTotal);
+  // console.log("previousRevenue:", previousRevenue);
+
+  // console.log("currentOrders:", currentOrders);
+  // console.log("previousOrders:", previousOrders);
+
+  // console.log("==================================");
 
   // console.log("===== REVENUE KPI DEBUG =====");
   // console.log("range:", range);
