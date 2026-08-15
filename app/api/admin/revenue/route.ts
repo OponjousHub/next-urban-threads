@@ -29,6 +29,7 @@ export async function GET(req: Request) {
   // Add a reusable filter
   const revenueOrderFilter = {
     tenantId: tenant.id,
+    storeMode: tenant.storeMode,
     paymentStatus: PaymentStatus.PAID,
     status: {
       in: [OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED],
@@ -312,6 +313,16 @@ export async function GET(req: Request) {
     currentReturningRate,
     previousReturningRate,
   );
+
+  console.log("===== REVENUE KPI DEBUG =====");
+  console.log("range:", range);
+  console.log("startDate:", startDate);
+  console.log("previousStartDate:", previousStartDate);
+  console.log("currentRevenue:", currentRevenue);
+  console.log("previousRevenue:", previousRevenue);
+  console.log("currentOrders:", currentOrders);
+  console.log("previousOrders:", previousOrders);
+  console.log("=============================");
   return Response.json({
     revenue: currentRevenue,
     revenueChange: revenueStats.change,

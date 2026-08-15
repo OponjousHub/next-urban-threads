@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
 import Image from "next/image";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 type Props = {
   order: any;
@@ -202,8 +203,7 @@ export default function RefundModal({ order, onClose, onSuccess }: Props) {
       <div className="flex justify-between items-center">
         <span className="font-medium">Refund Total:</span>
         <span className="text-lg font-bold">
-          {tenant.currency}
-          {totalRefund}
+          {formatCurrency(totalRefund, tenant.currency)}
         </span>
       </div>
 

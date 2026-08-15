@@ -117,10 +117,11 @@ export default function AdminDashboard() {
       setData(json);
       setLoading(false);
     }
-
+    // 237,678.87
     loadDashboard();
   }, []);
-
+  console.log("DASHBOARD API SUMMARY", data.summary);
+  console.log("DASHBOARD API TOTAL REVENUE", data.summary?.totalRevenue);
   return (
     <>
       {loading && (

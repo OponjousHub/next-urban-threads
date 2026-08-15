@@ -26,6 +26,7 @@ export async function GET() {
      */
     const revenueOrderFilter = {
       tenantId: tenant.id,
+      storeMode: tenant.storeMode,
       paymentStatus: PaymentStatus.PAID,
       status: {
         in: [
@@ -72,6 +73,7 @@ export async function GET() {
        */
       prisma.order.aggregate({
         where: revenueOrderFilter,
+
         _sum: {
           totalAmount: true,
         },
@@ -91,6 +93,7 @@ export async function GET() {
       prisma.refundRequest.findMany({
         where: {
           tenantId: tenant.id,
+          storeMode: tenant.storeMode,
           status: "REFUNDED",
         },
         select: {
@@ -419,6 +422,10 @@ export async function GET() {
      * Response
      * ---------------------------------------------------------
      */
+    console.log("TOTAL REVENUE", totalRevenue);
+    console.log("TOTAL REFUNDS", totalRefunds);
+    console.log("averageOrderValue", averageOrderValue);
+    console.log("grossRevenue", grossRevenue);
     return NextResponse.json({
       storeMode: tenant.storeMode,
       currency: tenant.currency,
