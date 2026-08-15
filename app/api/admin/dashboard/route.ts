@@ -57,6 +57,7 @@ export async function GET() {
      */
     const [
       revenueAggregate,
+      refundedRequests,
       totalCustomers,
       newCustomersToday,
       lowStock,
@@ -76,6 +77,39 @@ export async function GET() {
         },
         _count: {
           id: true,
+        },
+      }),
+
+      /*
+       * Completed refunds
+       *
+       * Only REFUNDED refunds reduce dashboard revenue.
+       * REQUESTED / APPROVED / PROCESSING / FAILED / REJECTED /
+       * CANCELLED do not reduce revenue.
+       */
+
+      prisma.refundRequest.findMany({
+        where: {
+          tenantId: tenant.id,
+          status: "REFUNDED",
+        },
+        select: {
+          id: true,
+          orderId: true,
+          approvedAmount: true,
+          requestedAmount: true,
+          items: {
+            select: {
+              productId: true,
+              quantity: true,
+              priceAtPurchase: true,
+            },
+          },
+          order: {
+            select: {
+              status: true,
+            },
+          },
         },
       }),
 
@@ -211,12 +245,25 @@ export async function GET() {
 
     /*
      * ---------------------------------------------------------
-     * Summary
+     * Financial Summary
      * ---------------------------------------------------------
+     *
+     * totalAmount represents the original order value.
+     *
+     * Completed refunds are deducted separately so that we
+     * preserve the historical order amount in the database.
      */
-    const totalRevenue = revenueAggregate._sum.totalAmount?.toNumber?.() ?? 0;
+    const grossRevenue = revenueAggregate._sum.totalAmount?.toNumber?.() ?? 0;
 
     const totalOrders = revenueAggregate._count.id ?? 0;
+
+    const totalRefunds = refundedRequests.reduce((sum, refund) => {
+      const amount = refund.approvedAmount ?? refund.requestedAmount ?? 0;
+
+      return sum + Number(amount);
+    }, 0);
+
+    const totalRevenue = Math.max(0, grossRevenue - totalRefunds);
 
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
@@ -345,7 +392,7 @@ export async function GET() {
     >();
 
     for (const item of categoryOrderItems) {
-      const category = item.product.category.name || "Other";
+      const category = item.product.category?.name || "Other";
       const sales = item.quantity;
       const revenue = item.price.toNumber() * item.quantity;
 
@@ -379,6 +426,8 @@ export async function GET() {
 
       summary: {
         totalRevenue,
+        grossRevenue,
+        totalRefunds,
         totalOrders,
         averageOrderValue,
         totalCustomers,

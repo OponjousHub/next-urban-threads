@@ -6,7 +6,6 @@ import DashboardAnalytics from "../../../components/admin/dashboard/dashboardAna
 import DashboardOrders from "../../../components/admin/dashboard/dashboardOrders";
 import DashboardInventory from "../../../components/admin/dashboard/dashboardInventory";
 import DashboardSalesByCategory from "../../../components/admin/dashboard/dashboardSalesByCategory";
-import { useTenant } from "@/store/tenant-provider-context";
 
 type RecentOrder = {
   id: string;
