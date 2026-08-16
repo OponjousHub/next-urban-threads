@@ -43,6 +43,7 @@ model User {
   products                     Product[]           @relation("UserProduct")
   refundRequest                RefundRequest[]
   reviews                      Review[]
+  storefrontSessions           StorefrontSession[]
   session                      Session[]
   storeFollow                  StoreFollow[]
   tenant                       Tenant              @relation(fields: [tenantId], references: [id])
@@ -351,6 +352,7 @@ model Tenant {
   adminNotificationSettings AdminNotificationSettings[]
   adminNotification AdminNotification[]
   trackingEvents    RefundTrackingEvent[]
+  storefrontSessions StorefrontSession[]
 }
 
 model Session {
