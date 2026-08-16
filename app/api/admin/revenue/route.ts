@@ -153,8 +153,8 @@ export async function GET(req: Request) {
       where: {
         ...revenueOrderFilter,
         createdAt: {
-          gte: chartStartDate,
-          lt: chartEndDate,
+          gte: startDate,
+          lt: new Date(chartEndDate.getTime() + 24 * 60 * 60 * 1000),
         },
       },
       select: {
@@ -169,7 +169,7 @@ export async function GET(req: Request) {
         ...revenueOrderFilter,
         createdAt: {
           gte: previousStartDate,
-          lt: chartStartDate,
+          lt: previousEndDate,
         },
       },
       select: {
@@ -183,7 +183,18 @@ export async function GET(req: Request) {
       by: ["userId"],
       where: {
         tenantId: tenant.id,
-        createdAt: { gte: startDate },
+        storeMode: tenant.storeMode,
+        createdAt: {
+          gte: startDate,
+        },
+        paymentStatus: PaymentStatus.PAID,
+        status: {
+          in: [
+            OrderStatus.PROCESSING,
+            OrderStatus.SHIPPED,
+            OrderStatus.DELIVERED,
+          ],
+        },
       },
       _count: {
         id: true,
@@ -195,9 +206,18 @@ export async function GET(req: Request) {
       by: ["userId"],
       where: {
         tenantId: tenant.id,
+        storeMode: tenant.storeMode,
         createdAt: {
           gte: previousStartDate,
           lt: startDate,
+        },
+        paymentStatus: PaymentStatus.PAID,
+        status: {
+          in: [
+            OrderStatus.PROCESSING,
+            OrderStatus.SHIPPED,
+            OrderStatus.DELIVERED,
+          ],
         },
       },
       _count: {
@@ -299,9 +319,8 @@ export async function GET(req: Request) {
   const chartData = [];
 
   for (let i = 0; i < days; i++) {
-    const d = new Date(chartStartDate);
-
-    d.setDate(chartStartDate.getDate() + i);
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
 
     const label = d.toLocaleDateString("en-US", {
       month: "short",
@@ -314,7 +333,7 @@ export async function GET(req: Request) {
     const grossRevenueForDay = current?.revenue ?? 0;
     const refundsForDay = refundChartMap.get(label) ?? 0;
 
-    const netRevenueForDay = Math.max(0, grossRevenueForDay - refundsForDay);
+    const netRevenueForDay = grossRevenueForDay - refundsForDay;
 
     chartData.push({
       name: label,
@@ -421,14 +440,14 @@ export async function GET(req: Request) {
   console.log("===== CHART VS KPI DEBUG =====");
   console.log("KPI currentRevenue:", currentRevenue);
   console.log("KPI currentGrossRevenue:", currentGrossRevenue);
-  // console.log("KPI currentRefundTotal:", currentRefundTotal);
+  console.log("KPI currentRefundTotal:", currentRefundTotal);
 
-  // console.log("Chart gross revenue:", chartGrossRevenue);
-  // console.log("Chart refund total:", chartRefundTotal);
-  // console.log(
-  //   "Chart net revenue:",
-  //   chartData.reduce((sum, day) => sum + day.revenue, 0),
-  // );
+  console.log("Chart gross revenue:", chartGrossRevenue);
+  console.log("Chart refund total:", chartRefundTotal);
+  console.log(
+    "Chart net revenue:",
+    chartData.reduce((sum, day) => sum + day.revenue, 0),
+  );
 
   console.log(
     "Difference:",
