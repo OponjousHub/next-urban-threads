@@ -4,11 +4,11 @@ import { calculateChange } from "@/lib/analytics/calculateChange";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
 
 function getStartDate(range: string) {
-  const now = new Date();
   const days = range === "7" ? 7 : range === "90" ? 90 : 30;
 
   const start = new Date();
-  start.setDate(now.getDate() - days);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - (days - 1));
 
   return start;
 }
@@ -17,11 +17,22 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const range = searchParams.get("range") || "30";
 
-  const startDate = getStartDate(range);
   const days = range === "7" ? 7 : range === "90" ? 90 : 30;
 
+  // Use calendar-day boundaries for both KPI and chart calculations.
+  // This keeps the KPI period and chart period perfectly aligned.
+  const chartEndDate = new Date();
+  chartEndDate.setHours(0, 0, 0, 0);
+
+  const startDate = new Date(chartEndDate);
+  startDate.setDate(startDate.getDate() - (days - 1));
+  startDate.setHours(0, 0, 0, 0);
+
+  // Previous period immediately before the current period.
   const previousStartDate = new Date(startDate);
-  previousStartDate.setDate(startDate.getDate() - days);
+  previousStartDate.setDate(previousStartDate.getDate() - days);
+
+  const previousEndDate = new Date(startDate);
 
   const tenant = await getDefaultTenant();
   if (!tenant) throw new Error("Default tenant not found");
@@ -142,7 +153,8 @@ export async function GET(req: Request) {
       where: {
         ...revenueOrderFilter,
         createdAt: {
-          gte: startDate,
+          gte: chartStartDate,
+          lt: chartEndDate,
         },
       },
       select: {
@@ -157,7 +169,7 @@ export async function GET(req: Request) {
         ...revenueOrderFilter,
         createdAt: {
           gte: previousStartDate,
-          lt: startDate,
+          lt: chartStartDate,
         },
       },
       select: {
@@ -277,12 +289,19 @@ export async function GET(req: Request) {
     }
   }
 
-  // Build every day in the selected range
+  // Build every calendar day represented by the current period.
+  //
+  // The KPI uses a rolling period starting at startDate.
+  // For the chart, we normalize the first date to the beginning
+  // of that calendar day so that today's orders/refunds are not
+  // accidentally left outside the chart.
+
   const chartData = [];
 
   for (let i = 0; i < days; i++) {
-    const d = new Date(startDate);
-    d.setDate(startDate.getDate() + i);
+    const d = new Date(chartStartDate);
+
+    d.setDate(chartStartDate.getDate() + i);
 
     const label = d.toLocaleDateString("en-US", {
       month: "short",
@@ -305,7 +324,6 @@ export async function GET(req: Request) {
       prevOrders: previous?.orders ?? 0,
     });
   }
-
   // DERIVING VALUES FROM PROMISE>ALL VALUES
 
   const currentGrossRevenue =
@@ -390,44 +408,34 @@ export async function GET(req: Request) {
     currentReturningRate,
     previousReturningRate,
   );
-  console.log("===== CHART REFUND DEBUG =====");
-
-  console.log("refundChartMap:", Object.fromEntries(refundChartMap));
-
-  console.log(
-    "currentChartNetRevenue:",
-    chartData.reduce((sum, day) => sum + day.revenue, 0),
+  const chartGrossRevenue = chartData.reduce(
+    (sum, day) => sum + (day.revenue + (refundChartMap.get(day.name) ?? 0)),
+    0,
   );
 
-  console.log("currentRevenueKPI:", currentRevenue);
+  const chartRefundTotal = Array.from(refundChartMap.values()).reduce(
+    (sum, amount) => sum + amount,
+    0,
+  );
+
+  console.log("===== CHART VS KPI DEBUG =====");
+  console.log("KPI currentRevenue:", currentRevenue);
+  console.log("KPI currentGrossRevenue:", currentGrossRevenue);
+  // console.log("KPI currentRefundTotal:", currentRefundTotal);
+
+  // console.log("Chart gross revenue:", chartGrossRevenue);
+  // console.log("Chart refund total:", chartRefundTotal);
+  // console.log(
+  //   "Chart net revenue:",
+  //   chartData.reduce((sum, day) => sum + day.revenue, 0),
+  // );
+
+  console.log(
+    "Difference:",
+    chartData.reduce((sum, day) => sum + day.revenue, 0) - currentRevenue,
+  );
 
   console.log("==============================");
-  // console.log("===== REVENUE + REFUND DEBUG =====");
-
-  // console.log("range:", range);
-
-  // console.log("currentGrossRevenue:", currentGrossRevenue);
-  // console.log("currentRefundTotal:", currentRefundTotal);
-  // console.log("currentRevenue:", currentRevenue);
-
-  // console.log("previousGrossRevenue:", previousGrossRevenue);
-  // console.log("previousRefundTotal:", previousRefundTotal);
-  // console.log("previousRevenue:", previousRevenue);
-
-  // console.log("currentOrders:", currentOrders);
-  // console.log("previousOrders:", previousOrders);
-
-  // console.log("==================================");
-
-  // console.log("===== REVENUE KPI DEBUG =====");
-  // console.log("range:", range);
-  // console.log("startDate:", startDate);
-  // console.log("previousStartDate:", previousStartDate);
-  // console.log("currentRevenue:", currentRevenue);
-  // console.log("previousRevenue:", previousRevenue);
-  // console.log("currentOrders:", currentOrders);
-  // console.log("previousOrders:", previousOrders);
-  // console.log("=============================");
 
   return Response.json({
     revenue: currentRevenue,
