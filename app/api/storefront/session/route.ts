@@ -7,7 +7,43 @@ export async function POST(req: Request) {
     const tenant = await getDefaultTenant();
 
     if (!tenant) {
-      return NextResponse.json(
+      return NextResponse.json("use client";
+
+import { useEffect } from "react";
+
+const SESSION_KEY = "urban_threads_storefront_session";
+
+export default function StorefrontSessionTracker() {
+  useEffect(() => {
+    let sessionKey = sessionStorage.getItem(SESSION_KEY);
+
+    if (!sessionKey) {
+      sessionKey = crypto.randomUUID();
+      sessionStorage.setItem(SESSION_KEY, sessionKey);
+    }
+
+    const trackSession = async () => {
+      try {
+        await fetch("/api/storefront/session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sessionKey,
+          }),
+          keepalive: true,
+        });
+      } catch (error) {
+        console.error("Failed to track storefront session:", error);
+      }
+    };
+
+    trackSession();
+  }, []);
+
+  return null;
+}
         { message: "Default tenant not found" },
         { status: 404 },
       );
