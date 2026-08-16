@@ -367,6 +367,25 @@ model Session {
   @@index([userId])
 }
 
+model StorefrontSession {
+  id          String    @id @default(cuid())
+  sessionKey  String
+  tenantId    String
+  storeMode   StoreMode
+
+  userId      String?
+  startedAt   DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  user        User?     @relation(fields: [userId], references: [id])
+
+  @@unique([tenantId, storeMode, sessionKey])
+  @@index([tenantId, storeMode, startedAt])
+  @@index([tenantId, storeMode, lastSeenAt])
+  @@index([userId])
+}
+
 model Review {
   id                      String                    @id @default(cuid())
   userId                  String
