@@ -169,7 +169,7 @@ export async function GET(req: Request) {
         ...revenueOrderFilter,
         createdAt: {
           gte: previousStartDate,
-          lt: previousEndDate,
+          lt: startDate,
         },
       },
       select: {
