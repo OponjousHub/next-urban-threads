@@ -128,22 +128,40 @@ export async function GET(req: Request) {
     }),
 
     // Current customers
+    //
+    // A customer belongs in this dashboard period only if they
+    // actually have a qualifying order in the current store mode.
     prisma.user.count({
       where: {
         tenantId: tenant.id,
         role: "USER",
-        createdAt: { gte: startDate },
+        orders: {
+          some: {
+            ...revenueOrderFilter,
+            createdAt: {
+              gte: startDate,
+            },
+          },
+        },
       },
     }),
 
     // Previous customers
+    //
+    // Same logic as current customers, but for the previous
+    // comparison period.
     prisma.user.count({
       where: {
         tenantId: tenant.id,
         role: "USER",
-        createdAt: {
-          gte: previousStartDate,
-          lt: startDate,
+        orders: {
+          some: {
+            ...revenueOrderFilter,
+            createdAt: {
+              gte: previousStartDate,
+              lt: startDate,
+            },
+          },
         },
       },
     }),
