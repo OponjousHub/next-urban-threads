@@ -4,6 +4,7 @@ import { CartContextProvider } from "@/store/cart-context";
 import { ProductContextProvider } from "@/store/products-context";
 import { TenantProvider } from "@/store/tenant-provider-context";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import StorefrontSessionTracker from "@/components/analytics/storefront-session-tracker";
 import { getTenant } from "../lib/tenant/getTenant";
 import { Toaster } from "sonner";
 import { darkenColor } from "@/utils/color-shades";
@@ -53,6 +54,7 @@ export default async function RootLayout({
         }}
       >
         <TenantProvider tenant={tenant}>
+          <StorefrontSessionTracker />
           <ProductContextProvider>
             <CartContextProvider>
               <Header />
