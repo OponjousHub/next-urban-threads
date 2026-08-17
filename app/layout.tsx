@@ -54,9 +54,9 @@ export default async function RootLayout({
         }}
       >
         <TenantProvider tenant={tenant}>
-          <StorefrontSessionTracker />
           <ProductContextProvider>
             <CartContextProvider>
+              <StorefrontSessionTracker />
               <Header />
               {children}
               <Toaster
