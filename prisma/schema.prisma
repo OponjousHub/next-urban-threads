@@ -220,6 +220,7 @@ model Order {
   user               User                 @relation(fields: [userId], references: [id])
   vendor             Vendor?              @relation(fields: [vendorId], references: [id])
   shippingMethod     ShippingMethod?      @relation(fields: [shippingMethodId], references: [id])
+  storefrontSession StorefrontSession?    @relation(fields: [storefrontSessionId],references: [id])
 
   items              OrderItem[]
   orderCoupons       OrderCoupon[]
@@ -229,6 +230,7 @@ model Order {
   refundRequest      RefundRequest[]
   review             Review[]
 
+  @@index([storefrontSessionId])
   @@index([tenantId, createdAt, status])
 }
 
@@ -375,6 +377,7 @@ model StorefrontSession {
   sessionKey  String
   tenantId    String
   storeMode   StoreMode
+  orders      Order[]
 
   userId      String?
   startedAt   DateTime  @default(now())
