@@ -6,12 +6,12 @@ import { formatCurrency } from "@/lib/formatCurrency";
 
 interface Props {
   title: string;
-  value: number;
+  value: number | null;
   decimals?: number;
   prefix?: string;
   suffix?: string;
   currency?: string;
-  change?: number;
+  change?: number | null;
   icon?: React.ReactNode;
 }
 
@@ -26,8 +26,13 @@ export default function KpiCard({
   icon,
 }: Props) {
   const [displayValue, setDisplayValue] = useState<number | null>(null);
+
+  const isLoading = Number.isNaN(value);
+  const isUnavailable = value === null;
+
   useEffect(() => {
-    if (!Number.isFinite(value)) {
+    // Nothing to animate when the KPI is unavailable.
+    if (value === null || !Number.isFinite(value)) {
       setDisplayValue(null);
       return;
     }
@@ -56,7 +61,7 @@ export default function KpiCard({
     requestAnimationFrame(step);
   }, [value]);
 
-  const isPositive = change !== undefined && change >= 0;
+  const isPositive = change !== undefined && change !== null && change >= 0;
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-lg p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 group">
@@ -69,12 +74,16 @@ export default function KpiCard({
           <div className="flex items-center gap-2">
             <p className="text-sm text-gray-500">{title}</p>
 
-            {change !== undefined && (
+            {change !== undefined && change !== null && (
               <div
                 className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full cursor-default
-                  ${isPositive ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}
+                  ${
+                    isPositive
+                      ? "bg-green-100 text-green-600"
+                      : "bg-red-100 text-red-600"
+                  }
                 `}
-                title="Compared to last month" // Tooltip on hover
+                title="Compared to previous period"
               >
                 {isPositive ? (
                   <FiArrowUp size={16} />
@@ -87,9 +96,13 @@ export default function KpiCard({
             )}
           </div>
 
-          {/* Animated Value */}
+          {/* KPI Value */}
           <h3 className="text-3xl font-bold tracking-tight mt-2">
-            {displayValue === null ? (
+            {isLoading ? (
+              <span className="inline-block h-9 w-24 animate-pulse rounded-md bg-gray-100" />
+            ) : isUnavailable ? (
+              <span title="Not enough data for a reliable calculation">—</span>
+            ) : displayValue === null ? (
               <span className="inline-block h-9 w-24 animate-pulse rounded-md bg-gray-100" />
             ) : currency ? (
               formatCurrency(displayValue, currency, {
@@ -100,6 +113,13 @@ export default function KpiCard({
               `${prefix ?? ""}${displayValue.toFixed(decimals)}${suffix ?? ""}`
             )}
           </h3>
+
+          {/* Explanation for unavailable KPI */}
+          {isUnavailable && (
+            <p className="mt-1 text-xs text-gray-400">
+              Not enough traffic data
+            </p>
+          )}
         </div>
 
         {/* Optional icon */}

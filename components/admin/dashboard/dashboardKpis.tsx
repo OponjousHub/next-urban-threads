@@ -22,8 +22,8 @@ interface KpiData {
   customers: number;
   customersChange: number;
 
-  conversionRate: number;
-  conversionChange: number;
+  conversionRate: number | null;
+  conversionChange: number | null;
 
   returningCustomerRate: number;
   returningCustomerChange: number;

@@ -427,10 +427,10 @@ export async function GET(req: Request) {
   // CALCULATE CONVERSION RATE
 
   const currentConversion =
-    currentCustomers > 0 ? (currentOrders / currentCustomers) * 100 : 0;
+    currentSessions > 0 ? (currentOrders / currentSessions) * 100 : 0;
 
   const previousConversion =
-    previousCustomers > 0 ? (previousOrders / previousCustomers) * 100 : 0;
+    previousSessions > 0 ? (previousOrders / previousSessions) * 100 : 0;
 
   const revenueStats = calculateChange(currentRevenue, previousRevenue);
   const ordersStats = calculateChange(currentOrders, previousOrders);
@@ -480,24 +480,33 @@ export async function GET(req: Request) {
     0,
   );
 
-  console.log("===== CHART VS KPI DEBUG =====");
-  console.log("KPI currentRevenue:", currentRevenue);
-  console.log("KPI currentGrossRevenue:", currentGrossRevenue);
-  console.log("KPI currentRefundTotal:", currentRefundTotal);
+  console.log("===== CONVERSION DEBUG =====");
+  console.log("Current orders:", currentOrders);
+  console.log("Current sessions:", currentSessions);
+  console.log("Current conversion:", currentConversion);
+  console.log("Previous orders:", previousOrders);
+  console.log("Previous sessions:", previousSessions);
+  console.log("Previous conversion:", previousConversion);
+  console.log("============================");
 
-  console.log("Chart gross revenue:", chartGrossRevenue);
-  console.log("Chart refund total:", chartRefundTotal);
-  console.log(
-    "Chart net revenue:",
-    chartData.reduce((sum, day) => sum + day.revenue, 0),
-  );
+  // console.log("===== CHART VS KPI DEBUG =====");
+  // console.log("KPI currentRevenue:", currentRevenue);
+  // console.log("KPI currentGrossRevenue:", currentGrossRevenue);
+  // console.log("KPI currentRefundTotal:", currentRefundTotal);
 
-  console.log(
-    "Difference:",
-    chartData.reduce((sum, day) => sum + day.revenue, 0) - currentRevenue,
-  );
+  // console.log("Chart gross revenue:", chartGrossRevenue);
+  // console.log("Chart refund total:", chartRefundTotal);
+  // console.log(
+  //   "Chart net revenue:",
+  //   chartData.reduce((sum, day) => sum + day.revenue, 0),
+  // );
 
-  console.log("==============================");
+  // console.log(
+  //   "Difference:",
+  //   chartData.reduce((sum, day) => sum + day.revenue, 0) - currentRevenue,
+  // );
+
+  // console.log("==============================");
 
   return Response.json({
     revenue: currentRevenue,
