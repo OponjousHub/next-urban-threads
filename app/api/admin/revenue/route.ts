@@ -54,6 +54,8 @@ export async function GET(req: Request) {
     previousRefunds,
     currentCustomers,
     previousCustomers,
+    currentSessions,
+    previousSessions,
     chartOrders,
     previousChartOrders,
     currentReturningRaw,
@@ -162,6 +164,29 @@ export async function GET(req: Request) {
               lt: startDate,
             },
           },
+        },
+      },
+    }),
+
+    // Current storefront sessions
+    prisma.storefrontSession.count({
+      where: {
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
+        startedAt: {
+          gte: startDate,
+        },
+      },
+    }),
+
+    // Previous storefront sessions
+    prisma.storefrontSession.count({
+      where: {
+        tenantId: tenant.id,
+        storeMode: tenant.storeMode,
+        startedAt: {
+          gte: previousStartDate,
+          lt: startDate,
         },
       },
     }),
