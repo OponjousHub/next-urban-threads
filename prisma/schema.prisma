@@ -193,6 +193,7 @@ model VendorBankAccount {
 model Order {
   id                 String               @id @default(cuid())
   userId             String
+  storefrontSessionId String?
   customerEmail      String
   createdAt          DateTime             @default(now())
   status             OrderStatus          @default(PENDING)
