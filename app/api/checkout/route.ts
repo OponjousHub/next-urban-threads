@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
     // ---------------------------------------------------------
 
     const {
+      sessionKey,
       items,
       shippingAddress,
       addressId,
@@ -55,7 +56,6 @@ export async function POST(req: NextRequest) {
       saveAddress,
       couponIds,
       shippingMethodId,
-      sessionKey,
     } = await req.json();
 
     if (!items || items.length === 0) {
@@ -481,17 +481,6 @@ export async function POST(req: NextRequest) {
     // Shipping is added ONCE per order.
     // Discount applies to merchandise subtotal.
     // ---------------------------------------------------------
-
-    // console.log("CHECKOUT COUPON DEBUG", {
-    //   couponIds: uniqueCouponIds,
-    //   couponCalculations: couponCalculations.map((coupon) => ({
-    //     id: coupon.couponId,
-    //     code: coupon.code,
-    //     discount: coupon.discountAmount.toString(),
-    //   })),
-    //   discountAmount: discountAmount.toString(),
-    //   merchandiseSubtotal: merchandiseSubtotal.toString(),
-    // });
 
     const discountedSubtotal = merchandiseSubtotal.minus(discountAmount);
 

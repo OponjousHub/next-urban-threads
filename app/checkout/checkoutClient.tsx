@@ -50,6 +50,7 @@ export default function CheckoutClient({
   const [shippingMethods, setShippingMethods] = useState<any[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<any | null>(null);
   const [shippingLoading, setShippingLoading] = useState(false);
+  const [sessionKey, setSessionKey] = useState<string | null>(null);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null,
   );
@@ -111,6 +112,20 @@ export default function CheckoutClient({
       setShippingLoading(false);
     }
   };
+
+  // Creating session key
+  useEffect(() => {
+    const storageKey = "checkout-session-key";
+
+    let key = sessionStorage.getItem(storageKey);
+
+    if (!key) {
+      key = crypto.randomUUID();
+      sessionStorage.setItem(storageKey, key);
+    }
+
+    setSessionKey(key);
+  }, []);
 
   // Recalculate shipping whenever a saved address is selected
   useEffect(() => {
@@ -279,6 +294,14 @@ export default function CheckoutClient({
       return;
     }
 
+    if (!sessionKey) {
+      appToast.error(
+        "Checkout session unavailable",
+        "Please refresh the page and try again.",
+      );
+      return;
+    }
+
     appToast.loading("Placing your order...");
     setIsLoading(true);
 
@@ -298,6 +321,7 @@ export default function CheckoutClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sessionKey,
           items: orderItems,
           shippingAddress: selectedAddressId ? null : address,
           addressId: selectedAddressId,
