@@ -6,8 +6,6 @@ import { NextResponse } from "next/server";
 
 const MIN_CONVERSION_SESSIONS = 10;
 const MIN_RETURNING_CUSTOMERS = 10;
-// const MIN_CONVERSION_SESSIONS = 4;
-// const MIN_RETURNING_CUSTOMERS = 3;
 
 function getStartDate(range: string) {
   const days = range === "7" ? 7 : range === "90" ? 90 : 30;
