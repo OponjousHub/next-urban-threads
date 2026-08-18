@@ -22,7 +22,7 @@ interface KpiData {
   customers: number;
   customersChange: number;
 
-  conversionStats: number | null;
+  conversionRate: number | null;
   conversionChange: number | null;
 
   returningCustomerRate: number;
@@ -58,7 +58,7 @@ export default function DashboardAnalytics({
 
     loadKpiChange();
   }, []);
-  console.log("CONVERSION", kpiData);
+
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
       <KpiCard
@@ -93,7 +93,7 @@ export default function DashboardAnalytics({
       />
       <KpiCard
         title="Conversion Rate"
-        value={kpiData?.conversionStats ?? NaN}
+        value={kpiData === null ? NaN : kpiData.conversionRate}
         suffix="%"
         change={kpiData?.conversionChange}
         decimals={1}
@@ -101,7 +101,7 @@ export default function DashboardAnalytics({
       />
       <KpiCard
         title="Returning Customers"
-        value={kpiData?.returningCustomerRate ?? NaN}
+        value={kpiData === null ? NaN : kpiData.returningCustomerRate}
         suffix="%"
         decimals={1}
         icon={<FiRepeat />}

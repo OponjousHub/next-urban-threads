@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/utils/prisma";
-import { Prisma, PaymentStatus, OrderStatus } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 
 import { detectCountryFromHeaders } from "@/app/lib/payments/geo";
@@ -83,22 +83,34 @@ export async function POST(req: NextRequest) {
     let storefrontSessionId: string | null = null;
 
     if (typeof sessionKey === "string" && sessionKey.trim()) {
-      const storefrontSession = await prisma.storefrontSession.findUnique({
+      const normalizedSessionKey = sessionKey.trim();
+
+      const storefrontSession = await prisma.storefrontSession.upsert({
         where: {
           tenantId_storeMode_sessionKey: {
             tenantId: tenant.id,
             storeMode: tenant.storeMode,
-            sessionKey: sessionKey.trim(),
+            sessionKey: normalizedSessionKey,
           },
         },
+
+        update: {
+          lastSeenAt: new Date(),
+        },
+
+        create: {
+          tenantId: tenant.id,
+          storeMode: tenant.storeMode,
+          sessionKey: normalizedSessionKey,
+          lastSeenAt: new Date(),
+        },
+
         select: {
           id: true,
         },
       });
 
-      if (storefrontSession) {
-        storefrontSessionId = storefrontSession.id;
-      }
+      storefrontSessionId = storefrontSession.id;
     }
 
     // ---------------------------------------------------------
