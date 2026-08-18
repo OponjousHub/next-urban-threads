@@ -11,6 +11,7 @@ export const CreateProductSchema = z.object({
   discountedPrice: z.number().optional(),
   featured: z.boolean().optional().default(false),
   flash: z.boolean().optional().default(false),
+  hasVariants: z.boolean().optional().default(false),
   seoTitle: z.number().optional(),
   seoDescription: z.number().optional(),
   colours: z.array(z.string()).optional(),
