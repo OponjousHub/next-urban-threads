@@ -117,7 +117,7 @@ export default function KpiCard({
           {/* Explanation for unavailable KPI */}
           {isUnavailable && (
             <p className="mt-1 text-xs text-gray-400">
-              Not enough traffic data
+              Need at least 10 sessions before conversion can be calculated.
             </p>
           )}
         </div>

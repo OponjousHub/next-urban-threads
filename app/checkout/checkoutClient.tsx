@@ -339,6 +339,14 @@ export default function CheckoutClient({
         throw new Error(errorData.message || "Order failed");
       }
 
+      const paymentData = await res.json();
+      if (paymentData.paymentUrl) {
+        sessionStorage.removeItem("checkout-session-key");
+        window.location.href = paymentData.paymentUrl;
+      } else {
+        throw new Error("Payment URL missing");
+      }
+
       // //SHOW TOAST NOTIFICATION
       appToast.dismiss();
       appToast.loading("Redirecting to secure payment...");
