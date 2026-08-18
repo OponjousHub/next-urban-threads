@@ -115,7 +115,7 @@ export default function CheckoutClient({
 
   // Creating session key
   useEffect(() => {
-    const storageKey = "checkout-session-key";
+    const storageKey = "urban_threads_storefront_session";
 
     let key = sessionStorage.getItem(storageKey);
 
