@@ -31,19 +31,7 @@ interface KpiData {
   currency: string;
 }
 
-export default function DashboardAnalytics({
-  totalRevenue,
-  totalCustomer,
-  totalOrder,
-  conversion,
-  returningCustomerRate,
-}: {
-  totalRevenue: number;
-  totalCustomer: number;
-  totalOrder: number;
-  conversion: number;
-  returningCustomerRate: number;
-}) {
+export default function DashboardAnalytics() {
   const [kpiData, setKPIData] = useState<KpiData | null>(null);
   const [currency, setCurrency] = useState("NGN");
 

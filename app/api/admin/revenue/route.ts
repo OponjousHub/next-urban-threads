@@ -743,40 +743,6 @@ export async function GET(req: Request) {
       0,
     );
 
-    // ---------------------------------------------------------
-    // DEBUG
-    // ---------------------------------------------------------
-
-    console.log("===== REVENUE KPI DEBUG =====");
-
-    console.log("Current orders:", currentOrders);
-
-    console.log("Current sessions:", currentSessions);
-
-    console.log("Current converted sessions:", convertedCurrentSessions);
-
-    console.log("Current conversion:", currentConversion);
-
-    console.log("Previous sessions:", previousSessions);
-
-    console.log("Previous converted sessions:", convertedPreviousSessions);
-
-    console.log("Previous conversion:", previousConversion);
-
-    console.log("Conversion threshold:", MIN_CONVERSION_SESSIONS);
-
-    console.log("Current customers:", currentCustomers);
-
-    console.log("Current returning customers:", currentReturningCustomers);
-
-    console.log("Current returning rate:", currentReturningRate);
-
-    console.log("==============================");
-
-    // ---------------------------------------------------------
-    // RESPONSE
-    // ---------------------------------------------------------
-
     return NextResponse.json({
       revenue: currentRevenue,
       revenueChange: revenueStats.change,
