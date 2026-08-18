@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
       saveAddress,
       couponIds,
       shippingMethodId,
+      sessionKey,
     } = await req.json();
 
     if (!items || items.length === 0) {
@@ -68,6 +69,36 @@ export async function POST(req: NextRequest) {
         },
         { status: 400 },
       );
+    }
+
+    // ---------------------------------------------------------
+    // 3. Storefront session
+    // ---------------------------------------------------------
+    //
+    // A storefront session is optional for backward compatibility.
+    // When available, it must belong to the current tenant and
+    // current store mode.
+    // ---------------------------------------------------------
+
+    let storefrontSessionId: string | null = null;
+
+    if (typeof sessionKey === "string" && sessionKey.trim()) {
+      const storefrontSession = await prisma.storefrontSession.findUnique({
+        where: {
+          tenantId_storeMode_sessionKey: {
+            tenantId: tenant.id,
+            storeMode: tenant.storeMode,
+            sessionKey: sessionKey.trim(),
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (storefrontSession) {
+        storefrontSessionId = storefrontSession.id;
+      }
     }
 
     // ---------------------------------------------------------
@@ -451,16 +482,16 @@ export async function POST(req: NextRequest) {
     // Discount applies to merchandise subtotal.
     // ---------------------------------------------------------
 
-    console.log("CHECKOUT COUPON DEBUG", {
-      couponIds: uniqueCouponIds,
-      couponCalculations: couponCalculations.map((coupon) => ({
-        id: coupon.couponId,
-        code: coupon.code,
-        discount: coupon.discountAmount.toString(),
-      })),
-      discountAmount: discountAmount.toString(),
-      merchandiseSubtotal: merchandiseSubtotal.toString(),
-    });
+    // console.log("CHECKOUT COUPON DEBUG", {
+    //   couponIds: uniqueCouponIds,
+    //   couponCalculations: couponCalculations.map((coupon) => ({
+    //     id: coupon.couponId,
+    //     code: coupon.code,
+    //     discount: coupon.discountAmount.toString(),
+    //   })),
+    //   discountAmount: discountAmount.toString(),
+    //   merchandiseSubtotal: merchandiseSubtotal.toString(),
+    // });
 
     const discountedSubtotal = merchandiseSubtotal.minus(discountAmount);
 
@@ -540,6 +571,7 @@ export async function POST(req: NextRequest) {
         userId,
         tenantId: tenant.id,
         storeMode: tenant.storeMode,
+        storefrontSessionId,
 
         shippingAddressId,
 
