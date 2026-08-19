@@ -182,17 +182,30 @@ export async function GET() {
       prisma.orderItem.findMany({
         where: {
           tenantId: tenant.id,
+
+          // Only order items belonging to financially valid
+          // orders in the current store mode.
           order: revenueOrderFilter,
+
+          // Explicitly scope the product itself.
+          product: {
+            tenantId: tenant.id,
+            storeMode: tenant.storeMode,
+            deletedAt: null,
+          },
         },
+
         select: {
           productId: true,
           quantity: true,
           price: true,
+
           product: {
             select: {
               id: true,
               name: true,
               images: true,
+              storeMode: true,
             },
           },
         },
