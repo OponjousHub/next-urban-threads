@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { ProductImageUploader } from "./productImageUploader";
 import { ProductVideoUploader } from "./productVideoUploader";
 import toast from "react-hot-toast";
@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import { Loader2 } from "lucide-react";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
@@ -127,8 +128,6 @@ export function ProductForm({
 
   const [selectedColours, setSelectedColours] = useState<string[]>([]);
 
-  const [variants, setVariants] = useState<VariantType[]>([]);
-
   const [uploadingVariantImage, setUploadingVariantImage] = useState<
     number | null
   >(null);
@@ -141,8 +140,13 @@ export function ProductForm({
    */
   const [hasVariants, setHasVariants] = useState(false);
 
+  const [variants, setVariants] = useState<VariantType[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Tracks which variant image is currently uploading
+  const [uploadingVariantIndex, setUploadingVariantIndex] = useState<
+    number | null
+  >(null);
   /* -------------------------------- FETCH CATEGORIES -------------------------------- */
 
   useEffect(() => {
@@ -957,6 +961,7 @@ export function ProductForm({
 
                               <td className="py-4">
                                 <div className="flex items-center gap-3 min-w-[260px]">
+                                  {/* Image Preview */}
                                   {variant.image ? (
                                     <img
                                       src={variant.image}
@@ -964,75 +969,116 @@ export function ProductForm({
                                       className="w-14 h-14 rounded-lg object-cover border shrink-0"
                                     />
                                   ) : (
-                                    <div className="w-14 h-14 rounded-lg border bg-gray-100 shrink-0" />
+                                    <div className="w-14 h-14 rounded-lg border bg-gray-100 flex items-center justify-center shrink-0">
+                                      <span className="text-[10px] text-gray-400 text-center px-1">
+                                        No image
+                                      </span>
+                                    </div>
                                   )}
 
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="text-xs max-w-[180px]"
-                                    onChange={async (e) => {
-                                      const file = e.target.files?.[0];
+                                  {/* Upload Button */}
+                                  <label
+                                    className={`
+        inline-flex items-center justify-center gap-2
+        min-w-[105px]
+        px-3 py-2
+        rounded-lg
+        border
+        text-xs
+        font-medium
+        transition
+        ${
+          uploadingVariantIndex === index
+            ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 cursor-pointer"
+        }
+      `}
+                                  >
+                                    {uploadingVariantIndex === index ? (
+                                      <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Uploading...
+                                      </>
+                                    ) : (
+                                      "Upload image"
+                                    )}
 
-                                      if (!file) return;
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      disabled={uploadingVariantIndex === index}
+                                      className="hidden"
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
 
-                                      const toastId =
-                                        toast.loading("Uploading...");
+                                        if (!file) return;
 
-                                      try {
-                                        const compressedFile =
-                                          await imageCompression(file, {
-                                            maxSizeMB: 1,
-                                            maxWidthOrHeight: 1600,
-                                            useWebWorker: true,
-                                          });
+                                        // Start variant-specific loading state
+                                        setUploadingVariantIndex(index);
 
-                                        const formData = new FormData();
+                                        try {
+                                          // Compress image
+                                          const compressedFile =
+                                            await imageCompression(file, {
+                                              maxSizeMB: 1,
+                                              maxWidthOrHeight: 1600,
+                                              useWebWorker: true,
+                                            });
 
-                                        formData.append(
-                                          "image",
-                                          compressedFile,
-                                        );
+                                          const formData = new FormData();
 
-                                        const response = await fetch(
-                                          "/api/upload/image-upload",
-                                          {
-                                            method: "POST",
-                                            body: formData,
-                                          },
-                                        );
-
-                                        const data = await response.json();
-
-                                        if (!response.ok || data.error) {
-                                          throw new Error(
-                                            data.error || "Upload failed",
+                                          formData.append(
+                                            "image",
+                                            compressedFile,
                                           );
+
+                                          const response = await fetch(
+                                            "/api/upload/image-upload",
+                                            {
+                                              method: "POST",
+                                              body: formData,
+                                            },
+                                          );
+
+                                          const data = await response.json();
+
+                                          if (!response.ok || data.error) {
+                                            throw new Error(
+                                              data.error || "Upload failed",
+                                            );
+                                          }
+
+                                          // Update this specific variant
+                                          updateVariant(
+                                            index,
+                                            "image",
+                                            data.url,
+                                          );
+
+                                          appToast.success(
+                                            "Success",
+                                            "Variant image uploaded",
+                                          );
+                                        } catch (err) {
+                                          console.error(
+                                            "Variant image upload failed:",
+                                            err,
+                                          );
+
+                                          appToast.error(
+                                            "Error",
+                                            "Variant image upload failed",
+                                          );
+                                        } finally {
+                                          // Stop loading state
+                                          setUploadingVariantIndex(null);
+
+                                          // Allow selecting the same file again
+                                          e.target.value = "";
                                         }
-
-                                        updateVariant(index, "image", data.url);
-
-                                        toast.dismiss(toastId);
-
-                                        appToast.success(
-                                          "Success",
-                                          "Variant image uploaded",
-                                        );
-                                      } catch (err) {
-                                        console.error(
-                                          "Variant image upload failed:",
-                                          err,
-                                        );
-
-                                        toast.dismiss(toastId);
-
-                                        appToast.error(
-                                          "Error",
-                                          "Variant image upload failed",
-                                        );
-                                      }
-                                    }}
-                                  />
+                                      }}
+                                    />
+                                  </label>
                                 </div>
                               </td>
                             </tr>
