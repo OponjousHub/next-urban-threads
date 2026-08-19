@@ -157,17 +157,6 @@ export default function CheckoutClient({
     paymentMethod: "credit-card",
   });
 
-  // const currentAddress: ShippingAddress = {
-  //   id: "",
-  //   fullName: formData.fullName,
-  //   street: formData.street,
-  //   city: formData.city,
-  //   state: formData.state,
-  //   country: formData.country,
-  //   phone: formData.phone,
-  //   isDefault: false,
-  // };
-
   // Recalculate shipping whenever address is selected
   useEffect(() => {
     // Existing saved address selected
@@ -339,14 +328,6 @@ export default function CheckoutClient({
         throw new Error(errorData.message || "Order failed");
       }
 
-      const paymentData = await res.json();
-      if (paymentData.paymentUrl) {
-        sessionStorage.removeItem("checkout-session-key");
-        window.location.href = paymentData.paymentUrl;
-      } else {
-        throw new Error("Payment URL missing");
-      }
-
       // //SHOW TOAST NOTIFICATION
       appToast.dismiss();
       appToast.loading("Redirecting to secure payment...");
@@ -354,6 +335,7 @@ export default function CheckoutClient({
       const data = await res.json();
 
       if (data.paymentUrl) {
+        sessionStorage.removeItem("checkout-session-key");
         window.location.href = data.paymentUrl;
       } else {
         throw new Error("Payment URL missing");
