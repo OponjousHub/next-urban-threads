@@ -25,7 +25,13 @@ type AdjustStockInput = {
 
 export default class InventoryService {
   /**
-   * Reduce stock after purchase
+   * =========================================================
+   * REDUCE STOCK AFTER PURCHASE
+   *
+   * Supports:
+   * 1. Products with variants
+   * 2. Products without variants
+   * =========================================================
    */
   static async decreaseStock({
     productId,
@@ -33,6 +39,10 @@ export default class InventoryService {
     quantity,
     tx,
   }: DecreaseStockInput) {
+    if (quantity <= 0) {
+      throw new Error("Quantity must be greater than zero.");
+    }
+
     if (tx) {
       const updated = await this.performDecreaseStock(
         tx,
@@ -53,22 +63,71 @@ export default class InventoryService {
       return this.performDecreaseStock(trx, productId, variantId, quantity);
     });
 
+    await checkInventoryNotification({
+      productId,
+      variantId,
+    });
+
     return updated;
   }
 
-  // Helper for decreaseStock
-
+  /**
+   * =========================================================
+   * INTERNAL DECREASE STOCK
+   * =========================================================
+   */
   private static async performDecreaseStock(
     db: Prisma.TransactionClient,
     productId: string,
     variantId: string | null | undefined,
     quantity: number,
   ) {
+    /**
+     * ---------------------------------------------------------
+     * NON-VARIANT PRODUCT
+     * ---------------------------------------------------------
+     *
+     * No variantId means this is a normal product whose stock
+     * lives directly on Product.stock.
+     */
     if (!variantId) {
-      throw new Error("Variant ID is required.");
+      const product = await db.product.findUnique({
+        where: {
+          id: productId,
+        },
+        select: {
+          id: true,
+          stock: true,
+        },
+      });
+
+      if (!product) {
+        throw new Error("Product not found.");
+      }
+
+      if (product.stock < quantity) {
+        throw new Error("Insufficient stock.");
+      }
+
+      const newStock = product.stock - quantity;
+
+      return db.product.update({
+        where: {
+          id: productId,
+        },
+        data: {
+          stock: newStock,
+          instock: newStock > 0,
+        },
+      });
     }
 
-    // Get the purchased variant
+    /**
+     * ---------------------------------------------------------
+     * VARIANT PRODUCT
+     * ---------------------------------------------------------
+     */
+
     const variant = await db.productVariant.findUnique({
       where: {
         id: variantId,
@@ -84,11 +143,21 @@ export default class InventoryService {
       throw new Error("Product variant not found.");
     }
 
+    /**
+     * Make sure the variant actually belongs to the product
+     * being purchased.
+     */
+    if (variant.productId !== productId) {
+      throw new Error("Product variant does not belong to this product.");
+    }
+
     if (variant.stock < quantity) {
       throw new Error("Insufficient stock.");
     }
 
-    // Reduce variant stock
+    /**
+     * Reduce variant stock.
+     */
     const updatedVariant = await db.productVariant.update({
       where: {
         id: variantId,
@@ -98,7 +167,9 @@ export default class InventoryService {
       },
     });
 
-    // Calculate remaining stock from ALL variants
+    /**
+     * Recalculate parent product stock from ALL variants.
+     */
     const variants = await db.productVariant.findMany({
       where: {
         productId,
@@ -113,12 +184,9 @@ export default class InventoryService {
       0,
     );
 
-    await checkInventoryNotification({
-      productId,
-      variantId: updatedVariant.id,
-    });
-
-    // Update parent product
+    /**
+     * Update parent product.
+     */
     return db.product.update({
       where: {
         id: productId,
@@ -131,7 +199,13 @@ export default class InventoryService {
   }
 
   /**
-   * Restore stock after refund/return
+   * =========================================================
+   * RESTORE STOCK AFTER REFUND / RETURN
+   *
+   * Supports:
+   * 1. Products with variants
+   * 2. Products without variants
+   * =========================================================
    */
   static async increaseStock({
     productId,
@@ -139,25 +213,87 @@ export default class InventoryService {
     variantId,
     tx,
   }: IncreaseStockInput) {
-    if (tx) {
-      return this.performIncreaseStock(tx, productId, variantId, quantity);
+    if (quantity <= 0) {
+      throw new Error("Quantity must be greater than zero.");
     }
 
-    return prisma.$transaction(async (trx) => {
+    if (tx) {
+      const updated = await this.performIncreaseStock(
+        tx,
+        productId,
+        variantId,
+        quantity,
+      );
+
+      await checkInventoryNotification({
+        productId,
+        variantId,
+      });
+
+      return updated;
+    }
+
+    const updated = await prisma.$transaction(async (trx) => {
       return this.performIncreaseStock(trx, productId, variantId, quantity);
     });
+
+    await checkInventoryNotification({
+      productId,
+      variantId,
+    });
+
+    return updated;
   }
 
-  // Helper for IncreaseStock
+  /**
+   * =========================================================
+   * INTERNAL INCREASE STOCK
+   * =========================================================
+   */
   private static async performIncreaseStock(
     db: Prisma.TransactionClient,
     productId: string,
     variantId: string | null | undefined,
     quantity: number,
   ) {
+    /**
+     * ---------------------------------------------------------
+     * NON-VARIANT PRODUCT
+     * ---------------------------------------------------------
+     */
     if (!variantId) {
-      throw new Error("Variant ID is required.");
+      const product = await db.product.findUnique({
+        where: {
+          id: productId,
+        },
+        select: {
+          id: true,
+          stock: true,
+        },
+      });
+
+      if (!product) {
+        throw new Error("Product not found.");
+      }
+
+      const newStock = product.stock + quantity;
+
+      return db.product.update({
+        where: {
+          id: productId,
+        },
+        data: {
+          stock: newStock,
+          instock: newStock > 0,
+        },
+      });
     }
+
+    /**
+     * ---------------------------------------------------------
+     * VARIANT PRODUCT
+     * ---------------------------------------------------------
+     */
 
     const variant = await db.productVariant.findUnique({
       where: {
@@ -166,6 +302,7 @@ export default class InventoryService {
       select: {
         id: true,
         stock: true,
+        productId: true,
       },
     });
 
@@ -173,7 +310,13 @@ export default class InventoryService {
       throw new Error("Product variant not found.");
     }
 
-    // Restore variant stock
+    if (variant.productId !== productId) {
+      throw new Error("Product variant does not belong to this product.");
+    }
+
+    /**
+     * Restore variant stock.
+     */
     await db.productVariant.update({
       where: {
         id: variantId,
@@ -183,7 +326,9 @@ export default class InventoryService {
       },
     });
 
-    // Recalculate total product stock
+    /**
+     * Recalculate total product stock.
+     */
     const variants = await db.productVariant.findMany({
       where: {
         productId,
@@ -210,7 +355,11 @@ export default class InventoryService {
   }
 
   /**
-   * Manual stock adjustment
+   * =========================================================
+   * MANUAL STOCK ADJUSTMENT
+   *
+   * This adjusts the parent Product.stock.
+   * =========================================================
    */
   static async adjustStock({
     productId,
@@ -218,6 +367,10 @@ export default class InventoryService {
     stock,
     tx,
   }: AdjustStockInput) {
+    if (stock < 0) {
+      throw new Error("Stock cannot be negative.");
+    }
+
     if (tx) {
       const updated = await this.performAdjustStock(tx, productId, stock);
 
@@ -241,7 +394,11 @@ export default class InventoryService {
     return updated;
   }
 
-  // Helper for adjustStock
+  /**
+   * =========================================================
+   * INTERNAL MANUAL STOCK ADJUSTMENT
+   * =========================================================
+   */
   private static async performAdjustStock(
     db: Prisma.TransactionClient,
     productId: string,
