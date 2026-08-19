@@ -149,7 +149,7 @@ export async function GET() {
        */
       prisma.order.findMany({
         where: {
-          tenantId: tenant.id,
+          ...revenueOrderFilter,
         },
         take: 5,
         orderBy: {
