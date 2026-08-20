@@ -130,13 +130,7 @@ export default function AdminDashboard() {
       <div className="space-y-8">
         {/* Header */}
 
-        <DashboardKpis
-          totalRevenue={data.summary.totalRevenue}
-          totalCustomer={data.summary.totalCustomers}
-          totalOrder={data.summary.totalOrders}
-          conversion={0}
-          returningCustomerRate={0}
-        />
+        <DashboardKpis />
 
         <DashboardAnalytics
           lowstock={data?.lowStock}
