@@ -294,6 +294,7 @@ export async function GET(req: Request) {
       prisma.order.findMany({
         where: {
           ...revenueOrderFilter,
+          storeMode: tenant.storeMode,
           createdAt: {
             gte: startDate,
             lt: chartEndExclusive,

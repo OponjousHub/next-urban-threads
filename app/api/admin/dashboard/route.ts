@@ -150,6 +150,7 @@ export async function GET() {
       prisma.order.findMany({
         where: {
           ...revenueOrderFilter,
+          // storeMode: tenant.storeMode,
         },
         take: 5,
         orderBy: {

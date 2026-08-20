@@ -24,7 +24,7 @@ const CustomTooltip = ({
 }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
-    const {tenant} = useTenant()
+    const { tenant } = useTenant();
 
     return (
       <div className="bg-white border border-gray-200 shadow-sm rounded-lg p-3 text-sm">
@@ -95,7 +95,7 @@ export default function OrdersStatusChart({
       {/* Header */}
       <h3 className="text-lg font-semibold mb-6">Order Status</h3>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center justify-center gap-6">
         {/* Chart */}
         <div className="w-40 h-40">
           <ResponsiveContainer width="100%" height="100%">
