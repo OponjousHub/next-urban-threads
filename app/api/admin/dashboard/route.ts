@@ -219,6 +219,7 @@ export async function GET() {
         by: ["status"],
         where: {
           tenantId: tenant.id,
+          storeMode: tenant.storeMode,
         },
         _count: {
           id: true,
@@ -439,7 +440,7 @@ export async function GET() {
     console.log("TOTAL REVENUE", totalRevenue);
     console.log("TOTAL REFUNDS", totalRefunds);
     console.log("averageOrderValue", averageOrderValue);
-    console.log("grossRevenue", grossRevenue);
+    console.log("salesByCategory", orderStatus);
     return NextResponse.json({
       storeMode: tenant.storeMode,
       currency: tenant.currency,

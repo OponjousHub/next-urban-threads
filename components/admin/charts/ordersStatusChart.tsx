@@ -1,9 +1,10 @@
 "use client";
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+
 import { useRouter } from "next/navigation";
+
 import { formatCurrency } from "@/lib/formatCurrency";
-import { useTenant } from "@/store/tenant-provider-context";
 
 const STATUS_COLORS: Record<string, string> = {
   Pending: "#f59e0b",
@@ -13,47 +14,72 @@ const STATUS_COLORS: Record<string, string> = {
   Cancelled: "#ef4444",
 };
 
-const CustomTooltip = ({
-  active,
-  payload,
-  currency,
-}: {
-  active?: boolean;
-  payload?: any[];
-  currency: string;
-}) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const { tenant } = useTenant();
+type OrderStatusData = {
+  pending: {
+    count: number;
+    revenue: number;
+  };
+  processing: {
+    count: number;
+    revenue: number;
+  };
+  shipped: {
+    count: number;
+    revenue: number;
+  };
+  delivered: {
+    count: number;
+    revenue: number;
+  };
+  cancelled: {
+    count: number;
+    revenue: number;
+  };
+};
 
-    return (
-      <div className="bg-white border border-gray-200 shadow-sm rounded-lg p-3 text-sm">
-        <p className="font-medium text-gray-800">{data.name}</p>
-        <p className="text-gray-600">{data.value} orders</p>
-        <p className="text-gray-500">
-          {formatCurrency(data.revenue, tenant.currency)} revenue
-        </p>
-      </div>
-    );
+type TooltipProps = {
+  active?: boolean;
+  payload?: Array<{
+    payload: {
+      name: string;
+      value: number;
+      revenue: number;
+    };
+  }>;
+  currency: string;
+};
+
+function CustomTooltip({ active, payload, currency }: TooltipProps) {
+  if (!active || !payload || payload.length === 0) {
+    return null;
   }
 
-  return null;
-};
+  const data = payload[0].payload;
+
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-sm">
+      <p className="font-medium text-gray-800">{data.name}</p>
+
+      <p className="text-gray-600">
+        {data.value} {data.value === 1 ? "order" : "orders"}
+      </p>
+
+      <p className="text-gray-500">
+        {formatCurrency(data.revenue, currency)} revenue
+      </p>
+    </div>
+  );
+}
 
 export default function OrdersStatusChart({
   orderStatus,
   currency,
 }: {
-  orderStatus: {
-    pending: { count: number; revenue: number };
-    processing: { count: number; revenue: number };
-    shipped: { count: number; revenue: number };
-    delivered: { count: number; revenue: number };
-    cancelled: { count: number; revenue: number };
-  };
+  orderStatus: OrderStatusData;
   currency: string;
 }) {
   const router = useRouter();
+
   const STATUS_ROUTE: Record<string, string> = {
     Pending: "/admin/orders?status=PENDING",
     Processing: "/admin/orders?status=PROCESSING",
@@ -61,6 +87,7 @@ export default function OrdersStatusChart({
     Delivered: "/admin/orders?status=DELIVERED",
     Cancelled: "/admin/orders?status=CANCELLED",
   };
+
   const data = [
     {
       name: "Pending",
@@ -90,14 +117,15 @@ export default function OrdersStatusChart({
   ].filter((item) => item.value > 0);
 
   const totalOrders = data.reduce((sum, item) => sum + item.value, 0);
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      {/* Header */}
-      <h3 className="text-lg font-semibold mb-6">Order Status</h3>
 
-      <div className="flex items-center justify-center gap-6">
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+      {/* Header */}
+      <h3 className="mb-6 text-lg font-semibold">Order Status</h3>
+
+      <div className="flex items-center gap-6">
         {/* Chart */}
-        <div className="w-40 h-40">
+        <div className="h-40 w-40 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -106,8 +134,9 @@ export default function OrdersStatusChart({
                 outerRadius={70}
                 paddingAngle={4}
                 dataKey="value"
+                nameKey="name"
               >
-                {data.map((entry, index) => (
+                {data.map((entry) => (
                   <Cell
                     key={entry.name}
                     fill={STATUS_COLORS[entry.name]}
@@ -116,49 +145,57 @@ export default function OrdersStatusChart({
                   />
                 ))}
 
+                {/* Center total */}
                 <text
                   x="50%"
-                  y="50%"
+                  y="46%"
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  className="text-lg font-semibold fill-gray-800"
+                  className="fill-gray-800 text-lg font-semibold"
                 >
                   {totalOrders}
                 </text>
 
                 <text
                   x="50%"
-                  y="62%"
+                  y="60%"
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  className="text-xs fill-gray-400"
+                  className="fill-gray-400 text-xs"
                 >
                   Orders
                 </text>
               </Pie>
-              <Tooltip content={<CustomTooltip currency={currency} />} />{" "}
+
+              <Tooltip content={<CustomTooltip currency={currency} />} />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
         {/* Legend */}
-        <div className="flex flex-col gap-3">
-          {data.map((item, index) => (
-            <div
+        <div className="flex flex-1 flex-col gap-3">
+          {data.map((item) => (
+            <button
               key={item.name}
+              type="button"
               onClick={() => router.push(STATUS_ROUTE[item.name])}
-              className="flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50 translate rounded-md px-2 py-1"
+              className="flex w-full items-center justify-between gap-4 rounded-md px-2 py-1 text-left transition hover:bg-gray-50"
             >
               <div className="flex items-center gap-2">
                 <span
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: STATUS_COLORS[item.name] }}
+                  className="h-3 w-3 rounded-full"
+                  style={{
+                    backgroundColor: STATUS_COLORS[item.name],
+                  }}
                 />
+
                 <span className="text-sm text-gray-600">{item.name}</span>
               </div>
 
-              <span className="text-sm font-medium">{item.value}</span>
-            </div>
+              <span className="text-sm font-medium text-gray-900">
+                {item.value}
+              </span>
+            </button>
           ))}
         </div>
       </div>
