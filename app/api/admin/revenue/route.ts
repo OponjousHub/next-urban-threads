@@ -732,15 +732,15 @@ export async function GET(req: Request) {
     // CHART DEBUG VALUES
     // ---------------------------------------------------------
 
-    const chartGrossRevenue = chartData.reduce(
-      (sum, day) => sum + (day.revenue + (refundChartMap.get(day.name) ?? 0)),
-      0,
-    );
+    // const chartGrossRevenue = chartData.reduce(
+    //   (sum, day) => sum + (day.revenue + (refundChartMap.get(day.name) ?? 0)),
+    //   0,
+    // );
 
-    const chartRefundTotal = Array.from(refundChartMap.values()).reduce(
-      (sum, amount) => sum + amount,
-      0,
-    );
+    // const chartRefundTotal = Array.from(refundChartMap.values()).reduce(
+    //   (sum, amount) => sum + amount,
+    //   0,
+    // );
 
     return NextResponse.json({
       revenue: currentRevenue,

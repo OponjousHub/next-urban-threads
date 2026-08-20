@@ -2,6 +2,7 @@ import { getRecentOrders } from "../data/orders";
 import { getRecentUsers } from "../data/users";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { getLowStockProducts } from "../data/products";
+import { formatCurrency } from "../formatCurrency";
 
 export async function getActivities(tenantId: string) {
   const tenant = await getDefaultTenant();
@@ -20,8 +21,9 @@ export async function getActivities(tenantId: string) {
     ...recentOrders.map((order) => ({
       id: `order-${order.id}`,
       type: "order",
-      message: `${order.user?.name || "Guest"} placed an order ($${Number(
-        order.totalAmount,
+      message: `${order.user?.name || "Guest"} placed an order (${formatCurrency(
+        Number(order.totalAmount),
+        tenant.currency,
       )})`,
       time: order.createdAt,
     })),

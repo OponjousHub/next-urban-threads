@@ -437,10 +437,7 @@ export async function GET() {
      * Response
      * ---------------------------------------------------------
      */
-    console.log("TOTAL REVENUE", totalRevenue);
-    console.log("TOTAL REFUNDS", totalRefunds);
-    console.log("averageOrderValue", averageOrderValue);
-    console.log("salesByCategory", orderStatus);
+
     return NextResponse.json({
       storeMode: tenant.storeMode,
       currency: tenant.currency,
