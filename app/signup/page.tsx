@@ -177,7 +177,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             {/* Email */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -199,7 +198,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             {/* Phone */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -221,7 +219,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             {/* Address */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -243,7 +240,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             {/* City */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -265,14 +261,13 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             {/* State */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
                 State
               </label>
 
-              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+              <div className="relative flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
                 <FiMapPin className="mr-3 shrink-0 text-gray-400" />
 
                 <select
@@ -280,7 +275,7 @@ export default function SignupPage() {
                   value={form.state}
                   onChange={handleChange}
                   disabled={!form.country || isLoading}
-                  className="w-full bg-transparent text-sm text-gray-700 outline-none disabled:cursor-not-allowed disabled:bg-gray-50"
+                  className="w-full appearance-none border-none bg-transparent pr-8 text-sm text-gray-700 outline-none focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent"
                   autoComplete="address-level1"
                 >
                   <option value="">
@@ -293,16 +288,30 @@ export default function SignupPage() {
                     </option>
                   ))}
                 </select>
+
+                {/* Custom dropdown arrow */}
+                <svg
+                  className="pointer-events-none absolute right-4 h-4 w-4 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
             </div>
-
             {/* Country */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
                 Country
               </label>
 
-              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+              <div className="relative flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
                 <FiGlobe className="mr-3 shrink-0 text-gray-400" />
 
                 <select
@@ -317,7 +326,7 @@ export default function SignupPage() {
                     }));
                   }}
                   disabled={isLoading}
-                  className="w-full bg-transparent text-sm text-gray-700 outline-none disabled:cursor-not-allowed"
+                  className="w-full appearance-none border-none bg-transparent pr-8 text-sm text-gray-700 outline-none focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent"
                   autoComplete="country"
                 >
                   <option value="">Select Country</option>
@@ -328,9 +337,23 @@ export default function SignupPage() {
                     </option>
                   ))}
                 </select>
-              </div>
-            </div>
 
+                {/* Custom dropdown arrow */}
+                <svg
+                  className="pointer-events-none absolute right-4 h-4 w-4 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>{" "}
             {/* Postal Code */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -352,7 +375,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             {/* Password */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -374,7 +396,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             {/* Confirm Password */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -396,7 +417,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             {/* Submit Button */}
             <button
               type="submit"
