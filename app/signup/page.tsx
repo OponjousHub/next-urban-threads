@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-// import { AdminToast } from "@/components/ui/adminToast";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { Country, State } from "country-state-city";
@@ -14,6 +13,7 @@ import {
   FiGlobe,
   FiHome,
 } from "react-icons/fi";
+import { Loader2 } from "lucide-react";
 import { appToast } from "@/utils/appToast";
 
 const initialState = {
@@ -28,9 +28,11 @@ const initialState = {
   state: "",
   postalCode: "",
 };
+
 export default function SignupPage() {
   const [form, setForm] = useState(initialState);
   const [isLoading, setIsLoading] = useState(false);
+
   const countries = Country.getAllCountries();
   const states = State.getStatesOfCountry(form.country);
 
@@ -48,9 +50,9 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 🔄 Loading toast
-    const toastId = toast.loading("Signing up user...");
-    setIsLoading(true);
+    // ---------------------------------------------------------
+    // Validation
+    // ---------------------------------------------------------
 
     if (
       !form.name ||
@@ -62,7 +64,6 @@ export default function SignupPage() {
       !form.phone ||
       !form.confirmPassword
     ) {
-      toast.dismiss(toastId);
       appToast.warning(
         "Some fields are required",
         "Please fill in all the required fields.",
@@ -71,7 +72,6 @@ export default function SignupPage() {
     }
 
     if (form.password !== form.confirmPassword) {
-      toast.dismiss(toastId);
       appToast.warning(
         "Passwords do not match",
         "Password and password confirm must match.",
@@ -79,8 +79,15 @@ export default function SignupPage() {
       return;
     }
 
+    // ---------------------------------------------------------
+    // Start loading
+    // ---------------------------------------------------------
+
+    setIsLoading(true);
+
+    const toastId = toast.loading("Creating your account...");
+
     try {
-      // TODO: send signup data to your backend or API
       const response = await fetch("/api/users/register", {
         method: "POST",
         headers: {
@@ -101,13 +108,16 @@ export default function SignupPage() {
       });
 
       const data = await response.json();
+
       if (!response.ok) {
         throw new Error(data.message || "Signup failed");
       }
+
       toast.dismiss(toastId);
+
       appToast.success(
-        "Signup sucessfull",
-        `${data?.name} your registration was successful.`,
+        "Signup successful",
+        `${data?.name ?? form.name}, your registration was successful.`,
       );
 
       setForm(initialState);
@@ -117,254 +127,304 @@ export default function SignupPage() {
       console.error("SIGN UP ERROR:", err);
 
       toast.dismiss(toastId);
-      appToast.error("Signup failed!", `${err.message || "Please try again."}`);
+
+      appToast.error("Signup failed!", err.message || "Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        {/* Header */}
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
-          Create Your Account
-        </h1>
-        <p className="text-gray-500 text-center mb-8">
-          Join us and start shopping today
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10 sm:px-6">
+      <div className="w-full max-w-md">
+        {/* Card */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_10px_40px_rgba(0,0,0,0.08)] sm:p-8">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              Create Your Account
+            </h1>
 
-        {/* Signup Form */}
-        <form className="space-y-5" autoComplete="off" onSubmit={handleSubmit}>
-          {/* Full Name */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Full Name
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiUser className="text-gray-400 mr-2" />
-              <input
-                type="text"
-                name="name"
-                placeholder="John Doe"
-                className="w-full outline-none text-gray-700"
-                autoComplete="new-name"
-                value={form.name}
-                onChange={handleChange}
-              />
-            </div>
+            <p className="mt-2 text-sm text-gray-500">
+              Join us and start shopping today
+            </p>
           </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Email Address
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiMail className="text-gray-400 mr-2" />
-              <input
-                type="email"
-                name="email"
-                placeholder="you@example.com"
-                className="w-full outline-none text-gray-700"
-                autoComplete="new-email"
-                value={form.email}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Phone Number
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiPhone className="text-gray-400 mr-2" />
-              <input
-                type="tel"
-                name="phone"
-                placeholder="08063702221"
-                className="w-full outline-none text-gray-700"
-                autoComplete="new-tel"
-                value={form.phone}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Address */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Street Address
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiHome className="text-gray-400 mr-2" />
-              <input
-                type="text"
-                name="address"
-                placeholder="N0 43, Orga Wuse Street, Wuse"
-                className="w-full outline-none text-gray-700"
-                autoComplete="new-address"
-                value={form.address}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* City */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">City</label>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiMapPin className="text-gray-400 mr-2" />
-              <input
-                type="text"
-                name="city"
-                placeholder="Abuja"
-                className="w-full outline-none text-gray-700"
-                autoComplete="new-city"
-                value={form.city}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-          {/* State */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              State
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiMapPin className="text-gray-400 mr-2" />
-              <select
-                name="state"
-                value={form.state}
-                onChange={handleChange}
-                disabled={!form.country}
-                className="w-full outline-none text-gray-700 bg-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                autoComplete="address-level1"
-              >
-                <option value="">
-                  {form.country ? "Select State" : "Select Country First"}
-                </option>
-
-                {states.map((state) => (
-                  <option key={state.isoCode} value={state.name}>
-                    {state.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Country */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Country
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiGlobe className="text-gray-400 mr-2" />
-              <select
-                name="country"
-                value={form.country}
-                onChange={(e) => {
-                  handleChange(e);
-
-                  // Reset state when country changes
-                  setForm((prev) => ({
-                    ...prev,
-                    state: "",
-                  }));
-                }}
-                className="w-full outline-none text-gray-700 bg-transparent"
-                autoComplete="country"
-              >
-                <option value="">Select Country</option>
-
-                {countries.map((country) => (
-                  <option key={country.isoCode} value={country.isoCode}>
-                    {country.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* PostalCode */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              PostalCode
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiGlobe className="text-gray-400 mr-2" />
-              <input
-                type="text"
-                name="postalCode"
-                placeholder=""
-                className="w-full outline-none text-gray-700"
-                autoComplete="new-postalCode"
-                value={form.postalCode}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Password
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiLock className="text-gray-400 mr-2" />
-              <input
-                type="password"
-                name="password"
-                placeholder="Enter password"
-                className="w-full outline-none text-gray-700"
-                autoComplete="new-password"
-                value={form.password}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Confirm Password
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
-              <FiLock className="text-gray-400 mr-2" />
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm password"
-                className="w-full outline-none text-gray-700"
-                autoComplete="new-password"
-                value={form.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white py-3 rounded-lg font-semibold transition"
+          {/* Signup Form */}
+          <form
+            className="space-y-5"
+            autoComplete="off"
+            onSubmit={handleSubmit}
           >
-            Create Account
-          </button>
-        </form>
+            {/* Full Name */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Full Name
+              </label>
 
-        {/* Login Link */}
-        <p className="text-center text-gray-600 text-sm mt-6">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="text-[var(--color-primary)] font-medium hover:underline"
-          >
-            Log in
-          </Link>
-        </p>
+              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+                <FiUser className="mr-3 shrink-0 text-gray-400" />
+
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="John Doe"
+                  className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                  autoComplete="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Email Address
+              </label>
+
+              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+                <FiMail className="mr-3 shrink-0 text-gray-400" />
+
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                  autoComplete="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Phone Number
+              </label>
+
+              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+                <FiPhone className="mr-3 shrink-0 text-gray-400" />
+
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="08063702221"
+                  className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                  autoComplete="tel"
+                  value={form.phone}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* Address */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Street Address
+              </label>
+
+              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+                <FiHome className="mr-3 shrink-0 text-gray-400" />
+
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="No 43, Orga Wuse Street, Wuse"
+                  className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                  autoComplete="street-address"
+                  value={form.address}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* City */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                City
+              </label>
+
+              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+                <FiMapPin className="mr-3 shrink-0 text-gray-400" />
+
+                <input
+                  type="text"
+                  name="city"
+                  placeholder="Abuja"
+                  className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                  autoComplete="address-level2"
+                  value={form.city}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* State */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                State
+              </label>
+
+              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+                <FiMapPin className="mr-3 shrink-0 text-gray-400" />
+
+                <select
+                  name="state"
+                  value={form.state}
+                  onChange={handleChange}
+                  disabled={!form.country || isLoading}
+                  className="w-full bg-transparent text-sm text-gray-700 outline-none disabled:cursor-not-allowed disabled:bg-gray-50"
+                  autoComplete="address-level1"
+                >
+                  <option value="">
+                    {form.country ? "Select State" : "Select Country First"}
+                  </option>
+
+                  {states.map((state) => (
+                    <option key={state.isoCode} value={state.name}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Country */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Country
+              </label>
+
+              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+                <FiGlobe className="mr-3 shrink-0 text-gray-400" />
+
+                <select
+                  name="country"
+                  value={form.country}
+                  onChange={(e) => {
+                    handleChange(e);
+
+                    setForm((prev) => ({
+                      ...prev,
+                      state: "",
+                    }));
+                  }}
+                  disabled={isLoading}
+                  className="w-full bg-transparent text-sm text-gray-700 outline-none disabled:cursor-not-allowed"
+                  autoComplete="country"
+                >
+                  <option value="">Select Country</option>
+
+                  {countries.map((country) => (
+                    <option key={country.isoCode} value={country.isoCode}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Postal Code */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Postal Code
+              </label>
+
+              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+                <FiGlobe className="mr-3 shrink-0 text-gray-400" />
+
+                <input
+                  type="text"
+                  name="postalCode"
+                  placeholder="Postal code"
+                  className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                  autoComplete="postal-code"
+                  value={form.postalCode}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Password
+              </label>
+
+              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+                <FiLock className="mr-3 shrink-0 text-gray-400" />
+
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Enter password"
+                  className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Confirm Password
+              </label>
+
+              <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3.5 py-3 transition-all duration-200 focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/10">
+                <FiLock className="mr-3 shrink-0 text-gray-400" />
+
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Confirm password"
+                  className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                  autoComplete="new-password"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] py-3.5 font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[var(--color-primary-dark)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:shadow-sm"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Creating account...</span>
+                </>
+              ) : (
+                "Create Account"
+              )}
+            </button>
+          </form>
+
+          {/* Login Link */}
+          <p className="mt-7 text-center text-sm text-gray-600">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-[var(--color-primary)] transition-colors hover:underline"
+            >
+              Log in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
