@@ -13,6 +13,12 @@ interface Props {
   currency?: string;
   change?: number | null;
   icon?: React.ReactNode;
+
+  /**
+   * Optional message shown when value === null.
+   * This allows different KPIs to have different explanations.
+   */
+  unavailableMessage?: string;
 }
 
 export default function KpiCard({
@@ -24,20 +30,29 @@ export default function KpiCard({
   decimals = 0,
   change,
   icon,
+  unavailableMessage,
 }: Props) {
   const [displayValue, setDisplayValue] = useState<number | null>(null);
 
+  /**
+   * NaN means the KPI is still loading.
+   */
   const isLoading = Number.isNaN(value);
+
+  /**
+   * null means the KPI is unavailable / cannot currently
+   * be calculated.
+   */
   const isUnavailable = value === null;
 
   useEffect(() => {
-    // Nothing to animate when the KPI is unavailable.
     if (value === null || !Number.isFinite(value)) {
       setDisplayValue(null);
       return;
     }
 
     let startTimestamp: number | null = null;
+
     const duration = 700;
 
     const step = (timestamp: number) => {
@@ -64,11 +79,11 @@ export default function KpiCard({
   const isPositive = change !== undefined && change !== null && change >= 0;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-lg p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 group">
+    <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white/60 p-6 shadow-sm backdrop-blur-lg transition-all duration-300 hover:shadow-lg group">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-purple-100 opacity-20" />
 
-      <div className="relative z-10 flex justify-between items-center">
+      <div className="relative z-10 flex items-center justify-between">
         <div>
           {/* Title + Trend */}
           <div className="flex items-center gap-2">
@@ -76,13 +91,11 @@ export default function KpiCard({
 
             {change !== undefined && change !== null && (
               <div
-                className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full cursor-default
-                  ${
-                    isPositive
-                      ? "bg-green-100 text-green-600"
-                      : "bg-red-100 text-red-600"
-                  }
-                `}
+                className={`flex cursor-default items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
+                  isPositive
+                    ? "bg-green-100 text-green-600"
+                    : "bg-red-100 text-red-600"
+                }`}
                 title="Compared to previous period"
               >
                 {isPositive ? (
@@ -97,7 +110,7 @@ export default function KpiCard({
           </div>
 
           {/* KPI Value */}
-          <h3 className="text-3xl font-bold tracking-tight mt-2">
+          <h3 className="mt-2 text-3xl font-bold tracking-tight">
             {isLoading ? (
               <span className="inline-block h-9 w-24 animate-pulse rounded-md bg-gray-100" />
             ) : isUnavailable ? (
@@ -114,17 +127,15 @@ export default function KpiCard({
             )}
           </h3>
 
-          {/* Explanation for unavailable KPI */}
-          {isUnavailable && (
-            <p className="mt-1 text-xs text-gray-400">
-              Need at least 10 sessions before conversion can be calculated.
-            </p>
+          {/* Optional explanation for unavailable KPI */}
+          {isUnavailable && unavailableMessage && (
+            <p className="mt-1 text-xs text-gray-400">{unavailableMessage}</p>
           )}
         </div>
 
         {/* Optional icon */}
         {icon && (
-          <div className="text-[var(--color-primary-light)] text-3xl">
+          <div className="text-3xl text-[var(--color-primary-light)]">
             {icon}
           </div>
         )}

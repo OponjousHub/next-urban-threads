@@ -30,7 +30,6 @@ interface KpiData {
 
   currency: string;
 }
-
 export default function DashboardAnalytics() {
   const [kpiData, setKPIData] = useState<KpiData | null>(null);
   const [currency, setCurrency] = useState("NGN");
@@ -47,6 +46,7 @@ export default function DashboardAnalytics() {
     loadKpiChange();
   }, []);
 
+  console.log("kpiData.returningCustomerRate", kpiData?.returningCustomerRate);
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
       <KpiCard
@@ -95,7 +95,7 @@ export default function DashboardAnalytics() {
         change={kpiData?.conversionChange}
         decimals={1}
         icon={<FiTrendingUp />}
-        emptyMessage={
+        unavailableMessage={
           kpiData?.conversionRate === null
             ? "Need at least 10 sessions before conversion can be calculated."
             : undefined

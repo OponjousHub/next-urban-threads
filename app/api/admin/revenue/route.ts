@@ -714,14 +714,14 @@ export async function GET(req: Request) {
     // ---------------------------------------------------------
 
     const currentReturningRate =
-      currentCustomers >= MIN_RETURNING_CUSTOMERS
+      currentCustomers > 0
         ? (currentReturningCustomers / currentCustomers) * 100
-        : null;
+        : 0;
 
     const previousReturningRate =
-      previousCustomers >= MIN_RETURNING_CUSTOMERS
+      previousCustomers > 0
         ? (previousReturningCustomers / previousCustomers) * 100
-        : null;
+        : 0;
 
     const returningStats = calculateKpiChange(
       currentReturningRate,
