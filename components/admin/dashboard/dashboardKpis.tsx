@@ -79,13 +79,27 @@ export default function DashboardAnalytics() {
         icon={<FiUsers />}
         change={kpiData?.customersChange}
       />
-      <KpiCard
+      {/* <KpiCard
         title="Conversion Rate"
         value={kpiData === null ? NaN : kpiData.conversionRate}
         suffix="%"
         change={kpiData?.conversionChange}
         decimals={1}
         icon={<FiTrendingUp />}
+      /> */}
+
+      <KpiCard
+        title="Conversion Rate"
+        value={kpiData === null ? null : kpiData.conversionRate}
+        suffix="%"
+        change={kpiData?.conversionChange}
+        decimals={1}
+        icon={<FiTrendingUp />}
+        emptyMessage={
+          kpiData?.conversionRate === null
+            ? "Need at least 10 sessions before conversion can be calculated."
+            : undefined
+        }
       />
       <KpiCard
         title="Returning Customers"
