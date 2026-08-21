@@ -708,9 +708,24 @@ export async function processRefund(refundId: string) {
   };
 }
 
-export async function rejectRefund(refundId: string, reason?: string) {
-  const refund = await prisma.refundRequest.findUnique({
-    where: { id: refundId },
+export async function rejectRefund(refundId: string, reason: string) {
+  const tenant = await getDefaultTenant();
+
+  if (!tenant) {
+    throw new Error("Default tenant not found");
+  }
+
+  const trimmedReason = reason.trim();
+
+  if (!trimmedReason) {
+    throw new Error("A reason is required when rejecting a refund.");
+  }
+
+  const refund = await prisma.refundRequest.findFirst({
+    where: {
+      id: refundId,
+      tenantId: tenant.id,
+    },
     include: {
       order: true,
     },
@@ -724,12 +739,14 @@ export async function rejectRefund(refundId: string, reason?: string) {
     throw new Error("Only pending refund requests can be rejected.");
   }
 
-  await prisma.refundRequest.update({
+  const rejectedRefund = await prisma.refundRequest.update({
     where: {
-      id: refundId,
+      id: refund.id,
     },
     data: {
       status: "REJECTED",
+      rejectionReason: trimmedReason,
+      rejectedAt: new Date(),
     },
   });
 
@@ -742,17 +759,22 @@ export async function rejectRefund(refundId: string, reason?: string) {
     },
   });
 
+  // ---------------------------------------------------------
   // Customer tracking timeline
+  // ---------------------------------------------------------
+
   await createRefundTrackingEvent({
     tenantId: refund.tenantId,
     refundRequestId: refund.id,
     status: "REFUND_REJECTED",
     title: "Refund Request Rejected",
-    description:
-      reason ?? "Your refund request has been reviewed and rejected.",
+    description: trimmedReason,
   });
 
-  // Vendor
+  // ---------------------------------------------------------
+  // Vendor notification
+  // ---------------------------------------------------------
+
   if (refund.vendorId) {
     await NotificationService.notify({
       vendorId: refund.vendorId,
@@ -762,25 +784,29 @@ export async function rejectRefund(refundId: string, reason?: string) {
       message: `Refund request for Order #${refund.orderId.slice(-8)} was rejected.`,
       link: `/vendor/orders/${refund.orderId}`,
       metadata: {
-        refundId,
+        refundId: refund.id,
       },
     });
   }
 
-  // Admin
+  // ---------------------------------------------------------
+  // Admin notification
+  // ---------------------------------------------------------
+
   await AdminNotificationService.notify({
     type: "REFUND_REJECTED",
     title: "Refund Rejected",
     message: `Refund request for Order #${refund.orderId.slice(-8)} has been rejected.`,
     link: `/admin/refunds`,
     metadata: {
-      refundId,
+      refundId: refund.id,
       orderId: refund.orderId,
     },
   });
 
   return {
     success: true,
+    refund: rejectedRefund,
   };
 }
 
