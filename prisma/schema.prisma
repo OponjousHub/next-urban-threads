@@ -537,6 +537,7 @@ model RefundRequest {
   vendorId        String?
   status          RefundStatus        @default(REQUESTED)
   reason          String
+  rejectionReason String?
   rejectedAt      DateTime?
   description     String?
   requestedAmount Float
