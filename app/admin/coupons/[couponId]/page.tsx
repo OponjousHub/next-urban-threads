@@ -84,11 +84,17 @@ export default async function CouponDetailPage({ params }: Props) {
   const averageOrderValue = totalUses === 0 ? 0 : revenueGenerated / totalUses;
 
   const safeCoupon = {
-    ...coupon,
+    id: coupon.id,
+    code: coupon.code,
+    description: coupon.description,
+    type: coupon.type,
 
     value: Number(coupon.value),
 
     minimumAmount: coupon.minimumAmount ? Number(coupon.minimumAmount) : null,
+
+    usageLimit: coupon.usageLimit,
+    usedCount: coupon.usedCount,
 
     startsAt: coupon.startsAt
       ? new Date(coupon.startsAt).toISOString().slice(0, 16)
@@ -97,6 +103,14 @@ export default async function CouponDetailPage({ params }: Props) {
     expiresAt: coupon.expiresAt
       ? new Date(coupon.expiresAt).toISOString().slice(0, 16)
       : "",
+
+    active: coupon.active,
+
+    tenantId: coupon.tenantId,
+    vendorId: coupon.vendorId,
+
+    createdAt: coupon.createdAt.toISOString(),
+    updatedAt: coupon.updatedAt.toISOString(),
 
     orders: coupon.orderCoupons.map((orderCoupon) => {
       const order = orderCoupon.order;
