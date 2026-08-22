@@ -10,6 +10,15 @@ export async function PATCH(
 
     const { reply } = await req.json();
 
+    if (!reply) {
+      return NextResponse.json(
+        {
+          message: "The reply field is empty. Please write a reply.",
+        },
+        { status: 400 },
+      );
+    }
+
     const review = await prisma.review.update({
       where: {
         id: reviewId,

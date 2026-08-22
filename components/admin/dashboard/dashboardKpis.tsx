@@ -46,7 +46,6 @@ export default function DashboardAnalytics() {
     loadKpiChange();
   }, []);
 
-  console.log("kpiData.returningCustomerRate", kpiData?.returningCustomerRate);
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
       <KpiCard

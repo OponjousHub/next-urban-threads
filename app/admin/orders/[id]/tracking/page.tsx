@@ -68,7 +68,6 @@ export default function AdminOrderTrackingPage() {
     try {
       const res = await fetch(`/api/orders/${orderId}/tracking`);
       const data = await res.json();
-      console.log("THIS IS THE EVENTS +++++", data);
 
       // newest first
       const sorted = [...data].sort(
@@ -87,7 +86,6 @@ export default function AdminOrderTrackingPage() {
   useEffect(() => {
     fetchEvents();
   }, []);
-  console.log("THIS IS THE EVENTS -------", events);
   /* ---------------- QUICK ACTION ---------------- */
 
   const handleQuickUpdate = async (status: string) => {

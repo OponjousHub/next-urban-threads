@@ -131,6 +131,10 @@ export default function ReviewDetail({
 
   const saveReply = async () => {
     try {
+      // if (!reply) {
+      //   appToast.warning("Reply empty", "The reply field cannot be empty!");
+      //   return;
+      // }
       setSavingReply(true);
 
       const response = await fetch(`/api/reviews/${review.id}/reply`, {
@@ -144,7 +148,13 @@ export default function ReviewDetail({
       });
 
       if (!response.ok) {
-        throw new Error();
+        const replyData = await response.json();
+        if (replyData.status === 400) {
+          appToast.error("Field empty", replyData.message);
+          return;
+        } else {
+          throw new Error();
+        }
       }
 
       appToast.success("Reply Saved", "Customer response updated successfully");
