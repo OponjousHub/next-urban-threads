@@ -37,39 +37,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // ---------------------------;
     // 2️⃣ Fetch order + items
     // ---------------------------
-    // const order = await prisma.order.findFirst({
-    //   where: {
-    //     id: orderId,
-    //     userId,
-    //     tenantId: tenant.id,
-    //   },
-
-    //   include: {
-    //     user: {
-    //       select: {
-    //         name: true,
-    //       },
-    //     },
-    //     items: {
-    //       include: {
-    //         product: true,
-    //       },
-    //     },
-    //     refundRequest: {
-    //       orderBy: {
-    //         createdAt: "desc",
-    //       },
-    //       take: 1,
-    //       include: {
-    //         items: {
-    //           include: {
-    //             product: true,
-    //           },
-    //         },
-    //       },
-    //     },
-    //   },
-    // });
 
     const order = await prisma.order.findFirst({
       where: {
@@ -86,6 +53,11 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         items: {
           include: {
             product: true,
+          },
+        },
+        orderCoupons: {
+          select: {
+            couponId: true,
           },
         },
 
@@ -223,10 +195,12 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       },
     });
 
-    if (order.couponId) {
+    const couponId = order.orderCoupons[0]?.couponId;
+
+    if (couponId) {
       await prisma.coupon.update({
         where: {
-          id: order.couponId,
+          id: couponId,
           tenantId: tenant.id,
           vendorId: order.vendorId,
         },

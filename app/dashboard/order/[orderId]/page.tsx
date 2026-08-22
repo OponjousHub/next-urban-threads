@@ -16,6 +16,7 @@ import { useTenant } from "@/store/tenant-provider-context";
 import { ShippingMethod } from "@prisma/client";
 import { RefundStatus, RefundTrackingEvent } from "@prisma/client";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { FiX } from "react-icons/fi";
 
 type RefundRequestWithTracking = RefundRequest & {
   trackingEvents: RefundTrackingEvent[];
@@ -70,6 +71,8 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   const [open, setOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
   const [cancellingRefund, setCancellingRefund] = useState(false);
+
+  const latestRefundRequest = order?.refundRequest?.[0];
 
   async function fetchOrder() {
     const res = await fetch(`/api/orders/me/${orderId}`);
@@ -375,130 +378,36 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
           </div>
 
           {/* Refund Status card */}
-          <div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">Refund Status</h2>
-
-            {/* NONE */}
-            {order.refundStatus === "NONE" &&
-              order.paymentStatus === PaymentStatus.PAID &&
-              order.status === "DELIVERED" && (
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <p className="font-medium text-green-600">
-                      Eligible for refund
-                    </p>
-
-                    <p className="mt-1 text-sm text-gray-500">
-                      Your order has been delivered. If there's an issue, you
-                      may request a refund.
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() => setRefundOpen(true)}
-                    className="w-fit rounded-xl bg-red-500 px-5 py-2 text-white hover:bg-red-600"
-                  >
-                    Request Refund
-                  </button>
+          {order.refundStatus === "REJECTED" && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 mb-8">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100">
+                  <FiX className="h-5 w-5 text-red-600" />
                 </div>
-              )}
 
-            {/* REQUESTED */}
-            {order.refundStatus === "REQUESTED" && (
-              <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4">
-                <p className="font-semibold text-yellow-700">
-                  Refund Requested
-                </p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-red-700">Refund Rejected</p>
 
-                <p className="mt-1 text-sm text-yellow-600">
-                  We've received your refund request and it is awaiting review.
-                </p>
+                  <p className="mt-1 text-sm leading-5 text-red-600">
+                    Unfortunately, your refund request was rejected.
+                  </p>
 
-                <button
-                  onClick={cancelRefund}
-                  disabled={cancellingRefund}
-                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-red-500 px-4 py-2 text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {cancellingRefund ? (
-                    <>
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-                      Cancelling...
-                    </>
-                  ) : (
-                    "Cancel Request"
+                  {/* Admin rejection reason */}
+                  {latestRefundRequest?.rejectionReason && (
+                    <div className="mt-4 rounded-lg border border-red-200 bg-white p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        Reason for rejection
+                      </p>
+
+                      <p className="mt-1 text-sm leading-5 text-gray-700">
+                        {latestRefundRequest?.rejectionReason}
+                      </p>
+                    </div>
                   )}
-                </button>
+                </div>
               </div>
-            )}
-            {/* APPROVED */}
-            {order.refundStatus === "APPROVED" && (
-              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-                <p className="font-semibold text-blue-700">Refund Approved</p>
-
-                <p className="mt-1 text-sm text-blue-600">
-                  Your refund has been approved and will be processed shortly.
-                </p>
-              </div>
-            )}
-
-            {/* PROCESSING */}
-            {order.refundStatus === "PROCESSING" && (
-              <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
-                <p className="font-semibold text-indigo-700">
-                  Refund Processing
-                </p>
-
-                <p className="mt-1 text-sm text-indigo-600">
-                  Your payment provider is currently processing your refund.
-                </p>
-              </div>
-            )}
-
-            {/* REFUNDED */}
-            {order.refundStatus === "REFUNDED" && (
-              <div className="rounded-xl border border-green-200 bg-green-50 p-4">
-                <p className="font-semibold text-green-700">Refund Completed</p>
-
-                <p className="mt-1 text-sm text-green-600">
-                  Your refund has been completed successfully.
-                </p>
-              </div>
-            )}
-
-            {/* REJECTED */}
-            {order.refundStatus === "REJECTED" && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-                <p className="font-semibold text-red-700">Refund Rejected</p>
-
-                <p className="mt-1 text-sm text-red-600">
-                  Unfortunately, your refund request was rejected.
-                </p>
-              </div>
-            )}
-
-            {/* FAILED */}
-            {order.refundStatus === "FAILED" && (
-              <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
-                <p className="font-semibold text-orange-700">Refund Failed</p>
-
-                <p className="mt-1 text-sm text-orange-600">
-                  We couldn't complete your refund. Our support team has been
-                  notified.
-                </p>
-              </div>
-            )}
-
-            {/* CANCELLED */}
-            {order.refundStatus === "CANCELLED" && (
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="font-semibold text-gray-700">Refund Cancelled</p>
-
-                <p className="mt-1 text-sm text-gray-600">
-                  This refund request was cancelled.
-                </p>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <CustomerTrackingTimeline orderId={order.id} />
           {order.refundStatus !== "NONE" && (
