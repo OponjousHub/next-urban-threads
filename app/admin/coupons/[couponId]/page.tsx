@@ -31,13 +31,15 @@ export default async function CouponDetailPage({ params }: Props) {
         id: couponId,
         tenantId: tenant?.id,
       },
-
       include: {
-        orders: {
+        orderCoupons: {
           include: {
-            user: true,
+            order: {
+              include: {
+                user: true,
+              },
+            },
           },
-
           orderBy: {
             createdAt: "desc",
           },
@@ -67,15 +69,15 @@ export default async function CouponDetailPage({ params }: Props) {
     avatarUrl: user?.avatarUrl,
   };
 
-  const totalUses = coupon.orders.length;
+  const totalUses = coupon.orderCoupons.length;
 
-  const revenueGenerated = coupon.orders.reduce(
-    (sum, order) => sum + Number(order.totalAmount),
+  const revenueGenerated = coupon.orderCoupons.reduce(
+    (sum, orderCoupon) => sum + Number(orderCoupon.order.totalAmount),
     0,
   );
 
-  const totalDiscount = coupon.orders.reduce(
-    (sum, order) => sum + Number(order.discountAmount ?? 0),
+  const totalDiscount = coupon.orderCoupons.reduce(
+    (sum, orderCoupon) => sum + Number(orderCoupon.discountAmount ?? 0),
     0,
   );
 
@@ -96,26 +98,31 @@ export default async function CouponDetailPage({ params }: Props) {
       ? new Date(coupon.expiresAt).toISOString().slice(0, 16)
       : "",
 
-    orders: coupon.orders.map((order) => ({
-      ...order,
+    orders: coupon.orderCoupons.map((orderCoupon) => {
+      const order = orderCoupon.order;
 
-      totalAmount: Number(order.totalAmount),
+      return {
+        ...order,
 
-      discountAmount: Number(order.discountAmount ?? 0),
+        totalAmount: Number(order.totalAmount),
 
-      commissionAmount: Number(order.commissionAmount ?? 0),
+        discountAmount: Number(orderCoupon.discountAmount ?? 0),
 
-      shippingCost: Number(order.shippingCost ?? 0),
+        commissionAmount: Number(order.commissionAmount ?? 0),
 
-      createdAt: order.createdAt.toISOString(),
+        shippingCost: Number(order.shippingCost ?? 0),
 
-      user: {
-        ...order.user,
-      },
-    })),
+        createdAt: order.createdAt.toISOString(),
+
+        user: {
+          ...order.user,
+        },
+      };
+    }),
   };
 
   const safeAverageOrderValue = Number(averageOrderValue);
+
   return (
     <>
       <AdminHeaderUI
