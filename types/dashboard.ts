@@ -17,7 +17,7 @@ export type RecentOrder = {
   paymentMethod: string | null;
   paymentProvider: string | null;
   paymentReference: string | null;
-  currency: string;
+  currency: string | null;
 
   createdAt: string; // serialized ISO date
   totalAmount: number;

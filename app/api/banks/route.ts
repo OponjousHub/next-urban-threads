@@ -20,7 +20,8 @@ export async function GET() {
 
     const config = resolvePaymentConfig(tenant.country);
 
-    const provider = getPaymentProvider(config.currency);
+    // const provider = getPaymentProvider(config.currency);
+    const provider = getPaymentProvider(config.provider);
 
     const banks = await provider.getBanks(config.countryCode);
 

@@ -45,7 +45,8 @@ export async function POST(req: Request) {
 
     const config = resolvePaymentConfig(tenantRecord.country);
 
-    const provider = getPaymentProvider(config.currency);
+    // const provider = getPaymentProvider(config.currency);
+    const provider = getPaymentProvider(config.provider);
 
     const result = await provider.verifyBankAccount(bankCode, accountNumber);
 
