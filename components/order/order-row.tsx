@@ -113,13 +113,6 @@ export function OrderRow({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* ---------------- STATUS POSITION ---------------- */
-
-  // const currentIndex = STATUS_ORDER.indexOf(order.status);
-
-  // const isPast = (status: OrderStatus) =>
-  //   STATUS_ORDER.indexOf(status) <= currentIndex;
-
   /* ---------------- API ---------------- */
 
   const handleUpdateStatus = async (status: OrderStatus) => {

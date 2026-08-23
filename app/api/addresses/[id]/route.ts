@@ -17,13 +17,6 @@ export async function PATCH(
   const data = await req.json();
   const parsed = AddressSchema.safeParse(data);
 
-  // if (data.isDefault) {
-  //   await prisma.address.updateMany({
-  //     where: { userId },
-  //     data: { isDefault: false },
-  //   });
-  // }
-
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.flatten().fieldErrors },

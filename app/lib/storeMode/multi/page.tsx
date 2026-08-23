@@ -19,15 +19,3 @@ export default function MultiVendorHome() {
     </>
   );
 }
-
-// import { getStoreMode } from "@/app/lib/storeMode";
-// import SingleVendorHome from "./storefront/single/page";
-// import MultiVendorHome from "./storefront/multi/page";
-
-// export default async function HomePage() {
-//   const mode = await getStoreMode();
-
-//   return mode === "MULTI_VENDOR"
-//     ? <MultiVendorHome />
-//     : <SingleVendorHome />;
-// }

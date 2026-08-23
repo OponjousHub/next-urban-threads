@@ -10,7 +10,6 @@ export interface Product {
   name: string;
   price: number;
   images: string[];
-  // reviews?: Review[];
   description: string | null;
   sizes: string[];
   colours: string[];

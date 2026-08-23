@@ -64,21 +64,6 @@ export default function ShippingMethodsPageClient({ methods }: Props) {
         </Link>
       </div>
 
-      {/* Search */}
-
-      {/* <div className="rounded-2xl border bg-white p-4 shadow-sm">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-
-          <input
-            placeholder="Search methods..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border py-2 pl-10 pr-4 outline-none focus:ring-2 focus:ring-black"
-          />
-        </div>
-      </div> */}
-
       {/* Empty */}
 
       {filteredMethods.length === 0 && (

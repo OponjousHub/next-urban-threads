@@ -9,7 +9,6 @@ export default function TwoFactorSection({
 }: {
   twoFAStatus: Boolean | undefined;
 }) {
-  // const [showDisableModal, setShowDisableModal] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [mode, setMode] = useState<"enable" | "disable" | null>(null);
   const [otp, setOtp] = useState("");

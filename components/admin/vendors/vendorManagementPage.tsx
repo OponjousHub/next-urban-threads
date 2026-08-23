@@ -433,30 +433,7 @@ export default function VendorManagementPage() {
           </button>
         </div>
       </div>
-      {/* <div className="flex items-center justify-between border-t p-4">
-        <div className="text-sm text-muted-foreground">
-          Showing{" "}
-          {Math.min((currentPage - 1) * pageSize + 1, filteredVendors.length)}-
-          {Math.min(currentPage * pageSize, filteredVendors.length)} of{" "}
-          {filteredVendors.length}
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-          >
-            Previous
-          </button>
-
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => p + 1)}
-          >
-            Next
-          </button>
-        </div>
-      </div> */}
+   
     </main>
   );
 }

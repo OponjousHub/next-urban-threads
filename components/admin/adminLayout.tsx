@@ -14,26 +14,6 @@ export default function AdminLayout({
   // ✅ Mobile sidebar state comes from context
   const { open, setOpen } = useAdminSidebar();
 
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     try {
-  //       const res = await fetch("/api/users/me", {
-  //         cache: "no-store",
-  //       });
-
-  //       if (!res.ok) {
-  //         throw new Error("Failed to get user");
-  //       }
-
-  //       await res.json();
-  //     } catch (error) {
-  //       console.error("User fetch error:", error);
-  //     }
-  //   };
-
-  //   getUser();
-  // }, []);
-
   return (
     <>
       <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">

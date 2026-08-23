@@ -6,24 +6,6 @@ import { FiMail } from "react-icons/fi";
 export default function NewsletterPage() {
   const [email, setEmail] = useState("");
   const { tenant } = useTenant();
-  //   const [status, setStatus] =
-  //     (useState < "idle") | "success" | ("error" > "idle");
-
-  //   const handleSubmit = (e: React.FormEvent) => {
-  //     e.preventDefault();
-
-  //     if (!email || !email.includes("@")) {
-  //       setStatus("error");
-  //       return;
-  //     }
-
-  //     // Mock API call for demo
-  //     setTimeout(() => {
-  //       console.log("Subscribed:", email);
-  //       setStatus("success");
-  //       setEmail("");
-  //     }, 1000);
-  //   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6">

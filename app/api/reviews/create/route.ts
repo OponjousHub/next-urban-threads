@@ -116,18 +116,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // await NotificationService.notify({
-    //   vendorId: review.id,
-    //   setting: "newReview",
-    //   type: "REVIEW",
-    //   title: "New Review",
-    //   message: `You received a new review (${review.id.slice(-8)}).`,
-    //   link: `/vendor/orders/${review.id}`,
-    //   metadata: {
-    //     orderId: review.id,
-    //   },
-    // });
-
     //Update product rating
     await updateProductRating(review.productId);
 
