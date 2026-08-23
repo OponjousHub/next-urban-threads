@@ -9,13 +9,14 @@ export default function Hero() {
 
   return (
     <section className="relative h-[70vh] flex items-center justify-center text-white">
-      <Image
-        // src="/img/featured-img.jpg"
-        src={tenant.heroImage}
-        alt="Hero"
-        fill
-        className="object-cover"
-      />
+      {tenant.heroImage && (
+        <Image
+          src={tenant.heroImage}
+          alt="Hero"
+          fill
+          className="object-cover"
+        />
+      )}
 
       {/* Overlay */}
       {/* <div className="absolute inset-0 bg-black/50 z-10" /> */}

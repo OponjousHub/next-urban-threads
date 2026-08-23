@@ -9,13 +9,15 @@ export default function Hero() {
 
   return (
     <section className="relative h-[85vh] overflow-hidden">
-      <Image
-        src={tenant.heroImage}
-        alt=""
-        fill
-        priority
-        className="object-cover scale-105"
-      />
+      {tenant.heroImage && (
+        <Image
+          src={tenant.heroImage}
+          alt=""
+          fill
+          priority
+          className="object-cover scale-105"
+        />
+      )}
 
       <div className="absolute inset-0 bg-black/40" />
 
