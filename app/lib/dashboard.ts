@@ -99,7 +99,6 @@ export async function getUserDashboardStats(
       orderBy: { createdAt: "desc" },
     }),
   ]);
-  // console.dir(recentOrders[0]?.items[0], { depth: null });
   const serializedRecentOrders = recentOrders.map((order) => {
     return {
       id: order.id,

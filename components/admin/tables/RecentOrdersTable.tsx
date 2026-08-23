@@ -18,6 +18,7 @@ type RecentOrder = {
   status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
   paymentStatus: string;
   date: string | Date;
+  currency: string | null;
 };
 
 export default function RecentOrdersTable({ orders, currency }: Props) {

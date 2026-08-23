@@ -15,6 +15,7 @@ type RecentOrder = {
   status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
   paymentStatus: string;
   date: string;
+  currency: string | null;
 };
 
 type DashboardProduct = {

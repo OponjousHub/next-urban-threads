@@ -9,6 +9,7 @@ type recentOrder = {
   status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
   paymentStatus: string;
   date: string | Date;
+  currency: string | null;
 };
 
 interface Product {
