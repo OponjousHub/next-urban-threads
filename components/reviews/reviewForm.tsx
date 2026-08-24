@@ -12,7 +12,7 @@ import { appToast } from "@/utils/appToast";
 interface Props {
   productId: string;
 
-  onSuccess?: () => void;
+  onSuccess?: (review: any) => void;
 
   existingReview?: {
     id: string;
@@ -108,7 +108,7 @@ export function ReviewForm({ productId, existingReview, onSuccess }: Props) {
 
       router.refresh();
 
-      onSuccess?.();
+      onSuccess?.(data.review ?? data);
     } catch (error) {
       console.error("REVIEW SUBMIT ERROR:", error);
 

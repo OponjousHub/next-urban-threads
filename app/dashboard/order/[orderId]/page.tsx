@@ -585,7 +585,16 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                           <ReviewForm
                             productId={item.product.id}
                             existingReview={userReviews[item.product.id]}
-                            onSuccess={() => setOpen(false)}
+                            onSuccess={(review) => {
+                              if (review) {
+                                setUserReviews((prev) => ({
+                                  ...prev,
+                                  [item.product.id]: review,
+                                }));
+                              }
+
+                              setOpen(false);
+                            }}
                           />
                         </DialogContent>
                       </Dialog>
