@@ -85,43 +85,108 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   }
 
   useEffect(() => {
-    if (!orderId || hasVerified.current) return;
-    hasVerified.current = true;
+    if (!orderId) return;
 
-    const toastId = "verifying";
+    let cancelled = false;
 
-    async function verifyOrder() {
+    async function loadOrder() {
       try {
-        toast.loading("Verifying payment...", { id: toastId });
+        // ---------------------------------------
+        // 1. Load the order immediately
+        // ---------------------------------------
 
-        const res = await fetch(`/api/orders/me/${orderId}/verify`, {
-          method: "POST",
+        const res = await fetch(`/api/orders/me/${orderId}`, {
           credentials: "include",
-          body: JSON.stringify({ reference }),
-          headers: { "Content-Type": "application/json" },
         });
 
-        const data = await res.json();
-        setOrder(data);
-
-        toast.dismiss(toastId);
-
-        if (data.status === "PAID") {
-          appToast.success("Payment verified", "Status: Paid");
-        } else if (data.status === "FAILED") {
-          appToast.error("Payment failed!", "Status: Failed");
+        if (!res.ok) {
+          throw new Error("Failed to load order");
         }
-      } catch (err) {
-        toast.dismiss(toastId);
-        appToast.error("Verification failed", "Could not verify payment");
-      } finally {
+
+        const data = await res.json();
+
+        if (cancelled) return;
+
+        setOrder(data);
         setLoading(false);
+
+        // ---------------------------------------
+        // 2. Verify payment in the background
+        // ---------------------------------------
+
+        if (data.status !== "PENDING" || data.paymentStatus === "PAID") {
+          return;
+        }
+
+        if (hasVerified.current) {
+          return;
+        }
+
+        hasVerified.current = true;
+
+        const toastId = "verifying";
+
+        try {
+          toast.loading("Verifying payment...", {
+            id: toastId,
+          });
+
+          const verifyRes = await fetch(`/api/orders/me/${orderId}/verify`, {
+            method: "POST",
+            credentials: "include",
+            body: JSON.stringify({
+              reference,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!verifyRes.ok) {
+            toast.dismiss(toastId);
+            return;
+          }
+
+          const verifiedOrder = await verifyRes.json();
+
+          if (cancelled) return;
+
+          setOrder(verifiedOrder);
+
+          toast.dismiss(toastId);
+
+          if (verifiedOrder.status === "PROCESSING") {
+            appToast.success("Payment verified", "Status: Paid");
+          } else if (verifiedOrder.paymentStatus === "FAILED") {
+            appToast.error("Payment failed", "Your payment was not completed.");
+          }
+        } catch (error) {
+          console.error("Payment verification error:", error);
+
+          toast.dismiss(toastId);
+
+          // Don't prevent the customer from viewing
+          // their order if verification fails.
+        }
+      } catch (error) {
+        console.error("Order loading error:", error);
+
+        if (!cancelled) {
+          setLoading(false);
+          appToast.error(
+            "Unable to load order",
+            "Please refresh the page and try again.",
+          );
+        }
       }
     }
 
-    verifyOrder();
-  }, [orderId]);
+    loadOrder();
 
+    return () => {
+      cancelled = true;
+    };
+  }, [orderId, reference]);
   // VERIFY ODER
   useEffect(() => {
     if (!order || order.status !== "PENDING") return;
