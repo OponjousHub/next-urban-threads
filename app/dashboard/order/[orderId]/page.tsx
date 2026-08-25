@@ -374,20 +374,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   }
 
   /* ------------------------------------
-     ORDER IS PENDING
-  ------------------------------------- */
-  // if (order.status === "PENDING") {
-  //   return (
-  //     <div className="p-6 text-center">
-  //       <h2 className="text-lg font-semibold">Confirming payment…</h2>
-  //       <p className="text-sm text-gray-500">
-  //         Please wait while we verify your payment.
-  //       </p>
-  //     </div>
-  //   );
-  // }
-
-  /* ------------------------------------
      ✅ NORMAL PAGE CONTENT
   ------------------------------------- */
   return (
@@ -413,51 +399,73 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
               <h2 className="text-lg font-semibold mb-4">Order Information</h2>
 
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
+                {/* Order ID */}
+                <div className="flex justify-between gap-4">
                   <span className="text-gray-500">Order ID</span>
-                  <span className="font-medium">{order.id}</span>
+
+                  <span className="font-medium text-right break-all">
+                    {order.id}
+                  </span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* Order Status */}
+                <div className="flex justify-between gap-4">
                   <span className="text-gray-500">Status</span>
 
                   <span
                     className={`font-semibold ${
                       order.status === "DELIVERED"
                         ? "text-green-600"
-                        : order.status === "CANCELLED"
+                        : order.status === "CANCELLED" ||
+                            order.status === "FAILED"
                           ? "text-red-600"
-                          : "text-yellow-600"
+                          : order.status === "PROCESSING" ||
+                              order.status === "SHIPPED" ||
+                              order.status === "IN_TRANSIT" ||
+                              order.status === "OUT_FOR_DELIVERY"
+                            ? "text-blue-600"
+                            : "text-yellow-600"
                     }`}
                   >
                     {order.status}
                   </span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* Payment Status */}
+                <div className="flex justify-between gap-4">
                   <span className="text-gray-500">Payment</span>
 
                   <span
                     className={`font-semibold ${
                       order.paymentStatus === PaymentStatus.PAID
                         ? "text-green-600"
-                        : "text-yellow-600"
+                        : order.paymentStatus === PaymentStatus.FAILED
+                          ? "text-red-600"
+                          : "text-yellow-600"
                     }`}
                   >
-                    {order.paymentStatus}
+                    {order.paymentStatus === PaymentStatus.PAID
+                      ? "PAID"
+                      : order.paymentStatus === PaymentStatus.FAILED
+                        ? "FAILED"
+                        : "PENDING"}
                   </span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* Payment Reference */}
+                <div className="flex justify-between gap-4">
                   <span className="text-gray-500">Payment Reference</span>
-                  <span className="font-medium">
+
+                  <span className="font-medium text-right break-all">
                     {order.paymentReference || "N/A"}
                   </span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* Placed On */}
+                <div className="flex justify-between gap-4">
                   <span className="text-gray-500">Placed On</span>
-                  <span>
+
+                  <span className="text-right">
                     {new Date(order.createdAt).toLocaleDateString()}{" "}
                     {new Date(order.createdAt).toLocaleTimeString()}
                   </span>
@@ -470,7 +478,8 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
               <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
 
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
+                {/* Subtotal */}
+                <div className="flex justify-between gap-4">
                   <span className="text-gray-500">Subtotal</span>
 
                   <span>
@@ -483,15 +492,17 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                   </span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* Shipping Method */}
+                <div className="flex justify-between gap-4">
                   <span className="text-gray-500">Shipping Method</span>
 
-                  <span>
+                  <span className="text-right">
                     {order.shippingMethod?.name || "Standard Delivery"}
                   </span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* Shipping Fee */}
+                <div className="flex justify-between gap-4">
                   <span className="text-gray-500">Shipping Fee</span>
 
                   <span>
@@ -502,7 +513,8 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                   </span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* Discount */}
+                <div className="flex justify-between gap-4">
                   <span className="text-gray-500">Discount</span>
 
                   <span className="text-green-600">
@@ -516,18 +528,12 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
                 <hr />
 
-                {/* <div className="flex justify-between text-lg font-bold">
-                  <span>Total Paid</span>
-
-                  <span>
-                    {formatCurrency(Number(order.totalAmount), tenant.currency)}
-                  </span>
-                </div> */}
-                <div className="border-t pt-4 flex items-center justify-between">
+                {/* Final Amount */}
+                <div className="border-t pt-4 flex items-center justify-between gap-4">
                   <p className="font-bold">
-                    {order.paymentStatus === "PAID"
+                    {order.paymentStatus === PaymentStatus.PAID
                       ? "Total Paid"
-                      : order.paymentStatus === "FAILED"
+                      : order.paymentStatus === PaymentStatus.FAILED
                         ? "Order Total"
                         : "Amount Due"}
                   </p>
@@ -536,11 +542,37 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                     {formatCurrency(Number(order.totalAmount), tenant.currency)}
                   </p>
                 </div>
+
+                {/* Payment Explanation */}
+                {order.paymentStatus === PaymentStatus.PENDING && (
+                  <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-3 mt-3">
+                    <p className="text-xs text-yellow-800">
+                      Payment has not been confirmed yet. Your order will be
+                      updated automatically once your payment is confirmed.
+                    </p>
+                  </div>
+                )}
+
+                {order.paymentStatus === PaymentStatus.FAILED && (
+                  <div className="rounded-lg bg-red-50 border border-red-200 p-3 mt-3">
+                    <p className="text-xs text-red-800">
+                      This payment was not completed. The amount shown above was
+                      not charged.
+                    </p>
+                  </div>
+                )}
+
+                {order.paymentStatus === PaymentStatus.PAID && (
+                  <div className="rounded-lg bg-green-50 border border-green-200 p-3 mt-3">
+                    <p className="text-xs text-green-800">
+                      Your payment has been successfully confirmed.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Refund Status card */}
           {/* Refund Status card */}
           <div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold">Refund Status</h2>
