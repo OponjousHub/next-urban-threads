@@ -1,3 +1,4 @@
+// import { VerifyPaymentResult as PrismaVerifyPaymentResult } from "@prisma/client";
 export interface InitializePaymentPayload {
   email: string;
   amount: number;
@@ -8,6 +9,13 @@ export interface InitializePaymentPayload {
 export interface PaymentInitResponse {
   authorizationUrl: string;
   reference: string;
+}
+
+export interface VerifyPaymentResult {
+  success: boolean;
+  status: "successful" | "failed" | "pending";
+  transactionId?: number;
+  txRef?: string;
 }
 
 export interface PaymentProvider {
@@ -24,9 +32,3 @@ export interface PaymentProvider {
 
   verifyPayment(reference: string): Promise<VerifyPaymentResult>;
 }
-
-export type VerifyPaymentResult = {
-  success: boolean;
-  transactionId?: number | string;
-  txRef?: string;
-};
