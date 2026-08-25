@@ -20,18 +20,20 @@ export class FlutterwaveProvider implements PaymentProvider {
     amount,
     reference,
     callbackUrl,
+    currency,
   }: {
     email: string;
     amount: number;
     reference: string;
     callbackUrl: string;
+    currency: string;
   }) {
     const res = await axios.post(
       `${this.baseUrl}/payments`,
       {
         tx_ref: reference,
-        amount: Math.round(amount),
-        currency: "NGN",
+        amount,
+        currency,
         redirect_url: callbackUrl,
         customer: { email },
         payment_options: "card,banktransfer",
@@ -53,7 +55,6 @@ export class FlutterwaveProvider implements PaymentProvider {
       reference,
     };
   }
-
   // ✅ FIXED RETURN TYPE
   async verifyPayment(reference: string): Promise<VerifyResponse> {
     const res = await axios.get(
