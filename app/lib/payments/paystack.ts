@@ -10,6 +10,7 @@ import {
 export type InitializePaymentParams = {
   email: string;
   amount: number;
+  currency: string;
   reference: string;
   callbackUrl: string;
 };
@@ -51,7 +52,7 @@ export class PaystackProvider {
       `${this.baseUrl}/transaction/initialize`,
       {
         email,
-        amount: amount * 100, // Paystack expects kobo
+        amount: amount * 100,
         reference,
         callback_url: callbackUrl,
       },

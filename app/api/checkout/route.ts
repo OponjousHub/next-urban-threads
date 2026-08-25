@@ -704,11 +704,16 @@ export async function POST(req: NextRequest) {
     // 21. Initialize payment
     // ---------------------------------------------------------
 
+    if (!order.currency) {
+      throw new Error("Order currency is not configured");
+    }
+
     const provider = getPaymentProvider(order.paymentProvider);
 
     const payment = await provider.initializePayment({
       email,
       amount: order.totalAmount.toNumber(),
+      currency: order.currency,
       reference: order.paymentReference,
       callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/order/${order.id}`,
     });

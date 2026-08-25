@@ -14,6 +14,7 @@ export interface PaymentProvider {
   initializePayment(input: {
     email: string;
     amount: number;
+    currency: string;
     reference: string;
     callbackUrl: string;
   }): Promise<{
