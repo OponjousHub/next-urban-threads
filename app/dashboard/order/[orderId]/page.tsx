@@ -75,13 +75,25 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   const latestRefundRequest = order?.refundRequest?.[0];
 
   async function fetchOrder() {
-    const res = await fetch(`/api/orders/me/${orderId}`);
+    try {
+      const res = await fetch(`/api/orders/me/${orderId}`, {
+        credentials: "include",
+        cache: "no-store",
+      });
 
-    if (!res.ok) return;
+      if (!res.ok) {
+        throw new Error("Failed to fetch order");
+      }
 
-    const data = await res.json();
+      const data = await res.json();
 
-    setOrder(data);
+      setOrder(data);
+
+      return data;
+    } catch (error) {
+      console.error("Fetch order error:", error);
+      return null;
+    }
   }
 
   useEffect(() => {
@@ -91,12 +103,13 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
     async function loadOrder() {
       try {
-        // ---------------------------------------
-        // 1. Load the order immediately
-        // ---------------------------------------
+        // ---------------------------------------------------------
+        // 1. ALWAYS load the order from our database first
+        // ---------------------------------------------------------
 
         const res = await fetch(`/api/orders/me/${orderId}`, {
           credentials: "include",
+          cache: "no-store",
         });
 
         if (!res.ok) {
@@ -107,42 +120,54 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
         if (cancelled) return;
 
+        // IMPORTANT:
+        // The order is now available immediately, regardless
+        // of whether payment is pending, paid, or failed.
         setOrder(data);
         setLoading(false);
 
-        // ---------------------------------------
-        // 2. Verify payment in the background
-        // ---------------------------------------
+        // ---------------------------------------------------------
+        // 2. Only verify payment if it is actually still pending
+        // ---------------------------------------------------------
 
-        if (data.status !== "PENDING" || data.paymentStatus === "PAID") {
+        if (data.status !== "PENDING" || data.paymentStatus !== "PENDING") {
           return;
         }
 
+        // Prevent duplicate initial verification
         if (hasVerified.current) {
           return;
         }
 
         hasVerified.current = true;
 
-        const toastId = "verifying";
+        const toastId = "verifying-payment";
 
         try {
-          toast.loading("Verifying payment...", {
+          toast.loading("Checking payment status...", {
             id: toastId,
           });
 
           const verifyRes = await fetch(`/api/orders/me/${orderId}/verify`, {
             method: "POST",
             credentials: "include",
-            body: JSON.stringify({
-              reference,
-            }),
             headers: {
               "Content-Type": "application/json",
             },
+            body: JSON.stringify({
+              reference,
+            }),
           });
 
+          // -------------------------------------------------------
+          // IMPORTANT:
+          // A verification failure must NEVER prevent the order
+          // page from displaying.
+          // -------------------------------------------------------
+
           if (!verifyRes.ok) {
+            console.warn("Payment verification returned:", verifyRes.status);
+
             toast.dismiss(toastId);
             return;
           }
@@ -151,33 +176,45 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
           if (cancelled) return;
 
-          setOrder(verifiedOrder);
+          // Only replace the order if we actually received
+          // an order object.
+          if (verifiedOrder?.id) {
+            setOrder(verifiedOrder);
+          }
 
           toast.dismiss(toastId);
 
-          if (verifiedOrder.status === "PROCESSING") {
+          if (
+            verifiedOrder?.paymentStatus === "PAID" &&
+            verifiedOrder?.status === "PROCESSING"
+          ) {
             appToast.success("Payment verified", "Status: Paid");
-          } else if (verifiedOrder.paymentStatus === "FAILED") {
+          }
+
+          if (verifiedOrder?.paymentStatus === "FAILED") {
             appToast.error("Payment failed", "Your payment was not completed.");
           }
         } catch (error) {
-          console.error("Payment verification error:", error);
+          console.error("Background payment verification error:", error);
 
           toast.dismiss(toastId);
 
-          // Don't prevent the customer from viewing
-          // their order if verification fails.
+          // DO NOT set loading(true)
+          // DO NOT clear the order
+          //
+          // The customer can still see the order.
         }
       } catch (error) {
-        console.error("Order loading error:", error);
+        console.error("Load order error:", error);
 
-        if (!cancelled) {
-          setLoading(false);
-          appToast.error(
-            "Unable to load order",
-            "Please refresh the page and try again.",
-          );
-        }
+        if (cancelled) return;
+
+        setLoading(false);
+
+        appToast.error(
+          "Unable to load order",
+          "We could not load this order. Please try again.",
+        );
       }
     }
 
@@ -187,28 +224,72 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
       cancelled = true;
     };
   }, [orderId, reference]);
-  // VERIFY ODER
+
+  // POLLING EFFECT
   useEffect(() => {
-    if (!order || order.status !== "PENDING") return;
+    if (
+      !order ||
+      order.status !== "PENDING" ||
+      order.paymentStatus !== "PENDING"
+    ) {
+      return;
+    }
+
+    let stopped = false;
 
     const interval = setInterval(async () => {
-      const res = await fetch(`/api/orders/me/${orderId}/verify`, {
-        method: "POST",
-        credentials: "include",
-      });
+      if (stopped) return;
 
-      if (!res.ok) return;
+      try {
+        const res = await fetch(`/api/orders/me/${orderId}/verify`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      const data = await res.json();
-      setOrder(data);
+        if (!res.ok) {
+          console.warn("Background payment verification returned:", res.status);
+          return;
+        }
 
-      if (data.status === "PAID") {
-        clearInterval(interval);
+        const data = await res.json();
+
+        if (stopped) return;
+
+        if (!data?.id) {
+          return;
+        }
+
+        setOrder(data);
+
+        // -------------------------------------------------------
+        // Stop polling once payment reaches a terminal state
+        // -------------------------------------------------------
+
+        if (
+          data.paymentStatus === "PAID" ||
+          data.paymentStatus === "FAILED" ||
+          data.status === "CANCELLED"
+        ) {
+          clearInterval(interval);
+        }
+      } catch (error) {
+        console.error("Background payment polling error:", error);
+
+        // Do nothing.
+        //
+        // A temporary verification failure should NOT
+        // break the order page.
       }
     }, 5000);
 
-    return () => clearInterval(interval);
-  }, [order, orderId]);
+    return () => {
+      stopped = true;
+      clearInterval(interval);
+    };
+  }, [order?.status, order?.paymentStatus, orderId]);
 
   // CHECK REVIEWS
   useEffect(() => {
@@ -267,12 +348,17 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   ------------------------------------- */
   if (loading) {
     return (
-      <main className="flex min-h-[70vh] items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-3">
-          <span className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-indigo-600" />
-          <p className="text-sm text-gray-500">Loading order…</p>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-[var(--color-primary)]" />
+
+          <p className="text-sm font-medium text-gray-700">Loading order...</p>
+
+          <p className="mt-1 text-xs text-gray-500">
+            Please wait while we load your order details.
+          </p>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -290,16 +376,16 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
   /* ------------------------------------
      ORDER IS PENDING
   ------------------------------------- */
-  if (order.status === "PENDING") {
-    return (
-      <div className="p-6 text-center">
-        <h2 className="text-lg font-semibold">Confirming payment…</h2>
-        <p className="text-sm text-gray-500">
-          Please wait while we verify your payment.
-        </p>
-      </div>
-    );
-  }
+  // if (order.status === "PENDING") {
+  //   return (
+  //     <div className="p-6 text-center">
+  //       <h2 className="text-lg font-semibold">Confirming payment…</h2>
+  //       <p className="text-sm text-gray-500">
+  //         Please wait while we verify your payment.
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   /* ------------------------------------
      ✅ NORMAL PAGE CONTENT
@@ -430,12 +516,25 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
 
                 <hr />
 
-                <div className="flex justify-between text-lg font-bold">
+                {/* <div className="flex justify-between text-lg font-bold">
                   <span>Total Paid</span>
 
                   <span>
                     {formatCurrency(Number(order.totalAmount), tenant.currency)}
                   </span>
+                </div> */}
+                <div className="border-t pt-4 flex items-center justify-between">
+                  <p className="font-bold">
+                    {order.paymentStatus === "PAID"
+                      ? "Total Paid"
+                      : order.paymentStatus === "FAILED"
+                        ? "Order Total"
+                        : "Amount Due"}
+                  </p>
+
+                  <p className="font-bold">
+                    {formatCurrency(Number(order.totalAmount), tenant.currency)}
+                  </p>
                 </div>
               </div>
             </div>

@@ -67,21 +67,26 @@ export class FlutterwaveProvider implements PaymentProvider {
         {
           headers: {
             Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+            "Content-Type": "application/json",
           },
-
-          // Never allow payment verification to block
-          // the customer's order page indefinitely.
-          timeout: 3000,
+          timeout: 10000,
         },
       );
 
       const data = res.data?.data;
 
-      const rawStatus = String(data?.status ?? "").toLowerCase();
+      if (!data) {
+        return {
+          success: false,
+          status: "pending",
+        };
+      }
+
+      const rawStatus = String(data.status ?? "").toLowerCase();
 
       let status: "successful" | "failed" | "pending";
 
-      if (rawStatus === "successful") {
+      if (rawStatus === "successful" || rawStatus === "succeeded") {
         status = "successful";
       } else if (
         rawStatus === "failed" ||
@@ -96,8 +101,8 @@ export class FlutterwaveProvider implements PaymentProvider {
       return {
         success: status === "successful",
         status,
-        transactionId: data?.id,
-        txRef: data?.tx_ref,
+        transactionId: data.id,
+        txRef: data.tx_ref,
       };
     } catch (error: any) {
       const statusCode = error?.response?.status;
@@ -108,13 +113,19 @@ export class FlutterwaveProvider implements PaymentProvider {
         "Flutterwave verification failed";
 
       console.warn("Flutterwave verification warning:", {
+        reference,
         statusCode,
         message,
-        reference,
+        code: error?.code,
       });
 
-      // Transaction does not exist yet.
-      // Keep the order pending.
+      // ---------------------------------------------------------
+      // No transaction exists yet.
+      //
+      // This can happen when the customer opens Flutterwave
+      // and leaves before completing payment.
+      // ---------------------------------------------------------
+
       if (statusCode === 400 || statusCode === 404) {
         return {
           success: false,
@@ -122,17 +133,31 @@ export class FlutterwaveProvider implements PaymentProvider {
         };
       }
 
-      // Flutterwave did not respond within our timeout.
-      // Do NOT fail the order. We simply don't know yet.
-      if (error?.code === "ECONNABORTED") {
+      // ---------------------------------------------------------
+      // Timeout
+      //
+      // We don't know the payment outcome, so DON'T fail
+      // the order.
+      // ---------------------------------------------------------
+
+      if (error?.code === "ECONNABORTED" || error?.code === "ETIMEDOUT") {
         return {
           success: false,
           status: "pending",
         };
       }
 
-      // Genuine API/server/authentication error.
-      throw error;
+      // ---------------------------------------------------------
+      // Other Flutterwave/network errors
+      //
+      // Don't turn an unknown verification problem into a
+      // failed payment.
+      // ---------------------------------------------------------
+
+      return {
+        success: false,
+        status: "pending",
+      };
     }
   }
 
