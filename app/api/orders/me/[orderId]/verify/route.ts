@@ -6,7 +6,11 @@ import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
 import NotificationService from "@/lib/notifications/notification.service";
-import { PaymentStatus } from "@prisma/client";
+import { PaymentStatus, OrderStatus } from "@prisma/client";
+import {
+  isPendingPaymentExpired,
+  PENDING_PAYMENT_TIMEOUT_MINUTES,
+} from "@/app/lib/payments/payment-timeout";
 
 type RouteParams = {
   params: {
@@ -112,6 +116,71 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       order.status !== "PENDING"
     ) {
       return NextResponse.json(order);
+    }
+
+    // ---------------------------------------------------------
+    // 5. Expire unresolved pending payment
+    // ---------------------------------------------------------
+
+    if (isPendingPaymentExpired(order.createdAt)) {
+      const expiredOrder = await prisma.$transaction(async (tx) => {
+        const updatedOrder = await tx.order.update({
+          where: {
+            id: order.id,
+            tenantId: tenant.id,
+          },
+          data: {
+            paymentStatus: PaymentStatus.FAILED,
+            status: OrderStatus.CANCELLED,
+          },
+          include: {
+            user: {
+              select: {
+                name: true,
+              },
+            },
+            items: {
+              include: {
+                product: true,
+              },
+            },
+            orderCoupons: {
+              select: {
+                couponId: true,
+              },
+            },
+            shippingMethod: true,
+            refundRequest: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              include: {
+                items: true,
+                trackingEvents: {
+                  orderBy: {
+                    createdAt: "asc",
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        await tx.orderTrackingEvent.create({
+          data: {
+            orderId: order.id,
+            tenantId: tenant.id,
+            status: OrderStatus.CANCELLED,
+            type: "STATUS_CHANGE",
+            title: "Payment expired",
+            description: `Payment was not completed within ${PENDING_PAYMENT_TIMEOUT_MINUTES} minutes. The order has been cancelled.`,
+          },
+        });
+
+        return updatedOrder;
+      });
+
+      return NextResponse.json(expiredOrder);
     }
 
     // ---------------------------
