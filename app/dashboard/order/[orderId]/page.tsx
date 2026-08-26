@@ -547,8 +547,9 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
                 {order.paymentStatus === PaymentStatus.PENDING && (
                   <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-3 mt-3">
                     <p className="text-xs text-yellow-800">
-                      Payment has not been confirmed yet. Your order will be
-                      updated automatically once your payment is confirmed.
+                      Your payment is still pending. We are checking the payment
+                      status automatically. If payment is not completed, this
+                      order will be cancelled automatically.
                     </p>
                   </div>
                 )}
