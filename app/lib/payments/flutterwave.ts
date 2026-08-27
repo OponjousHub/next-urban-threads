@@ -1,5 +1,7 @@
 import axios from "axios";
+
 import { PaymentProvider, VerifyPaymentResult } from "@/types/payment";
+
 import {
   VerifyBankAccountResult,
   TransferRecipient,
@@ -75,88 +77,112 @@ export class FlutterwaveProvider implements PaymentProvider {
 
       const data = res.data?.data;
 
-      // console.log("========== FLUTTERWAVE VERIFY ==========");
-      // console.log("Reference sent:", reference);
-      // console.log("Flutterwave transaction ID:", data?.id);
-      // console.log("Flutterwave tx_ref:", data?.tx_ref);
-      // console.log("Flutterwave status:", data?.status);
-      // console.log("Flutterwave amount:", data?.amount);
-      // console.log("Flutterwave currency:", data?.currency);
-      // console.log("Flutterwave processor response:", data?.processor_response);
-      // console.log("Flutterwave full data:", data);
-      // console.log("==========================================");
+      console.log("========== FLUTTERWAVE VERIFY ==========");
+      console.log("Reference sent:", reference);
+      console.log("Flutterwave transaction ID:", data?.id);
+      console.log("Flutterwave tx_ref:", data?.tx_ref);
+      console.log("Flutterwave status:", data?.status);
+      console.log("Flutterwave amount:", data?.amount);
+      console.log("Flutterwave currency:", data?.currency);
+      console.log("Flutterwave processor response:", data?.processor_response);
+      console.log("==========================================");
 
+      // No transaction data returned.
+      // This is NOT the same as a real pending transaction.
       if (!data) {
         return {
           success: false,
-          status: "pending",
+          status: "not_found",
         };
       }
 
       const rawStatus = String(data.status ?? "").toLowerCase();
 
-      let status: "successful" | "failed" | "pending";
+      // ---------------------------
+      // Successful
+      // ---------------------------
 
       if (rawStatus === "successful" || rawStatus === "succeeded") {
-        status = "successful";
-      } else if (
+        return {
+          success: true,
+          status: "successful",
+          transactionId: data.id,
+          txRef: data.tx_ref,
+        };
+      }
+
+      // ---------------------------
+      // Failed / cancelled
+      // ---------------------------
+
+      if (
         rawStatus === "failed" ||
         rawStatus === "cancelled" ||
         rawStatus === "canceled"
       ) {
-        status = "failed";
-      } else {
-        status = "pending";
+        return {
+          success: false,
+          status: "failed",
+          transactionId: data.id,
+          txRef: data.tx_ref,
+        };
       }
 
+      // ---------------------------
+      // Genuine pending transaction
+      // ---------------------------
+
       return {
-        success: status === "successful",
-        status,
+        success: false,
+        status: "pending",
         transactionId: data.id,
         txRef: data.tx_ref,
       };
     } catch (error: any) {
       const statusCode = error?.response?.status;
 
-      // console.log("========== FLUTTERWAVE VERIFY ERROR ==========");
-      // console.log("Reference:", reference);
-      // console.log("HTTP status:", error?.response?.status);
-      // console.log("Flutterwave error response:", error?.response?.data);
-      // console.log("Error code:", error?.code);
-      // console.log("Error message:", error?.message);
-      // console.log("==============================================");
-
       const message =
         error?.response?.data?.message ??
         error?.message ??
         "Flutterwave verification failed";
 
-      console.warn("Flutterwave verification warning:", {
-        reference,
-        statusCode,
-        message,
-        code: error?.code,
-      });
+      console.warn("========== FLUTTERWAVE VERIFY ERROR ==========");
+      console.warn("Reference:", reference);
+      console.warn("HTTP status:", statusCode);
+      console.warn("Flutterwave error response:", error?.response?.data);
+      console.warn("Error code:", error?.code);
+      console.warn("Error message:", message);
+      console.warn("==============================================");
 
       // ---------------------------------------------------------
-      // No transaction exists yet.
+      // No transaction exists.
       //
-      // This can happen when the customer opens Flutterwave
-      // and leaves before completing payment.
+      // This is what we observed when:
+      // 1. Customer abandoned Flutterwave before completing payment
+      // 2. Customer pressed Cancel on Flutterwave
+      //
+      // Flutterwave returned:
+      // 400
+      // "No transaction was found for this id"
+      //
+      // Therefore this MUST NOT be treated as pending.
       // ---------------------------------------------------------
 
-      if (statusCode === 400 || statusCode === 404) {
+      if (
+        (statusCode === 400 || statusCode === 404) &&
+        String(message).toLowerCase().includes("no transaction")
+      ) {
         return {
           success: false,
-          status: "pending",
+          status: "not_found",
         };
       }
 
       // ---------------------------------------------------------
       // Timeout
       //
-      // We don't know the payment outcome, so DON'T fail
-      // the order.
+      // We don't know the payment outcome.
+      // Keep the order pending.
       // ---------------------------------------------------------
 
       if (error?.code === "ECONNABORTED" || error?.code === "ETIMEDOUT") {
@@ -169,8 +195,9 @@ export class FlutterwaveProvider implements PaymentProvider {
       // ---------------------------------------------------------
       // Other Flutterwave/network errors
       //
-      // Don't turn an unknown verification problem into a
-      // failed payment.
+      // We don't know the payment outcome.
+      // Never mark a potentially paid order as failed because
+      // of a temporary verification/network problem.
       // ---------------------------------------------------------
 
       return {
