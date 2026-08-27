@@ -12,6 +12,24 @@ import {
   PENDING_PAYMENT_TIMEOUT_MINUTES,
 } from "@/app/lib/payments/payment-timeout";
 
+import { NextRequest, NextResponse } from "next/server";
+
+import { PaymentStatus, OrderStatus } from "@prisma/client";
+
+import { prisma } from "@/utils/prisma";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { getLoggedInUserId } from "@/app/lib/auth";
+import {
+  PENDING_PAYMENT_TIMEOUT_MINUTES,
+  isPendingPaymentExpired,
+} from "@/app/lib/payments/pending-payment";
+
+import { PaystackProvider } from "@/app/lib/payments/paystack";
+import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
+
+import { NotificationService } from "@/app/lib/notifications/notification.service";
+import { AdminNotificationService } from "@/app/lib/notifications/admin-notification.service";
+
 type RouteParams = {
   params: {
     orderId: string;
@@ -51,29 +69,36 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         userId,
         tenantId: tenant.id,
       },
+
       include: {
         user: {
           select: {
             name: true,
           },
         },
+
         items: {
           include: {
             product: true,
           },
         },
+
         orderCoupons: {
           select: {
             couponId: true,
           },
         },
+
         shippingMethod: true,
+
         refundRequest: {
           orderBy: {
             createdAt: "desc",
           },
+
           include: {
             items: true,
+
             trackingEvents: {
               orderBy: {
                 createdAt: "asc",
@@ -98,6 +123,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           id: order.id,
           tenantId: tenant.id,
         },
+
         data: {
           paymentReference: referenceFromClient,
         },
@@ -113,14 +139,15 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     if (
       order.paymentStatus === PaymentStatus.PAID ||
-      order.status !== "PENDING"
+      order.status !== OrderStatus.PENDING
     ) {
       return NextResponse.json(order);
     }
 
-    // ---------------------------------------------------------
-    // 5. Expire unresolved pending payment
-    // ---------------------------------------------------------
+    // ---------------------------
+    // 5. Expire unresolved pending
+    // payment after timeout
+    // ---------------------------
 
     if (isPendingPaymentExpired(order.createdAt)) {
       const expiredOrder = await prisma.$transaction(async (tx) => {
@@ -129,33 +156,41 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
             id: order.id,
             tenantId: tenant.id,
           },
+
           data: {
             paymentStatus: PaymentStatus.FAILED,
             status: OrderStatus.CANCELLED,
           },
+
           include: {
             user: {
               select: {
                 name: true,
               },
             },
+
             items: {
               include: {
                 product: true,
               },
             },
+
             orderCoupons: {
               select: {
                 couponId: true,
               },
             },
+
             shippingMethod: true,
+
             refundRequest: {
               orderBy: {
                 createdAt: "desc",
               },
+
               include: {
                 items: true,
+
                 trackingEvents: {
                   orderBy: {
                     createdAt: "asc",
@@ -184,7 +219,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // ---------------------------
-    // 5. No reference → cannot verify
+    // 6. No reference
     // ---------------------------
 
     if (!order.paymentReference) {
@@ -192,7 +227,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // ---------------------------
-    // 6. Select provider
+    // 7. Select provider
     // ---------------------------
 
     const provider =
@@ -201,22 +236,22 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         : new FlutterwaveProvider();
 
     // ---------------------------
-    // 7. Verify payment
+    // 8. Verify payment
     // ---------------------------
 
     const result = await provider.verifyPayment(order.paymentReference);
 
-    // console.log("========== ORDER PAYMENT VERIFY ==========");
-    // console.log("Order ID:", order.id);
-    // console.log("Payment provider:", order.paymentProvider);
-    // console.log("Payment reference:", order.paymentReference);
-    // console.log("Provider verification result:", result);
-    // console.log("Current order paymentStatus:", order.paymentStatus);
-    // console.log("Current order status:", order.status);
-    // console.log("===========================================");
+    console.log("========== ORDER PAYMENT VERIFY ==========");
+    console.log("Order ID:", order.id);
+    console.log("Payment provider:", order.paymentProvider);
+    console.log("Payment reference:", order.paymentReference);
+    console.log("Provider verification result:", result);
+    console.log("Current order paymentStatus:", order.paymentStatus);
+    console.log("Current order status:", order.status);
+    console.log("===========================================");
 
     // ---------------------------
-    // 8. Still pending
+    // 9. Genuine pending payment
     // ---------------------------
 
     if (result.status === "pending") {
@@ -224,42 +259,54 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // ---------------------------
-    // 9. Payment failed
+    // 10. Transaction not found
+    //
+    // Customer abandoned/cancelled
+    // before Flutterwave created a
+    // transaction.
     // ---------------------------
 
-    if (result.status === "failed") {
-      const failedOrder = await prisma.order.update({
+    if (result.status === "not_found") {
+      const cancelledOrder = await prisma.order.update({
         where: {
           id: order.id,
           tenantId: tenant.id,
         },
+
         data: {
           paymentStatus: PaymentStatus.FAILED,
-          status: "CANCELLED",
+          status: OrderStatus.CANCELLED,
         },
+
         include: {
           user: {
             select: {
               name: true,
             },
           },
+
           items: {
             include: {
               product: true,
             },
           },
+
           orderCoupons: {
             select: {
               couponId: true,
             },
           },
+
           shippingMethod: true,
+
           refundRequest: {
             orderBy: {
               createdAt: "desc",
             },
+
             include: {
               items: true,
+
               trackingEvents: {
                 orderBy: {
                   createdAt: "asc",
@@ -270,15 +317,81 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         },
       });
 
-      // ---------------------------
-      // Tracking event
-      // ---------------------------
+      await prisma.orderTrackingEvent.create({
+        data: {
+          orderId: order.id,
+          tenantId: tenant.id,
+          status: OrderStatus.CANCELLED,
+          type: "STATUS_CHANGE",
+          title: "Payment cancelled",
+          description:
+            "No payment transaction was found. Your order has been cancelled because the payment was not completed.",
+        },
+      });
+
+      return NextResponse.json(cancelledOrder);
+    }
+
+    // ---------------------------
+    // 11. Payment failed
+    // ---------------------------
+
+    if (result.status === "failed") {
+      const failedOrder = await prisma.order.update({
+        where: {
+          id: order.id,
+          tenantId: tenant.id,
+        },
+
+        data: {
+          paymentStatus: PaymentStatus.FAILED,
+          status: OrderStatus.CANCELLED,
+        },
+
+        include: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+
+          items: {
+            include: {
+              product: true,
+            },
+          },
+
+          orderCoupons: {
+            select: {
+              couponId: true,
+            },
+          },
+
+          shippingMethod: true,
+
+          refundRequest: {
+            orderBy: {
+              createdAt: "desc",
+            },
+
+            include: {
+              items: true,
+
+              trackingEvents: {
+                orderBy: {
+                  createdAt: "asc",
+                },
+              },
+            },
+          },
+        },
+      });
 
       await prisma.orderTrackingEvent.create({
         data: {
           orderId: order.id,
           tenantId: tenant.id,
-          status: "CANCELLED",
+          status: OrderStatus.CANCELLED,
           type: "STATUS_CHANGE",
           title: "Payment failed",
           description:
@@ -290,7 +403,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // ---------------------------
-    // 10. Successful payment
+    // 12. Successful payment
     // ---------------------------
 
     if (result.status !== "successful") {
@@ -302,9 +415,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         id: order.id,
         tenantId: tenant.id,
       },
+
       data: {
         paymentStatus: PaymentStatus.PAID,
-        status: "PROCESSING",
+        status: OrderStatus.PROCESSING,
 
         // Keep transaction ID for refunds
         paymentReference:
@@ -314,6 +428,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
         paymentTxRef: result.txRef,
       },
+
       include: {
         items: {
           include: {
@@ -324,14 +439,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     });
 
     // ---------------------------
-    // 11. Tracking event
+    // 13. Tracking event
     // ---------------------------
 
     await prisma.orderTrackingEvent.create({
       data: {
         orderId: order.id,
         tenantId: tenant.id,
-        status: "PROCESSING",
+        status: OrderStatus.PROCESSING,
         type: "STATUS_CHANGE",
         title: "Payment confirmed",
         description:
@@ -340,7 +455,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     });
 
     // ---------------------------
-    // 12. Vendor notification
+    // 14. Vendor notification
     // ---------------------------
 
     if (order.vendorId) {
@@ -349,12 +464,15 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         setting: "paymentReceived",
         type: "PAYMENT",
         title: "Payment Received",
-        message: `Payment of ${order.currency} ${Number(
-          order.totalAmount,
-        ).toLocaleString()} has been confirmed for Order #${order.id.slice(
+
+        message: `Payment of ${
+          order.currency
+        } ${Number(order.totalAmount).toLocaleString()} has been confirmed for Order #${order.id.slice(
           -8,
         )}.`,
+
         link: `/vendor/orders/${order.id}`,
+
         metadata: {
           orderId: order.id,
           paymentReference: updatedOrder.paymentReference,
@@ -365,16 +483,19 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // ---------------------------
-    // 13. Admin notification
+    // 15. Admin notification
     // ---------------------------
 
     await AdminNotificationService.notify({
       type: "PAYMENT_RECEIVED",
       title: "Payment Received",
+
       message: `${order.user.name ?? "A customer"} paid ${
         updatedOrder.currency
       } ${Number(updatedOrder.totalAmount).toLocaleString()}.`,
+
       link: `/admin/orders/${order.id}`,
+
       metadata: {
         orderId: order.id,
         customerId: order.userId,
@@ -385,7 +506,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     });
 
     // ---------------------------
-    // 14. Coupon usage
+    // 16. Coupon usage
     // ---------------------------
 
     const couponId = order.orderCoupons[0]?.couponId;
@@ -397,6 +518,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           tenantId: tenant.id,
           vendorId: order.vendorId,
         },
+
         data: {
           usedCount: {
             increment: 1,
