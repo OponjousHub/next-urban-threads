@@ -75,6 +75,17 @@ export class FlutterwaveProvider implements PaymentProvider {
 
       const data = res.data?.data;
 
+      // console.log("========== FLUTTERWAVE VERIFY ==========");
+      // console.log("Reference sent:", reference);
+      // console.log("Flutterwave transaction ID:", data?.id);
+      // console.log("Flutterwave tx_ref:", data?.tx_ref);
+      // console.log("Flutterwave status:", data?.status);
+      // console.log("Flutterwave amount:", data?.amount);
+      // console.log("Flutterwave currency:", data?.currency);
+      // console.log("Flutterwave processor response:", data?.processor_response);
+      // console.log("Flutterwave full data:", data);
+      // console.log("==========================================");
+
       if (!data) {
         return {
           success: false,
@@ -106,6 +117,14 @@ export class FlutterwaveProvider implements PaymentProvider {
       };
     } catch (error: any) {
       const statusCode = error?.response?.status;
+
+      // console.log("========== FLUTTERWAVE VERIFY ERROR ==========");
+      // console.log("Reference:", reference);
+      // console.log("HTTP status:", error?.response?.status);
+      // console.log("Flutterwave error response:", error?.response?.data);
+      // console.log("Error code:", error?.code);
+      // console.log("Error message:", error?.message);
+      // console.log("==============================================");
 
       const message =
         error?.response?.data?.message ??

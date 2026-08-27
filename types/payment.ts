@@ -1,4 +1,3 @@
-// import { VerifyPaymentResult as PrismaVerifyPaymentResult } from "@prisma/client";
 export interface InitializePaymentPayload {
   email: string;
   amount: number;
@@ -13,7 +12,7 @@ export interface PaymentInitResponse {
 
 export interface VerifyPaymentResult {
   success: boolean;
-  status: "successful" | "failed" | "pending";
+  status: "successful" | "failed" | "pending" | "not_found";
   transactionId?: number;
   txRef?: string;
 }

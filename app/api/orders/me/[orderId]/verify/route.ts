@@ -206,6 +206,15 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     const result = await provider.verifyPayment(order.paymentReference);
 
+    // console.log("========== ORDER PAYMENT VERIFY ==========");
+    // console.log("Order ID:", order.id);
+    // console.log("Payment provider:", order.paymentProvider);
+    // console.log("Payment reference:", order.paymentReference);
+    // console.log("Provider verification result:", result);
+    // console.log("Current order paymentStatus:", order.paymentStatus);
+    // console.log("Current order status:", order.status);
+    // console.log("===========================================");
+
     // ---------------------------
     // 8. Still pending
     // ---------------------------
