@@ -53,6 +53,17 @@ export default function OrderDetails({
   const router = useRouter();
   const { tenant } = useTenant();
 
+  const orderStatus = localOrder.status.toUpperCase();
+  const paymentStatus = localOrder.paymentStatus.toUpperCase();
+
+  // A paid order can move through fulfillment and eventually be delivered.
+  const canMarkAsDelivered =
+    paymentStatus === "PAID" && ["PROCESSING", "SHIPPED"].includes(orderStatus);
+
+  // Cancellation is only allowed before an order has entered shipment/delivery
+  // or reached another terminal state.
+  const canCancelOrder = ["PENDING", "PROCESSING"].includes(orderStatus);
+
   async function updateStatus(newStatus: string) {
     if (!localOrder) return;
     setLoading(true);
@@ -427,25 +438,34 @@ export default function OrderDetails({
 
             {/* ACTION BUTTONS */}
             <div className="mt-8 space-y-3">
-              {localOrder.status !== "DELIVERED" && (
+              {canMarkAsDelivered && (
                 <button
                   onClick={() => updateStatus("DELIVERED")}
                   disabled={loading}
-                  className="w-full rounded-2xl bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-50"
+                  className="w-full rounded-2xl bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Mark as Delivered
                 </button>
               )}
 
-              {localOrder.status !== "CANCELLED" && (
+              {canCancelOrder && (
                 <button
                   onClick={() => updateStatus("CANCELLED")}
                   disabled={loading}
-                  className="w-full rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                  className="w-full rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancel Order
                 </button>
               )}
+
+              {!canMarkAsDelivered &&
+                !canCancelOrder &&
+                orderStatus !== "DELIVERED" &&
+                orderStatus !== "CANCELLED" && (
+                  <p className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-center text-sm text-gray-500">
+                    No order actions are available for the current order state.
+                  </p>
+                )}
             </div>
           </div>
         </div>
