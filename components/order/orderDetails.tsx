@@ -57,8 +57,12 @@ export default function OrderDetails({
   const paymentStatus = localOrder.paymentStatus.toUpperCase();
 
   // A paid order can move through fulfillment and eventually be delivered.
-  const canMarkAsDelivered =
-    paymentStatus === "PAID" && ["PROCESSING", "SHIPPED"].includes(orderStatus);
+  const canMarkDelivered =
+    localOrder.paymentStatus === "PAID" &&
+    ["PROCESSING", "SHIPPED", "OUT_FOR_DELIVERY"].includes(localOrder.status);
+
+  {
+  }
 
   // Cancellation is only allowed before an order has entered shipment/delivery
   // or reached another terminal state.
@@ -438,7 +442,7 @@ export default function OrderDetails({
 
             {/* ACTION BUTTONS */}
             <div className="mt-8 space-y-3">
-              {canMarkAsDelivered && (
+              {canMarkDelivered && (
                 <button
                   onClick={() => updateStatus("DELIVERED")}
                   disabled={loading}
@@ -447,7 +451,15 @@ export default function OrderDetails({
                   Mark as Delivered
                 </button>
               )}
-
+              canMarkDelivered && (
+              <button
+                onClick={() => updateStatus("DELIVERED")}
+                disabled={loading}
+                className="w-full rounded-2xl bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-50"
+              >
+                {loading ? "Updating..." : "Mark as Delivered"}
+              </button>
+              );
               {canCancelOrder && (
                 <button
                   onClick={() => updateStatus("CANCELLED")}
@@ -457,15 +469,6 @@ export default function OrderDetails({
                   Cancel Order
                 </button>
               )}
-
-              {!canMarkAsDelivered &&
-                !canCancelOrder &&
-                orderStatus !== "DELIVERED" &&
-                orderStatus !== "CANCELLED" && (
-                  <p className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-center text-sm text-gray-500">
-                    No order actions are available for the current order state.
-                  </p>
-                )}
             </div>
           </div>
         </div>
