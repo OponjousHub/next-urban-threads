@@ -123,12 +123,13 @@ export async function PATCH(
 
         if (
           existingOrder.status !== OrderStatus.PROCESSING &&
-          existingOrder.status !== OrderStatus.SHIPPED
+          existingOrder.status !== OrderStatus.SHIPPED &&
+          existingOrder.status !== OrderStatus.OUT_FOR_DELIVERY
         ) {
           return NextResponse.json(
             {
               error:
-                "Only processing or shipped orders can be marked as delivered",
+                "Only processing, shipped, or out-for-delivery orders can be marked as delivered",
             },
             { status: 400 },
           );
