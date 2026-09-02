@@ -446,20 +446,11 @@ export default function OrderDetails({
                 <button
                   onClick={() => updateStatus("DELIVERED")}
                   disabled={loading}
-                  className="w-full rounded-2xl bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-2xl bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-50"
                 >
-                  Mark as Delivered
+                  {loading ? "Updating..." : "Mark as Delivered"}
                 </button>
               )}
-              canMarkDelivered && (
-              <button
-                onClick={() => updateStatus("DELIVERED")}
-                disabled={loading}
-                className="w-full rounded-2xl bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-50"
-              >
-                {loading ? "Updating..." : "Mark as Delivered"}
-              </button>
-              );
               {canCancelOrder && (
                 <button
                   onClick={() => updateStatus("CANCELLED")}
