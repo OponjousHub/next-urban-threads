@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import {
-  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -10,10 +10,12 @@ import {
   CartesianGrid,
   Area,
   ComposedChart,
+  Line,
 } from "recharts";
+
 import { FiArrowDown, FiArrowUp } from "react-icons/fi";
+
 import { formatCurrency } from "@/lib/formatCurrency";
-import { useTenant } from "@/store/tenant-provider-context";
 
 type Trend = "up" | "down" | "neutral";
 
@@ -21,7 +23,9 @@ interface ChartData {
   name: string;
   revenue: number;
   orders: number;
-  prev: number;
+  prev?: number;
+  prevRevenue?: number;
+  prevOrders?: number;
 }
 
 export default function RevenueChart() {
@@ -37,14 +41,14 @@ export default function RevenueChart() {
   const [avgOrderChange, setAvgOrderChange] = useState(0);
 
   const [revenueTrend, setRevenueTrend] = useState<Trend>("neutral");
+
   const [ordersTrend, setOrdersTrend] = useState<Trend>("neutral");
+
   const [avgTrend, setAvgTrend] = useState<Trend>("neutral");
 
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [currency, setCurrency] = useState("NGN");
-
-  const { tenant } = useTenant();
 
   useEffect(() => {
     let cancelled = false;
@@ -85,6 +89,9 @@ export default function RevenueChart() {
 
         if (!cancelled) {
           setChartData([]);
+          setRevenue(0);
+          setOrders(0);
+          setAvgOrderValue(0);
         }
       } finally {
         if (!cancelled) {
@@ -107,11 +114,54 @@ export default function RevenueChart() {
   }
 
   function TrendIcon({ trend }: { trend: Trend }) {
-    if (trend === "up") return <FiArrowUp size={11} />;
-    if (trend === "down") return <FiArrowDown size={11} />;
+    if (trend === "up") {
+      return <FiArrowUp size={11} />;
+    }
+
+    if (trend === "down") {
+      return <FiArrowDown size={11} />;
+    }
 
     return <span className="w-[11px]" />;
   }
+
+  /*
+   * Determine whether this store actually has revenue/order activity.
+   *
+   * We check both the current period and previous period.
+   *
+   * This is important because a brand-new store can have a chart
+   * containing many zero-value date points even though there has
+   * never been any real activity.
+   */
+  const hasHistoricalActivity = chartData.some((item) => {
+    const currentRevenue = Number(item.revenue) || 0;
+    const currentOrders = Number(item.orders) || 0;
+
+    const previousRevenue = Number(item.prevRevenue ?? item.prev) || 0;
+
+    const previousOrders = Number(item.prevOrders) || 0;
+
+    return (
+      currentRevenue > 0 ||
+      currentOrders > 0 ||
+      previousRevenue > 0 ||
+      previousOrders > 0
+    );
+  });
+
+  /*
+   * The store has meaningful revenue analytics only when
+   * there has been at least one order/revenue event.
+   */
+  const hasRevenueActivity =
+    revenue > 0 || orders > 0 || avgOrderValue > 0 || hasHistoricalActivity;
+
+  /*
+   * Only show "vs last period" when there is something
+   * meaningful to compare.
+   */
+  const showComparison = hasRevenueActivity;
 
   return (
     <section
@@ -169,14 +219,20 @@ export default function RevenueChart() {
             {formatCurrency(revenue, currency)}
           </p>
 
-          <span
-            className={`mt-1 flex items-center gap-1 text-xs font-medium ${getTrendColor(
-              revenueTrend,
-            )}`}
-          >
-            <TrendIcon trend={revenueTrend} />
-            {Math.abs(revenueChange).toFixed(1)}% vs last period
-          </span>
+          {showComparison ? (
+            <span
+              className={`mt-1 flex items-center gap-1 text-xs font-medium ${getTrendColor(
+                revenueTrend,
+              )}`}
+            >
+              <TrendIcon trend={revenueTrend} />
+              {Math.abs(revenueChange).toFixed(1)}% vs last period
+            </span>
+          ) : (
+            <span className="mt-1 block text-xs text-gray-400">
+              No sales yet
+            </span>
+          )}
         </div>
 
         {/* Orders */}
@@ -189,14 +245,20 @@ export default function RevenueChart() {
             {orders.toLocaleString()}
           </p>
 
-          <span
-            className={`mt-1 flex items-center gap-1 text-xs font-medium ${getTrendColor(
-              ordersTrend,
-            )}`}
-          >
-            <TrendIcon trend={ordersTrend} />
-            {Math.abs(ordersChange).toFixed(1)}% vs last period
-          </span>
+          {showComparison ? (
+            <span
+              className={`mt-1 flex items-center gap-1 text-xs font-medium ${getTrendColor(
+                ordersTrend,
+              )}`}
+            >
+              <TrendIcon trend={ordersTrend} />
+              {Math.abs(ordersChange).toFixed(1)}% vs last period
+            </span>
+          ) : (
+            <span className="mt-1 block text-xs text-gray-400">
+              No orders yet
+            </span>
+          )}
         </div>
 
         {/* Average Order */}
@@ -209,14 +271,20 @@ export default function RevenueChart() {
             {formatCurrency(avgOrderValue, currency)}
           </p>
 
-          <span
-            className={`mt-1 flex items-center gap-1 text-xs font-medium ${getTrendColor(
-              avgTrend,
-            )}`}
-          >
-            <TrendIcon trend={avgTrend} />
-            {Math.abs(avgOrderChange).toFixed(1)}% vs last period
-          </span>
+          {showComparison ? (
+            <span
+              className={`mt-1 flex items-center gap-1 text-xs font-medium ${getTrendColor(
+                avgTrend,
+              )}`}
+            >
+              <TrendIcon trend={avgTrend} />
+              {Math.abs(avgOrderChange).toFixed(1)}% vs last period
+            </span>
+          ) : (
+            <span className="mt-1 block text-xs text-gray-400">
+              No orders yet
+            </span>
+          )}
         </div>
       </div>
 
@@ -276,6 +344,27 @@ export default function RevenueChart() {
           <div className="flex h-full items-center justify-center">
             <div className="h-full w-full animate-pulse rounded-xl bg-gray-50" />
           </div>
+        ) : !hasRevenueActivity ? (
+          /*
+           * True empty-store state.
+           *
+           * Do not render a zero-line chart because that makes
+           * the store look like it has historical analytics.
+           */
+          <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/40 px-6 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+              <span className="text-xl">↗</span>
+            </div>
+
+            <p className="text-sm font-medium text-gray-700">
+              No sales activity yet
+            </p>
+
+            <p className="mt-1 max-w-sm text-xs leading-5 text-gray-400">
+              Revenue and order performance will appear here once your store
+              starts receiving orders.
+            </p>
+          </div>
         ) : chartData.length === 0 ? (
           <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-gray-200">
             <p className="text-sm text-gray-500">
@@ -320,7 +409,10 @@ export default function RevenueChart() {
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "#9ca3af" }}
+                tick={{
+                  fontSize: 11,
+                  fill: "#9ca3af",
+                }}
                 minTickGap={24}
               />
 
@@ -353,7 +445,6 @@ export default function RevenueChart() {
                     case "revenue":
                       return [
                         formatCurrency(numericValue, currency),
-
                         "Revenue",
                       ];
 
