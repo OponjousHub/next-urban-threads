@@ -25,10 +25,7 @@ export default function DashboardSalesByCategory({
         <SalesByCategoryChart data={catData} />
       </div>
 
-      <OrdersStatusChart
-        orderStatus={orderStatus}
-        currency={currency}
-      />
+      <OrdersStatusChart orderStatus={orderStatus} currency={currency} />
     </section>
   );
 }

@@ -1,10 +1,9 @@
 "use client";
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-
 import { useRouter } from "next/navigation";
-
 import { formatCurrency } from "@/lib/formatCurrency";
+import { FiShoppingBag } from "react-icons/fi";
 
 const STATUS_COLORS: Record<string, string> = {
   Pending: "#f59e0b",
@@ -118,87 +117,106 @@ export default function OrdersStatusChart({
 
   const totalOrders = data.reduce((sum, item) => sum + item.value, 0);
 
+  const hasOrders = totalOrders > 0;
+
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
       {/* Header */}
-      <h3 className="mb-6 text-lg font-semibold">Order Status</h3>
+      <h3 className="mb-6 text-lg font-semibold text-gray-900">Order Status</h3>
 
-      <div className="flex items-center gap-6">
-        {/* Chart */}
-        <div className="h-40 w-40 shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                innerRadius={50}
-                outerRadius={70}
-                paddingAngle={4}
-                dataKey="value"
-                nameKey="name"
+      {!hasOrders ? (
+        /* Empty State */
+        <div className="flex min-h-[256px] flex-col items-center justify-center text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400">
+            <FiShoppingBag className="text-2xl" />
+          </div>
+
+          <h4 className="font-semibold text-gray-900">No orders yet</h4>
+
+          <p className="mt-1 max-w-xs text-sm text-gray-500">
+            Order status information will appear here once customers place
+            orders.
+          </p>
+        </div>
+      ) : (
+        /* Chart + Legend */
+        <div className="flex items-center gap-6">
+          {/* Chart */}
+          <div className="h-40 w-40 shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  innerRadius={50}
+                  outerRadius={70}
+                  paddingAngle={4}
+                  dataKey="value"
+                  nameKey="name"
+                >
+                  {data.map((entry) => (
+                    <Cell
+                      key={entry.name}
+                      fill={STATUS_COLORS[entry.name]}
+                      className="cursor-pointer"
+                      onClick={() => router.push(STATUS_ROUTE[entry.name])}
+                    />
+                  ))}
+
+                  {/* Center total */}
+                  <text
+                    x="50%"
+                    y="46%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-gray-800 text-lg font-semibold"
+                  >
+                    {totalOrders}
+                  </text>
+
+                  <text
+                    x="50%"
+                    y="60%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-gray-400 text-xs"
+                  >
+                    Orders
+                  </text>
+                </Pie>
+
+                <Tooltip content={<CustomTooltip currency={currency} />} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Legend */}
+          <div className="flex flex-1 flex-col gap-3">
+            {data.map((item) => (
+              <button
+                key={item.name}
+                type="button"
+                onClick={() => router.push(STATUS_ROUTE[item.name])}
+                className="flex w-full items-center justify-between gap-4 rounded-md px-2 py-1 text-left transition hover:bg-gray-50"
               >
-                {data.map((entry) => (
-                  <Cell
-                    key={entry.name}
-                    fill={STATUS_COLORS[entry.name]}
-                    className="cursor-pointer"
-                    onClick={() => router.push(STATUS_ROUTE[entry.name])}
+                <div className="flex items-center gap-2">
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{
+                      backgroundColor: STATUS_COLORS[item.name],
+                    }}
                   />
-                ))}
 
-                {/* Center total */}
-                <text
-                  x="50%"
-                  y="46%"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  className="fill-gray-800 text-lg font-semibold"
-                >
-                  {totalOrders}
-                </text>
+                  <span className="text-sm text-gray-600">{item.name}</span>
+                </div>
 
-                <text
-                  x="50%"
-                  y="60%"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  className="fill-gray-400 text-xs"
-                >
-                  Orders
-                </text>
-              </Pie>
-
-              <Tooltip content={<CustomTooltip currency={currency} />} />
-            </PieChart>
-          </ResponsiveContainer>
+                <span className="text-sm font-medium text-gray-900">
+                  {item.value}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
-
-        {/* Legend */}
-        <div className="flex flex-1 flex-col gap-3">
-          {data.map((item) => (
-            <button
-              key={item.name}
-              type="button"
-              onClick={() => router.push(STATUS_ROUTE[item.name])}
-              className="flex w-full items-center justify-between gap-4 rounded-md px-2 py-1 text-left transition hover:bg-gray-50"
-            >
-              <div className="flex items-center gap-2">
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{
-                    backgroundColor: STATUS_COLORS[item.name],
-                  }}
-                />
-
-                <span className="text-sm text-gray-600">{item.name}</span>
-              </div>
-
-              <span className="text-sm font-medium text-gray-900">
-                {item.value}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
