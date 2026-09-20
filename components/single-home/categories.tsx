@@ -87,12 +87,6 @@ export default function Categories() {
               </div>
             ))}
           </div>
-        ) : visibleCategories.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 py-12 text-center">
-            <p className="text-sm text-gray-500">
-              No categories available right now.
-            </p>
-          </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
             {visibleCategories.map((cat) => (
