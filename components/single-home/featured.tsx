@@ -51,6 +51,10 @@ export default function FeaturedProducts() {
     load();
   }, []);
 
+  if (!loading && products.length === 0) {
+    return null;
+  }
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
       <section className="py-16">
@@ -97,12 +101,6 @@ export default function FeaturedProducts() {
                 </div>
               </div>
             ))}
-          </div>
-        ) : products.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 py-12 text-center">
-            <p className="text-sm text-gray-500">
-              No featured products available right now.
-            </p>
           </div>
         ) : (
           /*
