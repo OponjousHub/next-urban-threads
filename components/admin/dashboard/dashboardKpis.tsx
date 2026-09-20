@@ -1,5 +1,6 @@
 import KpiCard from "../KpiCard";
 import { useState, useEffect } from "react";
+
 import {
   FiDollarSign,
   FiShoppingBag,
@@ -12,48 +13,49 @@ import {
 interface KpiData {
   revenue: number;
   revenueChange: number;
-
   orders: number;
   ordersChange: number;
-
   avgOrderValue: number;
   avgOrderChange: number;
-
   customers: number;
   customersChange: number;
-
   conversionRate: number | null;
   conversionChange: number | null;
-
   returningCustomerRate: number;
   returningCustomerChange: number;
-
   currency: string;
 }
+
 export default function DashboardAnalytics() {
   const [kpiData, setKPIData] = useState<KpiData | null>(null);
   const [currency, setCurrency] = useState("NGN");
 
-  // Fetch Kpi percentage change
+  // Fetch KPI percentage change
   useEffect(() => {
     async function loadKpiChange() {
-      const res = await fetch("/api/admin/revenue");
-      const json = await res.json();
-      setKPIData(json);
-      setCurrency(json.currency || "NGN");
+      try {
+        const res = await fetch("/api/admin/revenue");
+        const json = await res.json();
+
+        setKPIData(json);
+        setCurrency(json.currency || "NGN");
+      } catch (error) {
+        console.error("KPI FETCH ERROR:", error);
+      }
     }
 
     loadKpiChange();
   }, []);
 
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+    <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
       <KpiCard
         title="Total Revenue"
         value={kpiData?.revenue ?? NaN}
         currency={currency}
         change={kpiData?.revenueChange}
         icon={<FiDollarSign />}
+        emptyMessage="No sales yet"
       />
 
       <KpiCard
@@ -63,6 +65,7 @@ export default function DashboardAnalytics() {
         decimals={2}
         icon={<FiBarChart2 />}
         change={kpiData?.avgOrderChange}
+        emptyMessage="No orders yet"
       />
 
       <KpiCard
@@ -70,6 +73,7 @@ export default function DashboardAnalytics() {
         value={kpiData?.orders ?? NaN}
         icon={<FiShoppingBag />}
         change={kpiData?.ordersChange}
+        emptyMessage="No orders yet"
       />
 
       <KpiCard
@@ -77,15 +81,8 @@ export default function DashboardAnalytics() {
         value={kpiData?.customers ?? NaN}
         icon={<FiUsers />}
         change={kpiData?.customersChange}
+        emptyMessage="No customers yet"
       />
-      {/* <KpiCard
-        title="Conversion Rate"
-        value={kpiData === null ? NaN : kpiData.conversionRate}
-        suffix="%"
-        change={kpiData?.conversionChange}
-        decimals={1}
-        icon={<FiTrendingUp />}
-      /> */}
 
       <KpiCard
         title="Conversion Rate"
@@ -100,6 +97,7 @@ export default function DashboardAnalytics() {
             : undefined
         }
       />
+
       <KpiCard
         title="Returning Customers"
         value={kpiData === null ? NaN : kpiData.returningCustomerRate}
@@ -107,6 +105,7 @@ export default function DashboardAnalytics() {
         decimals={1}
         icon={<FiRepeat />}
         change={kpiData?.returningCustomerChange}
+        emptyMessage="No customers yet"
       />
     </section>
   );

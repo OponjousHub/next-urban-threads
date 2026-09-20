@@ -19,6 +19,12 @@ interface Props {
    * This allows different KPIs to have different explanations.
    */
   unavailableMessage?: string;
+
+  /**
+   * Optional message shown when the KPI value is exactly 0.
+   * Useful for a brand-new store where there is no data yet.
+   */
+  emptyMessage?: string;
 }
 
 export default function KpiCard({
@@ -31,6 +37,7 @@ export default function KpiCard({
   change,
   icon,
   unavailableMessage,
+  emptyMessage,
 }: Props) {
   const [displayValue, setDisplayValue] = useState<number | null>(null);
 
@@ -44,6 +51,25 @@ export default function KpiCard({
    * be calculated.
    */
   const isUnavailable = value === null;
+
+  /**
+   * A value of exactly zero represents an empty KPI when an
+   * emptyMessage has been provided.
+   */
+  const isEmpty = value === 0 && !!emptyMessage;
+
+  /**
+   * Don't show a trend badge when both the current value and
+   * previous-period comparison are zero.
+   *
+   * Example:
+   * Current revenue = ₦0
+   * Previous revenue = ₦0
+   *
+   * Showing "↑ +0%" would misleadingly suggest improvement.
+   */
+  const hasMeaningfulChange =
+    change !== undefined && change !== null && !(value === 0 && change === 0);
 
   useEffect(() => {
     if (value === null || !Number.isFinite(value)) {
@@ -79,7 +105,7 @@ export default function KpiCard({
   const isPositive = change !== undefined && change !== null && change >= 0;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white/60 p-6 shadow-sm backdrop-blur-lg transition-all duration-300 hover:shadow-lg group">
+    <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white/60 p-6 shadow-sm backdrop-blur-lg transition-all duration-300 hover:shadow-lg">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-purple-100 opacity-20" />
 
@@ -89,7 +115,7 @@ export default function KpiCard({
           <div className="flex items-center gap-2">
             <p className="text-sm text-gray-500">{title}</p>
 
-            {change !== undefined && change !== null && (
+            {hasMeaningfulChange && (
               <div
                 className={`flex cursor-default items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
                   isPositive
@@ -114,7 +140,12 @@ export default function KpiCard({
             {isLoading ? (
               <span className="inline-block h-9 w-24 animate-pulse rounded-md bg-gray-100" />
             ) : isUnavailable ? (
-              <span title="Not enough data for a reliable calculation">—</span>
+              <span
+                title="Not enough data for a reliable calculation"
+                className="text-gray-400"
+              >
+                —
+              </span>
             ) : displayValue === null ? (
               <span className="inline-block h-9 w-24 animate-pulse rounded-md bg-gray-100" />
             ) : currency ? (
@@ -127,13 +158,18 @@ export default function KpiCard({
             )}
           </h3>
 
-          {/* Optional explanation for unavailable KPI */}
+          {/* Empty-state explanation */}
+          {isEmpty && (
+            <p className="mt-1 text-xs text-gray-400">{emptyMessage}</p>
+          )}
+
+          {/* Unavailable-state explanation */}
           {isUnavailable && unavailableMessage && (
             <p className="mt-1 text-xs text-gray-400">{unavailableMessage}</p>
           )}
         </div>
 
-        {/* Optional icon */}
+        {/* Icon */}
         {icon && (
           <div className="text-3xl text-[var(--color-primary-light)]">
             {icon}
