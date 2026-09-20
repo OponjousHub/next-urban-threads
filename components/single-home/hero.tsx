@@ -9,15 +9,13 @@ export default function Hero() {
 
   return (
     <section className="relative h-[85vh] overflow-hidden">
-      {tenant.heroImage && (
-        <Image
-          src={tenant.heroImage}
-          alt=""
-          fill
-          priority
-          className="object-cover scale-105"
-        />
-      )}
+      <Image
+        src={tenant.heroImage || "/img/default-hero-image.jpg"}
+        alt=""
+        fill
+        priority
+        className="object-cover scale-105"
+      />
 
       <div className="absolute inset-0 bg-black/40" />
 
@@ -28,10 +26,13 @@ export default function Hero() {
           </p>
 
           <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-            {tenant.heroTitle}
+            {tenant.heroTitle || "Build your online store"}
           </h1>
 
-          <p className="text-lg opacity-90">{tenant.heroSubtitle}</p>
+          <p className="text-lg opacity-90">
+            {tenant.heroSubtitle ||
+              "Sell products from one or multiple vendors in one place"}
+          </p>
 
           <div className="flex gap-4">
             <Link href="/products">

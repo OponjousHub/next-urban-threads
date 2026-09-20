@@ -46,6 +46,10 @@ export default function Categories() {
   const visibleCategories = categories.slice(0, 6);
   const hasMoreCategories = categories.length > 6;
 
+  if (!loading && categories.length === 0) {
+    return null;
+  }
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
       <section className="py-16">
