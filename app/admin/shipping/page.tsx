@@ -277,9 +277,14 @@ export default async function ShippingDashboardPage() {
                   </div>
                 ))
               ) : (
-                <div className="p-6 text-center text-gray-500">
-                  No shipping zones
-                  {/* {query ? "No shipping zones" : "No shipping zones yet"} */}
+                <div className="p-6 text-center">
+                  <p className="text-sm font-medium text-gray-700">
+                    No shipping zones yet
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Create a shipping zone to start configuring where you
+                    deliver.
+                  </p>
                 </div>
               )}
             </div>
@@ -302,8 +307,14 @@ export default async function ShippingDashboardPage() {
                   </div>
                 ))
               ) : (
-                <div className="p-6 text-center text-gray-500">
-                  No shipping methods
+                <div className="p-6 text-center">
+                  <p className="text-sm font-medium text-gray-700">
+                    No shipping methods yet
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Add a shipping method to define how customers can receive
+                    their orders.
+                  </p>
                 </div>
               )}
             </div>
@@ -330,8 +341,13 @@ export default async function ShippingDashboardPage() {
                   </div>
                 ))
               ) : (
-                <div className="p-6 text-center text-gray-500">
-                  No shipping rates
+                <div className="p-6 text-center">
+                  <p className="text-sm font-medium text-gray-700">
+                    No shipping rates yet
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Add a shipping rate to configure delivery pricing.
+                  </p>
                 </div>
               )}
             </div>
