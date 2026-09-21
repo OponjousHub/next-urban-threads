@@ -198,7 +198,7 @@ export default function OrdersTable({
               {orders.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-10 text-gray-500">
-                    No orders found
+                    {query ? "No orders found" : "No orders yet"}
                   </td>
                 </tr>
               ) : (

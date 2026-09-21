@@ -39,6 +39,7 @@ export default function ReviewTable({ reviews, basePath }: Props) {
               <tr>
                 <td colSpan={7} className="py-12 text-center text-gray-500">
                   No reviews found
+                  {/* {query ? "No reviews found" : "No reviews yet"} */}
                 </td>
               </tr>
             ) : (
