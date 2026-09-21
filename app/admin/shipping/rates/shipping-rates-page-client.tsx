@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Edit, Plus, Search, Trash2 } from "lucide-react";
+import { Edit, Plus, Search, Trash2, Truck } from "lucide-react";
 import { useTenant } from "@/store/tenant-provider-context";
 import ConfirmationModal from "@/components/modals/ConfirmationModal";
 import { appToast } from "@/utils/appToast";
@@ -107,128 +107,143 @@ export default function ShippingRatesPageClient({ rates }: Props) {
         </Link>
       </div>
 
-      {/* Search */}
+      {/* Empty */}
+
+      {filtered.length === 0 && (
+        <div className="rounded-2xl border bg-white py-20 text-center shadow-sm">
+          <Truck className="mx-auto h-14 w-14 text-gray-300" />
+
+          <h2 className="mt-4 text-lg font-semibold">
+            No shipping rates found.
+          </h2>
+
+          <p className="mt-2 text-sm text-gray-500">
+            Create your first shipping rate.
+          </p>
+
+          <Link
+            href="/admin/shipping/methods/new"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-black px-5 py-3 text-white"
+          >
+            <Plus className="h-4 w-4" />
+            Create Rate
+          </Link>
+        </div>
+      )}
 
       {/* Table */}
-
-      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-5 py-4 text-left">Name</th>
-
-              <th className="px-5 py-4 text-left">Zone</th>
-
-              <th className="px-5 py-4 text-left">Method</th>
-
-              <th className="px-5 py-4 text-left">Price</th>
-
-              <th className="px-5 py-4 text-left">Conditions</th>
-
-              <th className="px-5 py-4 text-center">Priority</th>
-
-              <th className="px-5 py-4 text-center">Status</th>
-
-              <th className="px-5 py-4 text-right">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filtered.length === 0 && (
+      {filtered.length > 0 && (
+        <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-50">
               <tr>
-                <td colSpan={8} className="py-16 text-center text-gray-500">
-                  No shipping rates found.
-                </td>
+                <th className="px-5 py-4 text-left">Name</th>
+
+                <th className="px-5 py-4 text-left">Zone</th>
+
+                <th className="px-5 py-4 text-left">Method</th>
+
+                <th className="px-5 py-4 text-left">Price</th>
+
+                <th className="px-5 py-4 text-left">Conditions</th>
+
+                <th className="px-5 py-4 text-center">Priority</th>
+
+                <th className="px-5 py-4 text-center">Status</th>
+
+                <th className="px-5 py-4 text-right">Actions</th>
               </tr>
-            )}
+            </thead>
 
-            {filtered.map((rate) => (
-              <tr key={rate.id} className="border-t">
-                <td className="px-5 py-4">
-                  <div className="font-medium">{rate.name}</div>
+            <tbody>
+              {filtered.map((rate) => (
+                <tr key={rate.id} className="border-t">
+                  <td className="px-5 py-4">
+                    <div className="font-medium">{rate.name}</div>
 
-                  {rate.isDefault && (
-                    <span className="mt-1 inline-block rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">
-                      Default
-                    </span>
-                  )}
-                </td>
-
-                <td className="px-5 py-4">{rate.zone.name}</td>
-
-                <td className="px-5 py-4">{rate.method.name}</td>
-
-                <td className="px-5 py-4 font-medium">
-                  {formatCurrency(Number(rate.amount), tenant.currency)}
-                </td>
-
-                <td className="px-5 py-4">
-                  <div className="space-y-1 text-xs text-gray-600">
-                    {(rate.minOrderAmount !== null ||
-                      rate.maxOrderAmount !== null) && (
-                      <div>
-                        Order: ₦{rate.minOrderAmount ?? 0}
-                        {" - "}₦{rate.maxOrderAmount ?? "∞"}
-                      </div>
+                    {rate.isDefault && (
+                      <span className="mt-1 inline-block rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">
+                        Default
+                      </span>
                     )}
+                  </td>
 
-                    {(rate.minWeight !== null || rate.maxWeight !== null) && (
-                      <div>
-                        Weight: {rate.minWeight ?? 0}
-                        kg - {rate.maxWeight ?? "∞"}
-                        kg
-                      </div>
-                    )}
+                  <td className="px-5 py-4">{rate.zone.name}</td>
 
-                    {rate.minOrderAmount === null &&
-                      rate.maxOrderAmount === null &&
-                      rate.minWeight === null &&
-                      rate.maxWeight === null && (
-                        <span className="text-gray-400">Always applies</span>
+                  <td className="px-5 py-4">{rate.method.name}</td>
+
+                  <td className="px-5 py-4 font-medium">
+                    {formatCurrency(Number(rate.amount), tenant.currency)}
+                  </td>
+
+                  <td className="px-5 py-4">
+                    <div className="space-y-1 text-xs text-gray-600">
+                      {(rate.minOrderAmount !== null ||
+                        rate.maxOrderAmount !== null) && (
+                        <div>
+                          Order: ₦{rate.minOrderAmount ?? 0}
+                          {" - "}₦{rate.maxOrderAmount ?? "∞"}
+                        </div>
                       )}
-                  </div>
-                </td>
 
-                <td className="px-5 py-4 text-center">{rate.priority}</td>
+                      {(rate.minWeight !== null || rate.maxWeight !== null) && (
+                        <div>
+                          Weight: {rate.minWeight ?? 0}
+                          kg - {rate.maxWeight ?? "∞"}
+                          kg
+                        </div>
+                      )}
 
-                <td className="px-5 py-4 text-center">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs ${
-                      rate.active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-200 text-gray-600"
-                    }`}
-                  >
-                    {rate.active ? "Active" : "Inactive"}
-                  </span>
-                </td>
+                      {rate.minOrderAmount === null &&
+                        rate.maxOrderAmount === null &&
+                        rate.minWeight === null &&
+                        rate.maxWeight === null && (
+                          <span className="text-gray-400">Always applies</span>
+                        )}
+                    </div>
+                  </td>
 
-                <td className="px-5 py-4">
-                  <div className="flex justify-end gap-2">
-                    <Link
-                      href={`/admin/shipping/rates/${rate.id}/edit`}
-                      className="rounded-lg border p-2 hover:bg-gray-50"
+                  <td className="px-5 py-4 text-center">{rate.priority}</td>
+
+                  <td className="px-5 py-4 text-center">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs ${
+                        rate.active
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
                     >
-                      <Edit className="h-4 w-4" />
-                    </Link>
+                      {rate.active ? "Active" : "Inactive"}
+                    </span>
+                  </td>
 
-                    <button
-                      onClick={() => {
-                        setRateId(rate.id);
-                        setShowDeleteModal(true);
-                      }}
-                      disabled={loading}
-                      className="rounded-lg border p-2 text-red-600 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  <td className="px-5 py-4">
+                    <div className="flex justify-end gap-2">
+                      <Link
+                        href={`/admin/shipping/rates/${rate.id}/edit`}
+                        className="rounded-lg border p-2 hover:bg-gray-50"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Link>
+
+                      <button
+                        onClick={() => {
+                          setRateId(rate.id);
+                          setShowDeleteModal(true);
+                        }}
+                        disabled={loading}
+                        className="rounded-lg border p-2 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       <ConfirmationModal
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
