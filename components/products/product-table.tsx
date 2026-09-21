@@ -23,7 +23,7 @@ export default function ProductsTable({
   if (!products.length) {
     return (
       <div className="bg-white rounded-xl p-10 text-center text-gray-500">
-        No products found
+        {query ? "No products found" : "No products yet"}
       </div>
     );
   }
