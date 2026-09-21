@@ -116,70 +116,86 @@ export default function SupportPageClient({
 
         {/* MESSAGE LIST */}
         <div className="space-y-3">
-          {localMessages.map((msg) => (
-            <div
-              key={msg.id}
-              onClick={async () => {
-                setSelected({
-                  ...msg,
-                  status: "READ",
-                });
+          {localMessages.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-6 py-12 text-center">
+              <p className="text-sm font-medium text-gray-700">
+                {statusParam || priorityParam
+                  ? "No messages found"
+                  : "No messages yet"}
+              </p>
 
-                setLocalMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === msg.id ? { ...m, status: "READ" } : m,
-                  ),
-                );
-
-                if (msg.status === "UNREAD") {
-                  await fetch("/api/contact/update", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      id: msg.id,
-                      status: "READ",
-                    }),
+              <p className="mt-1 text-xs text-gray-400">
+                {statusParam || priorityParam
+                  ? "No support messages match the selected filter."
+                  : "Customer support messages will appear here when customers contact your store."}
+              </p>
+            </div>
+          ) : (
+            localMessages.map((msg) => (
+              <div
+                key={msg.id}
+                onClick={async () => {
+                  setSelected({
+                    ...msg,
+                    status: "READ",
                   });
-                }
-              }}
-              className={`border rounded-xl p-3 cursor-pointer transition
+
+                  setLocalMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === msg.id ? { ...m, status: "READ" } : m,
+                    ),
+                  );
+
+                  if (msg.status === "UNREAD") {
+                    await fetch("/api/contact/update", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        id: msg.id,
+                        status: "READ",
+                      }),
+                    });
+                  }
+                }}
+                className={`border rounded-xl p-3 cursor-pointer transition
                 ${
                   selected?.id === msg.id
                     ? "bg-gray-100 border-black"
                     : "bg-white hover:bg-gray-50"
                 }`}
-            >
-              <p
-                className={`${
-                  msg.status === "UNREAD" ? "font-extrabold" : "font-normal"
-                }`}
               >
-                {msg.name}
-              </p>
-              <p
-                className={`${
-                  msg.status === "UNREAD" ? "font-bold" : "font-normal"
-                } text-xs text-gray-500`}
-              >
-                {msg.email}
-              </p>
+                <p
+                  className={`${
+                    msg.status === "UNREAD" ? "font-extrabold" : "font-normal"
+                  }`}
+                >
+                  {msg.name}
+                </p>
+                <p
+                  className={`${
+                    msg.status === "UNREAD" ? "font-bold" : "font-normal"
+                  } text-xs text-gray-500`}
+                >
+                  {msg.email}
+                </p>
 
-              <p
-                className={`${
-                  msg.status === "UNREAD" ? "font-bold" : "font-normal"
-                } text-sm mt-2 truncate line-clamp-2 text-gray-600`}
-              >
-                {msg.message}
-              </p>
+                <p
+                  className={`${
+                    msg.status === "UNREAD" ? "font-bold" : "font-normal"
+                  } text-sm mt-2 truncate line-clamp-2 text-gray-600`}
+                >
+                  {msg.message}
+                </p>
 
-              <div className="flex justify-between mt-2 text-xs">
-                <span>{msg.tag}</span>
-                <span>{msg.status}</span>
+                <div className="flex justify-between mt-2 text-xs">
+                  <span>{msg.tag}</span>
+                  <span>{msg.status}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 

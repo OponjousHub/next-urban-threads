@@ -151,6 +151,7 @@ export default async function AdminReviewsPage() {
                   <tr>
                     <td colSpan={8} className="py-12 text-center text-gray-500">
                       No reviews found
+                      {/* {query ? "No reviews found" : "No reviews yet"} */}
                     </td>
                   </tr>
                 ) : (
