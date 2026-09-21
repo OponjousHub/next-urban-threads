@@ -37,8 +37,17 @@ export default function ReviewTable({ reviews, basePath }: Props) {
           <tbody>
             {reviews.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-12 text-center text-gray-500">
-                  No reviews found
+                <td colSpan={7} className="py-12 text-center">
+                  <div className="flex flex-col items-center justify-center">
+                    <p className="text-sm font-semibold text-gray-800">
+                      No reviews yet
+                    </p>
+
+                    <p className="mt-1 max-w-sm text-xs text-gray-500">
+                      Customer reviews will appear here once customers start
+                      reviewing your products.
+                    </p>
+                  </div>
                 </td>
               </tr>
             ) : (
