@@ -162,9 +162,25 @@ export default async function AdminCouponsPage() {
                   <tr>
                     <td
                       colSpan={isMultiVendor ? 8 : 7}
-                      className="py-16 text-center text-gray-500"
+                      className="py-16 text-center"
                     >
-                      No coupons found
+                      <div className="flex flex-col items-center justify-center">
+                        <p className="text-sm font-semibold text-gray-800">
+                          No coupons yet
+                        </p>
+
+                        <p className="mt-1 max-w-sm text-xs text-gray-500">
+                          Create your first coupon to offer discounts to your
+                          customers.
+                        </p>
+
+                        <Link
+                          href="/admin/coupons/new"
+                          className="mt-4 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+                        >
+                          Create Coupon
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ) : (
