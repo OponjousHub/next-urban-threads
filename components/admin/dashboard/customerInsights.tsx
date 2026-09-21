@@ -14,30 +14,39 @@ export default function CustomerInsights({
 
   const returningCustomers = Math.max(safeTotal - safeNew, 0);
 
-  const newCustomerRate = safeTotal > 0 ? (safeNew / safeTotal) * 100 : 0;
+  const hasCustomers = safeTotal > 0;
 
-  const returningCustomerRate =
-    safeTotal > 0 ? (returningCustomers / safeTotal) * 100 : 0;
+  const newCustomerRate = hasCustomers ? (safeNew / safeTotal) * 100 : 0;
+
+  const returningCustomerRate = hasCustomers
+    ? (returningCustomers / safeTotal) * 100
+    : 0;
 
   const stats = [
     {
       title: "Total Customers",
       value: safeTotal,
-      description: "All registered customers",
+      description: hasCustomers
+        ? "All registered customers"
+        : "No customers yet",
       icon: <FiUsers className="h-4 w-4" />,
       wrapper: "bg-indigo-50 text-indigo-600",
     },
     {
       title: "New Today",
       value: safeNew,
-      description: `${newCustomerRate.toFixed(1)}% of customers`,
+      description: hasCustomers
+        ? `${newCustomerRate.toFixed(1)}% of customers`
+        : "No customers yet",
       icon: <FiUserPlus className="h-4 w-4" />,
       wrapper: "bg-emerald-50 text-emerald-600",
     },
     {
       title: "Returning",
       value: returningCustomers,
-      description: `${returningCustomerRate.toFixed(1)}% of customers`,
+      description: hasCustomers
+        ? `${returningCustomerRate.toFixed(1)}% of customers`
+        : "No customers yet",
       icon: <FiRepeat className="h-4 w-4" />,
       wrapper: "bg-blue-50 text-blue-600",
     },
