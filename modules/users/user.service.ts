@@ -6,8 +6,38 @@ import welcomeEmail from "@/app/lib/email/template/welcome";
 import { sendEmail } from "@/app/lib/email/sendEmail";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
+import { CreateAdminInput } from "@/modules/users/admin.schema";
 
 export class UserService {
+  static async createAdmin(data: CreateAdminInput) {
+    const tenant = await getDefaultTenant();
+
+    if (!tenant) {
+      throw new Error("Default tenant not found");
+    }
+
+    const normalizedEmail = data.email.trim().toLowerCase();
+
+    const existingUser = await UserRepository.findByEmail(normalizedEmail);
+
+    if (existingUser) {
+      throw new Error("Email already exists");
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const admin = await UserRepository.createAdmin({
+      fullName: data.fullName.trim(),
+      email: normalizedEmail,
+      password: hashedPassword,
+      phone: data.phone?.trim() || null,
+      country: data.country?.trim() || null,
+      tenantId: tenant.id,
+    });
+
+    return admin;
+  }
+
   static async register(data: RegisterInput) {
     const tenant = await getDefaultTenant();
 
