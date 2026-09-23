@@ -1,6 +1,5 @@
 import { prisma } from "@/utils/prisma";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { User } from "@prisma/client";
 import { AuthService } from "./auth.service";
 import { getLoggedInUserId } from "@/lib/auth";
 

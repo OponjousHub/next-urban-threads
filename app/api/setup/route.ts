@@ -1,26 +1,12 @@
 import { NextResponse } from "next/server";
 
 import bcrypt from "bcryptjs";
-
 import { z } from "zod";
+import jwt from "jsonwebtoken";
 
 import { prisma } from "@/utils/prisma";
-
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-
-import { AuthService } from "@/modules/auth/auth.service";
-
-/*
-|--------------------------------------------------------------------------
-| Initial administrator setup schema
-|--------------------------------------------------------------------------
-|
-| This is intentionally different from normal customer registration.
-|
-| A store owner does not need to provide a shipping address just to
-| create the first administrator account.
-|
-*/
+import { authRepository } from "@/modules/auth/auth.repository";
 
 const SetupSchema = z.object({
   setupSecret: z.string().min(1),
@@ -43,16 +29,6 @@ const SetupSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
-
-/*
-|--------------------------------------------------------------------------
-| GET
-|--------------------------------------------------------------------------
-|
-| Used by the setup page to determine whether initial setup is still
-| available.
-|
-*/
 
 export async function GET() {
   try {
@@ -95,29 +71,11 @@ export async function GET() {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| POST
-|--------------------------------------------------------------------------
-|
-| Creates the FIRST administrator for the default tenant.
-|
-| Important security rules:
-|
-| 1. A setup secret is required.
-| 2. A default tenant must exist.
-| 3. An administrator must NOT already exist.
-| 4. The operation is protected against two simultaneous setup requests.
-|
-*/
-
 export async function POST(req: Request) {
   try {
-    /*
-    |--------------------------------------------------------------------------
-    | Validate request
-    |--------------------------------------------------------------------------
-    */
+    // ---------------------------------------------------------
+    // 1. Validate request body
+    // ---------------------------------------------------------
 
     const body = await req.json();
 
@@ -135,11 +93,9 @@ export async function POST(req: Request) {
     const { setupSecret, fullName, email, password, phone, country } =
       parsed.data;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Verify setup secret
-    |--------------------------------------------------------------------------
-    */
+    // ---------------------------------------------------------
+    // 2. Validate setup secret
+    // ---------------------------------------------------------
 
     const expectedSecret = process.env.STORE_SETUP_SECRET;
 
@@ -163,11 +119,9 @@ export async function POST(req: Request) {
       );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Get default tenant
-    |--------------------------------------------------------------------------
-    */
+    // ---------------------------------------------------------
+    // 3. Get default tenant
+    // ---------------------------------------------------------
 
     const tenant = await getDefaultTenant();
 
@@ -180,19 +134,9 @@ export async function POST(req: Request) {
       );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Normalize email
-    |--------------------------------------------------------------------------
-    */
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    /*
-    |--------------------------------------------------------------------------
-    | Check whether an administrator already exists
-    |--------------------------------------------------------------------------
-    */
+    // ---------------------------------------------------------
+    // 4. Make sure initial setup has not already been completed
+    // ---------------------------------------------------------
 
     const existingAdmin = await prisma.user.findFirst({
       where: {
@@ -214,14 +158,15 @@ export async function POST(req: Request) {
       );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Check email
-    |--------------------------------------------------------------------------
-    |
-    | Email is globally unique in your User model.
-    |
-    */
+    // ---------------------------------------------------------
+    // 5. Normalize email
+    // ---------------------------------------------------------
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // ---------------------------------------------------------
+    // 6. Make sure email is not already in use
+    // ---------------------------------------------------------
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -241,27 +186,18 @@ export async function POST(req: Request) {
       );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Hash password
-    |--------------------------------------------------------------------------
-    */
+    // ---------------------------------------------------------
+    // 7. Hash password
+    // ---------------------------------------------------------
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Create the first administrator
-    |--------------------------------------------------------------------------
-    |
-    | We use a transaction and re-check for an ADMIN inside the transaction.
-    |
-    | This helps prevent two setup requests from both attempting to create
-    | the first administrator at approximately the same time.
-    |
-    */
+    // ---------------------------------------------------------
+    // 8. Create first administrator
+    // ---------------------------------------------------------
 
     const admin = await prisma.$transaction(async (tx) => {
+      // Re-check inside the transaction to reduce race conditions
       const adminAlreadyCreated = await tx.user.findFirst({
         where: {
           tenantId: tenant.id,
@@ -280,17 +216,11 @@ export async function POST(req: Request) {
       return tx.user.create({
         data: {
           name: fullName.trim(),
-
           email: normalizedEmail,
-
           password: hashedPassword,
-
           phone: phone?.trim() || null,
-
           country: country?.trim() || null,
-
           role: "ADMIN",
-
           status: "ACTIVE",
 
           tenant: {
@@ -304,21 +234,60 @@ export async function POST(req: Request) {
           id: true,
           name: true,
           email: true,
+          phone: true,
+          country: true,
           role: true,
+          status: true,
           tenantId: true,
         },
       });
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Generate authentication token
-    |--------------------------------------------------------------------------
-    */
+    // ---------------------------------------------------------
+    // 9. Create a normal authenticated session
+    // ---------------------------------------------------------
 
-    const token = AuthService.generateToken(admin.id);
+    const userAgent = req.headers.get("user-agent") || "";
 
-    const res = NextResponse.json(
+    const rawIp =
+      req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "";
+
+    const ip = rawIp.split(",")[0].trim() || "127.0.0.1";
+
+    const normalizedIp = ip === "::1" ? "127.0.0.1" : ip;
+
+    const deviceLabel = "Initial Store Setup";
+
+    const session = await authRepository.createSession(
+      admin.id,
+      tenant.id,
+      userAgent,
+      normalizedIp,
+      deviceLabel,
+    );
+
+    // ---------------------------------------------------------
+    // 10. Create JWT using the same structure as normal login
+    // ---------------------------------------------------------
+
+    const token = jwt.sign(
+      {
+        userId: admin.id,
+        email: admin.email,
+        tenantId: tenant.id,
+        sessionId: session.id,
+      },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: "7d",
+      },
+    );
+
+    // ---------------------------------------------------------
+    // 11. Set authentication cookie
+    // ---------------------------------------------------------
+
+    const response = NextResponse.json(
       {
         success: true,
         message: "Store administrator created successfully.",
@@ -327,32 +296,16 @@ export async function POST(req: Request) {
       { status: 201 },
     );
 
-    /*
-    |--------------------------------------------------------------------------
-    | Set authentication cookie
-    |--------------------------------------------------------------------------
-    */
-
-    res.cookies.set("token", token, {
+    response.cookies.set("token", token, {
       httpOnly: true,
-
       secure: process.env.NODE_ENV === "production",
-
       sameSite: "lax",
-
       path: "/",
-
       maxAge: 60 * 60 * 24 * 7,
     });
 
-    return res;
+    return response;
   } catch (error: any) {
-    /*
-    |--------------------------------------------------------------------------
-    | Another setup request may have created the admin first.
-    |--------------------------------------------------------------------------
-    */
-
     if (error?.message === "INITIAL_ADMIN_ALREADY_EXISTS") {
       return NextResponse.json(
         {

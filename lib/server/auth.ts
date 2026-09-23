@@ -56,7 +56,12 @@ export async function getUserRole() {
   }
 
   const user = await prisma.user.findFirst({
-    where: { id: userId, tenantId: tenant?.id },
+    where: {
+      id: userId,
+      tenantId: tenant?.id,
+      isDeleted: false,
+      status: "ACTIVE",
+    },
     select: { id: true, role: true },
   });
   if (!user) redirect("/login");
