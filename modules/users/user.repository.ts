@@ -94,4 +94,41 @@ export const UserRepository = {
       },
     });
   },
+
+  createAdmin(data: {
+    fullName: string;
+    email: string;
+    password: string;
+    phone?: string | null;
+    country?: string | null;
+    tenantId: string;
+  }) {
+    return prisma.user.create({
+      data: {
+        name: data.fullName,
+        email: data.email,
+        password: data.password,
+        phone: data.phone || null,
+        country: data.country || null,
+        role: "ADMIN",
+        status: "ACTIVE",
+        tenant: {
+          connect: {
+            id: data.tenantId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        country: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        tenantId: true,
+      },
+    });
+  },
 };
