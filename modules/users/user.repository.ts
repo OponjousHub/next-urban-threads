@@ -1,9 +1,12 @@
 import { prisma } from "@/utils/prisma";
 
 export const UserRepository = {
-  findByEmail(email: string) {
-    return prisma.user.findUnique({
-      where: { email },
+  findByEmail(email: string, tenantId: string) {
+    return prisma.user.findFirst({
+      where: {
+        email,
+        tenantId,
+      },
     });
   },
 
