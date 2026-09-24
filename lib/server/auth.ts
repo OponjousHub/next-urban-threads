@@ -90,3 +90,39 @@ export async function getOptionalAuthPayload() {
     };
   }
 }
+
+export async function requireOwner() {
+  const userId = await getLoggedInUserId();
+  const tenant = await getDefaultTenant();
+
+  if (!userId || !tenant) {
+    throw new Error("Unauthorized");
+  }
+
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      tenantId: tenant.id,
+      isDeleted: false,
+    },
+    select: {
+      id: true,
+      role: true,
+      name: true,
+      email: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  if (user.role !== "OWNER") {
+    throw new Error("Forbidden");
+  }
+
+  return {
+    user,
+    tenant,
+  };
+}
