@@ -17,6 +17,7 @@ import {
   FiChevronLeft,
   FiCreditCard,
   FiTruck,
+  FiUser,
   FiTag,
 } from "react-icons/fi";
 
@@ -178,6 +179,14 @@ export default function AdminSidebar({
             onNavigate={onNavigate}
           />
         )}
+        <SidebarItem
+          href="/admin/administrator"
+          icon={<FiUser size={20} />}
+          label="Administrator"
+          collapsed={collapsed}
+          pathname={pathname}
+          onNavigate={onNavigate}
+        />
         <SidebarItem
           href="/admin/settings"
           icon={<FiSettings size={20} />}
