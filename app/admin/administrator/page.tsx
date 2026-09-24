@@ -1,0 +1,578 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  FiPlus,
+  FiShield,
+  FiMail,
+  FiPhone,
+  FiUser,
+  FiCalendar,
+  FiX,
+} from "react-icons/fi";
+
+import { appToast } from "@/utils/appToast";
+
+type Administrator = {
+  id: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  country: string | null;
+  role: string;
+  status: string;
+  createdAt: string;
+  tenantId: string;
+};
+
+type AdminForm = {
+  fullName: string;
+  email: string;
+  password: string;
+  phone: string;
+  country: string;
+};
+
+const initialForm: AdminForm = {
+  fullName: "",
+  email: "",
+  password: "",
+  phone: "",
+  country: "Nigeria",
+};
+
+export default function AdministratorsPage() {
+  const [administrators, setAdministrators] = useState<Administrator[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [form, setForm] = useState<AdminForm>(initialForm);
+
+  async function loadAdministrators() {
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/admin/administrators", {
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        appToast.error(
+          "Unable to load administrators",
+          data?.message || "Something went wrong.",
+        );
+        return;
+      }
+
+      setAdministrators(data.administrators ?? []);
+    } catch (error) {
+      console.error("LOAD ADMINISTRATORS ERROR:", error);
+
+      appToast.error(
+        "Unable to load administrators",
+        "Something went wrong while loading administrators.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadAdministrators();
+  }, []);
+
+  function updateField(field: keyof AdminForm, value: string) {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }
+
+  function openModal() {
+    setForm(initialForm);
+    setShowModal(true);
+  }
+
+  function closeModal() {
+    if (submitting) return;
+
+    setShowModal(false);
+    setForm(initialForm);
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (submitting) return;
+
+    if (!form.fullName.trim()) {
+      appToast.error(
+        "Missing name",
+        "Please enter the administrator's full name.",
+      );
+      return;
+    }
+
+    if (!form.email.trim()) {
+      appToast.error(
+        "Missing email",
+        "Please enter the administrator's email address.",
+      );
+      return;
+    }
+
+    if (!form.password) {
+      appToast.error("Missing password", "Please enter a password.");
+      return;
+    }
+
+    if (form.password.length < 6) {
+      appToast.error(
+        "Invalid password",
+        "Password must be at least 6 characters.",
+      );
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const res = await fetch("/api/admin/administrators", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        const firstFieldError =
+          data?.errors && Object.values(data.errors).flat()?.[0];
+
+        appToast.error(
+          "Administrator creation failed",
+          firstFieldError || data?.message || "Unable to create administrator.",
+        );
+
+        return;
+      }
+
+      appToast.success(
+        "Administrator created",
+        `${data?.admin?.name || "Administrator"} was added successfully.`,
+      );
+
+      setShowModal(false);
+      setForm(initialForm);
+
+      await loadAdministrators();
+    } catch (error) {
+      console.error("CREATE ADMINISTRATOR ERROR:", error);
+
+      appToast.error(
+        "Administrator creation failed",
+        "Something went wrong while creating the administrator.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function formatDate(date: string) {
+    return new Date(date).toLocaleDateString("en-NG", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* ----------------------------------------------------- */}
+      {/* Header */}
+      {/* ----------------------------------------------------- */}
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+              <FiShield className="h-5 w-5" />
+            </div>
+
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+                Administrators
+              </h1>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Manage the administrators who have access to your store.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={openModal}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+        >
+          <FiPlus className="h-4 w-4" />
+          Add Administrator
+        </button>
+      </div>
+
+      {/* ----------------------------------------------------- */}
+      {/* Administrator count */}
+      {/* ----------------------------------------------------- */}
+
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600">
+            <FiShield className="h-5 w-5" />
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+              Total Administrators
+            </p>
+
+            <p className="mt-1 text-xl font-semibold text-gray-900">
+              {loading ? "—" : administrators.length}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ----------------------------------------------------- */}
+      {/* Administrators table */}
+      {/* ----------------------------------------------------- */}
+
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        {loading ? (
+          <div className="space-y-4 p-6">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="h-16 animate-pulse rounded-xl bg-gray-100"
+              />
+            ))}
+          </div>
+        ) : administrators.length === 0 ? (
+          <div className="px-6 py-16 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
+              <FiShield className="h-6 w-6" />
+            </div>
+
+            <h2 className="mt-5 text-base font-semibold text-gray-800">
+              No administrators yet
+            </h2>
+
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+              Add another administrator to help manage your store.
+            </p>
+
+            <button
+              type="button"
+              onClick={openModal}
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
+            >
+              <FiPlus className="h-4 w-4" />
+              Add Administrator
+            </button>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px]">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/70">
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Administrator
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Contact
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Role
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Status
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Created
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-gray-100">
+                {administrators.map((admin) => (
+                  <tr key={admin.id} className="transition hover:bg-gray-50/70">
+                    {/* Administrator */}
+
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                          <FiUser className="h-4 w-4" />
+                        </div>
+
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {admin.name || "Unnamed Administrator"}
+                          </p>
+
+                          <p className="mt-0.5 text-xs text-gray-400">
+                            {admin.email}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Contact */}
+
+                    <td className="px-6 py-5">
+                      <div className="space-y-1.5 text-sm">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <FiMail className="h-3.5 w-3.5 text-gray-400" />
+                          <span>{admin.email}</span>
+                        </div>
+
+                        {admin.phone && (
+                          <div className="flex items-center gap-2 text-gray-500">
+                            <FiPhone className="h-3.5 w-3.5 text-gray-400" />
+                            <span>{admin.phone}</span>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Role */}
+
+                    <td className="px-6 py-5">
+                      <span className="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700">
+                        Administrator
+                      </span>
+                    </td>
+
+                    {/* Status */}
+
+                    <td className="px-6 py-5">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                          admin.status === "ACTIVE"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {admin.status === "ACTIVE" ? "Active" : admin.status}
+                      </span>
+                    </td>
+
+                    {/* Created */}
+
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <FiCalendar className="h-3.5 w-3.5 text-gray-400" />
+                        {formatDate(admin.createdAt)}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ----------------------------------------------------- */}
+      {/* Add Administrator Modal */}
+      {/* ----------------------------------------------------- */}
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+            {/* Modal header */}
+
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Add Administrator
+                </h2>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Create an administrator account with access to this store.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeModal}
+                disabled={submitting}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal body */}
+
+            <form
+              onSubmit={handleSubmit}
+              className="max-h-[calc(100vh-180px)] overflow-y-auto"
+            >
+              <div className="space-y-5 px-6 py-6">
+                {/* Full name */}
+
+                <div>
+                  <label
+                    htmlFor="admin-full-name"
+                    className="text-sm font-medium text-gray-800"
+                  >
+                    Full Name
+                    <span className="ml-1 text-red-500">*</span>
+                  </label>
+
+                  <input
+                    id="admin-full-name"
+                    type="text"
+                    value={form.fullName}
+                    onChange={(e) => updateField("fullName", e.target.value)}
+                    placeholder="Enter full name"
+                    autoComplete="name"
+                    disabled={submitting}
+                    className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]/20 disabled:bg-gray-50"
+                  />
+                </div>
+
+                {/* Email */}
+
+                <div>
+                  <label
+                    htmlFor="admin-email"
+                    className="text-sm font-medium text-gray-800"
+                  >
+                    Email Address
+                    <span className="ml-1 text-red-500">*</span>
+                  </label>
+
+                  <input
+                    id="admin-email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => updateField("email", e.target.value)}
+                    placeholder="admin@example.com"
+                    autoComplete="email"
+                    disabled={submitting}
+                    className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]/20 disabled:bg-gray-50"
+                  />
+                </div>
+
+                {/* Password */}
+
+                <div>
+                  <label
+                    htmlFor="admin-password"
+                    className="text-sm font-medium text-gray-800"
+                  >
+                    Password
+                    <span className="ml-1 text-red-500">*</span>
+                  </label>
+
+                  <input
+                    id="admin-password"
+                    type="password"
+                    value={form.password}
+                    onChange={(e) => updateField("password", e.target.value)}
+                    placeholder="At least 6 characters"
+                    autoComplete="new-password"
+                    disabled={submitting}
+                    className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]/20 disabled:bg-gray-50"
+                  />
+
+                  <p className="mt-1.5 text-xs text-gray-400">
+                    The administrator can change this password later.
+                  </p>
+                </div>
+
+                {/* Phone */}
+
+                <div>
+                  <label
+                    htmlFor="admin-phone"
+                    className="text-sm font-medium text-gray-800"
+                  >
+                    Phone Number
+                  </label>
+
+                  <input
+                    id="admin-phone"
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => updateField("phone", e.target.value)}
+                    placeholder="Optional"
+                    autoComplete="tel"
+                    disabled={submitting}
+                    className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]/20 disabled:bg-gray-50"
+                  />
+                </div>
+
+                {/* Country */}
+
+                <div>
+                  <label
+                    htmlFor="admin-country"
+                    className="text-sm font-medium text-gray-800"
+                  >
+                    Country
+                  </label>
+
+                  <input
+                    id="admin-country"
+                    type="text"
+                    value={form.country}
+                    onChange={(e) => updateField("country", e.target.value)}
+                    placeholder="Nigeria"
+                    autoComplete="country-name"
+                    disabled={submitting}
+                    className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]/20 disabled:bg-gray-50"
+                  />
+                </div>
+              </div>
+
+              {/* Modal footer */}
+
+              <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50/50 px-6 py-4">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  disabled={submitting}
+                  className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:bg-gray-400"
+                >
+                  {submitting
+                    ? "Creating Administrator..."
+                    : "Create Administrator"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
