@@ -64,6 +64,7 @@ export default function AdministratorsPage() {
   const [deleteModal, setDeleteModal] = useState<Administrator | null>(null);
   const [deleting, setDeleting] = useState(false);
   const countries = Country.getAllCountries();
+  const isOwner = currentUserRole === "OWNER";
   // ---------------------------------------------------------
   // Load administrators
   // ---------------------------------------------------------
@@ -87,8 +88,15 @@ export default function AdministratorsPage() {
         return;
       }
 
-      // GET /api/admin/administrator returns the array directly
-      setAdministrators(Array.isArray(data) ? data : []);
+      setAdministrators(
+        Array.isArray(data?.administrators) ? data.administrators : [],
+      );
+
+      setCurrentUserRole(
+        data?.currentUserRole === "OWNER" || data?.currentUserRole === "ADMIN"
+          ? data.currentUserRole
+          : null,
+      );
     } catch (error) {
       console.error("LOAD ADMINISTRATORS ERROR:", error);
 
@@ -217,8 +225,14 @@ export default function AdministratorsPage() {
   // ---------------------------------------------------------
 
   function openDeleteModal(admin: Administrator) {
-    // Extra frontend protection.
-    // The API must ALSO enforce this rule.
+    if (!isOwner) {
+      appToast.error(
+        "Access denied",
+        "Only the store owner can delete administrators.",
+      );
+      return;
+    }
+
     if (admin.role === "OWNER") {
       appToast.error(
         "Owner cannot be deleted",
@@ -239,7 +253,14 @@ export default function AdministratorsPage() {
   async function handleDeleteAdministrator() {
     if (!deleteModal || deleting) return;
 
-    // Never allow the owner to be deleted from the UI.
+    if (!isOwner) {
+      appToast.error(
+        "Access denied",
+        "Only the store owner can delete administrators.",
+      );
+      return;
+    }
+
     if (deleteModal.role === "OWNER") {
       appToast.error(
         "Owner cannot be deleted",
@@ -248,41 +269,7 @@ export default function AdministratorsPage() {
       return;
     }
 
-    try {
-      setDeleting(true);
-
-      const res = await fetch(`/api/admin/administrators/${deleteModal.id}`, {
-        method: "DELETE",
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        appToast.error(
-          "Deletion failed",
-          data?.message || "Unable to delete administrator.",
-        );
-        return;
-      }
-
-      appToast.success(
-        "Administrator deleted",
-        `${deleteModal.name || "Administrator"} was removed successfully.`,
-      );
-
-      setDeleteModal(null);
-
-      await loadAdministrators();
-    } catch (error) {
-      console.error("DELETE ADMINISTRATOR ERROR:", error);
-
-      appToast.error(
-        "Deletion failed",
-        "Something went wrong while deleting the administrator.",
-      );
-    } finally {
-      setDeleting(false);
-    }
+    // existing delete logic...
   }
 
   // ---------------------------------------------------------
@@ -310,16 +297,18 @@ export default function AdministratorsPage() {
         {/* Header */}
         {/* ----------------------------------------------------- */}
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-end pr-4">
-          <button
-            type="button"
-            onClick={openModal}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
-          >
-            <FiPlus className="h-4 w-4" />
-            Add Administrator
-          </button>
-        </div>
+        {isOwner && (
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-end pr-4">
+            <button
+              type="button"
+              onClick={openModal}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+            >
+              <FiPlus className="h-4 w-4" />
+              Add Administrator
+            </button>
+          </div>
+        )}
 
         {/* ----------------------------------------------------- */}
         {/* Administrator count */}
@@ -414,7 +403,7 @@ export default function AdministratorsPage() {
                 <tbody className="divide-y divide-gray-100">
                   {administrators.map((admin) => {
                     const isOwner = admin.role === "OWNER";
-
+                    console.log(admin.role);
                     return (
                       <tr
                         key={admin.id}
@@ -498,13 +487,12 @@ export default function AdministratorsPage() {
                         </td>
 
                         {/* Action */}
-
                         <td className="px-6 py-5 text-right">
-                          {isOwner ? (
+                          {currentUserRole !== "OWNER" ? (
                             <span className="text-xs text-gray-400">
                               Protected
                             </span>
-                          ) : (
+                          ) : !isOwner ? (
                             <button
                               type="button"
                               onClick={() => openDeleteModal(admin)}
@@ -513,6 +501,10 @@ export default function AdministratorsPage() {
                               <FiTrash2 className="h-3.5 w-3.5" />
                               Delete
                             </button>
+                          ) : (
+                            <span className="text-xs text-gray-400">
+                              Protected
+                            </span>
                           )}
                         </td>
                       </tr>

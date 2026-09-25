@@ -300,7 +300,7 @@ model Address {
 
 model Tenant {
   id                 String              @id @default(cuid())
-  name               String
+  name               String              @default("Your Store")
   slug               String              @unique
   domain             String?
   isDefault          Boolean             @default(false)
