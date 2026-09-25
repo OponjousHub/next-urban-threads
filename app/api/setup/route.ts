@@ -44,10 +44,10 @@ export async function GET() {
       );
     }
 
-    const adminExists = await prisma.user.findFirst({
+    const ownerExists = await prisma.user.findFirst({
       where: {
         tenantId: tenant.id,
-        role: "ADMIN",
+        role: "OWNER",
         isDeleted: false,
       },
       select: {
@@ -56,7 +56,7 @@ export async function GET() {
     });
 
     return NextResponse.json({
-      setupAvailable: !adminExists,
+      setupAvailable: !ownerExists,
     });
   } catch (error) {
     console.error("SETUP STATUS ERROR:", error);
@@ -138,10 +138,10 @@ export async function POST(req: Request) {
     // 4. Make sure initial setup has not already been completed
     // ---------------------------------------------------------
 
-    const existingAdmin = await prisma.user.findFirst({
+    const existingOwner = await prisma.user.findFirst({
       where: {
         tenantId: tenant.id,
-        role: "ADMIN",
+        role: "OWNER",
         isDeleted: false,
       },
       select: {
@@ -149,7 +149,7 @@ export async function POST(req: Request) {
       },
     });
 
-    if (existingAdmin) {
+    if (existingOwner) {
       return NextResponse.json(
         {
           message: "Initial store setup has already been completed.",
@@ -196,12 +196,12 @@ export async function POST(req: Request) {
     // 8. Create first administrator
     // ---------------------------------------------------------
 
-    const admin = await prisma.$transaction(async (tx) => {
+    const owner = await prisma.$transaction(async (tx) => {
       // Re-check inside the transaction to reduce race conditions
-      const adminAlreadyCreated = await tx.user.findFirst({
+      const ownerAlreadyCreated = await tx.user.findFirst({
         where: {
           tenantId: tenant.id,
-          role: "ADMIN",
+          role: "OWNER",
           isDeleted: false,
         },
         select: {
@@ -209,8 +209,8 @@ export async function POST(req: Request) {
         },
       });
 
-      if (adminAlreadyCreated) {
-        throw new Error("INITIAL_ADMIN_ALREADY_EXISTS");
+      if (ownerAlreadyCreated) {
+        throw new Error("INITIAL_OWNER_ALREADY_EXISTS");
       }
 
       return tx.user.create({
@@ -259,7 +259,7 @@ export async function POST(req: Request) {
     const deviceLabel = "Initial Store Setup";
 
     const session = await authRepository.createSession(
-      admin.id,
+      owner.id,
       tenant.id,
       userAgent,
       normalizedIp,
@@ -272,8 +272,8 @@ export async function POST(req: Request) {
 
     const token = jwt.sign(
       {
-        userId: admin.id,
-        email: admin.email,
+        userId: owner.id,
+        email: owner.email,
         tenantId: tenant.id,
         sessionId: session.id,
       },
@@ -290,8 +290,8 @@ export async function POST(req: Request) {
     const response = NextResponse.json(
       {
         success: true,
-        message: "Store administrator created successfully.",
-        user: admin,
+        message: "Store owner created successfully.",
+        user: owner,
       },
       { status: 201 },
     );
@@ -306,7 +306,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error: any) {
-    if (error?.message === "INITIAL_ADMIN_ALREADY_EXISTS") {
+    if (error?.message === "INITIAL_OWNER_ALREADY_EXISTS") {
       return NextResponse.json(
         {
           message: "Initial store setup has already been completed.",
