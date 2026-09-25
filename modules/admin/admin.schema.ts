@@ -5,6 +5,7 @@ export const CreateAdministratorSchema = z.object({
   email: z.email("Enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phone: z.string().optional(),
+  country: z.string("Please select your country"),
 });
 
 export type CreateAdministratorInput = z.infer<

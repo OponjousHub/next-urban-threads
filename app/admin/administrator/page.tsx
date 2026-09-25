@@ -12,8 +12,9 @@ import {
   FiX,
   FiTrash2,
   FiAlertTriangle,
+  FiGlobe,
 } from "react-icons/fi";
-
+import { Country } from "country-state-city";
 import { appToast } from "@/utils/appToast";
 
 type Administrator = {
@@ -52,6 +53,9 @@ export default function AdministratorsPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState<AdminForm>(initialForm);
+  const [currentUserRole, setCurrentUserRole] = useState<
+    "OWNER" | "ADMIN" | null
+  >(null);
 
   // ---------------------------------------------------------
   // Delete state
@@ -59,7 +63,7 @@ export default function AdministratorsPage() {
 
   const [deleteModal, setDeleteModal] = useState<Administrator | null>(null);
   const [deleting, setDeleting] = useState(false);
-
+  const countries = Country.getAllCountries();
   // ---------------------------------------------------------
   // Load administrators
   // ---------------------------------------------------------
@@ -653,7 +657,6 @@ export default function AdministratorsPage() {
                   </div>
 
                   {/* Country */}
-
                   <div>
                     <label
                       htmlFor="admin-country"
@@ -662,16 +665,28 @@ export default function AdministratorsPage() {
                       Country
                     </label>
 
-                    <input
-                      id="admin-country"
-                      type="text"
-                      value={form.country}
-                      onChange={(e) => updateField("country", e.target.value)}
-                      placeholder="Nigeria"
-                      autoComplete="country-name"
-                      disabled={submitting}
-                      className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]/20 disabled:bg-gray-50"
-                    />
+                    <div className="relative mt-2">
+                      <FiGlobe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+
+                      <select
+                        id="admin-country"
+                        value={form.country}
+                        onChange={(e) => updateField("country", e.target.value)}
+                        autoComplete="country-name"
+                        disabled={submitting}
+                        className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-10 py-3 pr-10 text-sm text-gray-800 outline-none transition focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]/20 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
+                      >
+                        {countries.map((country) => (
+                          <option key={country.isoCode} value={country.name}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </select>
+
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                        ▼
+                      </span>
+                    </div>
                   </div>
                 </div>
 
