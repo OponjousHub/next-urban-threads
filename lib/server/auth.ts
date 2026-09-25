@@ -104,6 +104,7 @@ export async function requireOwner() {
       id: userId,
       tenantId: tenant.id,
       isDeleted: false,
+      status: "ACTIVE",
     },
     select: {
       id: true,

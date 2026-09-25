@@ -69,6 +69,7 @@ export default function AdministratorsPage() {
 
       const res = await fetch("/api/admin/administrators", {
         cache: "no-store",
+        credentials: "include",
       });
 
       const data = await res.json();
@@ -81,7 +82,8 @@ export default function AdministratorsPage() {
         return;
       }
 
-      setAdministrators(data.administrators ?? []);
+      // GET /api/admin/administrator returns the array directly
+      setAdministrators(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("LOAD ADMINISTRATORS ERROR:", error);
 

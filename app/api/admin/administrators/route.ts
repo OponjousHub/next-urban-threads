@@ -4,13 +4,13 @@ import bcrypt from "bcryptjs";
 
 import { prisma } from "@/utils/prisma";
 
-import { requireOwner } from "@/lib/server/auth";
+import { requireOwner, requireAdminOrOwner } from "@/lib/server/auth";
 
 import { CreateAdministratorSchema } from "@/modules/admin/admin.schema";
 
 export async function GET() {
   try {
-    const { tenant } = await requireOwner();
+    const { tenant } = await requireAdminOrOwner();
 
     const administrators = await prisma.user.findMany({
       where: {
