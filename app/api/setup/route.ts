@@ -220,7 +220,7 @@ export async function POST(req: Request) {
           password: hashedPassword,
           phone: phone?.trim() || null,
           country: country?.trim() || null,
-          role: "ADMIN",
+          role: "OWNER",
           status: "ACTIVE",
 
           tenant: {
