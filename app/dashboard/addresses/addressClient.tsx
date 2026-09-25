@@ -77,7 +77,7 @@ export default function AddressClient({ initialAddresses }: Props) {
           <p className="text-sm text-muted-foreground">
             You haven’t added any addresses yet.
           </p>
-          <Button className="mt-4" onClick={() => setOpen(true)}>
+          <Button className="mt-4 text-white" onClick={() => setOpen(true)}>
             Add your first address
           </Button>
         </div>
