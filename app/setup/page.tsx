@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { appToast } from "@/utils/appToast";
+import { Country } from "country-state-city";
+import { FiGlobe } from "react-icons/fi";
 
 type FormData = {
   setupSecret: string;
@@ -29,9 +31,9 @@ export default function SetupPage() {
     email: "",
     password: "",
     phone: "",
-    country: "Nigeria",
+    country: "",
   });
-
+  const countries = Country.getAllCountries();
   /*
   |--------------------------------------------------------------------------
   | Check whether initial setup is still available
@@ -383,7 +385,6 @@ export default function SetupPage() {
               className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-black focus:ring-1 focus:ring-black"
             />
           </div>
-
           {/* ---------------------------------------------- */}
           {/* Country */}
           {/* ---------------------------------------------- */}
@@ -394,17 +395,44 @@ export default function SetupPage() {
               className="text-sm font-medium text-gray-800"
             >
               Country
+              <span className="text-red-500"> *</span>
             </label>
 
-            <input
-              id="country"
-              type="text"
-              value={form.country}
-              onChange={(e) => updateField("country", e.target.value)}
-              placeholder="Nigeria"
-              autoComplete="country-name"
-              className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-black focus:ring-1 focus:ring-black"
-            />
+            <div className="relative mt-2 flex items-center rounded-xl border border-gray-200 bg-white px-4 py-3 transition focus-within:border-[var(--color-primary)] focus-within:ring-1 focus-within:ring-[var(--color-primary)]/20">
+              <FiGlobe className="mr-3 shrink-0 text-gray-400" />
+
+              <select
+                id="country"
+                name="country"
+                value={form.country}
+                onChange={(e) => updateField("country", e.target.value)}
+                disabled={submitting}
+                autoComplete="country"
+                className="w-full appearance-none border-none bg-transparent pr-8 text-sm text-gray-700 outline-none focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent"
+              >
+                <option value="">Select Country</option>
+
+                {countries.map((country) => (
+                  <option key={country.isoCode} value={country.isoCode}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+
+              <svg
+                className="pointer-events-none absolute right-4 h-4 w-4 text-gray-400"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  d="M6 8l4 4 4-4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           </div>
 
           {/* ---------------------------------------------- */}
