@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/utils/prisma";
 
-import { requireOwner } from "@/lib/auth";
+import { requireOwner } from "@/lib/server/auth";
 
 type Params = {
   params: Promise<{

@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 import { prisma } from "@/utils/prisma";
 
-import { requireOwner } from "@/lib/auth";
+import { requireOwner } from "@/lib/server/auth";
 
 import { CreateAdministratorSchema } from "@/modules/admin/admin.schema";
 

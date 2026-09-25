@@ -18,7 +18,10 @@ export class UserService {
 
     const normalizedEmail = data.email.trim().toLowerCase();
 
-    const existingUser = await UserRepository.findByEmail(normalizedEmail);
+    const existingUser = await UserRepository.findByEmail(
+      normalizedEmail,
+      tenant.id,
+    );
 
     if (existingUser) {
       throw new Error("Email already exists");
@@ -57,7 +60,7 @@ export class UserService {
       country,
     } = data;
 
-    const existingUser = await UserRepository.findByEmail(email);
+    const existingUser = await UserRepository.findByEmail(email, tenant.id);
     if (existingUser) {
       throw new Error("Email already exists");
     }
