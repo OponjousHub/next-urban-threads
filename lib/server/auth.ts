@@ -126,3 +126,40 @@ export async function requireOwner() {
     tenant,
   };
 }
+
+export async function requireAdminOrOwner() {
+  const userId = await getLoggedInUserId();
+  const tenant = await getDefaultTenant();
+
+  if (!userId || !tenant) {
+    throw new Error("Unauthorized");
+  }
+
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      tenantId: tenant.id,
+      isDeleted: false,
+      status: "ACTIVE",
+    },
+    select: {
+      id: true,
+      role: true,
+      name: true,
+      email: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  if (user.role !== "OWNER" && user.role !== "ADMIN") {
+    throw new Error("Forbidden");
+  }
+
+  return {
+    user,
+    tenant,
+  };
+}

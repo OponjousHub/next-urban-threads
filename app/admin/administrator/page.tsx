@@ -9,6 +9,8 @@ import {
   FiUser,
   FiCalendar,
   FiX,
+  FiTrash2,
+  FiAlertTriangle,
 } from "react-icons/fi";
 
 import { appToast } from "@/utils/appToast";
@@ -50,6 +52,17 @@ export default function AdministratorsPage() {
 
   const [form, setForm] = useState<AdminForm>(initialForm);
 
+  // ---------------------------------------------------------
+  // Delete state
+  // ---------------------------------------------------------
+
+  const [deleteModal, setDeleteModal] = useState<Administrator | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // ---------------------------------------------------------
+  // Load administrators
+  // ---------------------------------------------------------
+
   async function loadAdministrators() {
     try {
       setLoading(true);
@@ -85,6 +98,10 @@ export default function AdministratorsPage() {
     loadAdministrators();
   }, []);
 
+  // ---------------------------------------------------------
+  // Form helpers
+  // ---------------------------------------------------------
+
   function updateField(field: keyof AdminForm, value: string) {
     setForm((prev) => ({
       ...prev,
@@ -103,6 +120,10 @@ export default function AdministratorsPage() {
     setShowModal(false);
     setForm(initialForm);
   }
+
+  // ---------------------------------------------------------
+  // Create administrator
+  // ---------------------------------------------------------
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -183,6 +204,83 @@ export default function AdministratorsPage() {
       setSubmitting(false);
     }
   }
+
+  // ---------------------------------------------------------
+  // Delete administrator
+  // ---------------------------------------------------------
+
+  function openDeleteModal(admin: Administrator) {
+    // Extra frontend protection.
+    // The API must ALSO enforce this rule.
+    if (admin.role === "OWNER") {
+      appToast.error(
+        "Owner cannot be deleted",
+        "The store owner cannot be removed from the administrator list.",
+      );
+      return;
+    }
+
+    setDeleteModal(admin);
+  }
+
+  function closeDeleteModal() {
+    if (deleting) return;
+
+    setDeleteModal(null);
+  }
+
+  async function handleDeleteAdministrator() {
+    if (!deleteModal || deleting) return;
+
+    // Never allow the owner to be deleted from the UI.
+    if (deleteModal.role === "OWNER") {
+      appToast.error(
+        "Owner cannot be deleted",
+        "The store owner cannot be removed.",
+      );
+      return;
+    }
+
+    try {
+      setDeleting(true);
+
+      const res = await fetch(`/api/admin/administrators/${deleteModal.id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        appToast.error(
+          "Deletion failed",
+          data?.message || "Unable to delete administrator.",
+        );
+        return;
+      }
+
+      appToast.success(
+        "Administrator deleted",
+        `${deleteModal.name || "Administrator"} was removed successfully.`,
+      );
+
+      setDeleteModal(null);
+
+      await loadAdministrators();
+    } catch (error) {
+      console.error("DELETE ADMINISTRATOR ERROR:", error);
+
+      appToast.error(
+        "Deletion failed",
+        "Something went wrong while deleting the administrator.",
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  // ---------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------
 
   function formatDate(date: string) {
     return new Date(date).toLocaleDateString("en-NG", {
@@ -288,7 +386,7 @@ export default function AdministratorsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px]">
+            <table className="w-full min-w-[900px]">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/70">
                   <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -310,82 +408,118 @@ export default function AdministratorsPage() {
                   <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
                     Created
                   </th>
+
+                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Action
+                  </th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-100">
-                {administrators.map((admin) => (
-                  <tr key={admin.id} className="transition hover:bg-gray-50/70">
-                    {/* Administrator */}
+                {administrators.map((admin) => {
+                  const isOwner = admin.role === "OWNER";
 
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
-                          <FiUser className="h-4 w-4" />
-                        </div>
+                  return (
+                    <tr
+                      key={admin.id}
+                      className="transition hover:bg-gray-50/70"
+                    >
+                      {/* Administrator */}
 
-                        <div>
-                          <p className="font-medium text-gray-900">
-                            {admin.name || "Unnamed Administrator"}
-                          </p>
-
-                          <p className="mt-0.5 text-xs text-gray-400">
-                            {admin.email}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Contact */}
-
-                    <td className="px-6 py-5">
-                      <div className="space-y-1.5 text-sm">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <FiMail className="h-3.5 w-3.5 text-gray-400" />
-                          <span>{admin.email}</span>
-                        </div>
-
-                        {admin.phone && (
-                          <div className="flex items-center gap-2 text-gray-500">
-                            <FiPhone className="h-3.5 w-3.5 text-gray-400" />
-                            <span>{admin.phone}</span>
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                            <FiUser className="h-4 w-4" />
                           </div>
+
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {admin.name || "Unnamed Administrator"}
+                            </p>
+
+                            <p className="mt-0.5 text-xs text-gray-400">
+                              {admin.email}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Contact */}
+
+                      <td className="px-6 py-5">
+                        <div className="space-y-1.5 text-sm">
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <FiMail className="h-3.5 w-3.5 text-gray-400" />
+                            <span>{admin.email}</span>
+                          </div>
+
+                          {admin.phone && (
+                            <div className="flex items-center gap-2 text-gray-500">
+                              <FiPhone className="h-3.5 w-3.5 text-gray-400" />
+                              <span>{admin.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Role */}
+
+                      <td className="px-6 py-5">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                            isOwner
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-purple-50 text-purple-700"
+                          }`}
+                        >
+                          {isOwner ? "Owner" : "Administrator"}
+                        </span>
+                      </td>
+
+                      {/* Status */}
+
+                      <td className="px-6 py-5">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                            admin.status === "ACTIVE"
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-gray-100 text-gray-600"
+                          }`}
+                        >
+                          {admin.status === "ACTIVE" ? "Active" : admin.status}
+                        </span>
+                      </td>
+
+                      {/* Created */}
+
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <FiCalendar className="h-3.5 w-3.5 text-gray-400" />
+                          {formatDate(admin.createdAt)}
+                        </div>
+                      </td>
+
+                      {/* Action */}
+
+                      <td className="px-6 py-5 text-right">
+                        {isOwner ? (
+                          <span className="text-xs text-gray-400">
+                            Protected
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => openDeleteModal(admin)}
+                            className="inline-flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-100 hover:text-red-700"
+                          >
+                            <FiTrash2 className="h-3.5 w-3.5" />
+                            Delete
+                          </button>
                         )}
-                      </div>
-                    </td>
-
-                    {/* Role */}
-
-                    <td className="px-6 py-5">
-                      <span className="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700">
-                        Administrator
-                      </span>
-                    </td>
-
-                    {/* Status */}
-
-                    <td className="px-6 py-5">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
-                          admin.status === "ACTIVE"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-gray-100 text-gray-600"
-                        }`}
-                      >
-                        {admin.status === "ACTIVE" ? "Active" : admin.status}
-                      </span>
-                    </td>
-
-                    {/* Created */}
-
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <FiCalendar className="h-3.5 w-3.5 text-gray-400" />
-                        {formatDate(admin.createdAt)}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -570,6 +704,95 @@ export default function AdministratorsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ----------------------------------------------------- */}
+      {/* Delete Administrator Confirmation Modal */}
+      {/* ----------------------------------------------------- */}
+
+      {deleteModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4 py-6">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+            {/* Delete modal header */}
+
+            <div className="flex items-start gap-4 px-6 pt-6">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600">
+                <FiAlertTriangle className="h-5 w-5" />
+              </div>
+
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Delete Administrator?
+                </h2>
+
+                <p className="mt-1 text-sm leading-6 text-gray-500">
+                  You are about to remove this administrator's access to the
+                  store.
+                </p>
+              </div>
+            </div>
+
+            {/* Administrator being deleted */}
+
+            <div className="mx-6 mt-5 rounded-xl border border-gray-100 bg-gray-50 p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm">
+                  <FiUser className="h-4 w-4" />
+                </div>
+
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-gray-900">
+                    {deleteModal.name || "Unnamed Administrator"}
+                  </p>
+
+                  <p className="truncate text-sm text-gray-500">
+                    {deleteModal.email}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4">
+              <p className="text-sm leading-6 text-gray-500">
+                This action cannot be undone from the administrator dashboard.
+                The administrator will no longer be able to access the admin
+                area.
+              </p>
+            </div>
+
+            {/* Delete modal footer */}
+
+            <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50/50 px-6 py-4">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                disabled={deleting}
+                className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteAdministrator}
+                disabled={deleting}
+                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                {deleting ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <FiTrash2 className="h-4 w-4" />
+                    Delete Administrator
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
