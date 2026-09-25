@@ -3,14 +3,13 @@ import { prisma } from "@/utils/prisma";
 async function main() {
   await prisma.tenant.create({
     data: {
-      name: "Urban Threads",
-      slug: "urban-threads",
+      slug: "your-store",
       isDefault: true,
-      country: "Nigeria",
+      country: "NG",
     },
   });
 
-  console.log("Default Urban Threads tenant created successfully.");
+  console.log("Default tenant created successfully.");
 }
 
 main()

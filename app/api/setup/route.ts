@@ -212,7 +212,7 @@ export async function POST(req: Request) {
       if (ownerAlreadyCreated) {
         throw new Error("INITIAL_OWNER_ALREADY_EXISTS");
       }
-
+      console.log(country);
       return tx.user.create({
         data: {
           name: fullName.trim(),
