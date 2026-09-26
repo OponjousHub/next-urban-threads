@@ -42,6 +42,7 @@ export async function GET() {
     return NextResponse.json({
       administrators,
       currentUserRole: user.role,
+      user,
     });
   } catch (error) {
     console.error("GET ADMINISTRATORS ERROR:", error);
