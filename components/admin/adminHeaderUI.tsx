@@ -11,6 +11,7 @@ type AdminHeaderProps = {
     name?: string | null;
     email?: string | null;
     avatarUrl?: string | null;
+    role?: string | null;
   };
 };
 
@@ -76,7 +77,7 @@ export default function AdminHeaderUI({
               </p>
 
               <span className="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-                Administrator
+                {admin?.role === "OWNER" ? "Owner" : "Administrator"}
               </span>
             </div>
           </div>

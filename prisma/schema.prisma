@@ -334,6 +334,9 @@ model Tenant {
   reviewModeration   Boolean             @default(false)
   country            String
   address            Address[]
+  city               String?
+  state              String?
+  postalCode         String?
   cartItem           CartItem[]
   categories         Category[]
   contact            Contact[]
