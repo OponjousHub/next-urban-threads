@@ -38,20 +38,20 @@ export async function PATCH(req: Request) {
       },
 
       data: {
-        name: name?.trim() || "Your Store",
-        email: email?.trim() || null,
-        country: country?.trim() || tenant.country,
-        currency: currency || null,
-        logo: logo?.trim() || null,
-        primaryColor: primaryColor?.trim() || null,
-        timezone: timezone?.trim() || null,
+        name: name?.trim() ?? "Your Store",
+        email: email?.trim() ?? null,
+        country: country?.trim() ?? tenant.country,
+        currency: currency ?? tenant.currency,
+        logo: logo?.trim() ?? null,
+        primaryColor: primaryColor?.trim() ?? null,
+        timezone: timezone ?? "UTC",
 
-        businessAddress: address?.trim() || null,
+        businessAddress: address?.trim() ?? null,
 
-        heroCTA: heroCTA?.trim() || null,
-        heroImage: heroImage?.trim() || null,
-        heroSubtitle: heroSubtitle?.trim() || null,
-        heroTitle: heroTitle?.trim() || null,
+        heroCTA: heroCTA?.trim() ?? null,
+        heroImage: heroImage?.trim() ?? null,
+        heroSubtitle: heroSubtitle?.trim() ?? null,
+        heroTitle: heroTitle?.trim() ?? null,
       },
     });
 
