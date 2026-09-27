@@ -334,6 +334,7 @@ model Tenant {
   reviewModeration   Boolean             @default(false)
   country            String
   address            Address[]
+  businessAddress    String?
   city               String?
   state              String?
   postalCode         String?

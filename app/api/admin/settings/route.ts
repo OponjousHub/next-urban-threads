@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
+
 import { prisma } from "@/utils/prisma";
+
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function PATCH(req: Request) {
   try {
     const tenant = await getDefaultTenant();
-    if (!tenant) throw new Error("Tenant not found");
+
+    if (!tenant) {
+      return NextResponse.json(
+        { message: "Tenant not found" },
+        { status: 404 },
+      );
+    }
 
     const body = await req.json();
 
@@ -20,37 +28,37 @@ export async function PATCH(req: Request) {
       address,
       heroTitle,
       heroSubtitle,
-      // storeMode,
       heroCTA,
       heroImage,
     } = body;
 
     const updated = await prisma.tenant.update({
-      where: { id: tenant.id },
+      where: {
+        id: tenant.id,
+      },
+
       data: {
-        name,
-        email,
-        country,
-        currency,
-        logo,
-        primaryColor,
-        timezone,
-        heroCTA,
-        // storeMode,
-        heroImage,
-        heroSubtitle,
-        heroTitle,
-        address: {
-          updateMany: {
-            where: { id: tenant.id },
-            data: { street: address },
-          },
-        },
+        name: name?.trim() || "Your Store",
+        email: email?.trim() || null,
+        country: country?.trim() || tenant.country,
+        currency: currency || null,
+        logo: logo?.trim() || null,
+        primaryColor: primaryColor?.trim() || null,
+        timezone: timezone?.trim() || null,
+
+        businessAddress: address?.trim() || null,
+
+        heroCTA: heroCTA?.trim() || null,
+        heroImage: heroImage?.trim() || null,
+        heroSubtitle: heroSubtitle?.trim() || null,
+        heroTitle: heroTitle?.trim() || null,
       },
     });
 
     return NextResponse.json(updated);
   } catch (error) {
+    console.error("UPDATE SETTINGS ERROR:", error);
+
     return NextResponse.json(
       { message: "Failed to update settings" },
       { status: 500 },
@@ -59,21 +67,17 @@ export async function PATCH(req: Request) {
 }
 
 export async function GET() {
-  const tenant = await prisma.tenant.findFirst({
-    where: { isDefault: true },
-    include: {
-      address: true, // <- this loads the address relation
-    },
-  });
+  try {
+    const tenant = await getDefaultTenant();
 
-  if (!tenant) {
-    return new Response(JSON.stringify({ error: "Tenant not found" }), {
-      status: 404,
-    });
-  }
+    if (!tenant) {
+      return NextResponse.json(
+        { message: "Tenant not found" },
+        { status: 404 },
+      );
+    }
 
-  return new Response(
-    JSON.stringify({
+    return NextResponse.json({
       name: tenant.name,
       email: tenant.email,
       country: tenant.country,
@@ -82,13 +86,20 @@ export async function GET() {
       storeMode: tenant.storeMode,
       primaryColor: tenant.primaryColor,
       timezone: tenant.timezone,
+
       heroImage: tenant.heroImage,
       heroCTA: tenant.heroCTA,
       heroSubtitle: tenant.heroSubtitle,
       heroTitle: tenant.heroTitle,
-      address: tenant.address?.[0] // pick the first address if only one is used
-        ? `${tenant.address[0].street}, ${tenant.address[0].city}, ${tenant.address[0].state}`
-        : "",
-    }),
-  );
+
+      address: tenant.businessAddress || "",
+    });
+  } catch (error) {
+    console.error("GET SETTINGS ERROR:", error);
+
+    return NextResponse.json(
+      { message: "Failed to load settings" },
+      { status: 500 },
+    );
+  }
 }
