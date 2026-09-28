@@ -1,13 +1,15 @@
 import { toast } from "sonner";
+
 import { AdminToast } from "@/components/ui/adminToast";
 
 export const appToast = {
   loading: (title: string, description?: string) => {
     const duration = 20000;
+
     return toast.custom(
       () => (
         <AdminToast
-          type="warning"
+          type="loading"
           title={title}
           description={description}
           duration={duration}
