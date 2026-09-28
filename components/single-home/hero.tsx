@@ -37,7 +37,7 @@ export default function Hero() {
           <div className="flex gap-4">
             <Link href="/products">
               <button className="bg-[var(--color-primary)] px-8 py-4 rounded-full font-semibold hover:scale-105 transition">
-                Shop Now
+                {tenant.heroCTA || "Shop Now"}
               </button>
             </Link>
 

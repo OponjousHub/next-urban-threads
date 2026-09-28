@@ -35,6 +35,16 @@ export default async function RootLayout({
 
   const tenant = await getTenant();
 
+  console.log("STOREFRONT TENANT:", {
+    id: tenant.id,
+    name: tenant.name,
+    heroTitle: tenant.heroTitle,
+    heroSubtitle: tenant.heroSubtitle,
+    heroCTA: tenant.heroCTA,
+    heroImage: tenant.heroImage,
+    currency: tenant.currency,
+  });
+
   const primaryDark = darkenColor(primaryColor, 20);
   const primaryLight = lightenColor(primaryColor, 20);
   const primaryLighter = lighterColor(primaryColor, 60);
