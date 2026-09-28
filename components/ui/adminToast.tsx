@@ -1,6 +1,11 @@
-import { CheckCircle2, AlertCircle, AlertTriangle } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertCircle,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 
-type ToastType = "success" | "error" | "warning";
+type ToastType = "success" | "error" | "warning" | "loading";
 
 interface AdminToastProps {
   title: string;
@@ -17,21 +22,23 @@ export function AdminToast({
 }: AdminToastProps) {
   const styles = {
     success: {
-      accent: "var(--color-primary)",
-      bg: "#ffffff",
+      accent: "#16a34a",
       icon: CheckCircle2,
     },
 
     error: {
       accent: "#dc2626",
-      bg: "#ffffff",
       icon: AlertCircle,
     },
 
     warning: {
       accent: "#f59e0b",
-      bg: "#ffffff",
       icon: AlertTriangle,
+    },
+
+    loading: {
+      accent: "#2563eb",
+      icon: Loader2,
     },
   };
 
@@ -75,6 +82,7 @@ export function AdminToast({
       >
         <Icon
           size={22}
+          className={type === "loading" ? "animate-spin" : undefined}
           style={{
             color: current.accent,
           }}
@@ -91,13 +99,16 @@ export function AdminToast({
       </div>
 
       {/* Progress bar */}
-      <div
-        className="absolute bottom-0 left-0 h-1 bg-[var(--color-primary)]"
-        style={{
-          width: "100%",
-          animation: `shrink ${duration}ms linear forwards`,
-        }}
-      />
+      {duration > 0 && (
+        <div
+          className="absolute bottom-0 left-0 h-1"
+          style={{
+            width: "100%",
+            backgroundColor: current.accent,
+            animation: `shrink ${duration}ms linear forwards`,
+          }}
+        />
+      )}
     </div>
   );
 }
