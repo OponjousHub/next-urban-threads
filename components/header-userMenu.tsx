@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useTenant } from "@/store/tenant-provider-context";
