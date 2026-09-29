@@ -122,7 +122,7 @@ export default function ShippingRatesPageClient({ rates }: Props) {
           </p>
 
           <Link
-            href="/admin/shipping/methods/new"
+            href="/admin/shipping/rates/new"
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-black px-5 py-3 text-white"
           >
             <Plus className="h-4 w-4" />
