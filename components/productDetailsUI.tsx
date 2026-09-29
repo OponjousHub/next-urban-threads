@@ -202,11 +202,22 @@ export function ProductDetailUI({
 
   /* ---------------- RECENT ---------------- */
   useEffect(() => {
-    const stored = JSON.parse(
-      localStorage.getItem(`recent:${tenant.id}`) || "[]",
-    );
-    setRecent(stored);
-  }, []);
+    if (!tenant?.id) return;
+
+    try {
+      const storageKey = `recent:${tenant.id}`;
+
+      const stored = JSON.parse(localStorage.getItem(storageKey) || "[]");
+
+      setRecent(
+        Array.isArray(stored) ? stored.filter((p: any) => !p.deletedAt) : [],
+      );
+    } catch (error) {
+      console.error("Failed to load recently viewed products:", error);
+
+      setRecent([]);
+    }
+  }, [tenant?.id]);
 
   // RESET WHEN VARIANT CHANGES
   useEffect(() => {
