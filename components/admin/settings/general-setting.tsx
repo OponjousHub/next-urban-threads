@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageUpload } from "./tenant-images";
 import { z } from "zod";
 import { appToast } from "@/utils/appToast";
+import { Country } from "country-state-city";
 
 /* ---------------- Schema ---------------- */
 export const settingSchema = z.object({
@@ -43,7 +44,7 @@ export default function GeneralSettings() {
   ];
 
   const timezones = Intl.supportedValuesOf("timeZone");
-
+  const countries = Country.getAllCountries();
   const {
     register,
     handleSubmit,
@@ -444,9 +445,23 @@ export default function GeneralSettings() {
               </p>
             )}
           </div>
+          {/* Country */}
 
           <div>
-            <Input label="Country" {...register("country")} />
+            <label className="text-sm font-medium">Country</label>
+
+            <select
+              {...register("country")}
+              className="mt-1 w-full px-3 py-2 border rounded-lg text-sm bg-white"
+            >
+              <option value="">Select country</option>
+
+              {countries.map((country) => (
+                <option key={country.isoCode} value={country.isoCode}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
 
             {errors.country && (
               <p className="mt-1 text-xs text-red-500">

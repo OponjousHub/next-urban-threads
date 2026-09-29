@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
     // 1️⃣ Validate request body
     const parsed = RegisterSchema.safeParse(body);
-
+    console.log("USER DATA", parsed);
     if (!parsed.success) {
       const zodError = parsed.error;
       const formatted = zodError.flatten();
@@ -21,6 +21,7 @@ export async function POST(req: Request) {
     }
 
     const data = parsed.data;
+    console.log("USER ROUTE HIT______________ssss");
 
     // Pass validated data to controller
     const result = await UserController.register(data);

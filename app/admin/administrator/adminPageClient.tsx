@@ -398,7 +398,6 @@ export default function AdministratorsPageClient() {
                 <tbody className="divide-y divide-gray-100">
                   {administrators.map((admin) => {
                     const isOwner = admin.role === "OWNER";
-                    console.log(admin.role);
                     return (
                       <tr
                         key={admin.id}
