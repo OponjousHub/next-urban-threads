@@ -7,6 +7,7 @@ import { useTenant } from "@/store/tenant-provider-context";
 import ConfirmationModal from "@/components/modals/ConfirmationModal";
 import { appToast } from "@/utils/appToast";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { useRouter } from "next/navigation";
 
 type ShippingRate = {
   id: string;
@@ -45,7 +46,7 @@ export default function ShippingRatesPageClient({ rates }: Props) {
   const [loading, setLoading] = useState(false);
 
   const { tenant } = useTenant();
-
+  const router = useRouter();
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
 
@@ -61,18 +62,28 @@ export default function ShippingRatesPageClient({ rates }: Props) {
   async function deleteRate(id: string) {
     try {
       setDeleting(true);
+
       const res = await fetch(`/api/admin/shipping/rates/${id}`, {
         method: "DELETE",
       });
 
       if (!res.ok) {
         const data = await res.json();
+
         throw new Error(data.message ?? "Unable to delete shipping rate.");
       }
 
+      // Close the confirmation modal after successful deletion
+      setShowDeleteModal(false);
+      setRateId("");
+
       appToast.success("Success", "Shipping rate deleted successfully.");
+
+      // Refresh the page so the deleted rate disappears
+      router.refresh();
     } catch (err: any) {
       console.error(err.message ?? "Unable to delete.");
+
       appToast.error(
         "Failed",
         err.message || "Could not delete shipping rate!",
@@ -231,7 +242,7 @@ export default function ShippingRatesPageClient({ rates }: Props) {
                           setRateId(rate.id);
                           setShowDeleteModal(true);
                         }}
-                        disabled={loading}
+                        disabled={deleting}
                         className="rounded-lg border p-2 text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="h-4 w-4" />
