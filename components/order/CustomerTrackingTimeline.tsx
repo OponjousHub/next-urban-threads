@@ -32,8 +32,16 @@ export default function CustomerTrackingTimeline({
 
     const fetchEvents = async () => {
       try {
-        const res = await fetch(`/api/orders/${orderId}/tracking`);
+        const res = await fetch(`/api/orders/${orderId}/tracking`, {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch tracking events");
+        }
+
         const data = await res.json();
+
         const sorted = [...data].sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -41,13 +49,17 @@ export default function CustomerTrackingTimeline({
 
         setEvents(sorted);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch tracking events:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvents();
+
+    const interval = setInterval(fetchEvents, 5000);
+
+    return () => clearInterval(interval);
   }, [orderId]);
 
   /* ---------------- HELPERS ---------------- */

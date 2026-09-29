@@ -20,6 +20,9 @@ export default async function ProductDetailPage({
       tenantId: tenant.id,
       storeMode: tenant.storeMode,
     },
+    include: {
+      variants: true,
+    },
   });
 
   if (!product) return notFound();

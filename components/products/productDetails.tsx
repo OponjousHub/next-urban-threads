@@ -104,31 +104,59 @@ export default function ProductDetails({
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h2 className="font-semibold mb-4">Variants</h2>
 
+            {/* SIZES */}
             <div className="mb-4">
               <p className="text-sm text-gray-500">Sizes</p>
+
               <div className="flex gap-2 mt-2 flex-wrap">
-                {product.sizes?.map((s: string) => (
+                {(
+                  Array.from(
+                    new Set(
+                      (product.variants ?? [])
+                        .map((variant: any) => variant.size)
+                        .filter(Boolean),
+                    ),
+                  ) as string[]
+                ).map((size) => (
                   <span
-                    key={s}
+                    key={size}
                     className="px-3 py-1 bg-gray-100 rounded-md text-sm"
                   >
-                    {s}
+                    {size}
                   </span>
                 ))}
+
+                {!(product.variants ?? []).some(
+                  (variant: any) => variant.size,
+                ) && <span className="text-sm text-gray-400">No sizes</span>}
               </div>
             </div>
 
+            {/* COLOURS */}
             <div>
               <p className="text-sm text-gray-500">Colours</p>
+
               <div className="flex gap-2 mt-2 flex-wrap">
-                {product.colours?.map((c: string) => (
+                {(
+                  Array.from(
+                    new Set(
+                      (product.variants ?? [])
+                        .map((variant: any) => variant.color)
+                        .filter(Boolean),
+                    ),
+                  ) as string[]
+                ).map((color) => (
                   <span
-                    key={c}
+                    key={color}
                     className="px-3 py-1 bg-gray-100 rounded-md text-sm"
                   >
-                    {c}
+                    {color}
                   </span>
                 ))}
+
+                {!(product.variants ?? []).some(
+                  (variant: any) => variant.color,
+                ) && <span className="text-sm text-gray-400">No colours</span>}
               </div>
             </div>
           </div>
