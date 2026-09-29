@@ -202,7 +202,9 @@ export function ProductDetailUI({
 
   /* ---------------- RECENT ---------------- */
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("recent") || "[]");
+    const stored = JSON.parse(
+      localStorage.getItem(`recent:${tenant.id}`) || "[]",
+    );
     setRecent(stored);
   }, []);
 

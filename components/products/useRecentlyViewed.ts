@@ -1,20 +1,29 @@
 import { useEffect } from "react";
+import { useTenant } from "@/store/tenant-provider-context";
 
 export function useRecentlyViewed(product: any) {
-  useEffect(() => {
-    if (!product?.id) return;
+  const { tenant } = useTenant();
 
-    // 🚫 don't save deleted products
+  useEffect(() => {
+    if (!product?.id || !tenant?.id) return;
+
+    // Don't save deleted products
     if (product.deletedAt) return;
 
-    const stored = JSON.parse(localStorage.getItem("recent") || "[]");
+    const storageKey = `recent:${tenant.id}`;
 
-    const filtered = stored.filter(
-      (p: any) => p.id !== product.id && !p.deletedAt,
-    );
+    try {
+      const stored = JSON.parse(localStorage.getItem(storageKey) || "[]");
 
-    filtered.unshift(product);
+      const filtered = stored.filter(
+        (p: any) => p.id !== product.id && !p.deletedAt,
+      );
 
-    localStorage.setItem("recent", JSON.stringify(filtered.slice(0, 12)));
-  }, [product]);
+      filtered.unshift(product);
+
+      localStorage.setItem(storageKey, JSON.stringify(filtered.slice(0, 12)));
+    } catch (error) {
+      console.error("Failed to save recently viewed products:", error);
+    }
+  }, [product, tenant?.id]);
 }
