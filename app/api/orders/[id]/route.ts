@@ -189,59 +189,6 @@ export async function PATCH(
       }
     }
 
-    /*
-     * ---------------------------------------------------------
-     * UPDATE ORDER + CREATE TRACKING EVENT
-     * ---------------------------------------------------------
-     */
-
-    // const updatedOrder = await prisma.$transaction(async (tx) => {
-    //   const updateData: {
-    //     status?: OrderStatus;
-    //     paymentStatus?: PaymentStatus;
-    //   } = {};
-
-    //   if (status) {
-    //     updateData.status = status;
-    //   }
-
-    //   if (paymentStatus) {
-    //     updateData.paymentStatus = paymentStatus;
-    //   }
-
-    //   const updated = await tx.order.update({
-    //     where: {
-    //       id: existingOrder.id,
-    //     },
-    //     data: updateData,
-    //   });
-
-    //   /*
-    //    * Only create a tracking event when the order status
-    //    * actually changed.
-    //    */
-    //   if (status && status !== existingOrder.status) {
-    //     const trackingDetails = getTrackingDetails(status);
-
-    //     await tx.orderTrackingEvent.create({
-    //       data: {
-    //         orderId: existingOrder.id,
-    //         tenantId: tenant.id,
-
-    //         type: TrackingEventType.STATUS_CHANGE,
-
-    //         status,
-
-    //         title: trackingDetails.title,
-
-    //         description: trackingDetails.description,
-    //       },
-    //     });
-    //   }
-
-    //   return updated;
-    // });
-
     const updatedOrder = await prisma.$transaction(async (tx) => {
       const updateData: {
         status?: OrderStatus;

@@ -240,6 +240,10 @@ export async function POST(req: NextRequest) {
     // 5. Calculate merchandise subtotal
     // ---------------------------------------------------------
 
+    // ---------------------------------------------------------
+    // 5. Calculate merchandise subtotal
+    // ---------------------------------------------------------
+
     let merchandiseSubtotal = new Prisma.Decimal(0);
 
     for (const item of items) {
@@ -252,11 +256,40 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const variant = product.variants.find(
-        (variant) => variant.id === item.variantId,
-      );
+      // -------------------------------------------------------
+      // Resolve selected variant
+      // -------------------------------------------------------
 
+      let variant = null;
+
+      if (item.variantId) {
+        variant = product.variants.find(
+          (variant) => variant.id === item.variantId,
+        );
+
+        // A variant was supplied but does not belong to this product.
+        if (!variant) {
+          return NextResponse.json(
+            {
+              message: `Selected variant for ${product.name} is no longer available.`,
+            },
+            { status: 400 },
+          );
+        }
+      }
+
+      // -------------------------------------------------------
+      // Resolve the actual selling price
+      //
+      // Variant price takes priority over product base price.
+      // -------------------------------------------------------
+
+      const unitPrice = variant?.price ?? product.price;
+
+      // -------------------------------------------------------
       // Inventory validation
+      // -------------------------------------------------------
+
       if (variant) {
         if (item.quantity > variant.stock) {
           return NextResponse.json(
@@ -277,11 +310,14 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      // -------------------------------------------------------
+      // Add the ACTUAL selling price to subtotal
+      // -------------------------------------------------------
+
       merchandiseSubtotal = merchandiseSubtotal.plus(
-        product.price.mul(item.quantity),
+        unitPrice.mul(item.quantity),
       );
     }
-
     // ---------------------------------------------------------
     // 6. Find the customer's shipping zone
     // ---------------------------------------------------------
@@ -521,6 +557,10 @@ export async function POST(req: NextRequest) {
     // 13. Create order items
     // ---------------------------------------------------------
 
+    // ---------------------------------------------------------
+    // 13. Create order items
+    // ---------------------------------------------------------
+
     const orderItems = items.map((item: any) => {
       const product = products.find((product) => product.id === item.productId);
 
@@ -528,22 +568,40 @@ export async function POST(req: NextRequest) {
         throw new Error("Product not found");
       }
 
-      const variant = product.variants.find(
-        (variant) => variant.id === item.variantId,
-      );
+      let variant = null;
+
+      if (item.variantId) {
+        variant = product.variants.find(
+          (variant) => variant.id === item.variantId,
+        );
+
+        if (!variant) {
+          throw new Error(
+            `Selected variant for ${product.name} is no longer available.`,
+          );
+        }
+      }
+
+      // Variant price is authoritative when a variant exists.
+      const unitPrice = variant?.price ?? product.price;
 
       return {
         productId: product.id,
         quantity: item.quantity,
-        price: product.price,
+
+        // IMPORTANT:
+        // Store the actual price paid for this line item.
+        price: unitPrice,
+
         tenantId: tenant.id,
+
         variantId: variant?.id,
         variantColor: variant?.color,
         variantSize: variant?.size,
+
         image: variant?.image || product.images?.[0],
       };
     });
-
     // ---------------------------------------------------------
     // 14. Create payment reference
     // ---------------------------------------------------------
@@ -717,6 +775,13 @@ export async function POST(req: NextRequest) {
       reference: order.paymentReference,
       callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/order/${order.id}`,
     });
+
+    console.log("========== FLUTTERWAVE INITIALIZE ==========");
+    console.log("Order ID:", order.id);
+    console.log("Order total:", order.totalAmount);
+    console.log("Currency:", order.currency);
+    // console.log("Flutterwave amount:", amount);
+    console.log("============================================");
 
     // ---------------------------------------------------------
     // 22. Respond
