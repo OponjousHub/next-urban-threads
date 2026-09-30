@@ -6,7 +6,6 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import RefundReviewModal from "@/components/refunds/refundReviewModal";
 import { useTenant } from "@/store/tenant-provider-context";
 import RefundKpis from "@/components/admin/refunds/refundKpis";
-import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
 type Refund = {
   id: string;

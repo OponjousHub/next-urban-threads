@@ -582,7 +582,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Variant price is authoritative when a variant exists.
-      const unitPrice = variant?.price ?? product.price;
+      const unitPrice = new Prisma.Decimal(variant?.price ?? product.price);
 
       return {
         productId: product.id,
