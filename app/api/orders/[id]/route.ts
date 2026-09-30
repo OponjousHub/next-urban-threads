@@ -195,6 +195,53 @@ export async function PATCH(
      * ---------------------------------------------------------
      */
 
+    // const updatedOrder = await prisma.$transaction(async (tx) => {
+    //   const updateData: {
+    //     status?: OrderStatus;
+    //     paymentStatus?: PaymentStatus;
+    //   } = {};
+
+    //   if (status) {
+    //     updateData.status = status;
+    //   }
+
+    //   if (paymentStatus) {
+    //     updateData.paymentStatus = paymentStatus;
+    //   }
+
+    //   const updated = await tx.order.update({
+    //     where: {
+    //       id: existingOrder.id,
+    //     },
+    //     data: updateData,
+    //   });
+
+    //   /*
+    //    * Only create a tracking event when the order status
+    //    * actually changed.
+    //    */
+    //   if (status && status !== existingOrder.status) {
+    //     const trackingDetails = getTrackingDetails(status);
+
+    //     await tx.orderTrackingEvent.create({
+    //       data: {
+    //         orderId: existingOrder.id,
+    //         tenantId: tenant.id,
+
+    //         type: TrackingEventType.STATUS_CHANGE,
+
+    //         status,
+
+    //         title: trackingDetails.title,
+
+    //         description: trackingDetails.description,
+    //       },
+    //     });
+    //   }
+
+    //   return updated;
+    // });
+
     const updatedOrder = await prisma.$transaction(async (tx) => {
       const updateData: {
         status?: OrderStatus;
@@ -209,33 +256,66 @@ export async function PATCH(
         updateData.paymentStatus = paymentStatus;
       }
 
-      const updated = await tx.order.update({
-        where: {
-          id: existingOrder.id,
-        },
-        data: updateData,
-      });
+      // ---------------------------------------------------------
+      // IMPORTANT:
+      // Atomically update the order only if its status is still
+      // the status we originally read.
+      //
+      // This prevents multiple concurrent PATCH requests from
+      // creating multiple tracking events for the same transition.
+      // ---------------------------------------------------------
 
-      /*
-       * Only create a tracking event when the order status
-       * actually changed.
-       */
+      let updated;
+
       if (status && status !== existingOrder.status) {
+        const statusUpdate = await tx.order.updateMany({
+          where: {
+            id: existingOrder.id,
+            tenantId: tenant.id,
+            status: existingOrder.status,
+          },
+          data: updateData,
+        });
+
+        // Another request already changed the order status.
+        if (statusUpdate.count === 0) {
+          return tx.order.findUnique({
+            where: {
+              id: existingOrder.id,
+            },
+          });
+        }
+
+        // This request successfully performed the status transition.
+        updated = await tx.order.findUnique({
+          where: {
+            id: existingOrder.id,
+          },
+        });
+
+        if (!updated) {
+          throw new Error("Updated order could not be found");
+        }
+
         const trackingDetails = getTrackingDetails(status);
 
         await tx.orderTrackingEvent.create({
           data: {
             orderId: existingOrder.id,
             tenantId: tenant.id,
-
             type: TrackingEventType.STATUS_CHANGE,
-
             status,
-
             title: trackingDetails.title,
-
             description: trackingDetails.description,
           },
+        });
+      } else {
+        // Payment-only update, or no actual status transition.
+        updated = await tx.order.update({
+          where: {
+            id: existingOrder.id,
+          },
+          data: updateData,
         });
       }
 

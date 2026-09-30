@@ -126,26 +126,6 @@ export default function OrdersTable({
 
       if (!res.ok) throw new Error();
 
-      // CREATE TRACKING EVENT
-      if (action.type === "status") {
-        const config = STATUS_CONFIG[action.value];
-
-        if (config) {
-          await fetch(`/api/admin/orders/${orderId}/tracking`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              status: action.value,
-              title: config.title,
-              message: config.message,
-              type: "STATUS_CHANGE",
-            }),
-          });
-        }
-      }
-
       appToast.success(
         "Order updated",
         action.type === "payment"
