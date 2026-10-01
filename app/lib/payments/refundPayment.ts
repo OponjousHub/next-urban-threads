@@ -1,6 +1,8 @@
 type RefundInput = {
   amount: number;
   reference: string;
+  provider: "PAYSTACK" | "FLUTTERWAVE";
+  flutterwaveTransactionId?: string | null;
 };
 
 export type RefundPaymentResult = {
@@ -12,13 +14,33 @@ export type RefundPaymentResult = {
 export async function refundPayment({
   amount,
   reference,
+  provider,
+  flutterwaveTransactionId,
 }: RefundInput): Promise<RefundPaymentResult> {
-  // Detect provider based on the payment reference.
-  if (reference.startsWith("ps_")) {
+  if (provider === "PAYSTACK") {
     return refundPaystack(amount, reference);
   }
 
-  return refundFlutterwave(amount, reference);
+  if (provider === "FLUTTERWAVE") {
+    if (!flutterwaveTransactionId) {
+      console.error(
+        "Missing Flutterwave transaction ID for refund:",
+        reference,
+      );
+
+      return {
+        success: false,
+        provider: "flutterwave",
+      };
+    }
+
+    return refundFlutterwave(amount, flutterwaveTransactionId);
+  }
+
+  return {
+    success: false,
+    provider: String(provider),
+  };
 }
 
 /* ==================================================
@@ -75,11 +97,11 @@ async function refundPaystack(
 
 async function refundFlutterwave(
   amount: number,
-  reference: string,
+  transactionId: string,
 ): Promise<RefundPaymentResult> {
   try {
     const res = await fetch(
-      `https://api.flutterwave.com/v3/transactions/${reference}/refund`,
+      `https://api.flutterwave.com/v3/transactions/${transactionId}/refund`,
       {
         method: "POST",
         headers: {

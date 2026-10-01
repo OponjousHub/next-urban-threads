@@ -447,6 +447,8 @@ export async function processRefund(refundId: string) {
     paymentResult = await refundPayment({
       amount: refundAmount,
       reference: refund.order.paymentReference!,
+      flutterwaveTransactionId: refund.order.flutterwaveTransactionId,
+      provider: refund.order.paymentProvider,
     });
   } catch (error) {
     console.error("REFUND PAYMENT ERROR:", error);

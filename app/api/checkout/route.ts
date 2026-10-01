@@ -775,6 +775,17 @@ export async function POST(req: NextRequest) {
       callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/order/${order.id}`,
     });
 
+    if (order.paymentProvider === "FLUTTERWAVE" && payment.transactionId) {
+      await prisma.order.update({
+        where: {
+          id: order.id,
+        },
+        data: {
+          flutterwaveTransactionId: String(payment.transactionId),
+        },
+      });
+    }
+
     console.log("========== FLUTTERWAVE INITIALIZE ==========");
     console.log("Order ID:", order.id);
     console.log("Order total:", order.totalAmount);

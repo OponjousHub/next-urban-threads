@@ -26,6 +26,7 @@ export interface PaymentProvider {
     callbackUrl: string;
   }): Promise<{
     authorizationUrl: string;
+    transactionId?: string | number;
     reference: string;
   }>;
 
