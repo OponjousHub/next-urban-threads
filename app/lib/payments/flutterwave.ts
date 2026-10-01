@@ -53,6 +53,7 @@ export class FlutterwaveProvider implements PaymentProvider {
     return {
       authorizationUrl: res.data.data.link,
       reference,
+      transactionId: res.data.data.id,
     };
   }
 
