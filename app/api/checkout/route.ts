@@ -775,7 +775,11 @@ export async function POST(req: NextRequest) {
       callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/order/${order.id}`,
     });
 
-    if (order.paymentProvider === "FLUTTERWAVE" && payment.transactionId) {
+    if (
+      order.paymentProvider === "FLUTTERWAVE" &&
+      "transactionId" in payment &&
+      payment.transactionId
+    ) {
       await prisma.order.update({
         where: {
           id: order.id,
