@@ -83,20 +83,6 @@ export async function submitRefundRequest(data: RefundRequestInput) {
 
   const requestedAmount = calculateRefundAmount(data.items);
 
-  console.log(
-    "VARIANT INFOR",
-    data.items.map((item) => ({
-      productId: item.productId,
-      variantId: item.variantId,
-    })),
-  );
-
-  const variant = await prisma.productVariant.findUnique({
-    where: {
-      id: data.items[0].variantId!,
-    },
-  });
-
   // Create refund request + items
   const refund = await prisma.refundRequest.create({
     data: {

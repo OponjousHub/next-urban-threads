@@ -38,7 +38,7 @@ export default function RefundRequestStatus({ status, refund }: Props) {
   const events = refund?.trackingEvents;
 
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm mt-6">
+    <div className="rounded-2xl border bg-white p-6 shadow-sm mt-6 mb-6">
       <h2 className="mb-6 text-lg font-semibold">Refund Progress</h2>
 
       {/* Main timeline */}

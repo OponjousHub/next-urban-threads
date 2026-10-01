@@ -223,15 +223,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     const result = await provider.verifyPayment(order.paymentReference);
 
-    console.log("========== ORDER PAYMENT VERIFY ==========");
-    console.log("Order ID:", order.id);
-    console.log("Payment provider:", order.paymentProvider);
-    console.log("Payment reference:", order.paymentReference);
-    console.log("Provider verification result:", result);
-    console.log("Current order paymentStatus:", order.paymentStatus);
-    console.log("Current order status:", order.status);
-    console.log("===========================================");
-
     // ---------------------------
     // 9. Genuine pending payment
     // ---------------------------
@@ -402,12 +393,16 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         paymentStatus: PaymentStatus.PAID,
         status: OrderStatus.PROCESSING,
 
-        // Keep transaction ID for refunds
-        paymentReference:
+        // Keep the original payment reference / tx_ref
+        paymentReference: order.paymentReference,
+
+        // Flutterwave transaction ID — needed for refunds
+        flutterwaveTransactionId:
           result.transactionId !== undefined
             ? String(result.transactionId)
-            : order.paymentReference,
+            : undefined,
 
+        // Gateway transaction reference
         paymentTxRef: result.txRef,
       },
 
