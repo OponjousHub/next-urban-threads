@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  FiAlertCircle,
-  FiCheck,
-  FiX,
-  FiLoader,
-  FiChevronDown,
-} from "react-icons/fi";
+import { FiAlertCircle, FiCheck, FiX, FiLoader } from "react-icons/fi";
 
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { appToast } from "@/utils/appToast";
@@ -95,7 +89,7 @@ export default function RefundReviewModal({
           : {}),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       appToast.dismiss(loadingToast);
 

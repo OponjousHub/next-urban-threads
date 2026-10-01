@@ -209,6 +209,7 @@ model Order {
   shippingMethodId   String?
   refundStatus       RefundStatus         @default(NONE)
   paymentTxRef       String?
+  flutterwaveTransactionId String?
   storeMode          StoreMode            @default(SINGLE_VENDOR)
 
   shippingCost       Decimal              @default(0)
