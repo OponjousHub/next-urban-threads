@@ -23,6 +23,12 @@ type Props = {
   } | null;
 };
 
+function getCountryName(countryCode?: string | null) {
+  if (!countryCode) return "";
+
+  return Country.getCountryByCode(countryCode)?.name ?? countryCode;
+}
+
 export default function CustomerDetailUI({ customer, address }: Props) {
   const { tenant } = useTenant();
   const totalOrders = customer.orders.length;
@@ -113,7 +119,9 @@ export default function CustomerDetailUI({ customer, address }: Props) {
 
           <Info
             label="Address"
-            value={`${address?.street}, ${address?.city}, ${address?.state ? address?.state : ""} ${address?.state ? "state" : ""}, ${address?.country}`}
+            value={`${address?.street}, ${address?.city}, ${
+              address?.state ? `${address.state} state, ` : ""
+            }${getCountryName(address?.country)}`}
           />
 
           <Info label="Status" value={customer.status} />
@@ -140,9 +148,7 @@ export default function CustomerDetailUI({ customer, address }: Props) {
             <tbody>
               {customer.orders.map((order: any) => (
                 <tr key={order.id} className="border-b">
-                  <td className="p-4">
-                    {formatCurrency(order.id.slice(0, 8), tenant.currency)}
-                  </td>
+                  <td className="p-4">#{order.id.slice(0, 8)}</td>
 
                   <td className="p-4">
                     {new Date(order.createdAt).toLocaleDateString()}
