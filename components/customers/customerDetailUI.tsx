@@ -2,6 +2,7 @@
 
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useTenant } from "@/store/tenant-provider-context";
+import { Country } from "country-state-city";
 
 type Props = {
   customer: any;
@@ -100,7 +101,13 @@ export default function CustomerDetailUI({ customer, address }: Props) {
         <div className="grid gap-4 md:grid-cols-2">
           <Info label="Phone" value={customer.phone} />
 
-          <Info label="Country" value={customer.country} />
+          <Info
+            label="Country"
+            value={
+              Country.getCountryByCode(customer.country)?.name ??
+              customer.country
+            }
+          />
 
           <Info label="City" value={customer.city} />
 
