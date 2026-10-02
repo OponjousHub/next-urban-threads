@@ -790,13 +790,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    console.log("========== FLUTTERWAVE INITIALIZE ==========");
-    console.log("Order ID:", order.id);
-    console.log("Order total:", order.totalAmount);
-    console.log("Currency:", order.currency);
-    // console.log("Flutterwave amount:", amount);
-    console.log("============================================");
-
     // ---------------------------------------------------------
     // 22. Respond
     // ---------------------------------------------------------

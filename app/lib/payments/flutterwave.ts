@@ -78,15 +78,18 @@ export class FlutterwaveProvider implements PaymentProvider {
 
       const data = res.data?.data;
 
-      console.log("========== FLUTTERWAVE VERIFY ==========");
-      console.log("Reference sent:", reference);
-      console.log("Flutterwave transaction ID:", data?.id);
-      console.log("Flutterwave tx_ref:", data?.tx_ref);
-      console.log("Flutterwave status:", data?.status);
-      console.log("Flutterwave amount:", data?.amount);
-      console.log("Flutterwave currency:", data?.currency);
-      console.log("Flutterwave processor response:", data?.processor_response);
-      console.log("==========================================");
+      console.log("========== FLUTTERWAVE ORIGINAL TRANSACTION ==========");
+      console.log("Transaction ID:", data?.data?.id);
+      console.log("TX REF:", data?.data?.tx_ref);
+      console.log("FLW REF:", data?.data?.flw_ref);
+      console.log("Amount:", data?.data?.amount);
+      console.log("Charged Amount:", data?.data?.charged_amount);
+      console.log("Amount Settled:", data?.data?.amount_settled);
+      console.log("Currency:", data?.data?.currency);
+      console.log("Status:", data?.data?.status);
+      console.log("Processor Response:", data?.data?.processor_response);
+      console.log("Payment Type:", data?.data?.payment_type);
+      console.log("======================================================");
 
       // No transaction data returned.
       // This is NOT the same as a real pending transaction.

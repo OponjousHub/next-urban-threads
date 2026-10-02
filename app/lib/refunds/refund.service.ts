@@ -381,8 +381,11 @@ export async function processRefund(refundId: string) {
     throw new Error("This refund has already been successfully processed.");
   }
 
-  const refundAmount = refund.approvedAmount ?? refund.requestedAmount;
+  const refundAmount = Number(refund.approvedAmount ?? refund.requestedAmount);
 
+  if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
+    throw new Error("Invalid refund amount.");
+  }
   /*
    * --------------------------------------------------
    * Mark refund as PROCESSING
