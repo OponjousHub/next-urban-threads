@@ -44,6 +44,12 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
             product: true,
           },
         },
+
+        refundRequest: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
     });
     /* --------------------------------------------------
