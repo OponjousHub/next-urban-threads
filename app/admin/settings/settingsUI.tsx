@@ -36,7 +36,6 @@ export default function SettingsPageUI({ admin }: AdminProps) {
     { id: "policies", label: "Shipping & Return" },
     { id: "about", label: "Manage About Us" },
     { id: "legal", label: "Legal setting" },
-    { id: "refund", label: "Manage Refund" },
     { id: "storeMode", label: "Manage store mode" },
     { id: "faqs", label: "FAQs" },
   ];
@@ -90,7 +89,6 @@ export default function SettingsPageUI({ admin }: AdminProps) {
           {activeTab === "faqs" && <FAQForm />}
           {activeTab === "about" && <AboutSettings />}
           {activeTab === "legal" && <LegalSettings />}
-          {activeTab === "refund" && <RefundsPage />}
           {activeTab === "storeMode" && (
             <StoreModeToggle
               initialMode={storeMode === "SINGLE_VENDOR" ? "SINGLE" : "MULTI"}

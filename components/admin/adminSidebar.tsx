@@ -20,6 +20,7 @@ import {
   FiTruck,
   FiUser,
   FiTag,
+  FiRotateCcw,
 } from "react-icons/fi";
 
 interface Props {
@@ -182,7 +183,7 @@ export default function AdminSidebar({
         )}
         <SidebarItem
           href="/admin/refunds"
-          icon={<FiUser size={20} />}
+          icon={<FiRotateCcw size={20} />}
           label="Manage Refund"
           collapsed={collapsed}
           pathname={pathname}
