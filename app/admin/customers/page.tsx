@@ -113,12 +113,12 @@ export default async function VendorCustomersPage({
   ).length;
 
   //Get Total count for to get the number of pages
-  const totalCustomersCount = await prisma.user.count({
-    where: {
-      tenantId: tenant.id,
-      isDeleted: false,
-    },
-  });
+  // const totalCustomersCount = await prisma.user.count({
+  //   where: {
+  //     tenantId: tenant.id,
+  //     isDeleted: false,
+  //   },
+  // });
 
   const admin = {
     name: user?.name,

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTenant } from "@/store/tenant-provider-context";
 import { FiX } from "react-icons/fi";
-import RefundsPage from "@/app/admin/refunds/page";
 import {
   FiHome,
   FiShoppingBag,
