@@ -4,6 +4,7 @@ interface Review {
   id: string;
   rating: number;
   comment: string | null;
+  reply: string | null;
   user: {
     name: string | null;
   };
@@ -20,10 +21,12 @@ export function ReviewList({ reviews }: Props) {
     <div className="space-y-6">
       {reviews.map((review) => (
         <div key={review.id} className="border-b pb-4">
+          {/* Customer review */}
           <div className="flex items-center justify-between">
             <div className="font-semibold">
               {review.user.name ?? "Anonymous"}
             </div>
+
             <div className="flex items-center gap-1">
               {[...Array(review.rating)].map((_, i) => (
                 <Star
@@ -35,10 +38,21 @@ export function ReviewList({ reviews }: Props) {
           </div>
 
           {review.verifiedPurchase && (
-            <div className="text-xs text-green-600 mt-1">Verified Purchase</div>
+            <div className="mt-1 text-xs text-green-600">Verified Purchase</div>
           )}
 
-          <p className="text-sm mt-2 text-muted-foreground">{review.comment}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{review.comment}</p>
+
+          {/* Admin reply */}
+          {review.reply && (
+            <div className="mt-4 rounded-lg bg-gray-50 p-4">
+              <p className="text-sm font-semibold text-gray-900">
+                Store Response
+              </p>
+
+              <p className="mt-1 text-sm text-gray-600">{review.reply}</p>
+            </div>
+          )}
         </div>
       ))}
     </div>

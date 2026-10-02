@@ -66,7 +66,7 @@ export function ProductDetailUI({
   const { addToCart } = useCart();
   const router = useRouter();
   const { tenant } = useTenant();
-
+  console.log("REVIEWS:", reviews);
   useRecentlyViewed(product);
 
   if (!product) return <ProductDetailSkeleton />;
