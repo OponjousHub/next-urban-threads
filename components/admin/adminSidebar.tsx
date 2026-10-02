@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTenant } from "@/store/tenant-provider-context";
 import { FiX } from "react-icons/fi";
+import RefundsPage from "@/app/admin/refunds/page";
 import {
   FiHome,
   FiShoppingBag,
@@ -179,6 +180,14 @@ export default function AdminSidebar({
             onNavigate={onNavigate}
           />
         )}
+        <SidebarItem
+          href="/admin/refunds"
+          icon={<FiUser size={20} />}
+          label="Manage Refund"
+          collapsed={collapsed}
+          pathname={pathname}
+          onNavigate={onNavigate}
+        />
         <SidebarItem
           href="/admin/administrator"
           icon={<FiUser size={20} />}
