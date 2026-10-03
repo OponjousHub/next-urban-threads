@@ -2,106 +2,171 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useTenant } from "@/store/tenant-provider-context";
+
 import { appToast } from "@/utils/appToast";
 import { Country, State } from "country-state-city";
+
+type Address = {
+  id: string;
+  fullName: string | null;
+  street: string;
+  city: string;
+  state?: string | null;
+  postalCode?: string | null;
+  country: string;
+  phone?: string | null;
+  isDefault: boolean;
+};
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  address?: any; // present = edit mode
+  address?: Address | null;
+};
+
+const EMPTY_FORM = {
+  fullName: "",
+  street: "",
+  city: "",
+  state: "",
+  country: "",
+  phone: "",
+  postalCode: "",
+  isDefault: false,
 };
 
 export default function AddAddressModal({ open, onClose, address }: Props) {
   const router = useRouter();
+
   const [loading, setLoading] = useState(false);
-  const { tenant } = useTenant();
+
+  const [form, setForm] = useState(EMPTY_FORM);
+
   const countries = Country.getAllCountries();
 
-  const [form, setForm] = useState({
-    fullName: "",
-    street: "",
-    city: "",
-    state: "",
-    country: "",
-    phone: "",
-    postalCode: "",
-    isDefault: false,
-  });
   const states = State.getStatesOfCountry(form.country);
 
+  /**
+   * Load the selected address when editing.
+   *
+   * When address becomes null, reset the form so that
+   * "Add Address" always starts with a completely empty form.
+   */
   useEffect(() => {
     if (address) {
       setForm({
-        fullName: address.fullName,
-        street: address.street,
-        city: address.city,
+        fullName: address.fullName ?? "",
+        street: address.street ?? "",
+        city: address.city ?? "",
         state: address.state ?? "",
-        country: address.country,
+        country: address.country ?? "",
         phone: address.phone ?? "",
         postalCode: address.postalCode ?? "",
-        isDefault: address.isDefault,
+        isDefault: address.isDefault ?? false,
       });
+    } else {
+      setForm(EMPTY_FORM);
     }
   }, [address]);
 
-  const handleChange = (key: string, value: any) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  /**
+   * Also reset the form whenever the modal is closed.
+   *
+   * This protects against stale values regardless of whether
+   * the modal was closed by Cancel, X, or after saving.
+   */
+  useEffect(() => {
+    if (!open) {
+      setForm(EMPTY_FORM);
+    }
+  }, [open]);
+
+  const handleChange = (
+    key: keyof typeof EMPTY_FORM,
+    value: string | boolean,
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleClose = () => {
+    setForm(EMPTY_FORM);
+    onClose();
   };
 
   const handleSubmit = async () => {
     setLoading(true);
-    const url = address ? `/api/addresses/${address.id}` : "/api/addresses";
 
-    const method = address ? "PATCH" : "POST";
+    try {
+      const isEdit = Boolean(address);
 
-    const res = await fetch(url, {
-      method: method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+      const url = isEdit ? `/api/addresses/${address!.id}` : "/api/addresses";
 
-    setLoading(false);
+      const method = isEdit ? "PATCH" : "POST";
 
-    if (!res.ok) {
-      appToast.error(
-        "Error",
-        `${`Failed to ${address ? "update" : "add"} address ❌`}`,
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        appToast.error(
+          "Error",
+          `Failed to ${isEdit ? "update" : "add"} address ❌`,
+        );
+        return;
+      }
+
+      appToast.success(
+        "Success",
+        `Address ${isEdit ? "updated" : "added"} successfully`,
       );
 
-      return;
+      // Clear form before closing.
+      setForm(EMPTY_FORM);
+
+      // Close modal.
+      onClose();
+
+      // Refresh server-rendered address list.
+      router.refresh();
+    } catch (error) {
+      console.error("ADDRESS SUBMIT ERROR:", error);
+
+      appToast.error(
+        "Error",
+        `Failed to ${address ? "update" : "add"} address ❌`,
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setForm({
-      fullName: "",
-      street: "",
-      city: "",
-      state: "",
-      country: "",
-      phone: "",
-      postalCode: "",
-      isDefault: false,
-    });
-    appToast.success(
-      "Success",
-      `${`Address ${address ? "update" : "add"} successfully`}`,
-    );
-
-    onClose();
-    router.refresh();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          handleClose();
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">
@@ -122,12 +187,14 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
               value={form.street}
               onChange={(e) => handleChange("street", e.target.value)}
             />
+
             <Input
               placeholder="City (optional)"
               value={form.city}
               onChange={(e) => handleChange("city", e.target.value)}
             />
           </div>
+
           <div className="grid grid-cols-2 gap-3">
             <select
               value={form.state}
@@ -147,10 +214,13 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
             <select
               value={form.country}
               onChange={(e) => {
-                handleChange("country", e.target.value);
+                const country = e.target.value;
 
-                // Reset state when country changes
-                handleChange("state", "");
+                setForm((prev) => ({
+                  ...prev,
+                  country,
+                  state: "",
+                }));
               }}
               className="w-full rounded-lg border p-3"
             >
@@ -170,8 +240,9 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
               value={form.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
             />
+
             <Input
-              placeholder="postalCode"
+              placeholder="Postal Code"
               value={form.postalCode}
               onChange={(e) => handleChange("postalCode", e.target.value)}
             />
@@ -180,14 +251,17 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
           <div className="flex items-center gap-2">
             <Checkbox
               checked={form.isDefault}
-              onCheckedChange={(v) => handleChange("isDefault", v)}
+              onCheckedChange={(value) =>
+                handleChange("isDefault", value === true)
+              }
               className="text-white"
             />
+
             <span className="text-sm">Set as default address</span>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={handleClose} disabled={loading}>
               Cancel
             </Button>
 
