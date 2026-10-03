@@ -47,7 +47,26 @@ export default function CustomerTrackingTimeline({
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
 
-        setEvents(sorted);
+        // Only display the latest "Payment confirmed" event.
+        // Any subsequent/duplicate payment-confirmed events are ignored.
+        let paymentConfirmedShown = false;
+
+        const filtered = sorted.filter((event) => {
+          const isPaymentConfirmed =
+            event.title?.trim().toLowerCase() === "payment confirmed";
+
+          if (isPaymentConfirmed) {
+            if (paymentConfirmedShown) {
+              return false;
+            }
+
+            paymentConfirmedShown = true;
+          }
+
+          return true;
+        });
+
+        setEvents(filtered);
       } catch (err) {
         console.error("Failed to fetch tracking events:", err);
       } finally {

@@ -3,34 +3,6 @@ import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { TrackingEventType } from "@prisma/client";
 
-// export async function GET(
-//   req: Request,
-//   { params }: { params: { id: string } },
-// ) {
-//   const param = await params;
-//   const tenant = await getDefaultTenant();
-//   if (!tenant) {
-//     return NextResponse.json(
-//       { error: "Default tenant not found" },
-//       { status: 404 },
-//     );
-//   }
-
-//   try {
-//     const events = await prisma.orderTrackingEvent.findMany({
-//       where: { orderId: param.id, tenantId: tenant.id },
-//       orderBy: { createdAt: "asc" },
-//     });
-
-//     return NextResponse.json(events);
-//   } catch (err) {
-//     return NextResponse.json(
-//       { error: "Failed to fetch tracking" },
-//       { status: 500 },
-//     );
-//   }
-// }
-
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
