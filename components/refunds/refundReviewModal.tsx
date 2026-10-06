@@ -256,7 +256,7 @@ export default function RefundReviewModal({
           </div>
 
           {/* APPROVED */}
-          {refund.status === "APPROVED" && (
+          {/* {refund.status === "APPROVED" && (
             <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
               <div className="flex gap-3">
                 <FiCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
@@ -269,6 +269,95 @@ export default function RefundReviewModal({
                     sent.
                   </p>
                 </div>
+              </div>
+            </div>
+          )} */}
+
+          {refund.status === "APPROVED" && (
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <div className="mb-3">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Refund Amount
+                </h3>
+
+                <p className="mt-1 text-xs text-gray-500">
+                  Choose whether the original shipping cost should be included.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <label
+                  className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${
+                    refundOption === "ITEMS_ONLY"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="refundOption"
+                    value="ITEMS_ONLY"
+                    checked={refundOption === "ITEMS_ONLY"}
+                    onChange={() => setRefundOption("ITEMS_ONLY")}
+                    disabled={actionLoading}
+                    className="mt-1"
+                  />
+
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      Item cost only
+                    </p>
+
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      Refund the approved item amount without shipping.
+                    </p>
+
+                    <p className="mt-1 text-sm font-semibold text-gray-700">
+                      {tenant?.currency}
+                      {Number(
+                        refund.approvedAmount ?? refund.requestedAmount,
+                      ).toFixed(2)}
+                    </p>
+                  </div>
+                </label>
+
+                <label
+                  className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${
+                    refundOption === "ITEMS_PLUS_SHIPPING"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="refundOption"
+                    value="ITEMS_PLUS_SHIPPING"
+                    checked={refundOption === "ITEMS_PLUS_SHIPPING"}
+                    onChange={() => setRefundOption("ITEMS_PLUS_SHIPPING")}
+                    disabled={actionLoading}
+                    className="mt-1"
+                  />
+
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      Item cost + shipping
+                    </p>
+
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      Refund the approved item amount plus the original shipping
+                      cost.
+                    </p>
+
+                    <p className="mt-1 text-sm font-semibold text-gray-700">
+                      {tenant?.currency}
+                      {(
+                        Number(
+                          refund.approvedAmount ?? refund.requestedAmount,
+                        ) + Number(refund.order?.shippingCost ?? 0)
+                      ).toFixed(2)}
+                    </p>
+                  </div>
+                </label>
               </div>
             </div>
           )}
