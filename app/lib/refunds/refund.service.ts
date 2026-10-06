@@ -8,6 +8,8 @@ import { AdminNotificationService } from "@/app/lib/admin/admin-notification-ser
 import { createRefundTrackingEvent } from "./refund-tracking.service";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
+type RefundOption = "ITEMS_ONLY" | "ITEMS_PLUS_SHIPPING";
+
 export type RefundRequestInput = {
   orderId: string;
 
@@ -301,7 +303,10 @@ export async function approveRefund(refundId: string) {
   return approvedRefund;
 }
 
-export async function processRefund(refundId: string) {
+export async function processRefund(
+  refundId: string,
+  refundOption: RefundOption = "ITEMS_ONLY",
+) {
   const tenant = await getDefaultTenant();
 
   if (!tenant) {
@@ -381,7 +386,22 @@ export async function processRefund(refundId: string) {
     throw new Error("This refund has already been successfully processed.");
   }
 
-  const refundAmount = Number(refund.approvedAmount ?? refund.requestedAmount);
+  const approvedAmount = Number(
+    refund.approvedAmount ?? refund.requestedAmount,
+  );
+
+  const shippingCost = Number(refund.order.shippingCost ?? 0);
+
+  const refundAmount =
+    refundOption === "ITEMS_PLUS_SHIPPING"
+      ? approvedAmount + shippingCost
+      : approvedAmount;
+
+  const orderTotal = Number(refund.order.totalAmount);
+
+  if (refundAmount > orderTotal) {
+    throw new Error("Refund amount cannot exceed the order total.");
+  }
 
   if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
     throw new Error("Invalid refund amount.");
@@ -639,6 +659,10 @@ export async function processRefund(refundId: string) {
     metadata: {
       provider: paymentResult.provider,
       reference: paymentResult.reference,
+      refundOption,
+      refundAmount,
+      shippingIncluded: refundOption === "ITEMS_PLUS_SHIPPING",
+      shippingAmount: shippingCost,
     },
   });
 

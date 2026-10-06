@@ -25,6 +25,9 @@ export default function RefundReviewModal({
 
   const [isRejecting, setIsRejecting] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [refundOption, setRefundOption] = useState<
+    "ITEMS_ONLY" | "ITEMS_PLUS_SHIPPING"
+  >("ITEMS_ONLY");
 
   const { tenant } = useTenant();
 
@@ -86,7 +89,13 @@ export default function RefundReviewModal({
                 reason: rejectionReason.trim(),
               }),
             }
-          : {}),
+          : type === "process"
+            ? {
+                body: JSON.stringify({
+                  refundOption,
+                }),
+              }
+            : {}),
       });
 
       const data = await response.json().catch(() => null);
