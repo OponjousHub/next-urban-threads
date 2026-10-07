@@ -403,6 +403,18 @@ export async function processRefund(
     throw new Error("Refund amount cannot exceed the order total.");
   }
 
+  if (!Number.isFinite(approvedAmount) || approvedAmount <= 0) {
+    throw new Error("Invalid approved refund amount.");
+  }
+
+  if (!Number.isFinite(shippingCost) || shippingCost < 0) {
+    throw new Error("Invalid shipping cost.");
+  }
+
+  if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
+    throw new Error("Invalid refund amount.");
+  }
+
   if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
     throw new Error("Invalid refund amount.");
   }
@@ -612,6 +624,16 @@ export async function processRefund(
       },
       data: {
         status: "REFUNDED",
+
+        // Actual amount sent to and successfully processed by the gateway
+        processedAmount: refundAmount,
+
+        // Shipping portion actually refunded
+        shippingRefunded:
+          refundOption === "ITEMS_PLUS_SHIPPING" ? shippingCost : 0,
+
+        // Whether shipping was included in this refund
+        shippingIncluded: refundOption === "ITEMS_PLUS_SHIPPING",
       },
     });
 
@@ -713,6 +735,7 @@ export async function processRefund(
    * Return
    * --------------------------------------------------
    */
+
   return {
     success: true,
     refundId: refund.id,
@@ -720,6 +743,12 @@ export async function processRefund(
     status: "REFUNDED",
     provider: paymentResult.provider,
     reference: paymentResult.reference,
+
+    // Actual refund breakdown
+    refundAmount,
+    itemRefundAmount: approvedAmount,
+    shippingRefunded: refundOption === "ITEMS_PLUS_SHIPPING" ? shippingCost : 0,
+    shippingIncluded: refundOption === "ITEMS_PLUS_SHIPPING",
   };
 }
 

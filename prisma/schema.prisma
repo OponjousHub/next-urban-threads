@@ -547,6 +547,9 @@ model RefundRequest {
   description     String?
   requestedAmount Float
   approvedAmount  Float?
+  processedAmount Float?
+  shippingRefunded Float?
+  shippingIncluded Boolean @default(false)
   currency        String
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
