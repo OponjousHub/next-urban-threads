@@ -16,7 +16,7 @@ import { useTenant } from "@/store/tenant-provider-context";
 import { ShippingMethod } from "@prisma/client";
 import { RefundStatus, RefundTrackingEvent } from "@prisma/client";
 import { formatCurrency } from "@/lib/formatCurrency";
-import { FiX } from "react-icons/fi";
+import { FiX, FiCheck } from "react-icons/fi";
 
 type RefundRequestWithTracking = RefundRequest & {
   trackingEvents: RefundTrackingEvent[];
@@ -343,6 +343,10 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
       setCancellingRefund(false);
     }
   }
+
+  const completedRefund = order?.refundRequest?.find(
+    (refund) => refund.status === "REFUNDED",
+  );
   /* ------------------------------------
      ✅ CENTERED LOADING STATE
   ------------------------------------- */
@@ -575,7 +579,6 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
           </div>
 
           {/* Refund Status card */}
-          {/* Refund Status card */}
           {(order.status === "DELIVERED" || order.refundStatus !== "NONE") && (
             <div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-lg font-semibold">Refund Status</h2>
@@ -659,15 +662,77 @@ export default function OrderPage({ params }: { params: { orderId: string } }) {
               )}
 
               {/* REFUNDED */}
+              {/* REFUNDED */}
               {order.refundStatus === "REFUNDED" && (
                 <div className="rounded-xl border border-green-200 bg-green-50 p-4">
-                  <p className="font-semibold text-green-700">
-                    Refund Completed
-                  </p>
+                  <div className="flex items-start gap-3">
+                    {/* ICON */}
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100">
+                      <FiCheck className="h-4 w-4 text-green-600" />
+                    </div>
 
-                  <p className="mt-1 text-sm text-green-600">
-                    Your refund has been completed successfully.
-                  </p>
+                    <div className="min-w-0 flex-1">
+                      {/* TITLE */}
+                      <p className="font-semibold text-green-700">
+                        Refund Completed
+                      </p>
+
+                      <p className="mt-1 text-sm text-green-600">
+                        Your refund has been completed successfully.
+                      </p>
+
+                      {/* REFUND BREAKDOWN */}
+                      {completedRefund && (
+                        <div className="mt-3 rounded-lg border border-green-200 bg-white px-3 py-2.5">
+                          {/* ITEM REFUND */}
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs text-gray-500">
+                              Item refund
+                            </span>
+
+                            <span className="text-xs font-medium text-gray-800">
+                              {completedRefund.currency}
+                              {Number(
+                                completedRefund.processedAmount ?? 0,
+                              ).toFixed(2)}
+                            </span>
+                          </div>
+
+                          {/* SHIPPING REFUND */}
+                          {completedRefund.shippingIncluded && (
+                            <div className="mt-1.5 flex items-center justify-between gap-3">
+                              <span className="text-xs text-gray-500">
+                                Shipping refund
+                              </span>
+
+                              <span className="text-xs font-medium text-gray-800">
+                                {completedRefund.currency}
+                                {Number(
+                                  completedRefund.shippingRefunded ?? 0,
+                                ).toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* TOTAL */}
+                          <div className="mt-2 border-t border-gray-100 pt-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="text-xs font-semibold text-gray-700">
+                                Total refunded
+                              </span>
+
+                              <span className="text-sm font-bold text-green-700">
+                                {completedRefund.currency}
+                                {Number(
+                                  completedRefund.processedAmount ?? 0,
+                                ).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
