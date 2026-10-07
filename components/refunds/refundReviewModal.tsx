@@ -172,52 +172,47 @@ export default function RefundReviewModal({
   return (
     <>
       {/* HEADER */}
-      <DialogHeader className="mb-6">
-        <DialogTitle className="text-xl font-semibold text-gray-900">
+      <DialogHeader className="mb-3">
+        <DialogTitle className="text-lg font-semibold text-gray-900">
           Refund Review
         </DialogTitle>
       </DialogHeader>
 
       {/* LOADING */}
       {loading ? (
-        <div className="flex min-h-[240px] items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <FiLoader className="h-7 w-7 animate-spin text-gray-400" />
-
-            <p className="text-sm text-gray-500">Loading refund details...</p>
+        <div className="flex min-h-[180px] items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <FiLoader className="h-6 w-6 animate-spin text-gray-400" />
+            <p className="text-xs text-gray-500">Loading refund details...</p>
           </div>
         </div>
       ) : !refund ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-center">
-          <FiAlertCircle className="mx-auto mb-2 h-6 w-6 text-red-500" />
-
-          <p className="font-medium text-red-700">Refund not found</p>
-
-          <p className="mt-1 text-sm text-red-600">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
+          <FiAlertCircle className="mx-auto mb-1.5 h-5 w-5 text-red-500" />
+          <p className="text-sm font-medium text-red-700">Refund not found</p>
+          <p className="mt-0.5 text-xs text-red-600">
             This refund request could not be loaded.
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* ORDER INFO */}
-          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
                   Order
                 </p>
-
-                <p className="mt-1 break-all text-sm font-semibold text-gray-900">
+                <p className="mt-0.5 truncate text-xs font-semibold text-gray-900">
                   {refund.orderId}
                 </p>
               </div>
 
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
                   Requested Amount
                 </p>
-
-                <p className="mt-1 text-sm font-semibold text-gray-900">
+                <p className="mt-0.5 text-xs font-semibold text-gray-900">
                   {currency}
                   {Number(refund.requestedAmount ?? 0).toFixed(2)}
                 </p>
@@ -227,27 +222,27 @@ export default function RefundReviewModal({
 
           {/* ITEMS */}
           <div>
-            <h3 className="mb-3 text-sm font-semibold text-gray-900">
+            <h3 className="mb-1.5 text-xs font-semibold text-gray-900">
               Requested Items
             </h3>
 
-            <div className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200">
+            <div className="divide-y divide-gray-100 overflow-hidden rounded-lg border border-gray-200">
               {refund.items.map((item: any) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between gap-4 bg-white px-4 py-3"
+                  className="flex items-center justify-between gap-3 bg-white px-3 py-2"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-gray-900">
+                    <p className="truncate text-xs font-medium text-gray-900">
                       {item.product.name}
                     </p>
 
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      Quantity: {item.quantity}
+                    <p className="mt-0.5 text-[11px] text-gray-500">
+                      Qty: {item.quantity}
                     </p>
                   </div>
 
-                  <p className="shrink-0 text-sm font-medium text-gray-700">
+                  <p className="shrink-0 text-xs font-medium text-gray-700">
                     {currency}
                     {Number(item.priceAtPurchase ?? 0).toFixed(2)}
                   </p>
@@ -258,17 +253,17 @@ export default function RefundReviewModal({
 
           {/* CUSTOMER REASON */}
           <div>
-            <h3 className="mb-3 text-sm font-semibold text-gray-900">
+            <h3 className="mb-1.5 text-xs font-semibold text-gray-900">
               Customer&apos;s Reason
             </h3>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <p className="text-sm font-medium text-gray-800">
+            <div className="rounded-lg border border-gray-200 bg-white px-3 py-2.5">
+              <p className="text-xs font-medium text-gray-800">
                 {refund.reason}
               </p>
 
               {refund.description && (
-                <p className="mt-2 text-sm leading-6 text-gray-600">
+                <p className="mt-1 text-xs leading-4 text-gray-600">
                   {refund.description}
                 </p>
               )}
@@ -277,22 +272,21 @@ export default function RefundReviewModal({
 
           {/* REFUND AMOUNT SELECTION */}
           {(refund.status === "APPROVED" || refund.status === "FAILED") && (
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <div className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-900">
+            <div className="rounded-lg border border-gray-200 bg-white p-3">
+              <div className="mb-2.5">
+                <h3 className="text-xs font-semibold text-gray-900">
                   Refund Amount
                 </h3>
 
-                <p className="mt-1 text-xs leading-5 text-gray-500">
-                  Choose whether the customer should receive only the item cost
-                  or the item cost plus the original shipping cost.
+                <p className="mt-0.5 text-[11px] leading-4 text-gray-500">
+                  Choose item cost only or item cost plus the original shipping.
                 </p>
               </div>
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {/* ITEM COST ONLY */}
                 <label
-                  className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
+                  className={`flex cursor-pointer items-start gap-2 rounded-lg border px-3 py-2.5 transition ${
                     refundOption === "ITEMS_ONLY"
                       ? "border-blue-500 bg-blue-50"
                       : "border-gray-200 hover:bg-gray-50"
@@ -305,33 +299,30 @@ export default function RefundReviewModal({
                     checked={refundOption === "ITEMS_ONLY"}
                     onChange={() => setRefundOption("ITEMS_ONLY")}
                     disabled={actionLoading}
-                    className="mt-1"
+                    className="mt-0.5 h-3.5 w-3.5"
                   />
 
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">
-                          Item cost only
-                        </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold text-gray-900">
+                        Item cost only
+                      </p>
 
-                        <p className="mt-1 text-xs leading-5 text-gray-500">
-                          Refund the approved item amount. Shipping will not be
-                          refunded.
-                        </p>
-                      </div>
-
-                      <p className="shrink-0 text-sm font-bold text-gray-900">
+                      <p className="shrink-0 text-xs font-bold text-gray-900">
                         {currency}
                         {itemRefundAmount.toFixed(2)}
                       </p>
                     </div>
+
+                    <p className="mt-0.5 text-[10px] leading-4 text-gray-500">
+                      Shipping will not be refunded.
+                    </p>
                   </div>
                 </label>
 
                 {/* ITEM COST + SHIPPING */}
                 <label
-                  className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
+                  className={`flex cursor-pointer items-start gap-2 rounded-lg border px-3 py-2.5 transition ${
                     refundOption === "ITEMS_PLUS_SHIPPING"
                       ? "border-blue-500 bg-blue-50"
                       : "border-gray-200 hover:bg-gray-50"
@@ -344,83 +335,60 @@ export default function RefundReviewModal({
                     checked={refundOption === "ITEMS_PLUS_SHIPPING"}
                     onChange={() => setRefundOption("ITEMS_PLUS_SHIPPING")}
                     disabled={actionLoading}
-                    className="mt-1"
+                    className="mt-0.5 h-3.5 w-3.5"
                   />
 
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">
-                          Item cost + shipping
-                        </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold text-gray-900">
+                        Item + shipping
+                      </p>
 
-                        <p className="mt-1 text-xs leading-5 text-gray-500">
-                          Refund the approved item amount plus the original
-                          shipping cost.
-                        </p>
-                      </div>
-
-                      <p className="shrink-0 text-sm font-bold text-gray-900">
+                      <p className="shrink-0 text-xs font-bold text-gray-900">
                         {currency}
                         {(itemRefundAmount + shippingCost).toFixed(2)}
                       </p>
                     </div>
 
-                    {shippingCost > 0 && (
-                      <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3 text-xs">
-                        <span className="text-gray-500">
-                          Shipping being added
-                        </span>
-
-                        <span className="font-semibold text-gray-700">
-                          +{currency}
-                          {shippingCost.toFixed(2)}
-                        </span>
-                      </div>
-                    )}
+                    <p className="mt-0.5 text-[10px] leading-4 text-gray-500">
+                      Includes original shipping cost.
+                    </p>
                   </div>
                 </label>
               </div>
 
               {/* FINAL REFUND TOTAL */}
-              <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4">
-                <div className="flex items-center justify-between gap-4">
+              <div className="mt-2.5 rounded-lg border border-green-200 bg-green-50 px-3 py-2.5">
+                <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-green-700">
-                      Total refund to customer
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-green-700">
+                      Total refund
                     </p>
 
-                    <p className="mt-1 text-xs text-green-600">
-                      This is the amount that will be sent to the payment
-                      provider.
+                    <p className="mt-0.5 text-[10px] text-green-600">
+                      Amount sent to payment provider
                     </p>
                   </div>
 
-                  <p className="text-xl font-bold text-green-700">
+                  <p className="text-lg font-bold text-green-700">
                     {currency}
                     {totalRefundAmount.toFixed(2)}
                   </p>
                 </div>
 
-                <div className="mt-3 border-t border-green-200 pt-3 text-xs text-green-700">
-                  <div className="flex justify-between">
-                    <span>Item refund</span>
-                    <span className="font-medium">
-                      {currency}
-                      {itemRefundAmount.toFixed(2)}
-                    </span>
-                  </div>
+                <div className="mt-2 flex items-center justify-between border-t border-green-200 pt-2 text-[10px] text-green-700">
+                  <span>
+                    Items: {currency}
+                    {itemRefundAmount.toFixed(2)}
+                  </span>
 
-                  <div className="mt-1 flex justify-between">
-                    <span>Shipping refund</span>
-                    <span className="font-medium">
-                      {currency}
-                      {(refundOption === "ITEMS_PLUS_SHIPPING"
-                        ? shippingCost
-                        : 0
-                      ).toFixed(2)}
-                    </span>
-                  </div>
+                  <span>
+                    Shipping: {currency}
+                    {(refundOption === "ITEMS_PLUS_SHIPPING"
+                      ? shippingCost
+                      : 0
+                    ).toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -428,16 +396,16 @@ export default function RefundReviewModal({
 
           {/* PROCESSING */}
           {refund.status === "PROCESSING" && (
-            <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4">
-              <div className="flex gap-3">
-                <FiLoader className="mt-0.5 h-5 w-5 shrink-0 animate-spin text-yellow-600" />
+            <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-3 py-2.5">
+              <div className="flex items-center gap-2.5">
+                <FiLoader className="h-4 w-4 shrink-0 animate-spin text-yellow-600" />
 
                 <div>
-                  <p className="font-semibold text-yellow-700">
+                  <p className="text-xs font-semibold text-yellow-700">
                     Processing Refund
                   </p>
 
-                  <p className="mt-1 text-sm leading-5 text-yellow-600">
+                  <p className="mt-0.5 text-[11px] text-yellow-600">
                     Payment is currently being processed through the payment
                     gateway.
                   </p>
@@ -448,16 +416,16 @@ export default function RefundReviewModal({
 
           {/* REFUNDED */}
           {refund.status === "REFUNDED" && (
-            <div className="rounded-xl border border-green-200 bg-green-50 p-4">
-              <div className="flex gap-3">
-                <FiCheck className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+            <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-2.5">
+              <div className="flex items-center gap-2.5">
+                <FiCheck className="h-4 w-4 shrink-0 text-green-600" />
 
                 <div>
-                  <p className="font-semibold text-green-700">
+                  <p className="text-xs font-semibold text-green-700">
                     Refund Completed
                   </p>
 
-                  <p className="mt-1 text-sm leading-5 text-green-600">
+                  <p className="mt-0.5 text-[11px] text-green-600">
                     The customer has been refunded successfully.
                   </p>
                 </div>
@@ -467,24 +435,26 @@ export default function RefundReviewModal({
 
           {/* REJECTED */}
           {refund.status === "REJECTED" && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-              <div className="flex gap-3">
-                <FiX className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
+              <div className="flex gap-2.5">
+                <FiX className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
 
                 <div className="min-w-0">
-                  <p className="font-semibold text-red-700">Refund Rejected</p>
+                  <p className="text-xs font-semibold text-red-700">
+                    Refund Rejected
+                  </p>
 
-                  <p className="mt-1 text-sm leading-5 text-red-600">
+                  <p className="mt-0.5 text-[11px] text-red-600">
                     This refund request has been rejected.
                   </p>
 
                   {refund.rejectionReason && (
-                    <div className="mt-3 rounded-lg border border-red-200 bg-white p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <div className="mt-2 rounded-md border border-red-200 bg-white px-2.5 py-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
                         Admin&apos;s Reason
                       </p>
 
-                      <p className="mt-1 text-sm leading-5 text-gray-700">
+                      <p className="mt-0.5 text-[11px] leading-4 text-gray-700">
                         {refund.rejectionReason}
                       </p>
                     </div>
@@ -496,16 +466,16 @@ export default function RefundReviewModal({
 
           {/* CANCELLED */}
           {refund.status === "CANCELLED" && (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-              <div className="flex gap-3">
-                <FiX className="mt-0.5 h-5 w-5 shrink-0 text-gray-500" />
+            <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5">
+              <div className="flex items-center gap-2.5">
+                <FiX className="h-4 w-4 shrink-0 text-gray-500" />
 
                 <div>
-                  <p className="font-semibold text-gray-700">
+                  <p className="text-xs font-semibold text-gray-700">
                     Refund Cancelled
                   </p>
 
-                  <p className="mt-1 text-sm leading-5 text-gray-600">
+                  <p className="mt-0.5 text-[11px] text-gray-600">
                     The customer cancelled this refund request.
                   </p>
                 </div>
@@ -515,20 +485,19 @@ export default function RefundReviewModal({
 
           {/* REJECTION FORM */}
           {isRejecting && refund.status === "REQUESTED" && (
-            <div className="rounded-xl border border-red-200 bg-red-50/60 p-4">
-              <div className="mb-3 flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100">
-                  <FiAlertCircle className="h-5 w-5 text-red-600" />
+            <div className="rounded-lg border border-red-200 bg-red-50/60 p-3">
+              <div className="mb-2.5 flex items-start gap-2.5">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-red-100">
+                  <FiAlertCircle className="h-4 w-4 text-red-600" />
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-900">
+                  <h3 className="text-xs font-semibold text-gray-900">
                     Reject Refund Request
                   </h3>
 
-                  <p className="mt-1 text-sm leading-5 text-gray-600">
-                    Please provide a clear reason for rejecting this request.
-                    This reason may be shown to the customer.
+                  <p className="mt-0.5 text-[11px] leading-4 text-gray-600">
+                    Provide a clear reason for rejecting this request.
                   </p>
                 </div>
               </div>
@@ -537,24 +506,24 @@ export default function RefundReviewModal({
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 disabled={actionLoading}
-                rows={4}
+                rows={3}
                 maxLength={500}
                 placeholder="Explain why this refund request is being rejected..."
-                className="w-full resize-none rounded-xl border border-gray-300 bg-white px-3.5 py-3 text-sm text-gray-700 outline-none transition-all placeholder:text-gray-400 focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-gray-100"
+                className="w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 outline-none transition-all placeholder:text-gray-400 focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-gray-100"
               />
 
-              <div className="mt-1.5 flex justify-end">
-                <span className="text-xs text-gray-400">
+              <div className="mt-1 flex justify-end">
+                <span className="text-[10px] text-gray-400">
                   {rejectionReason.length}/500
                 </span>
               </div>
 
-              <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <div className="mt-2.5 flex justify-end gap-2">
                 <button
                   type="button"
                   disabled={actionLoading}
                   onClick={handleCancelRejection}
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Cancel
                 </button>
@@ -563,16 +532,16 @@ export default function RefundReviewModal({
                   type="button"
                   disabled={actionLoading || !rejectionReason.trim()}
                   onClick={() => handleAction("reject")}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {actionLoading ? (
                     <>
-                      <FiLoader className="h-4 w-4 animate-spin" />
+                      <FiLoader className="h-3.5 w-3.5 animate-spin" />
                       Rejecting...
                     </>
                   ) : (
                     <>
-                      <FiX className="h-4 w-4" />
+                      <FiX className="h-3.5 w-3.5" />
                       Reject Refund
                     </>
                   )}
@@ -583,7 +552,7 @@ export default function RefundReviewModal({
 
           {/* ACTIONS */}
           {!isProcessed && !isProcessing && !isRejecting && (
-            <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
+            <div className="flex justify-end gap-2 border-t border-gray-100 pt-3">
               {/* REQUESTED */}
               {refund.status === "REQUESTED" && (
                 <>
@@ -591,9 +560,9 @@ export default function RefundReviewModal({
                     type="button"
                     disabled={actionLoading}
                     onClick={() => setIsRejecting(true)}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <FiX className="h-4 w-4" />
+                    <FiX className="h-3.5 w-3.5" />
                     Reject
                   </button>
 
@@ -601,16 +570,16 @@ export default function RefundReviewModal({
                     type="button"
                     disabled={actionLoading}
                     onClick={() => handleAction("approve")}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex items-center justify-center gap-1.5 rounded-lg bg-gray-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {actionLoading ? (
                       <>
-                        <FiLoader className="h-4 w-4 animate-spin" />
+                        <FiLoader className="h-3.5 w-3.5 animate-spin" />
                         Approving...
                       </>
                     ) : (
                       <>
-                        <FiCheck className="h-4 w-4" />
+                        <FiCheck className="h-3.5 w-3.5" />
                         Approve Refund
                       </>
                     )}
@@ -624,16 +593,16 @@ export default function RefundReviewModal({
                   type="button"
                   disabled={actionLoading}
                   onClick={() => handleAction("process")}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex items-center justify-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {actionLoading ? (
                     <>
-                      <FiLoader className="h-4 w-4 animate-spin" />
+                      <FiLoader className="h-3.5 w-3.5 animate-spin" />
                       Processing...
                     </>
                   ) : (
                     <>
-                      <FiCheck className="h-4 w-4" />
+                      <FiCheck className="h-3.5 w-3.5" />
                       Process Refund
                     </>
                   )}
@@ -646,11 +615,11 @@ export default function RefundReviewModal({
                   type="button"
                   disabled={actionLoading}
                   onClick={() => handleAction("process")}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex items-center justify-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {actionLoading ? (
                     <>
-                      <FiLoader className="h-4 w-4 animate-spin" />
+                      <FiLoader className="h-3.5 w-3.5 animate-spin" />
                       Retrying...
                     </>
                   ) : (
@@ -658,32 +627,6 @@ export default function RefundReviewModal({
                   )}
                 </button>
               )}
-            </div>
-          )}
-
-          {/* COMPLETED / TERMINAL STATES */}
-
-          {refund.status === "CANCELLED" && (
-            <div className="border-t border-gray-100 pt-5 text-center text-sm font-medium text-gray-500">
-              Customer cancelled this refund request.
-            </div>
-          )}
-
-          {refund.status === "PROCESSING" && (
-            <div className="border-t border-gray-100 pt-5 text-center text-sm font-medium text-yellow-600">
-              Refund Processing...
-            </div>
-          )}
-
-          {refund.status === "REFUNDED" && (
-            <div className="border-t border-gray-100 pt-5 text-center text-sm font-medium text-green-600">
-              ✓ Refund Approved & Processed
-            </div>
-          )}
-
-          {refund.status === "REJECTED" && (
-            <div className="border-t border-gray-100 pt-5 text-center text-sm font-medium text-red-600">
-              ✕ Refund Rejected
             </div>
           )}
         </div>
