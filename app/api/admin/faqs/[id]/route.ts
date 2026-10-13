@@ -4,12 +4,13 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const tenant = await getDefaultTenant();
+  const param = await params;
 
   await prisma.fAQ.delete({
-    where: { id: params.id, tenantId: tenant!.id },
+    where: { id: param.id, tenantId: tenant!.id },
   });
 
   return Response.json({ success: true });
@@ -17,9 +18,10 @@ export async function DELETE(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const tenant = await getDefaultTenant();
+  const param = await params;
 
   if (!tenant) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,7 +32,7 @@ export async function PATCH(
   try {
     const updated = await prisma.fAQ.update({
       where: {
-        id: params.id,
+        id: param.id,
         tenantId: tenant.id, // 🔒 protect tenant data
       },
       data: {

@@ -36,14 +36,15 @@ export async function PATCH(
 
 export async function DELETE(
   _: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const param = await params;
   const userId = await getLoggedInUserId();
   if (!userId) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  await AddressController.deleteAddress(userId, params.id);
+  await AddressController.deleteAddress(userId, param.id);
 
   return NextResponse.json({ success: true });
 }
