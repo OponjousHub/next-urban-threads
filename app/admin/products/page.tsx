@@ -1,5 +1,5 @@
 import ProductSearch from "@/components/products/product-search";
-import ProductFilters from "@/components/products/product-filters";
+import { ProductFilters } from "@/components/products/product-filters";
 import ProductSort from "@/components/products/product-sorting";
 import Pagination from "@/components/products/product-pagination";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";

@@ -10,6 +10,7 @@ type Category = {
 };
 
 type ProductFiltersProps = {
+  categories?: Category[];
   basePath?: string;
 };
 
