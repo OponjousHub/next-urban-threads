@@ -7,8 +7,9 @@ import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 export default async function ProductDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const param = await params;
   const tenant = await getDefaultTenant();
   if (!tenant) {
     throw new Error("Default tenant not found");
@@ -16,7 +17,7 @@ export default async function ProductDetailPage({
 
   const product = await prisma.product.findFirst({
     where: {
-      id: params.id,
+      id: param.id,
       tenantId: tenant.id,
       storeMode: tenant.storeMode,
     },
