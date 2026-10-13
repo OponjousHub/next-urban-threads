@@ -4,9 +4,9 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { prisma } from "@/utils/prisma";
 
 type RouteParams = {
-  params: {
+  params: Promise<{
     orderId: string;
-  };
+  }>;
 };
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
