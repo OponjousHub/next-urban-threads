@@ -95,11 +95,6 @@ export default async function VendorReviewPage({ params }: Props) {
     ),
   );
 
-  //   const safeOrders = orders.map((order) => ({
-  //   ...order,
-  //   totalAmount: Number(order.totalAmount),
-  // }));
-
   const customerPurchaseContext = {
     totalSpent,
     totalOrders,
@@ -124,11 +119,12 @@ export default async function VendorReviewPage({ params }: Props) {
       />
       <ReviewDetail
         review={safeReview}
-        vendorId={vendor.id}
         moderationHistory={moderationHistory}
         customerContext={customerPurchaseContext}
+        isAdmin={false}
+        vendor={vendor}
+        role="VENDOR"
       />
-      ;
     </>
   );
 }
