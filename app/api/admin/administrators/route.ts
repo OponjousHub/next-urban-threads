@@ -101,7 +101,6 @@ export async function POST(req: Request) {
         name: fullName.trim(),
         email: normalizedEmail,
         password: hashedPassword,
-        phone: phone?.trim() || null,
         country,
 
         // IMPORTANT:
@@ -119,7 +118,6 @@ export async function POST(req: Request) {
         id: true,
         name: true,
         email: true,
-        phone: true,
         role: true,
         status: true,
         createdAt: true,

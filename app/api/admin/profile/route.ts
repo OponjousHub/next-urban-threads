@@ -19,7 +19,6 @@ export async function GET() {
       select: {
         name: true,
         email: true,
-        phone: true,
       },
     });
 
@@ -44,11 +43,10 @@ export async function PATCH(req: NextRequest) {
 
     const body = await req.json();
 
-    const { name, phone } = body;
+    const { name } = body;
 
     const updateData: any = {
       name,
-      phone,
     };
 
     const updatedUser = await prisma.user.update({
