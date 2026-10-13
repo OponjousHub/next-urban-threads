@@ -212,13 +212,11 @@ export async function POST(req: Request) {
       if (ownerAlreadyCreated) {
         throw new Error("INITIAL_OWNER_ALREADY_EXISTS");
       }
-      console.log(country);
       return tx.user.create({
         data: {
           name: fullName.trim(),
           email: normalizedEmail,
           password: hashedPassword,
-          phone: phone?.trim() || null,
           country: country?.trim() || null,
           role: "OWNER",
           status: "ACTIVE",
@@ -234,7 +232,6 @@ export async function POST(req: Request) {
           id: true,
           name: true,
           email: true,
-          phone: true,
           country: true,
           role: true,
           status: true,
