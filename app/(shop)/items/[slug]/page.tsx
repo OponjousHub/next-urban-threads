@@ -6,18 +6,19 @@ import { notFound } from "next/navigation";
 import { getTenant } from "@/lib/tenant/getTenant";
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function ProductPage({ params }: Props) {
-  const { slug } = params;
+  const { slug } = await params;
+
   const tenant = await getTenant();
 
   if (!tenant) {
     throw new Error("Unauthorized");
   }
 
-  // 1️⃣ Get product
+  // 1. Get product belonging to the current tenant
   const product = await prisma.product.findUnique({
     where: {
       tenantId_slug: {
@@ -27,9 +28,11 @@ export default async function ProductPage({ params }: Props) {
     },
   });
 
-  if (!product) return notFound();
+  if (!product) {
+    notFound();
+  }
 
-  // 2️⃣ Fetch approved reviews
+  // 2. Fetch approved reviews
   const reviews = await prisma.review.findMany({
     where: {
       productId: product.id,
@@ -39,7 +42,9 @@ export default async function ProductPage({ params }: Props) {
     include: {
       user: true,
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
   return (
@@ -50,7 +55,7 @@ export default async function ProductPage({ params }: Props) {
         count={product.reviewCount}
       />
 
-      {/* Review form (client component) */}
+      {/* Review form */}
       <ReviewForm productId={product.id} />
 
       {/* Review list */}
