@@ -9,19 +9,17 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ message: "Invalid token" }, { status: 401 });
     }
 
-    const { name, phone } = await req.json();
+    const { name } = await req.json();
 
     const user = await prisma.user.update({
       where: { id: userId },
       data: {
         name,
-        phone,
       },
       select: {
         id: true,
         name: true,
         email: true,
-        phone: true,
       },
     });
 
