@@ -1,5 +1,5 @@
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
 import { prisma } from "@/utils/prisma";
 import AdminPayoutTable from "@/components/admin/payouts/admin-payout-table";
 import AdminStatCard from "@/components/vendor/payouts/payout-stat-card";
@@ -8,7 +8,7 @@ export default async function AdminPayoutPage() {
   const tenant = await getDefaultTenant();
 
   if (!tenant) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    redirect("/login");
   }
 
   const payouts = await prisma.vendorPayout.findMany({
