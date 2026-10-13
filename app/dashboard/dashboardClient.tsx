@@ -235,13 +235,6 @@ function DashboardClient({
                     <span className="font-medium">Email:</span>{" "}
                     {stats.user.email}
                   </p>
-
-                  {stats.user.phone && (
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium">Phone:</span>{" "}
-                      {stats.user.phone}
-                    </p>
-                  )}
                 </>
               ) : (
                 <p className="text-sm text-gray-500">
