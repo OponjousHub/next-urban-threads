@@ -13,9 +13,9 @@ import {
 } from "@/app/lib/payments/payment-timeout";
 
 type RouteParams = {
-  params: {
+  params: Promise<{
     orderId: string;
-  };
+  }>;
 };
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
