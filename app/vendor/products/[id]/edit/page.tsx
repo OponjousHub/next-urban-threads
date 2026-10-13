@@ -6,7 +6,7 @@ import { ProductForm } from "@/components/products/productForm";
 export default async function EditProductPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const param = await params;
   const tenant = await getDefaultTenant();
