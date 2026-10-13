@@ -43,7 +43,6 @@ export type DashboardUser = {
   id: string;
   name: string | null;
   email: string;
-  phone: string | null;
   createdAt: Date;
   passwordUpdatedAt: Date | null;
   twoFactorEnabled: Boolean;

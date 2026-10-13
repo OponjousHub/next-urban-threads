@@ -81,7 +81,6 @@ export async function getUserDashboardStats(
         id: true,
         name: true,
         email: true,
-        phone: true,
         createdAt: true,
         passwordUpdatedAt: true,
         twoFactorEnabled: true,

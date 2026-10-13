@@ -32,7 +32,7 @@ export async function GET(req: Request) {
     const unreadCount = await prisma.vendorNotification.count({
       where: {
         vendorId: vendor.id,
-        read: false,
+        isRead: false,
       },
     });
 
