@@ -4,9 +4,10 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const tenant = await getDefaultTenant();
+  const param = await params;
 
   if (!tenant) {
     return NextResponse.json(
@@ -29,7 +30,7 @@ export async function POST(
     // ✅ Create tracking event
     const event = await prisma.orderTrackingEvent.create({
       data: {
-        orderId: params.id,
+        orderId: param.id,
         tenantId: tenant.id,
 
         type: type || "STATUS_CHANGE", // ✅ enum default
@@ -44,7 +45,7 @@ export async function POST(
     // ✅ Only update order if this is a status change
     if (status) {
       await prisma.order.update({
-        where: { id: params.id },
+        where: { id: param.id },
         data: { status },
       });
     }
