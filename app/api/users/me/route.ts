@@ -1,24 +1,14 @@
-import AuthController from "@/modules/auth/auth.controller";
 import UserController from "@/modules/users/user.controller";
 import { prisma } from "@/utils/prisma";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getLoggedInUserId } from "@/lib/auth";
 
-async function getUserIdFromToken() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-  if (!token) throw new Error("Unauthorized:");
-  const payload = AuthController.verifyToken(token);
-
-  return payload.id;
-}
-
 // Get User profile
 export async function GET() {
   try {
-    // const userId = await getUserIdFromToken();
     const userId = await getLoggedInUserId();
+
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
@@ -30,21 +20,21 @@ export async function GET() {
         name: true,
         email: true,
         avatarUrl: true,
-        phone: true,
         city: true,
         country: true,
         createdAt: true,
       },
     });
 
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
     return NextResponse.json(user);
   } catch (error) {
     console.error("USER PROFILE ERROR:", error);
 
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 401 },
-    );
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 }
 
@@ -59,7 +49,7 @@ export async function DELETE() {
 
     const result = await UserController.deleteUserAccount(token);
 
-    // ✅ Clear auth cookie AFTER deletion
+    // Clear the authentication cookie after deletion
     cookieStore.set("token", "", {
       httpOnly: true,
       expires: new Date(0),
