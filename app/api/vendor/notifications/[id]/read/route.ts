@@ -46,7 +46,7 @@ export async function PATCH(
         id: param.id,
       },
       data: {
-        read: true,
+        isRead: true,
         readAt: new Date(),
       },
     });

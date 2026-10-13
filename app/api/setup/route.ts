@@ -90,8 +90,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { setupSecret, fullName, email, password, phone, country } =
-      parsed.data;
+    const { setupSecret, fullName, email, password, country } = parsed.data;
 
     // ---------------------------------------------------------
     // 2. Validate setup secret
