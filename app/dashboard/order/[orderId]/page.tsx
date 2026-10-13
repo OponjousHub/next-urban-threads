@@ -53,7 +53,7 @@ type Order = {
   refundStatus: RefundStatus;
 };
 
-export default function OrderPage({ params }: { params: { orderId: string } }) {
+export default function OrderPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const searchParams = useSearchParams();
   const { tenant } = useTenant();
