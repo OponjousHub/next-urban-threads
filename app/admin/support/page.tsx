@@ -9,10 +9,10 @@ import { redirect } from "next/navigation";
 export default async function SupportPage({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     status?: string;
     priority?: string;
-  };
+  }>;
 }) {
   const tenant = await getDefaultTenant();
 
