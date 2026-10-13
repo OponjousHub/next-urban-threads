@@ -5,7 +5,7 @@ import OrderDetails from "@/components/order/orderDetails";
 import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 
 interface OrderDetailsPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function OrderDetailsPage({
