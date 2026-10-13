@@ -6,16 +6,17 @@ import ProductDetails from "@/components/products/productDetails";
 export default async function ProductDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const tenant = await getDefaultTenant();
+  const param = await params;
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
 
   const product = await prisma.product.findFirst({
     where: {
-      id: params.id,
+      id: param.id,
       tenantId: tenant.id,
       storeMode: tenant.storeMode,
     },
