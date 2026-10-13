@@ -12,14 +12,14 @@ import Link from "next/link";
 export default async function VendorProductsPage({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     q?: string;
     category?: string;
     stock?: string;
     featured?: string;
     sort?: string;
     page?: string;
-  };
+  }>;
 }) {
   const { vendor } = await getCurrentVendor();
   if (!vendor) {
@@ -189,7 +189,11 @@ export default async function VendorProductsPage({
         </p>
       )}
 
-      <ProductsTable products={safeProducts} query={query} basePath="/vendor/products" />
+      <ProductsTable
+        products={safeProducts}
+        query={query}
+        basePath="/vendor/products"
+      />
       <Pagination totalPages={totalPages} />
     </div>
   );
