@@ -15,26 +15,35 @@ type ProductFiltersProps = {
 };
 
 export function ProductFilters({
+  categories: suppliedCategories,
   basePath = "/admin/products",
 }: ProductFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [fetchedCategories, setFetchedCategories] = useState<Category[]>([]);
+
+  const categories = suppliedCategories ?? fetchedCategories;
 
   useEffect(() => {
+    if (suppliedCategories) {
+      return;
+    }
+
     let active = true;
 
     async function loadCategories() {
       try {
         const response = await fetch("/api/category");
 
-        if (!response.ok) return;
+        if (!response.ok) {
+          return;
+        }
 
         const data = await response.json();
 
         if (active && Array.isArray(data)) {
-          setCategories(data);
+          setFetchedCategories(data);
         }
       } catch (error) {
         console.error("Failed to load product filter categories:", error);
@@ -46,7 +55,7 @@ export function ProductFilters({
     return () => {
       active = false;
     };
-  }, []);
+  }, [suppliedCategories]);
 
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());

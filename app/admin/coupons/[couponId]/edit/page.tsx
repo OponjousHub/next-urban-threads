@@ -5,13 +5,12 @@ import { getAuthPayload } from "@/lib/server/auth";
 import { redirect } from "next/navigation";
 
 type Props = {
-  basePath: string;
   params: Promise<{
     couponId: string;
   }>;
 };
 
-export default async function EditCouponPage({ basePath, params }: Props) {
+export default async function EditCouponPage({ params }: Props) {
   const { couponId } = await params;
 
   const { tenant } = await getAuthPayload();
