@@ -6,7 +6,9 @@ import { getAuthPayload } from "@/lib/server/auth";
 import { redirect } from "next/navigation";
 
 interface OrderDetailsPageProps {
-  params: { id: string };
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 export default async function OrderDetailsPage({
@@ -15,6 +17,8 @@ export default async function OrderDetailsPage({
   const tenant = await getDefaultTenant();
 
   const { userId, role } = await getAuthPayload();
+
+  const { id } = await params;
 
   if (!userId) {
     redirect("/login");
@@ -30,7 +34,7 @@ export default async function OrderDetailsPage({
 
   const [order, user] = await Promise.all([
     prisma.order.findUnique({
-      where: { id: params.id, tenantId: tenant.id },
+      where: { id: id, tenantId: tenant.id },
       include: {
         user: { select: { name: true, email: true } },
         items: {
