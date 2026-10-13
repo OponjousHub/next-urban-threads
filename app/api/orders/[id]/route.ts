@@ -52,9 +52,10 @@ function getTrackingDetails(status: OrderStatus) {
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const tenant = await getDefaultTenant();
+  const param = await params;
 
   if (!tenant) {
     return NextResponse.json(
@@ -80,7 +81,7 @@ export async function PATCH(
 
     const existingOrder = await prisma.order.findFirst({
       where: {
-        id: params.id,
+        id: param.id,
         tenantId: tenant.id,
       },
       select: {
