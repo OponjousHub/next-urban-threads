@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type Category = {
@@ -9,12 +10,42 @@ type Category = {
 };
 
 type ProductFiltersProps = {
-  categories: Category[];
+  basePath?: string;
 };
 
-export default function ProductFilters({ categories }: ProductFiltersProps) {
+export function ProductFilters({
+  basePath = "/admin/products",
+}: ProductFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadCategories() {
+      try {
+        const response = await fetch("/api/category");
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        if (active && Array.isArray(data)) {
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error("Failed to load product filter categories:", error);
+      }
+    }
+
+    loadCategories();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -25,10 +56,9 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
       params.delete(key);
     }
 
-    // Reset pagination whenever a filter changes
     params.delete("page");
 
-    router.push(`/admin/products?${params.toString()}`);
+    router.push(`${basePath}?${params.toString()}`);
   };
 
   const clearFilters = () => {
@@ -39,19 +69,20 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
     params.delete("featured");
     params.delete("page");
 
-    router.push(`/admin/products?${params.toString()}`);
+    const query = params.toString();
+
+    router.push(query ? `${basePath}?${query}` : basePath);
   };
 
-  const hasFilters =
+  const hasFilters = Boolean(
     searchParams.get("category") ||
     searchParams.get("stock") ||
-    searchParams.get("featured");
+    searchParams.get("featured"),
+  );
 
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      {/* Filter controls */}
       <div className="flex flex-wrap items-center gap-2">
-        {/* Filter label */}
         <div className="mr-1 flex items-center gap-2 text-sm font-medium text-gray-700">
           <svg
             className="h-4 w-4 text-gray-500"
@@ -69,25 +100,9 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
           Filters
         </div>
 
-        {/* Category */}
         <select
-          className="
-          h-9
-          rounded-lg
-          border border-gray-200
-          bg-white
-          px-3
-          text-sm
-          font-medium
-          text-gray-700
-          shadow-sm
-          outline-none
-          transition
-          hover:border-gray-300
-          focus:border-[var(--color-primary)]
-          focus:ring-2
-          focus:ring-[var(--color-primary-ring)]
-        "
+          aria-label="Filter by category"
+          className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm outline-none transition hover:border-gray-300 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-ring)]"
           onChange={(e) => updateParam("category", e.target.value)}
           value={searchParams.get("category") || ""}
         >
@@ -100,25 +115,9 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
           ))}
         </select>
 
-        {/* Stock */}
         <select
-          className="
-            h-9
-            rounded-lg
-            border border-gray-200
-            bg-white
-            px-3
-            text-sm
-            font-medium
-            text-gray-700
-            shadow-sm
-            outline-none
-            transition
-            hover:border-gray-300
-            focus:border-[var(--color-primary)]
-            focus:ring-2
-            focus:ring-[var(--color-primary-ring)]
-          "
+          aria-label="Filter by stock"
+          className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm outline-none transition hover:border-gray-300 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-ring)]"
           onChange={(e) => updateParam("stock", e.target.value)}
           value={searchParams.get("stock") || ""}
         >
@@ -127,25 +126,9 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
           <option value="out">Out of Stock</option>
         </select>
 
-        {/* Featured */}
         <select
-          className="
-            h-9
-            rounded-lg
-            border border-gray-200
-            bg-white
-            px-3
-            text-sm
-            font-medium
-            text-gray-700
-            shadow-sm
-            outline-none
-            transition
-            hover:border-gray-300
-            focus:border-[var(--color-primary)]
-            focus:ring-2
-            focus:ring-[var(--color-primary-ring)]
-          "
+          aria-label="Filter by featured status"
+          className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm outline-none transition hover:border-gray-300 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-ring)]"
           onChange={(e) => updateParam("featured", e.target.value)}
           value={searchParams.get("featured") || ""}
         >
@@ -154,29 +137,17 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
           <option value="false">Not Featured</option>
         </select>
 
-        {/* Clear filters */}
         {hasFilters && (
           <button
             type="button"
             onClick={clearFilters}
-            className="
-              h-9
-              rounded-lg
-              px-3
-              text-sm
-              font-medium
-              text-gray-500
-              transition
-              hover:bg-gray-100
-              hover:text-gray-900
-            "
+            className="h-9 rounded-lg px-3 text-sm font-medium text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
           >
             Clear
           </button>
         )}
       </div>
 
-      {/* Active filter indicator */}
       {hasFilters && (
         <div className="text-xs text-gray-400">Filters applied</div>
       )}
