@@ -5,12 +5,13 @@ import { getCurrentVendor } from "@/lib/vendor/getCurrentVendor";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const userId = await getLoggedInUserId();
+    const param = await params;
     const { vendor } = await getCurrentVendor();
-    console.log("Notification ID:", params.id);
+    console.log("Notification ID:", param.id);
 
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -28,7 +29,7 @@ export async function PATCH(
     // Ensure the notification belongs to this vendor
     const notification = await prisma.vendorNotification.findFirst({
       where: {
-        id: params.id,
+        id: param.id,
         vendorId: vendor.id,
       },
     });
@@ -42,14 +43,13 @@ export async function PATCH(
 
     const updated = await prisma.vendorNotification.update({
       where: {
-        id: params.id,
+        id: param.id,
       },
       data: {
         read: true,
         readAt: new Date(),
       },
     });
-    console.log("UPDATED============", updated);
     return NextResponse.json(updated);
   } catch (error) {
     console.error(error);
