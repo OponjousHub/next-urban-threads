@@ -2,7 +2,7 @@ import { approveRefund } from "@/app/lib/refunds/refund.service";
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const param = await params;
   const result = await approveRefund(param.id);
