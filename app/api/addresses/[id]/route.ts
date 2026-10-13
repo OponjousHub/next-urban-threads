@@ -7,9 +7,10 @@ import { AddressSchema } from "@/modules/address/address.schema";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const userId = await getLoggedInUserId();
+  const param = await params;
   if (!userId) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
@@ -26,7 +27,7 @@ export async function PATCH(
 
   const result = await AddressController.updateAddress(
     userId,
-    params.id,
+    param.id,
     parsed.data,
   );
 
