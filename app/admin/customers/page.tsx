@@ -10,9 +10,9 @@ import { formatCurrency } from "@/lib/formatCurrency";
 export default async function VendorCustomersPage({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
-  };
+  }>;
 }) {
   const queryParams = await searchParams;
   const tenant = await getDefaultTenant();
@@ -111,14 +111,6 @@ export default async function VendorCustomersPage({
   const newCustomers = customerRows.filter(
     (c) => c.joinedAt >= startOfMonth,
   ).length;
-
-  //Get Total count for to get the number of pages
-  // const totalCustomersCount = await prisma.user.count({
-  //   where: {
-  //     tenantId: tenant.id,
-  //     isDeleted: false,
-  //   },
-  // });
 
   const admin = {
     name: user?.name,
