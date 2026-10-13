@@ -4,15 +4,16 @@ import { NextResponse } from "next/server";
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const userId = await getLoggedInUserId();
+  const param = await params;
 
   if (!userId) {
     return NextResponse.json({ message: "Unauthorized!" }, { status: 401 });
   }
 
-  const result = await cancelRefund(params.id, userId);
+  const result = await cancelRefund(param.id, userId);
 
   return Response.json(result);
 }
