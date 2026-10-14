@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { fullName, email, password, phone, country } = parsed.data;
+    const { fullName, email, password, country } = parsed.data;
 
     const normalizedEmail = email.trim().toLowerCase();
 

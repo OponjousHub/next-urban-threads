@@ -11,5 +11,5 @@ export default function OrderLayout({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, []);
 
-  return <div className="min-h-screen bg-gray-50">{children}</div>;
+  return <div className="min-h-screen bg-gray-50 px-3">{children}</div>;
 }

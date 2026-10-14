@@ -70,6 +70,7 @@ export default function AdministratorsPageClient() {
   // ---------------------------------------------------------
 
   async function loadAdministrators() {
+    
     try {
       setLoading(true);
 

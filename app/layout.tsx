@@ -65,7 +65,11 @@ export default async function RootLayout({
                 Storefront pages have their own Header and Footer.
                 Admin pages should use the admin layout instead.
               */}
-              <div className="min-h-screen">{children}</div>
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
 
               <Toaster
                 position="top-center"

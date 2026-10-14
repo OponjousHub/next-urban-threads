@@ -101,26 +101,6 @@ const HeaderClient = ({
     };
   }, [pathname]);
 
-  // useEffect(() => {
-  //   async function loadUser() {
-  //     try {
-  //       const res = await fetch("/api/users/me", {
-  //         credentials: "include",
-  //         cache: "no-store",
-  //       });
-  //       if (!res.ok) {
-  //         setUser(null);
-  //       } else {
-  //         setUser(await res.json());
-  //       }
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-
-  //   loadUser();
-  // }, []);
-
   useEffect(() => {
     if (!search.trim()) {
       setSuggestions([]);
