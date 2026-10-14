@@ -1,25 +1,29 @@
 import Header from "../components/header";
 import Footer from "@/components/footer";
+
 import { CartContextProvider } from "@/store/cart-context";
 import { ProductContextProvider } from "@/store/products-context";
 import { TenantProvider } from "@/store/tenant-provider-context";
+
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import StorefrontSessionTracker from "@/components/analytics/storefront-session-tracker";
 import { getTenant } from "../lib/tenant/getTenant";
+
 import { Toaster } from "sonner";
-import { darkenColor } from "@/utils/color-shades";
+
 import {
+  darkenColor,
   lightenColor,
   lighterColor,
   lightestColor,
   hexToRgba,
 } from "@/utils/color-shades";
-// import {hexToRgba}
+
 import "./globals.css";
 
 export const metadata = {
   title: "Urban Threads store",
-  discription: "Selling trendy streetwear and accessories for men and women",
+  description: "Selling trendy streetwear and accessories for men and women",
 };
 
 export default async function RootLayout({
@@ -27,12 +31,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  <div className="bg-red-500 text-white p-10 text-3xl">
-    Tailwind v3 works 🎉
-  </div>;
   const storeInfo = await getDefaultTenant();
-  const primaryColor = storeInfo?.primaryColor || "#6366f1";
 
+  const primaryColor = storeInfo?.primaryColor || "#6366f1";
   const tenant = await getTenant();
 
   const primaryDark = darkenColor(primaryColor, 20);
@@ -44,28 +45,34 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        style={{
-          ["--color-primary" as any]: primaryColor,
-          ["--color-primary-dark" as any]: primaryDark,
-          ["--color-primary-light" as any]: primaryLight,
-          ["--color-primary-lighter" as any]: primaryLighter,
-          ["--color-primary-lightest" as any]: primaryLightest,
-          ["--color-primary-ring" as any]: primaryRing,
-        }}
+        style={
+          {
+            ["--color-primary" as any]: primaryColor,
+            ["--color-primary-dark" as any]: primaryDark,
+            ["--color-primary-light" as any]: primaryLight,
+            ["--color-primary-lighter" as any]: primaryLighter,
+            ["--color-primary-lightest" as any]: primaryLightest,
+            ["--color-primary-ring" as any]: primaryRing,
+          } as React.CSSProperties
+        }
       >
         <TenantProvider tenant={tenant}>
           <ProductContextProvider>
             <CartContextProvider>
               <StorefrontSessionTracker />
-              <Header />
-              {children}
+
+              {/*
+                Storefront pages have their own Header and Footer.
+                Admin pages should use the admin layout instead.
+              */}
+              <div className="min-h-screen">{children}</div>
+
               <Toaster
                 position="top-center"
                 richColors
                 closeButton
                 duration={6000}
-              />{" "}
-              <Footer />
+              />
             </CartContextProvider>
           </ProductContextProvider>
         </TenantProvider>
