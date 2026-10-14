@@ -88,7 +88,7 @@ export default async function VendorNotificationsPage() {
               key={notification.id}
               href={notification.link ?? "/vendor/notifications"}
               className={`block rounded-2xl border transition hover:shadow-sm ${
-                notification.read ? "bg-white" : "bg-blue-50 border-blue-200"
+                notification.isRead ? "bg-white" : "bg-blue-50 border-blue-200"
               }`}
             >
               <div className="flex gap-4 p-5">
@@ -100,7 +100,7 @@ export default async function VendorNotificationsPage() {
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold">{notification.title}</h3>
 
-                        {!notification.read && (
+                        {!notification.isRead && (
                           <span className="w-2 h-2 rounded-full bg-blue-600" />
                         )}
                       </div>

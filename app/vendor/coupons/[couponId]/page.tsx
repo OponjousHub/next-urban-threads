@@ -13,23 +13,29 @@ type Props = {
 
 export default async function CouponDetailPage({ params }: Props) {
   const { couponId } = await params;
-  const { tenant } = await getAuthPayload();
 
+  const { tenant } = await getAuthPayload();
   const { vendor } = await getCurrentVendor();
+
+  if (!tenant || !vendor) {
+    notFound();
+  }
 
   const coupon = await prisma.coupon.findFirst({
     where: {
       id: couponId,
-      tenantId: tenant?.id,
-      vendorId: vendor?.id,
+      tenantId: tenant.id,
+      vendorId: vendor.id,
     },
-
     include: {
-      orders: {
+      orderCoupons: {
         include: {
-          user: true,
+          order: {
+            include: {
+              user: true,
+            },
+          },
         },
-
         orderBy: {
           createdAt: "desc",
         },
@@ -41,15 +47,15 @@ export default async function CouponDetailPage({ params }: Props) {
     notFound();
   }
 
-  const totalUses = coupon.orders.length;
+  const totalUses = coupon.orderCoupons.length;
 
-  const revenueGenerated = coupon.orders.reduce(
-    (sum, order) => sum + Number(order.totalAmount),
+  const revenueGenerated = coupon.orderCoupons.reduce(
+    (sum, orderCoupon) => sum + Number(orderCoupon.order.totalAmount),
     0,
   );
 
-  const totalDiscount = coupon.orders.reduce(
-    (sum, order) => sum + Number(order.discountAmount ?? 0),
+  const totalDiscount = coupon.orderCoupons.reduce(
+    (sum, orderCoupon) => sum + Number(orderCoupon.discountAmount),
     0,
   );
 
@@ -57,48 +63,47 @@ export default async function CouponDetailPage({ params }: Props) {
 
   const safeCoupon = {
     ...coupon,
-
     value: Number(coupon.value),
-
-    minimumAmount: coupon.minimumAmount ? Number(coupon.minimumAmount) : null,
-
+    minimumAmount:
+      coupon.minimumAmount !== null ? Number(coupon.minimumAmount) : null,
     startsAt: coupon.startsAt
       ? new Date(coupon.startsAt).toISOString().slice(0, 16)
       : "",
-
     expiresAt: coupon.expiresAt
       ? new Date(coupon.expiresAt).toISOString().slice(0, 16)
       : "",
+    orders: coupon.orderCoupons.map((orderCoupon) => {
+      const order = orderCoupon.order;
 
-    orders: coupon.orders.map((order) => ({
-      ...order,
-
-      totalAmount: Number(order.totalAmount),
-      discountAmount: Number(order.discountAmount ?? 0),
-      commissionAmount: Number(order.commissionAmount ?? 0),
-      createdAt: order.createdAt.toISOString(),
-
-      user: {
-        ...order.user,
-      },
-    })),
+      return {
+        ...order,
+        totalAmount: Number(order.totalAmount),
+        discountAmount: Number(orderCoupon.discountAmount),
+        commissionAmount: Number(order.commissionAmount),
+        createdAt: order.createdAt.toISOString(),
+        user: {
+          ...order.user,
+        },
+      };
+    }),
   };
 
   const safeAverageOrderValue = Number(averageOrderValue);
+
   return (
     <>
+      {" "}
       <VendorHeaderUI
         title="Coupon Details"
         subtitle="Manage coupon performance"
         vendor={vendor}
       />
-
       <CouponDetail
         coupon={safeCoupon}
         revenueGenerated={revenueGenerated}
         avgOrderValue={safeAverageOrderValue}
         totalDiscount={totalDiscount}
-        basePath={"/vendor/coupons"}
+        basePath="/vendor/coupons"
       />
     </>
   );
