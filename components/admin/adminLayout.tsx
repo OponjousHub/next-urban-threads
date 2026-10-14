@@ -70,7 +70,8 @@ export default function AdminLayout({
   const { open, setOpen } = useAdminSidebar();
 
   return (
-    <div className="flex min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
+    // <div className="flex min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex min-h-screen w-full bg-red-100">
       {/* Desktop Sidebar */}
       <AdminSidebar
         collapsed={collapsed}

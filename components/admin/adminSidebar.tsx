@@ -84,8 +84,8 @@ export default function AdminSidebar({
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-2 px-3 text-red-600">
-        <SidebarItem
+      <nav className="flex-1 space-y-2 px-3">
+        {/* <SidebarItem
           href="/admin"
           icon={<FiHome size={20} />}
           label="Dashboard"
@@ -100,7 +100,7 @@ export default function AdminSidebar({
           collapsed={collapsed}
           pathname={pathname}
           onNavigate={onNavigate}
-        />
+        /> */}
         <SidebarItem
           href="/admin/orders"
           icon={<FiPackage size={20} />}
