@@ -84,7 +84,7 @@ export default function AdminSidebar({
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-2 px-3">
+      <nav className="flex-1 space-y-2 px-3 text-red-600">
         <SidebarItem
           href="/admin"
           icon={<FiHome size={20} />}
