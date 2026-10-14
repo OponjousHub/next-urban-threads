@@ -11,7 +11,6 @@ import StoreModeToggle from "@/components/admin/settings/storeModeToggle";
 import FAQForm from "@/components/admin/settings/FAQForm/faq-form";
 import AboutSettings from "../content/about/page";
 import LegalSettings from "../content/legal/page";
-import RefundsPage from "../refunds/page";
 import { useTenant } from "@/store/tenant-provider-context";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 
