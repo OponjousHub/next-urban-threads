@@ -47,7 +47,8 @@ export default function SettingsPageUI({ admin }: AdminProps) {
         subtitle="Manage your Settings and more"
         admin={admin}
       />
-      <div className="flex gap-8 max-w-6xl mx-auto p-6">
+
+      <div className="flex w-full max-w-6xl items-start gap-8 mx-auto p-6 min-h-0">
         {/* Sidebar */}
         <aside className="w-56 shrink-0">
           <div className="bg-white border rounded-2xl p-3 shadow-sm">
@@ -70,7 +71,7 @@ export default function SettingsPageUI({ admin }: AdminProps) {
         </aside>
 
         {/* Content */}
-        <main className="flex-1 space-y-6">
+        <main className="flex-1 min-w-0 min-h-0 space-y-6">
           {/* Header */}
           <div>
             <h1 className="text-2xl font-semibold capitalize">{activeTab}</h1>
