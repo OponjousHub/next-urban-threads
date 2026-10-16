@@ -2,7 +2,7 @@
 
 import { FaBars } from "react-icons/fa";
 import { useAdminSidebar } from "@/store/admin-sidebar-context";
-import AdminNotificationBell from "./notification-bell/adminNotificationBell";
+import AdminNotificationBell from "./notification-bell/AdminNotificationBell";
 
 type AdminHeaderProps = {
   title: string;

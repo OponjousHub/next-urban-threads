@@ -1,5 +1,5 @@
-import RevenueChart from "../charts/revenueChart";
-import DashboardAlerts from "../alerts/systemAlerts";
+import RevenueChart from "../charts/RevenueChart";
+import DashboardAlerts from "../alerts/SystemAlerts";
 
 export default function DashboardAnalytics({
   lowstock,

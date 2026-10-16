@@ -1,4 +1,4 @@
-import RecentOrdersTable from "../tables/recentOrdersTable";
+import RecentOrdersTable from "../tables/RecentOrdersTable";
 import TopProducts from "@/components/admin/dashboard/topProducts";
 
 type recentOrder = {
