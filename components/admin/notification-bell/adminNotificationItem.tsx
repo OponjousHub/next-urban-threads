@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import type { AdminNotification } from "./adminNotificationBell";
+import type { AdminNotification } from "./AdminNotificationBell";
 import { getNotificationIcon } from "./admin-notification-icons";
 import { formatNotificationTime } from "./time";
 

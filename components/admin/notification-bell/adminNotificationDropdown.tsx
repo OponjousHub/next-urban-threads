@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CheckCheck } from "lucide-react";
 import AdminNotificationItem from "./adminNotificationItem";
-import type { AdminNotification } from "./adminNotificationBell";
+import type { AdminNotification } from "./AdminNotificationBell";
 import Link from "next/link";
 
 type Props = {
