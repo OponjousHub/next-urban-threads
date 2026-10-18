@@ -379,7 +379,43 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // 12. Successful payment
     // ---------------------------
 
-    if (result.status !== "successful") {
+    if (!result.success || result.status !== "successful") {
+      return NextResponse.json(order);
+    }
+
+    const expectedAmount = Number(order.totalAmount);
+    const verifiedAmount = result.amount;
+
+    const expectedCurrency = String(order.currency ?? "").toUpperCase();
+    const verifiedCurrency = String(result.currency ?? "").toUpperCase();
+
+    const referenceMatches = result.txRef === order.paymentReference;
+
+    const amountMatches =
+      typeof verifiedAmount === "number" &&
+      Number.isFinite(verifiedAmount) &&
+      Number.isFinite(expectedAmount) &&
+      Math.round(verifiedAmount * 100) === Math.round(expectedAmount * 100);
+
+    const currencyMatches =
+      expectedCurrency !== "" &&
+      verifiedCurrency !== "" &&
+      expectedCurrency === verifiedCurrency;
+
+    if (!referenceMatches || !amountMatches || !currencyMatches) {
+      console.error(
+        "Payment verification mismatch; order not marked as paid.",
+        {
+          orderId: order.id,
+          provider: order.paymentProvider,
+          referenceMatches,
+          amountMatches,
+          currencyMatches,
+          expectedCurrency,
+          verifiedCurrency,
+        },
+      );
+
       return NextResponse.json(order);
     }
 

@@ -78,19 +78,6 @@ export class FlutterwaveProvider implements PaymentProvider {
 
       const data = res.data?.data;
 
-      console.log("========== FLUTTERWAVE ORIGINAL TRANSACTION ==========");
-      console.log("Transaction ID:", data?.data?.id);
-      console.log("TX REF:", data?.data?.tx_ref);
-      console.log("FLW REF:", data?.data?.flw_ref);
-      console.log("Amount:", data?.data?.amount);
-      console.log("Charged Amount:", data?.data?.charged_amount);
-      console.log("Amount Settled:", data?.data?.amount_settled);
-      console.log("Currency:", data?.data?.currency);
-      console.log("Status:", data?.data?.status);
-      console.log("Processor Response:", data?.data?.processor_response);
-      console.log("Payment Type:", data?.data?.payment_type);
-      console.log("======================================================");
-
       // No transaction data returned.
       // This is NOT the same as a real pending transaction.
       if (!data) {
@@ -105,13 +92,20 @@ export class FlutterwaveProvider implements PaymentProvider {
       // ---------------------------
       // Successful
       // ---------------------------
-
       if (rawStatus === "successful" || rawStatus === "succeeded") {
         return {
           success: true,
           status: "successful",
           transactionId: data.id,
           txRef: data.tx_ref,
+          amount:
+            typeof data.amount === "number" && Number.isFinite(data.amount)
+              ? data.amount
+              : undefined,
+          currency:
+            typeof data.currency === "string"
+              ? data.currency.toUpperCase()
+              : undefined,
         };
       }
 
@@ -149,14 +143,6 @@ export class FlutterwaveProvider implements PaymentProvider {
         error?.response?.data?.message ??
         error?.message ??
         "Flutterwave verification failed";
-
-      console.warn("========== FLUTTERWAVE VERIFY ERROR ==========");
-      console.warn("Reference:", reference);
-      console.warn("HTTP status:", statusCode);
-      console.warn("Flutterwave error response:", error?.response?.data);
-      console.warn("Error code:", error?.code);
-      console.warn("Error message:", message);
-      console.warn("==============================================");
 
       // ---------------------------------------------------------
       // No transaction exists.
