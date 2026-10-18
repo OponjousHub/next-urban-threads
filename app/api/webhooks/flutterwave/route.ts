@@ -23,10 +23,24 @@ export async function POST(req: Request) {
       const reference = event.data.tx_ref;
 
       const provider = new FlutterwaveProvider();
-      const isPaid = await provider.verifyPayment(reference);
+      const verification = await provider.verifyPayment(reference);
 
-      if (!isPaid) {
-        return NextResponse.json({ message: "Payment not verified" });
+      if (
+        !verification.success ||
+        verification.status !== "successful" ||
+        verification.txRef !== reference
+      ) {
+        console.warn("Flutterwave webhook payment verification rejected", {
+          reference,
+          verificationStatus: verification.status,
+          verificationSuccess: verification.success,
+          referenceMatches: verification.txRef === reference,
+        });
+
+        return NextResponse.json(
+          { message: "Payment not verified" },
+          { status: 400 },
+        );
       }
 
       const order = await prisma.order.update({
