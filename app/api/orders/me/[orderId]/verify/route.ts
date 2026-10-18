@@ -419,29 +419,57 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json(order);
     }
 
-    const updatedOrder = await prisma.order.update({
+    const paymentUpdate = await prisma.order.updateMany({
+      where: {
+        id: order.id,
+        tenantId: tenant.id,
+        paymentProvider: order.paymentProvider,
+        paymentStatus: PaymentStatus.PENDING,
+        status: OrderStatus.PENDING,
+        paymentReference: order.paymentReference,
+      },
+      data: {
+        paymentStatus: PaymentStatus.PAID,
+        status: OrderStatus.PROCESSING,
+        paymentTxRef: result.txRef,
+        flutterwaveTransactionId:
+          order.paymentProvider === "FLUTTERWAVE" &&
+          result.transactionId !== undefined
+            ? String(result.transactionId)
+            : undefined,
+      },
+    });
+
+    if (paymentUpdate.count === 0) {
+      const latestOrder = await prisma.order.findFirst({
+        where: {
+          id: order.id,
+          tenantId: tenant.id,
+        },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+
+      if (!latestOrder) {
+        return NextResponse.json(
+          { message: "Order not found" },
+          { status: 404 },
+        );
+      }
+
+      return NextResponse.json(latestOrder);
+    }
+
+    const updatedOrder = await prisma.order.findFirstOrThrow({
       where: {
         id: order.id,
         tenantId: tenant.id,
       },
-
-      data: {
-        paymentStatus: PaymentStatus.PAID,
-        status: OrderStatus.PROCESSING,
-
-        // Keep the original payment reference / tx_ref
-        paymentReference: order.paymentReference,
-
-        // Flutterwave transaction ID — needed for refunds
-        flutterwaveTransactionId:
-          result.transactionId !== undefined
-            ? String(result.transactionId)
-            : undefined,
-
-        // Gateway transaction reference
-        paymentTxRef: result.txRef,
-      },
-
       include: {
         items: {
           include: {

@@ -115,7 +115,9 @@ export async function POST(req: Request) {
       where: {
         id: order.id,
         tenantId: order.tenantId,
+        paymentProvider: "FLUTTERWAVE",
         paymentStatus: "PENDING",
+        status: "PENDING",
         paymentReference: reference,
       },
       data: {
