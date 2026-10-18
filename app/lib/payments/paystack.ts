@@ -69,6 +69,14 @@ export class PaystackProvider {
           status: "successful",
           transactionId: data.id,
           txRef: data.reference,
+          amount:
+            typeof data.amount === "number" && Number.isFinite(data.amount)
+              ? data.amount / 100
+              : undefined,
+          currency:
+            typeof data.currency === "string"
+              ? data.currency.toUpperCase()
+              : undefined,
         };
       }
 
