@@ -15,6 +15,8 @@ export interface VerifyPaymentResult {
   status: "successful" | "failed" | "pending" | "not_found";
   transactionId?: number;
   txRef?: string;
+  amount?: number;
+  currency?: string;
 }
 
 export interface PaymentProvider {
