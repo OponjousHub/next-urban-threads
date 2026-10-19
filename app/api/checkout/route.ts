@@ -670,28 +670,6 @@ export async function POST(req: NextRequest) {
     });
 
     // ---------------------------------------------------------
-    // Increment coupon usage
-    // ---------------------------------------------------------
-
-    if (couponCalculations.length > 0) {
-      await prisma.$transaction(
-        couponCalculations.map((coupon) =>
-          prisma.coupon.update({
-            where: {
-              id: coupon.couponId,
-            },
-
-            data: {
-              usedCount: {
-                increment: 1,
-              },
-            },
-          }),
-        ),
-      );
-    }
-
-    // ---------------------------------------------------------
     // 17. Admin notification
     // ---------------------------------------------------------
 
