@@ -43,6 +43,11 @@ export async function POST(req: Request) {
           include: { product: true },
         },
         shippingAddress: true,
+        orderCoupons: {
+          select: {
+            couponId: true,
+          },
+        },
       },
     });
 

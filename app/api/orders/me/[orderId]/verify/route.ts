@@ -549,23 +549,22 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // ---------------------------
     // 16. Coupon usage
     // ---------------------------
-
-    const couponId = order.orderCoupons[0]?.couponId;
-
-    if (couponId) {
-      await prisma.coupon.update({
-        where: {
-          id: couponId,
-          tenantId: tenant.id,
-          vendorId: order.vendorId,
-        },
-
-        data: {
-          usedCount: {
-            increment: 1,
-          },
-        },
-      });
+    if (paymentUpdate.count > 0 && order.orderCoupons.length > 0) {
+      await prisma.$transaction(
+        order.orderCoupons.map((orderCoupon) =>
+          prisma.coupon.update({
+            where: {
+              id: orderCoupon.couponId,
+              tenantId: tenant.id,
+            },
+            data: {
+              usedCount: {
+                increment: 1,
+              },
+            },
+          }),
+        ),
+      );
     }
 
     return NextResponse.json(updatedOrder);
