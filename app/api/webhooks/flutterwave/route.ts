@@ -155,6 +155,26 @@ export async function POST(req: Request) {
       );
     }
 
+    // Increment coupon usage only when this webhook successfully
+    // changes the order from pending to paid.
+    if (order.orderCoupons.length > 0) {
+      await prisma.$transaction(
+        order.orderCoupons.map((orderCoupon) =>
+          prisma.coupon.update({
+            where: {
+              id: orderCoupon.couponId,
+              tenantId: order.tenantId,
+            },
+            data: {
+              usedCount: {
+                increment: 1,
+              },
+            },
+          }),
+        ),
+      );
+    }
+
     const updatedOrder = await prisma.order.findUniqueOrThrow({
       where: { id: order.id },
       include: {
