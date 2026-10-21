@@ -12,13 +12,21 @@ type NotifyOptions = {
 };
 
 export class AdminNotificationService {
-  static async notify({ type, title, message, link, metadata }: NotifyOptions) {
+  static async notify({
+    type,
+    title,
+    message,
+    link,
+    metadata,
+    dedupeKey,
+  }: NotifyOptions) {
     const tenant = await getDefaultTenant();
 
     if (!tenant) {
       throw new Error("Tenant not found");
     }
-    // Find all admins
+
+    // Find all admins.
     const admins = await prisma.user.findMany({
       where: {
         tenantId: tenant.id,
@@ -38,12 +46,12 @@ export class AdminNotificationService {
         adminId: admin.id,
         tenantId: tenant.id,
         storeMode: tenant.storeMode,
-        type: options.type,
-        title: options.title,
-        message: options.message,
-        link: options.link,
-        metadata: options.metadata,
-        dedupeKey: options.dedupeKey,
+        type,
+        title,
+        message,
+        link,
+        metadata,
+        dedupeKey,
       })),
       skipDuplicates: true,
     });
@@ -103,7 +111,6 @@ export class AdminNotificationService {
         adminId,
         tenantId: tenant.id,
         storeMode: tenant.storeMode,
-
         isRead: false,
       },
     });
