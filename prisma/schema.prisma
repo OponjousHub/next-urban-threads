@@ -277,6 +277,28 @@ model OrderItem {
   product      Product   @relation(fields: [productId], references: [id])
 }
 
+model PaymentFinalization {
+  id                    String    @id @default(cuid())
+  orderId               String    @unique
+  tenantId              String
+
+  couponUsageProcessed  Boolean   @default(false)
+  trackingEventCreated  Boolean   @default(false)
+  vendorNotified        Boolean   @default(false)
+  adminNotified         Boolean   @default(false)
+  confirmationEmailSent Boolean   @default(false)
+
+  status                String    @default("PENDING")
+  attempts              Int       @default(0)
+  lastError             String?
+  processedAt           DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([tenantId, status])
+  @@index([status, updatedAt])
+}
+
 model Address {
   id          String   @id @default(cuid())
   userId      String

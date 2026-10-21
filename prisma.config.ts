@@ -13,5 +13,6 @@ export default defineConfig({
 
   datasource: {
     url: env("RAYNTA_DATABASE_URL"),
+    // url: env("DATABASE_URL"),
   },
 });
