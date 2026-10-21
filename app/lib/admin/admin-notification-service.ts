@@ -4,6 +4,7 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 type NotifyOptions = {
   type: AdminNotificationType;
+  dedupeKey?: string;
   title: string;
   message: string;
   link?: string;
@@ -37,12 +38,14 @@ export class AdminNotificationService {
         adminId: admin.id,
         tenantId: tenant.id,
         storeMode: tenant.storeMode,
-        type,
-        title,
-        message,
-        link,
-        metadata,
+        type: options.type,
+        title: options.title,
+        message: options.message,
+        link: options.link,
+        metadata: options.metadata,
+        dedupeKey: options.dedupeKey,
       })),
+      skipDuplicates: true,
     });
   }
 
