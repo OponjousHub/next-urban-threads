@@ -543,6 +543,7 @@ model OrderStatusHistory {
 
 model OrderTrackingEvent {
   id          String            @id @default(cuid())
+  dedupeKey   String?           @unique
   orderId     String
   tenantId    String
   type        TrackingEventType
@@ -731,6 +732,7 @@ model VendorNotificationSettings {
 
 model VendorNotification {
   id        String   @id @default(cuid())
+  dedupeKey String?
   vendorId  String
   tenantId  String
   title     String
@@ -743,7 +745,8 @@ model VendorNotification {
   metadata   Json?
   createdAt  DateTime @default(now())
   vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-
+  
+  @@unique([vendorId, dedupeKey])
   @@index([vendorId])
   @@index([vendorId, isRead])
   @@index([createdAt])
@@ -780,30 +783,27 @@ model AdminNotificationSettings {
 }
 
 model AdminNotification {
-  id String @id @default(cuid())
-
-  adminId String
+  id        String               @id @default(cuid())
+  dedupeKey String?
+  adminId   String
   tenantId  String
-  title String
-  message String
-  storeMode  StoreMode
+  title     String
+  message   String
+  storeMode StoreMode
+  type      AdminNotificationType
+  isRead    Boolean              @default(false)
+  link      String?
+  readAt    DateTime?
+  metadata  Json?
+  createdAt DateTime             @default(now())
+  admin     User                 @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  tenant    Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  type AdminNotificationType
-  isRead Boolean @default(false)
-  link String?
-  readAt DateTime?
-
-  metadata Json?
-  createdAt DateTime @default(now())
-
-  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
+  @@unique([adminId, dedupeKey])
   @@index([adminId])
   @@index([adminId, isRead])
   @@index([createdAt])
 }
-
 model InventoryLog {
   id         String   @id @default(cuid())
   productId  String
