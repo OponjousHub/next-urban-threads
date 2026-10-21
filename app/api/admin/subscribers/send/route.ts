@@ -71,11 +71,7 @@ async function sendInBackground(
             html: template.html,
           });
 
-          if (res?.error) {
-            console.error("EMAIL FAILED:", sub.email, res.error);
-          } else {
-            console.log("EMAIL SENT:", sub.email);
-          }
+          console.log("EMAIL SENT:", sub.email);
 
           sent++;
           setProgress({ sent });

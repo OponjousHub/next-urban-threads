@@ -294,6 +294,8 @@ model PaymentFinalization {
   processedAt           DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  lockToken             String?
+  lockedUntil           DateTime?
 
   @@index([tenantId, status])
   @@index([status, updatedAt])

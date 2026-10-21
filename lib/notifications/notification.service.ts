@@ -1,6 +1,7 @@
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import {
+  Prisma,
   VendorNotificationType,
   VendorNotificationSettings,
 } from "@prisma/client";
@@ -20,11 +21,14 @@ export default class NotificationService {
   /**
    * Creates a notification if the vendor has enabled it.
    */
+
   static async notify(options: NotifyOptions) {
     const tenant = await getDefaultTenant();
+
     if (!tenant) {
       throw new Error("No tenant found");
     }
+
     const settings = await prisma.vendorNotificationSettings.findUnique({
       where: {
         vendorId: options.vendorId,
@@ -39,7 +43,32 @@ export default class NotificationService {
       return null;
     }
 
-    if (options.dedupeKey) {
+    try {
+      return await prisma.vendorNotification.create({
+        data: {
+          vendorId: options.vendorId,
+          dedupeKey: options.dedupeKey,
+          tenantId: tenant.id,
+          storeMode: tenant.storeMode,
+          title: options.title,
+          message: options.message,
+          type: options.type,
+          link: options.link,
+          metadata: {
+            ...(options.metadata ?? {}),
+            dedupeKey: options.dedupeKey,
+          },
+        },
+      });
+    } catch (error) {
+      const isDuplicate =
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002";
+
+      if (!isDuplicate || !options.dedupeKey) {
+        throw error;
+      }
+
       const existing = await prisma.vendorNotification.findFirst({
         where: {
           vendorId: options.vendorId,
@@ -47,26 +76,12 @@ export default class NotificationService {
         },
       });
 
-      if (existing) return existing;
+      if (existing) {
+        return existing;
+      }
+
+      throw error;
     }
-
-    return prisma.vendorNotification.create({
-      data: {
-        vendorId: options.vendorId,
-        dedupeKey: options.dedupeKey,
-        tenantId: tenant.id,
-        storeMode: tenant.storeMode,
-        title: options.title,
-        message: options.message,
-        type: options.type,
-        link: options.link,
-
-        metadata: {
-          ...(options.metadata ?? {}),
-          dedupeKey: options.dedupeKey,
-        },
-      },
-    });
   }
 
   /**
