@@ -43,24 +43,17 @@ export default class NotificationService {
       const existing = await prisma.vendorNotification.findFirst({
         where: {
           vendorId: options.vendorId,
-          tenantId: tenant.id,
-          storeMode: tenant.storeMode,
-          isRead: false,
-          metadata: {
-            path: ["dedupeKey"],
-            equals: options.dedupeKey,
-          },
+          dedupeKey: options.dedupeKey,
         },
       });
 
-      if (existing) {
-        return existing;
-      }
+      if (existing) return existing;
     }
 
     return prisma.vendorNotification.create({
       data: {
         vendorId: options.vendorId,
+        dedupeKey: options.dedupeKey,
         tenantId: tenant.id,
         storeMode: tenant.storeMode,
         title: options.title,
