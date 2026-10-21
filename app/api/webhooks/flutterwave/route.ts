@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
 import orderConfirmationEmail from "@/app/lib/email/template/orderConfirmation";
 import { sendEmail } from "@/app/lib/email/sendEmail";
+import { finalizePayment } from "@/app/lib/payments/finalize-payment";
 
 export async function POST(req: Request) {
   try {
@@ -57,9 +58,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
     }
 
-    // Already paid: acknowledge the repeated webhook without resending email.
+    // Already paid: retry any unfinished finalization steps.
     if (order.paymentStatus === "PAID") {
-      return NextResponse.json({ received: true, alreadyProcessed: true });
+      const finalization = await finalizePayment(order.id);
+
+      if (!finalization.complete) {
+        return NextResponse.json(
+          {
+            received: true,
+            alreadyProcessed: true,
+            finalizationComplete: false,
+            errors: finalization.errors,
+          },
+          { status: 500 },
+        );
+      }
+
+      return NextResponse.json({
+        received: true,
+        alreadyProcessed: true,
+        finalizationComplete: true,
+      });
     }
 
     const provider = new FlutterwaveProvider();
@@ -143,9 +162,24 @@ export async function POST(req: Request) {
       });
 
       if (latestOrder?.paymentStatus === "PAID") {
+        const finalization = await finalizePayment(order.id);
+
+        if (!finalization.complete) {
+          return NextResponse.json(
+            {
+              received: true,
+              alreadyProcessed: true,
+              finalizationComplete: false,
+              errors: finalization.errors,
+            },
+            { status: 500 },
+          );
+        }
+
         return NextResponse.json({
           received: true,
           alreadyProcessed: true,
+          finalizationComplete: true,
         });
       }
 

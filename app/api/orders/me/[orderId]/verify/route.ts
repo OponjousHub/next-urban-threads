@@ -4,9 +4,8 @@ import { getLoggedInUserId } from "@/lib/auth";
 import { PaystackProvider } from "@/app/lib/payments/paystack";
 import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
-import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
-import NotificationService from "@/lib/notifications/notification.service";
 import { PaymentStatus, OrderStatus } from "@prisma/client";
+import { finalizePayment } from "@/app/lib/payments/finalize-payment";
 import {
   isPendingPaymentExpired,
   PENDING_PAYMENT_TIMEOUT_MINUTES,
@@ -119,10 +118,20 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // orders
     // ---------------------------
 
-    if (
-      order.paymentStatus === PaymentStatus.PAID ||
-      order.status !== OrderStatus.PENDING
-    ) {
+    // If payment is already complete, retry unfinished finalization steps.
+    if (order.paymentStatus === PaymentStatus.PAID) {
+      const finalization = await finalizePayment(order.id);
+
+      return NextResponse.json({
+        success: true,
+        alreadyProcessed: true,
+        finalizationComplete: finalization.complete,
+        finalizationErrors: finalization.errors,
+      });
+    }
+
+    // Preserve the existing handling for other non-pending orders.
+    if (order.status !== OrderStatus.PENDING) {
       return NextResponse.json(order);
     }
 
@@ -480,94 +489,17 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     });
 
     // ---------------------------
-    // 13. Tracking event
+    // 13. Finalize successful payment
     // ---------------------------
 
-    await prisma.orderTrackingEvent.create({
-      data: {
-        orderId: order.id,
-        tenantId: tenant.id,
-        status: OrderStatus.PROCESSING,
-        type: "STATUS_CHANGE",
-        title: "Payment confirmed",
-        description:
-          "Your payment was successful. We are now processing your order.",
-      },
+    const finalization = await finalizePayment(order.id);
+
+    return NextResponse.json({
+      success: true,
+      order: updatedOrder,
+      finalizationComplete: finalization.complete,
+      finalizationErrors: finalization.errors,
     });
-
-    // ---------------------------
-    // 14. Vendor notification
-    // ---------------------------
-
-    if (order.vendorId) {
-      await NotificationService.notify({
-        vendorId: order.vendorId,
-        setting: "paymentReceived",
-        type: "PAYMENT",
-        title: "Payment Received",
-
-        message: `Payment of ${
-          order.currency
-        } ${Number(order.totalAmount).toLocaleString()} has been confirmed for Order #${order.id.slice(
-          -8,
-        )}.`,
-
-        link: `/vendor/orders/${order.id}`,
-
-        metadata: {
-          orderId: order.id,
-          paymentReference: updatedOrder.paymentReference,
-          amount: Number(updatedOrder.totalAmount),
-          currency: updatedOrder.currency,
-        },
-      });
-    }
-
-    // ---------------------------
-    // 15. Admin notification
-    // ---------------------------
-
-    await AdminNotificationService.notify({
-      type: "PAYMENT_RECEIVED",
-      title: "Payment Received",
-
-      message: `${order.user.name ?? "A customer"} paid ${
-        updatedOrder.currency
-      } ${Number(updatedOrder.totalAmount).toLocaleString()}.`,
-
-      link: `/admin/orders/${order.id}`,
-
-      metadata: {
-        orderId: order.id,
-        customerId: order.userId,
-        customerName: order.user.name,
-        amount: Number(updatedOrder.totalAmount),
-        currency: updatedOrder.currency,
-      },
-    });
-
-    // ---------------------------
-    // 16. Coupon usage
-    // ---------------------------
-    if (paymentUpdate.count > 0 && order.orderCoupons.length > 0) {
-      await prisma.$transaction(
-        order.orderCoupons.map((orderCoupon) =>
-          prisma.coupon.update({
-            where: {
-              id: orderCoupon.couponId,
-              tenantId: tenant.id,
-            },
-            data: {
-              usedCount: {
-                increment: 1,
-              },
-            },
-          }),
-        ),
-      );
-    }
-
-    return NextResponse.json(updatedOrder);
   } catch (error) {
     console.error("Verify order error:", error);
 
