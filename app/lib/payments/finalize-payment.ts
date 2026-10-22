@@ -1,4 +1,6 @@
+import { randomUUID } from "crypto";
 import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/utils/prisma";
 import NotificationService from "@/lib/notifications/notification.service";
 import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
@@ -8,7 +10,12 @@ import { sendEmail } from "@/app/lib/email/sendEmail";
 type FinalizationResult = {
   complete: boolean;
   errors: string[];
+  skipped?: boolean;
+  reason?: string;
 };
+
+const LEASE_DURATION_MS = 2 * 60 * 1000;
+const LEASE_RENEWAL_INTERVAL_MS = 30 * 1000;
 
 function isUniqueConstraintError(error: unknown): boolean {
   return (
@@ -25,6 +32,7 @@ export async function finalizePayment(
   orderId: string,
 ): Promise<FinalizationResult> {
   const errors: string[] = [];
+  const lockToken = randomUUID();
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },
@@ -54,19 +62,108 @@ export async function finalizePayment(
     );
   }
 
+  // Ensure the finalization record exists before attempting to acquire a lease.
   await prisma.paymentFinalization.upsert({
     where: { orderId: order.id },
     create: {
       orderId: order.id,
       tenantId: order.tenantId,
-      status: "PROCESSING",
-      attempts: 1,
+      status: "PENDING",
     },
-    update: {
+    update: {},
+  });
+
+  // Acquire the lease atomically. An unexpired lease belongs to another request.
+  const now = new Date();
+  const leaseExpiry = new Date(now.getTime() + LEASE_DURATION_MS);
+
+  const leaseClaim = await prisma.paymentFinalization.updateMany({
+    where: {
+      orderId: order.id,
+      OR: [
+        { lockToken: null },
+        { lockedUntil: null },
+        { lockedUntil: { lte: now } },
+      ],
+    },
+    data: {
+      lockToken,
+      lockedUntil: leaseExpiry,
       status: "PROCESSING",
       attempts: { increment: 1 },
     },
   });
+
+  if (leaseClaim.count !== 1) {
+    return {
+      complete: false,
+      errors: [],
+      skipped: true,
+      reason: "Another request currently owns the payment-finalization lease.",
+    };
+  }
+
+  let leaseLost = false;
+  let renewalInProgress = false;
+
+  const leaseTimer = setInterval(async () => {
+    if (renewalInProgress || leaseLost) return;
+
+    renewalInProgress = true;
+
+    try {
+      const renewed = await prisma.paymentFinalization.updateMany({
+        where: {
+          orderId: order.id,
+          lockToken,
+        },
+        data: {
+          lockedUntil: new Date(Date.now() + LEASE_DURATION_MS),
+        },
+      });
+
+      if (renewed.count !== 1) {
+        leaseLost = true;
+      }
+    } catch (error) {
+      console.error(
+        `[Payment finalization] Could not renew lease for order ${order.id}:`,
+        error,
+      );
+    } finally {
+      renewalInProgress = false;
+    }
+  }, LEASE_RENEWAL_INTERVAL_MS);
+
+  leaseTimer.unref?.();
+
+  async function assertLeaseOwnership() {
+    if (leaseLost) {
+      throw new Error(
+        "Payment-finalization lease was lost; stopping further processing.",
+      );
+    }
+
+    const current = await prisma.paymentFinalization.findUnique({
+      where: { orderId: order?.id },
+      select: {
+        lockToken: true,
+        lockedUntil: true,
+      },
+    });
+
+    if (
+      !current ||
+      current.lockToken !== lockToken ||
+      !current.lockedUntil ||
+      current.lockedUntil.getTime() <= Date.now()
+    ) {
+      leaseLost = true;
+      throw new Error(
+        "Payment-finalization lease is no longer owned by this request.",
+      );
+    }
+  }
 
   async function recordError(step: string, error: unknown) {
     const message = `${step}: ${getErrorMessage(error)}`;
@@ -74,8 +171,14 @@ export async function finalizePayment(
 
     console.error(`[Payment finalization] Order ${order?.id}: ${message}`);
 
-    await prisma.paymentFinalization.update({
-      where: { orderId: order?.id },
+    // Never let an expired lease owner overwrite another owner's state.
+    if (leaseLost) return;
+
+    await prisma.paymentFinalization.updateMany({
+      where: {
+        orderId: order?.id,
+        lockToken,
+      },
       data: {
         lastError: message,
         status: "RETRY",
@@ -83,54 +186,50 @@ export async function finalizePayment(
     });
   }
 
-  // 1. Increment coupon usage exactly once.
-  //
-  // The flag and coupon increments share a transaction. If the transaction
-  // fails, both the flag and increments roll back together.
   try {
-    await prisma.$transaction(async (tx) => {
-      const claim = await tx.paymentFinalization.updateMany({
-        where: {
-          orderId: order.id,
-          couponUsageProcessed: false,
-        },
-        data: {
-          couponUsageProcessed: true,
-        },
-      });
+    // 1. Increment coupon usage exactly once.
+    try {
+      await assertLeaseOwnership();
 
-      if (claim.count === 0) {
-        return;
-      }
-
-      const orderCoupons = await tx.orderCoupon.findMany({
-        where: { orderId: order.id },
-        select: { couponId: true },
-      });
-
-      for (const orderCoupon of orderCoupons) {
-        await tx.coupon.update({
-          where: { id: orderCoupon.couponId },
+      await prisma.$transaction(async (tx) => {
+        const claim = await tx.paymentFinalization.updateMany({
+          where: {
+            orderId: order.id,
+            lockToken,
+            couponUsageProcessed: false,
+          },
           data: {
-            usedCount: { increment: 1 },
+            couponUsageProcessed: true,
           },
         });
-      }
-    });
-  } catch (error) {
-    await recordError("Coupon usage", error);
-  }
 
-  // 2. Create the payment-confirmation tracking event once.
-  const trackingDedupeKey = `payment-confirmed:${order.id}`;
+        if (claim.count === 0) return;
 
-  try {
-    const alreadyExists = await prisma.orderTrackingEvent.findUnique({
-      where: { dedupeKey: trackingDedupeKey },
-      select: { id: true },
-    });
+        const orderCoupons = await tx.orderCoupon.findMany({
+          where: { orderId: order.id },
+          select: { couponId: true },
+        });
 
-    if (!alreadyExists) {
+        for (const orderCoupon of orderCoupons) {
+          await tx.coupon.update({
+            where: { id: orderCoupon.couponId },
+            data: {
+              usedCount: { increment: 1 },
+            },
+          });
+        }
+      });
+    } catch (error) {
+      if (leaseLost) throw error;
+      await recordError("Coupon usage", error);
+    }
+
+    // 2. Create the payment-confirmation tracking event once.
+    try {
+      await assertLeaseOwnership();
+
+      const trackingDedupeKey = `payment-confirmed:${order.id}`;
+
       try {
         await prisma.orderTrackingEvent.create({
           data: {
@@ -148,124 +247,208 @@ export async function finalizePayment(
           },
         });
       } catch (error) {
-        // Another simultaneous finalization may have created the event.
-        if (!isUniqueConstraintError(error)) {
-          throw error;
-        }
+        if (!isUniqueConstraintError(error)) throw error;
+
+        // A previous or concurrent attempt already created the event.
+        const existing = await prisma.orderTrackingEvent.findUnique({
+          where: { dedupeKey: trackingDedupeKey },
+          select: { id: true },
+        });
+
+        if (!existing) throw error;
       }
+
+      await assertLeaseOwnership();
+
+      await prisma.paymentFinalization.updateMany({
+        where: {
+          orderId: order.id,
+          lockToken,
+        },
+        data: {
+          trackingEventCreated: true,
+        },
+      });
+    } catch (error) {
+      if (leaseLost) throw error;
+      await recordError("Tracking event", error);
     }
 
-    await prisma.paymentFinalization.update({
-      where: { orderId: order.id },
-      data: { trackingEventCreated: true },
-    });
-  } catch (error) {
-    await recordError("Tracking event", error);
-  }
-
-  // 3. Notify the vendor once.
-  if (order.vendorId) {
+    // 3. Notify the vendor.
     try {
-      await NotificationService.notify({
-        vendorId: order.vendorId,
-        setting: "paymentReceived",
-        type: "PAYMENT",
+      await assertLeaseOwnership();
+
+      if (order.vendorId) {
+        await NotificationService.notify({
+          vendorId: order.vendorId,
+          setting: "paymentReceived",
+          type: "PAYMENT",
+          title: "Payment Received",
+          message: `Payment received for order ${order.id
+            .slice(-8)
+            .toUpperCase()}.`,
+          link: `/vendor/orders/${order.id}`,
+          dedupeKey: `payment-received:${order.id}`,
+          metadata: {
+            orderId: order.id,
+            paymentReference: order.paymentReference,
+            amount: Number(order.totalAmount),
+            currency: order.currency,
+          },
+        });
+      }
+
+      await assertLeaseOwnership();
+
+      await prisma.paymentFinalization.updateMany({
+        where: {
+          orderId: order.id,
+          lockToken,
+        },
+        data: {
+          vendorNotified: true,
+        },
+      });
+    } catch (error) {
+      if (leaseLost) throw error;
+      await recordError("Vendor notification", error);
+    }
+
+    // 4. Notify administrators independently, with per-admin deduplication.
+    try {
+      await assertLeaseOwnership();
+
+      await AdminNotificationService.notify({
+        type: "PAYMENT_RECEIVED",
         title: "Payment Received",
-        message: `Payment received for order ${order.id.slice(-8).toUpperCase()}.`,
-        link: `/vendor/orders/${order.id}`,
+        message: `${order.user?.name ?? "A customer"} paid ${
+          order.currency
+        } ${Number(order.totalAmount).toFixed(2)} for order ${order.id
+          .slice(-8)
+          .toUpperCase()}.`,
+        link: `/admin/orders/${order.id}`,
         dedupeKey: `payment-received:${order.id}`,
         metadata: {
           orderId: order.id,
-          paymentReference: order.paymentReference,
+          customerId: order.userId,
+          customerName: order.user?.name ?? null,
           amount: Number(order.totalAmount),
           currency: order.currency,
         },
       });
 
-      await prisma.paymentFinalization.update({
-        where: { orderId: order.id },
-        data: { vendorNotified: true },
+      await assertLeaseOwnership();
+
+      await prisma.paymentFinalization.updateMany({
+        where: {
+          orderId: order.id,
+          lockToken,
+        },
+        data: {
+          adminNotified: true,
+        },
       });
     } catch (error) {
-      await recordError("Vendor notification", error);
+      if (leaseLost) throw error;
+      await recordError("Admin notification", error);
     }
-  } else {
-    await prisma.paymentFinalization.update({
-      where: { orderId: order.id },
-      data: { vendorNotified: true },
-    });
-  }
 
-  // 4. Notify every administrator independently, without duplicate rows.
-  try {
-    await AdminNotificationService.notify({
-      type: "PAYMENT_RECEIVED",
-      title: "Payment Received",
-      message: `${order.user?.name ?? "A customer"} paid ${order.currency} ${Number(
-        order.totalAmount,
-      ).toFixed(2)} for order ${order.id.slice(-8).toUpperCase()}.`,
-      link: `/admin/orders/${order.id}`,
-      dedupeKey: `payment-received:${order.id}`,
-      metadata: {
+    // 5. Send the confirmation email using a stable provider idempotency key.
+    try {
+      await assertLeaseOwnership();
+
+      if (!order.user?.email) {
+        throw new Error("The customer has no email address.");
+      }
+
+      const email = orderConfirmationEmail(order);
+
+      await sendEmail({
+        to: order.user.email,
+        subject: email.subject,
+        html: email.html,
+        idempotencyKey: `order-confirmation:${order.id}`,
+      });
+
+      await assertLeaseOwnership();
+
+      await prisma.paymentFinalization.updateMany({
+        where: {
+          orderId: order.id,
+          lockToken,
+        },
+        data: {
+          confirmationEmailSent: true,
+        },
+      });
+    } catch (error) {
+      if (leaseLost) throw error;
+      await recordError("Confirmation email", error);
+    }
+
+    await assertLeaseOwnership();
+
+    const finalization = await prisma.paymentFinalization.findUniqueOrThrow({
+      where: { orderId: order.id },
+    });
+
+    const complete =
+      finalization.couponUsageProcessed &&
+      finalization.trackingEventCreated &&
+      finalization.vendorNotified &&
+      finalization.adminNotified &&
+      finalization.confirmationEmailSent;
+
+    await prisma.paymentFinalization.updateMany({
+      where: {
         orderId: order.id,
-        customerId: order.userId,
-        customerName: order.user?.name ?? null,
-        amount: Number(order.totalAmount),
-        currency: order.currency,
+        lockToken,
+      },
+      data: {
+        status: complete ? "COMPLETED" : "RETRY",
+        processedAt: complete ? new Date() : null,
+        lastError: complete
+          ? null
+          : errors.join(" | ") || finalization.lastError,
       },
     });
 
-    await prisma.paymentFinalization.update({
-      where: { orderId: order.id },
-      data: { adminNotified: true },
-    });
+    return { complete, errors };
   } catch (error) {
-    await recordError("Admin notification", error);
-  }
+    const message = getErrorMessage(error);
 
-  // 5. Send the customer confirmation email with a stable Resend key.
-  try {
-    if (!order.user?.email) {
-      throw new Error("The customer has no email address.");
+    if (!errors.includes(message)) {
+      errors.push(message);
     }
 
-    const email = orderConfirmationEmail(order);
+    console.error(`[Payment finalization] Order ${order.id}: ${message}`);
 
-    await sendEmail({
-      to: order.user.email,
-      subject: email.subject,
-      html: email.html,
-      idempotencyKey: `order-confirmation:${order.id}`,
-    });
+    return {
+      complete: false,
+      errors,
+      skipped: leaseLost,
+      reason: leaseLost ? "Lease ownership was lost." : undefined,
+    };
+  } finally {
+    clearInterval(leaseTimer);
 
-    await prisma.paymentFinalization.update({
-      where: { orderId: order.id },
-      data: { confirmationEmailSent: true },
-    });
-  } catch (error) {
-    await recordError("Confirmation email", error);
+    // Release only if this request still owns the lease.
+    try {
+      await prisma.paymentFinalization.updateMany({
+        where: {
+          orderId: order.id,
+          lockToken,
+        },
+        data: {
+          lockToken: null,
+          lockedUntil: null,
+        },
+      });
+    } catch (error) {
+      console.error(
+        `[Payment finalization] Failed to release lease for order ${order.id}:`,
+        error,
+      );
+    }
   }
-
-  // 6. Mark complete only after every follow-up action succeeds.
-  const finalization = await prisma.paymentFinalization.findUniqueOrThrow({
-    where: { orderId: order.id },
-  });
-
-  const complete =
-    finalization.couponUsageProcessed &&
-    finalization.trackingEventCreated &&
-    finalization.vendorNotified &&
-    finalization.adminNotified &&
-    finalization.confirmationEmailSent;
-
-  await prisma.paymentFinalization.update({
-    where: { orderId: order.id },
-    data: {
-      status: complete ? "COMPLETED" : "RETRY",
-      processedAt: complete ? new Date() : null,
-      lastError: complete ? null : errors.join(" | ") || finalization.lastError,
-    },
-  });
-
-  return { complete, errors };
 }
