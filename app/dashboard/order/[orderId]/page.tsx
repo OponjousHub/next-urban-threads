@@ -172,12 +172,14 @@ export default function OrderPage() {
             return;
           }
 
-          const verifiedOrder = await verifyRes.json();
+          const verificationData = await verifyRes.json();
+
+          // The verification endpoint may return the order directly
+          // or inside a response object.
+          const verifiedOrder = verificationData?.order ?? verificationData;
 
           if (cancelled) return;
 
-          // Only replace the order if we actually received
-          // an order object.
           if (verifiedOrder?.id) {
             setOrder(verifiedOrder);
           }
@@ -254,9 +256,11 @@ export default function OrderPage() {
           return;
         }
 
-        const data = await res.json();
+        const verificationData = await res.json();
 
         if (stopped) return;
+
+        const data = verificationData?.order ?? verificationData;
 
         if (!data?.id) {
           return;

@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { FlutterwaveProvider } from "@/app/lib/payments/flutterwave";
-import orderConfirmationEmail from "@/app/lib/email/template/orderConfirmation";
-import { sendEmail } from "@/app/lib/email/sendEmail";
 import { finalizePayment } from "@/app/lib/payments/finalize-payment";
 
 export async function POST(req: Request) {
@@ -189,46 +187,31 @@ export async function POST(req: Request) {
       );
     }
 
-    // Increment coupon usage only when this webhook successfully
-    // changes the order from pending to paid.
-    if (order.orderCoupons.length > 0) {
-      await prisma.$transaction(
-        order.orderCoupons.map((orderCoupon) =>
-          prisma.coupon.update({
-            where: {
-              id: orderCoupon.couponId,
-              tenantId: order.tenantId,
-            },
-            data: {
-              usedCount: {
-                increment: 1,
-              },
-            },
-          }),
-        ),
+    // Run all post-payment actions through the shared, idempotent
+    // finalization service. This handles coupon usage, tracking,
+    // notifications, and confirmation email.
+    const finalization = await finalizePayment(order.id);
+
+    if (!finalization.complete) {
+      console.error("Flutterwave payment finalization incomplete", {
+        orderId: order.id,
+        errors: finalization.errors,
+      });
+
+      return NextResponse.json(
+        {
+          received: true,
+          finalizationComplete: false,
+          errors: finalization.errors,
+        },
+        { status: 500 },
       );
     }
 
-    const updatedOrder = await prisma.order.findUniqueOrThrow({
-      where: { id: order.id },
-      include: {
-        user: true,
-        items: {
-          include: { product: true },
-        },
-        shippingAddress: true,
-      },
+    return NextResponse.json({
+      received: true,
+      finalizationComplete: true,
     });
-
-    const template = orderConfirmationEmail(updatedOrder);
-
-    await sendEmail({
-      to: updatedOrder.user.email,
-      subject: template.subject,
-      html: template.html,
-    });
-
-    return NextResponse.json({ received: true });
   } catch (error) {
     console.error("Flutterwave webhook error:", error);
 
