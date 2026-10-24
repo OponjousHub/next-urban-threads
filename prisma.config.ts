@@ -12,7 +12,7 @@ export default defineConfig({
   engine: "classic",
 
   datasource: {
-    // url: env("RAYNTA_DATABASE_URL"),
-    url: env("DATABASE_URL"),
+    url: env("RAYNTA_DATABASE_URL"),
+    // url: env("DATABASE_URL"),
   },
 });
