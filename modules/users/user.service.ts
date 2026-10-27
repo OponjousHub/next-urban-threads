@@ -95,8 +95,30 @@ export class UserService {
       },
     });
 
-    //  Send welcome email
-    const template = welcomeEmail(user.name || "Customer");
+    // Send tenant-branded welcome email
+    const configuredBaseUrl = tenant.domain?.trim()
+      ? /^https?:\/\//i.test(tenant.domain.trim())
+        ? tenant.domain.trim()
+        : `https://${tenant.domain.trim()}`
+      : process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+    if (!configuredBaseUrl) {
+      throw new Error(
+        "Cannot send welcome email: no store domain or application URL is configured.",
+      );
+    }
+
+    const storeUrl = new URL(configuredBaseUrl).toString().replace(/\/$/, "");
+
+    const template = welcomeEmail(
+      user.name || "Customer",
+      {
+        name: tenant.name,
+        logo: tenant.logo,
+        primaryColor: tenant.primaryColor,
+      },
+      storeUrl,
+    );
 
     await sendEmail({
       to: user.email,
