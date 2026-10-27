@@ -38,6 +38,7 @@ export async function finalizePayment(
     where: { id: orderId },
     include: {
       user: true,
+      tenant: true,
       items: {
         include: {
           product: true,
@@ -361,7 +362,46 @@ export async function finalizePayment(
         throw new Error("The customer has no email address.");
       }
 
-      const email = orderConfirmationEmail(order);
+      const tenant = order.tenant;
+
+      if (!tenant) {
+        throw new Error(
+          `Cannot send order confirmation: tenant not found for order ${order.id}.`,
+        );
+      }
+
+      const configuredBaseUrl = tenant.domain?.trim()
+        ? /^https?:\/\//i.test(tenant.domain.trim())
+          ? tenant.domain.trim()
+          : `https://${tenant.domain.trim()}`
+        : process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+      if (!configuredBaseUrl) {
+        throw new Error(
+          "Cannot send order confirmation: no store domain or NEXT_PUBLIC_APP_URL is configured.",
+        );
+      }
+
+      let orderUrl: string;
+
+      try {
+        const baseUrl = new URL(configuredBaseUrl);
+
+        if (baseUrl.protocol !== "https:" && baseUrl.protocol !== "http:") {
+          throw new Error("Unsupported URL protocol.");
+        }
+
+        orderUrl = new URL(
+          `/dashboard/orders/${encodeURIComponent(order.id)}`,
+          baseUrl,
+        ).toString();
+      } catch {
+        throw new Error(
+          "Cannot send order confirmation: the store domain or application URL is invalid.",
+        );
+      }
+
+      const email = orderConfirmationEmail(order, tenant, orderUrl);
 
       await sendEmail({
         to: order.user.email,

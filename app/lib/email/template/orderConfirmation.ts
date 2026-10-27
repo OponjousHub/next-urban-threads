@@ -1,4 +1,5 @@
 import { formatCurrency } from "@/lib/formatCurrency";
+import { Prisma } from "@prisma/client";
 
 type OrderConfirmationTenant = {
   name: string;
@@ -10,7 +11,7 @@ type OrderConfirmationTenant = {
 
 type OrderConfirmationOrder = {
   id: string;
-  totalAmount: number;
+  totalAmount: Prisma.Decimal | number;
 };
 
 function escapeHtml(value: string): string {
@@ -39,8 +40,7 @@ export default function orderConfirmationEmail(
     ? tenant.primaryColor!
     : "#111827";
 
-  const formattedTotal = formatCurrency(order.totalAmount, currency);
-
+  const formattedTotal = formatCurrency(Number(order.totalAmount), currency);
   const logoHtml = tenant.logo
     ? `
       <img
