@@ -6,85 +6,151 @@ import { NewsletterEmail } from "@/app/lib/email/template/newsletter";
 import { setProgress } from "@/app/lib/newsletterProgress";
 
 export async function POST(req: Request) {
-  const tenant = await getDefaultTenant();
-  const { subject, message } = await req.json();
+  try {
+    const tenant = await getDefaultTenant();
 
-  if (!tenant) throw new Error("Tenant not found");
+    if (!tenant) {
+      return NextResponse.json({ error: "Tenant not found." }, { status: 404 });
+    }
 
-  const subscribers = await prisma.newsletter.findMany({
-    where: { tenantId: tenant.id },
-  });
+    const body = await req.json();
+    const subject = typeof body.subject === "string" ? body.subject.trim() : "";
+    const message = typeof body.message === "string" ? body.message.trim() : "";
 
-  // INIT progress
-  setProgress({
-    total: subscribers.length,
-    sent: 0,
-    status: "sending",
-  });
+    if (!subject || !message) {
+      return NextResponse.json(
+        { error: "Subject and message are required." },
+        { status: 400 },
+      );
+    }
 
-  // 🔥 run in background (no await)
-  sendInBackground(subscribers, subject, message, tenant);
+    const subscribers = await prisma.newsletter.findMany({
+      where: { tenantId: tenant.id },
+      select: { email: true },
+    });
 
-  return NextResponse.json({ message: "Sending started..." });
+    if (subscribers.length === 0) {
+      setProgress({
+        total: 0,
+        sent: 0,
+        status: "done",
+      });
+
+      return NextResponse.json({
+        message: "There are no newsletter subscribers to email.",
+        total: 0,
+        sent: 0,
+        failed: 0,
+      });
+    }
+
+    setProgress({
+      total: subscribers.length,
+      sent: 0,
+      status: "sending",
+    });
+
+    const result = await sendInBatches(subscribers, subject, message, tenant);
+
+    setProgress({ status: "done" });
+
+    return NextResponse.json({
+      message:
+        result.failed === 0
+          ? "Newsletter sending completed successfully."
+          : "Newsletter sending completed with some failures.",
+      total: subscribers.length,
+      sent: result.sent,
+      failed: result.failed,
+      failures: result.failures.slice(0, 10),
+    });
+  } catch (error) {
+    console.error("NEWSLETTER SEND ERROR:", error);
+
+    setProgress({ status: "error" });
+
+    return NextResponse.json(
+      { error: "Unable to send the newsletter. Check the server logs." },
+      { status: 500 },
+    );
+  }
 }
 
-// background function
-async function sendInBackground(
-  subscribers: { email: string }[],
+type NewsletterSubscriber = {
+  email: string;
+};
+
+type NewsletterTenant = {
+  id: string;
+  name: string;
+  logo: string | null;
+  primaryColor: string | null;
+};
+
+async function sendInBatches(
+  subscribers: NewsletterSubscriber[],
   subject: string,
   message: string,
-  tenant: {
-    name: string;
-    logo: string | null;
-    primaryColor: string | null;
-  },
+  tenant: NewsletterTenant,
 ) {
-  const BATCH_SIZE = 5; // safer for resend
+  const BATCH_SIZE = 5;
   const DELAY = 1500;
 
-  function chunk(arr: any[], size: number) {
-    const res = [];
-    for (let i = 0; i < arr.length; i += size) {
-      res.push(arr.slice(i, i + size));
-    }
-    return res;
-  }
-
-  function sleep(ms: number) {
-    return new Promise((r) => setTimeout(r, ms));
-  }
-
   let sent = 0;
-  const batches = chunk(subscribers, BATCH_SIZE);
+  let failed = 0;
 
-  for (const batch of batches) {
+  const failures: { email: string; error: string }[] = [];
+
+  const sleep = (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+  for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+    const batch = subscribers.slice(i, i + BATCH_SIZE);
+
     await Promise.all(
-      batch.map(async (sub) => {
+      batch.map(async (subscriber) => {
         try {
-          // ✅ CREATE TEMPLATE HERE
           const template = await NewsletterEmail({
             subject,
             message,
             tenant,
-            email: sub.email,
+            email: subscriber.email,
           });
 
-          const res = await sendEmail({
-            to: sub.email,
+          await sendEmail({
+            to: subscriber.email,
             subject: template.subject,
             html: template.html,
           });
 
           sent++;
           setProgress({ sent });
-        } catch (err) {
-          console.error("EMAIL FAILED:", sub.email, err);
+
+          console.log("NEWSLETTER EMAIL SENT:", subscriber.email);
+        } catch (error) {
+          failed++;
+
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown email error";
+
+          failures.push({
+            email: subscriber.email,
+            error: errorMessage,
+          });
+
+          console.error(
+            "NEWSLETTER EMAIL FAILED:",
+            subscriber.email,
+            errorMessage,
+          );
         }
       }),
     );
 
-    await sleep(DELAY);
+    if (i + BATCH_SIZE < subscribers.length) {
+      await sleep(DELAY);
+    }
   }
 
-  setProgress({ status: "done" });
+  return { sent, failed, failures };
 }

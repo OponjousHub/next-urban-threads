@@ -1,7 +1,7 @@
 type Progress = {
   total: number;
   sent: number;
-  status: "idle" | "sending" | "done";
+  status: "idle" | "sending" | "done" | "error";
 };
 
 let progress: Progress = {
