@@ -286,6 +286,7 @@ model PaymentFinalization {
   trackingEventCreated  Boolean   @default(false)
   vendorNotified        Boolean   @default(false)
   adminNotified         Boolean   @default(false)
+  merchantPaymentEmailSent Boolean @default(false)
   confirmationEmailSent Boolean   @default(false)
 
   status                String    @default("PENDING")
