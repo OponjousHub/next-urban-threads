@@ -23,17 +23,21 @@ export async function POST(req: Request) {
   });
 
   // 🔥 run in background (no await)
-  sendInBackground(subscribers, subject, message, tenant.name);
+  sendInBackground(subscribers, subject, message, tenant);
 
   return NextResponse.json({ message: "Sending started..." });
 }
 
 // background function
 async function sendInBackground(
-  subscribers: any[],
+  subscribers: { email: string }[],
   subject: string,
   message: string,
-  tenantName: string,
+  tenant: {
+    name: string;
+    logo: string | null;
+    primaryColor: string | null;
+  },
 ) {
   const BATCH_SIZE = 5; // safer for resend
   const DELAY = 1500;
@@ -61,8 +65,8 @@ async function sendInBackground(
           const template = await NewsletterEmail({
             subject,
             message,
-            tenantName,
-            email: sub.email, // ✅ THIS is the key
+            tenant,
+            email: sub.email,
           });
 
           const res = await sendEmail({
@@ -70,8 +74,6 @@ async function sendInBackground(
             subject: template.subject,
             html: template.html,
           });
-
-          console.log("EMAIL SENT:", sub.email);
 
           sent++;
           setProgress({ sent });
