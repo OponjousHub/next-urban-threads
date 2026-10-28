@@ -402,135 +402,6 @@ export async function finalizePayment(
         );
       }
 
-      // 6. Send the merchant payment email independently.
-      try {
-        await assertLeaseOwnership();
-
-        const finalization = await prisma.paymentFinalization.findUnique({
-          where: { orderId: order.id },
-          select: { merchantPaymentEmailSent: true },
-        });
-
-        if (!finalization?.merchantPaymentEmailSent) {
-          const tenant = order.tenant;
-
-          if (!tenant) {
-            throw new Error(
-              `Cannot send merchant payment email: tenant not found for order ${order.id}.`,
-            );
-          }
-
-          const configuredBaseUrl = tenant.domain?.trim()
-            ? /^https?:\/\//i.test(tenant.domain.trim())
-              ? tenant.domain.trim()
-              : `https://${tenant.domain.trim()}`
-            : process.env.NEXT_PUBLIC_APP_URL?.trim();
-
-          if (!configuredBaseUrl) {
-            throw new Error(
-              "Cannot send merchant payment email: no store domain or NEXT_PUBLIC_APP_URL is configured.",
-            );
-          }
-
-          let orderUrl: string;
-
-          try {
-            const baseUrl = new URL(configuredBaseUrl);
-
-            if (!["https:", "http:"].includes(baseUrl.protocol)) {
-              throw new Error("Unsupported URL protocol.");
-            }
-
-            orderUrl = new URL(
-              `/admin/orders/${encodeURIComponent(order.id)}`,
-              baseUrl,
-            ).toString();
-          } catch {
-            throw new Error(
-              "Cannot send merchant payment email: the store URL is invalid.",
-            );
-          }
-
-          // Include the configured store email and its tenant administrators/owners.
-          const administrators = await prisma.user.findMany({
-            where: {
-              tenantId: order.tenantId,
-              role: { in: ["ADMIN", "OWNER"] },
-              isDeleted: false,
-            },
-            select: { email: true },
-          });
-
-          const recipients = [
-            tenant.email,
-            ...administrators.map((admin) => admin.email),
-          ]
-            .filter((email): email is string => Boolean(email?.trim()))
-            .map((email) => email.trim());
-
-          const uniqueRecipients = [
-            ...new Set(recipients.map((email) => email.toLowerCase())),
-          ];
-
-          if (uniqueRecipients.length === 0) {
-            throw new Error(
-              `No merchant email recipients are configured for tenant ${tenant.id}.`,
-            );
-          }
-
-          const customerEmail =
-            order.user?.email || order.customerEmail || "Not provided";
-          const customerName = order.user?.name || "Customer";
-          const orderReference = order.id.slice(-8).toUpperCase();
-          const currency = String(order.currency);
-          const amount = `${currency} ${Number(order.totalAmount).toFixed(2)}`;
-
-          const email = merchantPaymentReceivedEmail({
-            storeName: tenant.name,
-            logo: tenant.logo,
-            primaryColor: tenant.primaryColor,
-            orderReference,
-            customerName,
-            customerEmail,
-            amount,
-            paymentReference: order.paymentReference || order.id,
-            paymentProvider: String(order.paymentProvider || "Online payment"),
-            paymentDate: new Date().toLocaleString("en-NG", {
-              dateStyle: "medium",
-              timeStyle: "short",
-              timeZone: tenant.timezone || "UTC",
-            }),
-            orderUrl,
-          });
-
-          for (const recipient of uniqueRecipients) {
-            await assertLeaseOwnership();
-
-            await sendEmail({
-              to: recipient,
-              subject: email.subject,
-              html: email.html,
-              idempotencyKey: `merchant-payment:${order.id}:${recipient}`,
-            });
-          }
-
-          await assertLeaseOwnership();
-
-          await prisma.paymentFinalization.updateMany({
-            where: {
-              orderId: order.id,
-              lockToken,
-            },
-            data: {
-              merchantPaymentEmailSent: true,
-            },
-          });
-        }
-      } catch (error) {
-        if (leaseLost) throw error;
-        await recordError("Merchant payment email", error);
-      }
-
       const email = orderConfirmationEmail(order, tenant, orderUrl);
 
       await sendEmail({
@@ -554,6 +425,135 @@ export async function finalizePayment(
     } catch (error) {
       if (leaseLost) throw error;
       await recordError("Confirmation email", error);
+    }
+
+    // 6. Send the merchant payment email independently.
+    try {
+      await assertLeaseOwnership();
+
+      const finalization = await prisma.paymentFinalization.findUnique({
+        where: { orderId: order.id },
+        select: { merchantPaymentEmailSent: true },
+      });
+
+      if (!finalization?.merchantPaymentEmailSent) {
+        const tenant = order.tenant;
+
+        if (!tenant) {
+          throw new Error(
+            `Cannot send merchant payment email: tenant not found for order ${order.id}.`,
+          );
+        }
+
+        const configuredBaseUrl = tenant.domain?.trim()
+          ? /^https?:\/\//i.test(tenant.domain.trim())
+            ? tenant.domain.trim()
+            : `https://${tenant.domain.trim()}`
+          : process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+        if (!configuredBaseUrl) {
+          throw new Error(
+            "Cannot send merchant payment email: no store domain or NEXT_PUBLIC_APP_URL is configured.",
+          );
+        }
+
+        let orderUrl: string;
+
+        try {
+          const baseUrl = new URL(configuredBaseUrl);
+
+          if (!["https:", "http:"].includes(baseUrl.protocol)) {
+            throw new Error("Unsupported URL protocol.");
+          }
+
+          orderUrl = new URL(
+            `/admin/orders/${encodeURIComponent(order.id)}`,
+            baseUrl,
+          ).toString();
+        } catch {
+          throw new Error(
+            "Cannot send merchant payment email: the store URL is invalid.",
+          );
+        }
+
+        // Include the configured store email and its tenant administrators/owners.
+        const administrators = await prisma.user.findMany({
+          where: {
+            tenantId: order.tenantId,
+            role: { in: ["ADMIN", "OWNER"] },
+            isDeleted: false,
+          },
+          select: { email: true },
+        });
+
+        const recipients = [
+          tenant.email,
+          ...administrators.map((admin) => admin.email),
+        ]
+          .filter((email): email is string => Boolean(email?.trim()))
+          .map((email) => email.trim());
+
+        const uniqueRecipients = [
+          ...new Set(recipients.map((email) => email.toLowerCase())),
+        ];
+
+        if (uniqueRecipients.length === 0) {
+          throw new Error(
+            `No merchant email recipients are configured for tenant ${tenant.id}.`,
+          );
+        }
+
+        const customerEmail =
+          order.user?.email || order.customerEmail || "Not provided";
+        const customerName = order.user?.name || "Customer";
+        const orderReference = order.id.slice(-8).toUpperCase();
+        const currency = String(order.currency);
+        const amount = `${currency} ${Number(order.totalAmount).toFixed(2)}`;
+
+        const email = merchantPaymentReceivedEmail({
+          storeName: tenant.name,
+          logo: tenant.logo,
+          primaryColor: tenant.primaryColor,
+          orderReference,
+          customerName,
+          customerEmail,
+          amount,
+          paymentReference: order.paymentReference || order.id,
+          paymentProvider: String(order.paymentProvider || "Online payment"),
+          paymentDate: new Date().toLocaleString("en-NG", {
+            dateStyle: "medium",
+            timeStyle: "short",
+            timeZone: tenant.timezone || "UTC",
+          }),
+          orderUrl,
+        });
+
+        for (const recipient of uniqueRecipients) {
+          await assertLeaseOwnership();
+
+          await sendEmail({
+            to: recipient,
+            subject: email.subject,
+            html: email.html,
+            idempotencyKey: `merchant-payment:${order.id}:${recipient}`,
+          });
+        }
+
+        await assertLeaseOwnership();
+
+        await prisma.paymentFinalization.updateMany({
+          where: {
+            orderId: order.id,
+            lockToken,
+          },
+          data: {
+            merchantPaymentEmailSent: true,
+          },
+        });
+      }
+    } catch (error) {
+      if (leaseLost) throw error;
+      await recordError("Merchant payment email", error);
     }
 
     await assertLeaseOwnership();
