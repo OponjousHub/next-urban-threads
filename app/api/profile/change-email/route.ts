@@ -40,8 +40,20 @@ export async function PATCH(req: Request) {
 
   const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
 
-  const template = changeEmailVerification(verifyUrl);
+  const tenant = await getDefaultTenant();
 
+  if (!tenant) {
+    return Response.json(
+      { error: "Store configuration not found." },
+      { status: 500 },
+    );
+  }
+
+  const template = changeEmailVerification(verifyUrl, {
+    name: tenant.name,
+    logo: tenant.logo,
+    primaryColor: tenant.primaryColor,
+  });
   await sendEmail({
     to: newEmail,
     subject: template.subject,
