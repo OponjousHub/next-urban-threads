@@ -29,6 +29,32 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+function getStoreBaseUrl(domain: string | null | undefined): string {
+  const configuredUrl = domain?.trim()
+    ? /^https?:\/\//i.test(domain.trim())
+      ? domain.trim()
+      : `https://${domain.trim()}`
+    : process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+  if (!configuredUrl) {
+    throw new Error("No store domain or NEXT_PUBLIC_APP_URL is configured.");
+  }
+
+  let parsedUrl: URL;
+
+  try {
+    parsedUrl = new URL(configuredUrl);
+  } catch {
+    throw new Error("The store domain or application URL is invalid.");
+  }
+
+  if (!["https:", "http:"].includes(parsedUrl.protocol)) {
+    throw new Error("The store URL must use HTTP or HTTPS.");
+  }
+
+  return parsedUrl.origin;
+}
+
 export async function finalizePayment(
   orderId: string,
 ): Promise<FinalizationResult> {
@@ -64,7 +90,7 @@ export async function finalizePayment(
     );
   }
 
-  // Ensure the finalization record exists before attempting to acquire a lease.
+  // Ensure a finalization record exists.
   await prisma.paymentFinalization.upsert({
     where: { orderId: order.id },
     create: {
@@ -75,9 +101,8 @@ export async function finalizePayment(
     update: {},
   });
 
-  // Acquire the lease atomically. An unexpired lease belongs to another request.
+  // Acquire the lease atomically.
   const now = new Date();
-  const leaseExpiry = new Date(now.getTime() + LEASE_DURATION_MS);
 
   const leaseClaim = await prisma.paymentFinalization.updateMany({
     where: {
@@ -90,7 +115,7 @@ export async function finalizePayment(
     },
     data: {
       lockToken,
-      lockedUntil: leaseExpiry,
+      lockedUntil: new Date(now.getTime() + LEASE_DURATION_MS),
       status: "PROCESSING",
       attempts: { increment: 1 },
     },
@@ -139,7 +164,7 @@ export async function finalizePayment(
 
   leaseTimer.unref?.();
 
-  async function assertLeaseOwnership() {
+  async function assertLeaseOwnership(): Promise<void> {
     if (leaseLost) {
       throw new Error(
         "Payment-finalization lease was lost; stopping further processing.",
@@ -161,19 +186,22 @@ export async function finalizePayment(
       current.lockedUntil.getTime() <= Date.now()
     ) {
       leaseLost = true;
+
       throw new Error(
         "Payment-finalization lease is no longer owned by this request.",
       );
     }
   }
 
-  async function recordError(step: string, error: unknown) {
+  async function recordError(step: string, error: unknown): Promise<void> {
     const message = `${step}: ${getErrorMessage(error)}`;
+
     errors.push(message);
 
     console.error(`[Payment finalization] Order ${order?.id}: ${message}`);
 
-    // Never let an expired lease owner overwrite another owner's state.
+    // Do not let a request that lost its lease overwrite another
+    // request's finalization state.
     if (leaseLost) return;
 
     await prisma.paymentFinalization.updateMany({
@@ -189,7 +217,33 @@ export async function finalizePayment(
   }
 
   try {
-    // 1. Increment coupon usage exactly once.
+    /*
+     * STEP 1: Ensure the order status reflects its verified payment.
+     *
+     * Only update a still-PENDING order. Do not overwrite later
+     * statuses such as SHIPPED or DELIVERED.
+     */
+    try {
+      await assertLeaseOwnership();
+
+      await prisma.order.updateMany({
+        where: {
+          id: order.id,
+          paymentStatus: "PAID",
+          status: "PENDING",
+        },
+        data: {
+          status: "PROCESSING",
+        },
+      });
+    } catch (error) {
+      if (leaseLost) throw error;
+      await recordError("Order status update", error);
+    }
+
+    /*
+     * STEP 2: Increment coupon usage exactly once.
+     */
     try {
       await assertLeaseOwnership();
 
@@ -226,7 +280,9 @@ export async function finalizePayment(
       await recordError("Coupon usage", error);
     }
 
-    // 2. Create the payment-confirmation tracking event once.
+    /*
+     * STEP 3: Create the payment-confirmation tracking event once.
+     */
     try {
       await assertLeaseOwnership();
 
@@ -249,9 +305,11 @@ export async function finalizePayment(
           },
         });
       } catch (error) {
-        if (!isUniqueConstraintError(error)) throw error;
+        if (!isUniqueConstraintError(error)) {
+          throw error;
+        }
 
-        // A previous or concurrent attempt already created the event.
+        // A previous attempt may already have created this event.
         const existing = await prisma.orderTrackingEvent.findUnique({
           where: { dedupeKey: trackingDedupeKey },
           select: { id: true },
@@ -276,7 +334,9 @@ export async function finalizePayment(
       await recordError("Tracking event", error);
     }
 
-    // 3. Notify the vendor.
+    /*
+     * STEP 4: Notify the vendor.
+     */
     try {
       await assertLeaseOwnership();
 
@@ -316,7 +376,9 @@ export async function finalizePayment(
       await recordError("Vendor notification", error);
     }
 
-    // 4. Notify administrators independently, with per-admin deduplication.
+    /*
+     * STEP 5: Notify administrators.
+     */
     try {
       await assertLeaseOwnership();
 
@@ -355,85 +417,19 @@ export async function finalizePayment(
       await recordError("Admin notification", error);
     }
 
-    // 5. Send the confirmation email using a stable provider idempotency key.
-    try {
-      await assertLeaseOwnership();
-
-      if (!order.user?.email) {
-        throw new Error("The customer has no email address.");
-      }
-
-      const tenant = order.tenant;
-
-      if (!tenant) {
-        throw new Error(
-          `Cannot send order confirmation: tenant not found for order ${order.id}.`,
-        );
-      }
-
-      const configuredBaseUrl = tenant.domain?.trim()
-        ? /^https?:\/\//i.test(tenant.domain.trim())
-          ? tenant.domain.trim()
-          : `https://${tenant.domain.trim()}`
-        : process.env.NEXT_PUBLIC_APP_URL?.trim();
-
-      if (!configuredBaseUrl) {
-        throw new Error(
-          "Cannot send order confirmation: no store domain or NEXT_PUBLIC_APP_URL is configured.",
-        );
-      }
-
-      let orderUrl: string;
-
-      try {
-        const baseUrl = new URL(configuredBaseUrl);
-
-        if (baseUrl.protocol !== "https:" && baseUrl.protocol !== "http:") {
-          throw new Error("Unsupported URL protocol.");
-        }
-
-        orderUrl = new URL(
-          `/dashboard/orders/${encodeURIComponent(order.id)}`,
-          baseUrl,
-        ).toString();
-      } catch {
-        throw new Error(
-          "Cannot send order confirmation: the store domain or application URL is invalid.",
-        );
-      }
-
-      const email = orderConfirmationEmail(order, tenant, orderUrl);
-
-      await sendEmail({
-        to: order.user.email,
-        subject: email.subject,
-        html: email.html,
-        idempotencyKey: `order-confirmation:${order.id}`,
-      });
-
-      await assertLeaseOwnership();
-
-      await prisma.paymentFinalization.updateMany({
-        where: {
-          orderId: order.id,
-          lockToken,
-        },
-        data: {
-          confirmationEmailSent: true,
-        },
-      });
-    } catch (error) {
-      if (leaseLost) throw error;
-      await recordError("Confirmation email", error);
-    }
-
-    // 6. Send the merchant payment email independently.
+    /*
+     * STEP 6: Send the merchant payment email.
+     *
+     * This is independent of the customer confirmation email.
+     */
     try {
       await assertLeaseOwnership();
 
       const finalization = await prisma.paymentFinalization.findUnique({
         where: { orderId: order.id },
-        select: { merchantPaymentEmailSent: true },
+        select: {
+          merchantPaymentEmailSent: true,
+        },
       });
 
       if (!finalization?.merchantPaymentEmailSent) {
@@ -445,57 +441,43 @@ export async function finalizePayment(
           );
         }
 
-        const configuredBaseUrl = tenant.domain?.trim()
-          ? /^https?:\/\//i.test(tenant.domain.trim())
-            ? tenant.domain.trim()
-            : `https://${tenant.domain.trim()}`
-          : process.env.NEXT_PUBLIC_APP_URL?.trim();
+        const baseUrl = getStoreBaseUrl(tenant.domain);
 
-        if (!configuredBaseUrl) {
-          throw new Error(
-            "Cannot send merchant payment email: no store domain or NEXT_PUBLIC_APP_URL is configured.",
-          );
-        }
+        const orderUrl = new URL(
+          `/admin/orders/${encodeURIComponent(order.id)}`,
+          baseUrl,
+        ).toString();
 
-        let orderUrl: string;
-
-        try {
-          const baseUrl = new URL(configuredBaseUrl);
-
-          if (!["https:", "http:"].includes(baseUrl.protocol)) {
-            throw new Error("Unsupported URL protocol.");
-          }
-
-          orderUrl = new URL(
-            `/admin/orders/${encodeURIComponent(order.id)}`,
-            baseUrl,
-          ).toString();
-        } catch {
-          throw new Error(
-            "Cannot send merchant payment email: the store URL is invalid.",
-          );
-        }
-
-        // Include the configured store email and its tenant administrators/owners.
+        // Notify the store email and the tenant's administrators/owners.
         const administrators = await prisma.user.findMany({
           where: {
             tenantId: order.tenantId,
             role: { in: ["ADMIN", "OWNER"] },
             isDeleted: false,
           },
-          select: { email: true },
+          select: {
+            email: true,
+          },
         });
 
         const recipients = [
           tenant.email,
           ...administrators.map((admin) => admin.email),
         ]
-          .filter((email): email is string => Boolean(email?.trim()))
+          .filter(
+            (email): email is string =>
+              typeof email === "string" && email.trim().length > 0,
+          )
           .map((email) => email.trim());
 
-        const uniqueRecipients = [
-          ...new Set(recipients.map((email) => email.toLowerCase())),
-        ];
+        // Deduplicate addresses without changing their original spelling.
+        const recipientMap = new Map<string, string>();
+
+        for (const recipient of recipients) {
+          recipientMap.set(recipient.toLowerCase(), recipient);
+        }
+
+        const uniqueRecipients = [...recipientMap.values()];
 
         if (uniqueRecipients.length === 0) {
           throw new Error(
@@ -505,10 +487,14 @@ export async function finalizePayment(
 
         const customerEmail =
           order.user?.email || order.customerEmail || "Not provided";
+
         const customerName = order.user?.name || "Customer";
+
         const orderReference = order.id.slice(-8).toUpperCase();
-        const currency = String(order.currency);
-        const amount = `${currency} ${Number(order.totalAmount).toFixed(2)}`;
+
+        const amount = `${String(order.currency)} ${Number(
+          order.totalAmount,
+        ).toFixed(2)}`;
 
         const email = merchantPaymentReceivedEmail({
           storeName: tenant.name,
@@ -535,7 +521,7 @@ export async function finalizePayment(
             to: recipient,
             subject: email.subject,
             html: email.html,
-            idempotencyKey: `merchant-payment:${order.id}:${recipient}`,
+            idempotencyKey: `merchant-payment:${order.id}:${recipient.toLowerCase()}`,
           });
         }
 
@@ -556,6 +542,59 @@ export async function finalizePayment(
       await recordError("Merchant payment email", error);
     }
 
+    /*
+     * STEP 7: Send the customer order-confirmation email independently.
+     */
+    try {
+      await assertLeaseOwnership();
+
+      if (!order.user?.email) {
+        throw new Error("The customer has no email address.");
+      }
+
+      const tenant = order.tenant;
+
+      if (!tenant) {
+        throw new Error(
+          `Cannot send order confirmation: tenant not found for order ${order.id}.`,
+        );
+      }
+
+      const baseUrl = getStoreBaseUrl(tenant.domain);
+
+      const orderUrl = new URL(
+        `/dashboard/orders/${encodeURIComponent(order.id)}`,
+        baseUrl,
+      ).toString();
+
+      const email = orderConfirmationEmail(order, tenant, orderUrl);
+
+      await sendEmail({
+        to: order.user.email,
+        subject: email.subject,
+        html: email.html,
+        idempotencyKey: `order-confirmation:${order.id}`,
+      });
+
+      await assertLeaseOwnership();
+
+      await prisma.paymentFinalization.updateMany({
+        where: {
+          orderId: order.id,
+          lockToken,
+        },
+        data: {
+          confirmationEmailSent: true,
+        },
+      });
+    } catch (error) {
+      if (leaseLost) throw error;
+      await recordError("Confirmation email", error);
+    }
+
+    /*
+     * STEP 8: Determine whether all required finalization steps succeeded.
+     */
     await assertLeaseOwnership();
 
     const finalization = await prisma.paymentFinalization.findUniqueOrThrow({
@@ -567,7 +606,8 @@ export async function finalizePayment(
       finalization.trackingEventCreated &&
       finalization.vendorNotified &&
       finalization.adminNotified &&
-      finalization.confirmationEmailSent;
+      finalization.confirmationEmailSent &&
+      finalization.merchantPaymentEmailSent;
 
     await prisma.paymentFinalization.updateMany({
       where: {
@@ -583,7 +623,10 @@ export async function finalizePayment(
       },
     });
 
-    return { complete, errors };
+    return {
+      complete,
+      errors,
+    };
   } catch (error) {
     const message = getErrorMessage(error);
 
@@ -602,7 +645,7 @@ export async function finalizePayment(
   } finally {
     clearInterval(leaseTimer);
 
-    // Release only if this request still owns the lease.
+    // Release the lease only if this request still owns it.
     try {
       await prisma.paymentFinalization.updateMany({
         where: {
