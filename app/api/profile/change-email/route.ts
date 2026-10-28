@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { getLoggedInUserId } from "@/lib/auth";
 import changeEmailVerification from "../../../lib/email/template/changeEmailVerification";
 import { sendEmail } from "../../../lib/email/sendEmail";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 export async function PATCH(req: Request) {
   const userId = await getLoggedInUserId();
