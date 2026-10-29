@@ -80,6 +80,7 @@ export async function POST(req: Request) {
       to: tenant.email,
       subject: template.subject,
       html: template.html,
+      category: "support",
     });
 
     // Send admin notification
