@@ -43,6 +43,7 @@ export async function POST(req: Request) {
     to: user.email,
     subject: "Reset Your Password",
     html: `Click <a href="${resetUrl}">here</a> to reset your password.`,
+    category: "security",
   });
 
   return NextResponse.json({ message: "If email exists, reset link sent" });
