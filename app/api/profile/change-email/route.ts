@@ -58,6 +58,7 @@ export async function PATCH(req: Request) {
     to: newEmail,
     subject: template.subject,
     html: template.html,
+    category: "security",
   });
 
   return Response.json({
