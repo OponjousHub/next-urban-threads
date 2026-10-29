@@ -33,6 +33,7 @@ export async function POST(req: Request) {
       to: email,
       subject: template.subject,
       html: template.html,
+      category: "support",
     });
 
     return NextResponse.json({ success: true });
