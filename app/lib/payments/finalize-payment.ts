@@ -522,6 +522,7 @@ export async function finalizePayment(
             subject: email.subject,
             html: email.html,
             idempotencyKey: `merchant-payment:${order.id}:${recipient.toLowerCase()}`,
+            category: "orders",
           });
         }
 
@@ -574,6 +575,7 @@ export async function finalizePayment(
         subject: email.subject,
         html: email.html,
         idempotencyKey: `order-confirmation:${order.id}`,
+        category: "orders",
       });
 
       await assertLeaseOwnership();
