@@ -121,6 +121,7 @@ async function sendInBatches(
             to: subscriber.email,
             subject: template.subject,
             html: template.html,
+            category: "news",
           });
 
           sent++;
