@@ -177,23 +177,37 @@ export class PaystackProvider {
   ): Promise<InitializePaymentResponse> {
     const { email, amount, reference, callbackUrl, currency } = params;
 
-    const res = await axios.post(
-      `${this.baseUrl}/transaction/initialize`,
-      {
-        email,
-        amount: Math.round(amount * 100),
-        currency,
-        reference,
-        callback_url: callbackUrl,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-          "Content-Type": "application/json",
+    const res = await axios
+      .post(
+        `${this.baseUrl}/transaction/initialize`,
+        {
+          email,
+          amount: Math.round(amount * 100),
+          currency,
+          reference,
+          callback_url: callbackUrl,
         },
-        timeout: 10000,
-      },
-    );
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+            "Content-Type": "application/json",
+          },
+          timeout: 10000,
+        },
+      )
+      .catch((error: any) => {
+        console.error("[PAYSTACK_INITIALIZATION_ERROR]", {
+          status: error?.response?.status,
+          response: error?.response?.data,
+          message: error?.message,
+          currency,
+          amount: Math.round(amount * 100),
+          hasSecretKey: Boolean(process.env.PAYSTACK_SECRET_KEY),
+          secretKeyPrefix: process.env.PAYSTACK_SECRET_KEY?.slice(0, 8),
+        });
+
+        throw error;
+      });
 
     const data = res.data?.data;
 
