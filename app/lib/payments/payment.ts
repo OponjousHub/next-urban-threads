@@ -1,31 +1,39 @@
 import { currencyEnum, PaymentProvider } from "@prisma/client";
 
 export function resolvePaymentConfig(country: string) {
-  const normalized = country.trim().toLowerCase();
+  const normalized = country.trim().toUpperCase();
 
   switch (normalized) {
-    case "nigeria":
+    case "NG":
+    case "NGA":
+    case "NIGERIA":
       return {
         currency: currencyEnum.NGN,
         provider: PaymentProvider.PAYSTACK,
         countryCode: "NG",
       };
 
-    case "kenya":
+    case "KE":
+    case "KEN":
+    case "KENYA":
       return {
         currency: currencyEnum.KES,
         provider: PaymentProvider.FLUTTERWAVE,
         countryCode: "KE",
       };
 
-    case "ghana":
+    case "GH":
+    case "GHA":
+    case "GHANA":
       return {
         currency: currencyEnum.GHS,
         provider: PaymentProvider.FLUTTERWAVE,
         countryCode: "GH",
       };
 
-    case "south africa":
+    case "ZA":
+    case "ZAF":
+    case "SOUTH AFRICA":
       return {
         currency: currencyEnum.ZAR,
         provider: PaymentProvider.FLUTTERWAVE,
