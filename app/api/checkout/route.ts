@@ -665,7 +665,7 @@ export async function POST(req: NextRequest) {
 
         totalAmount,
         customerEmail: email,
-        currency: tenant.currency,
+        currency: checkoutCurrency,
 
         paymentProvider: providerKey,
         paymentMethod,
