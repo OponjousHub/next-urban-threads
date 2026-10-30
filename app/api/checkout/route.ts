@@ -550,7 +550,37 @@ export async function POST(req: NextRequest) {
 
     const country = await detectCountryFromHeaders();
 
-    const { provider: providerKey } = resolvePaymentConfig(country);
+    const paymentConfig = resolvePaymentConfig(country);
+
+    const providerKey = paymentConfig.provider;
+    const checkoutCurrency = paymentConfig.currency;
+
+    // Validate that the checkout currency is supported by
+    // the selected payment provider.
+    const supportedCurrencies = {
+      PAYSTACK: ["NGN"],
+      FLUTTERWAVE: ["KES", "GHS", "ZAR", "USD"],
+    } as const;
+
+    const supported = supportedCurrencies[
+      providerKey as keyof typeof supportedCurrencies
+    ] as readonly string[] | undefined;
+
+    if (!supported?.includes(checkoutCurrency)) {
+      console.error("[CHECKOUT_PAYMENT_CONFIG_ERROR]", {
+        country,
+        provider: providerKey,
+        currency: checkoutCurrency,
+      });
+
+      return NextResponse.json(
+        {
+          message:
+            "The selected payment currency is not supported for your location. Please contact support.",
+        },
+        { status: 400 },
+      );
+    }
 
     // ---------------------------------------------------------
     // 13. Create order items
