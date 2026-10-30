@@ -14,6 +14,7 @@ export type InitializePaymentParams = {
   amount: number;
   reference: string;
   callbackUrl: string;
+  currency: string;
 };
 
 export type InitializePaymentResponse = {
@@ -174,19 +175,15 @@ export class PaystackProvider {
   async initializePayment(
     params: InitializePaymentParams,
   ): Promise<InitializePaymentResponse> {
-    const { email, amount, reference, callbackUrl } = params;
+    const { email, amount, reference, callbackUrl, currency } = params;
 
     const res = await axios.post(
       `${this.baseUrl}/transaction/initialize`,
       {
         email,
-
-        // Paystack expects the amount in the smallest
-        // currency unit, e.g. kobo for NGN.
         amount: Math.round(amount * 100),
-
+        currency,
         reference,
-
         callback_url: callbackUrl,
       },
       {
@@ -194,7 +191,6 @@ export class PaystackProvider {
           Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
-
         timeout: 10000,
       },
     );
