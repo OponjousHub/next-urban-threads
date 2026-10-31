@@ -6,6 +6,7 @@ type MerchantPaymentEmailData = {
   customerName: string;
   customerEmail: string;
   amount: string;
+  originalOrderTotal?: string;
   paymentReference: string;
   paymentProvider: string;
   paymentDate: string;
@@ -34,6 +35,9 @@ export default function merchantPaymentReceivedEmail(
   const customerName = escapeHtml(data.customerName);
   const customerEmail = escapeHtml(data.customerEmail);
   const amount = escapeHtml(data.amount);
+  const originalOrderTotal = data.originalOrderTotal
+    ? escapeHtml(data.originalOrderTotal)
+    : null;
   const paymentReference = escapeHtml(data.paymentReference);
   const paymentProvider = escapeHtml(data.paymentProvider);
   const paymentDate = escapeHtml(data.paymentDate);
@@ -66,9 +70,24 @@ A customer payment has been received by ${storeName}. </div>
                     <p style="margin:0 0 8px;color:#047857;font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">
                       Payment Successful
                     </p>
-                    <h2 style="margin:0;color:#065f46;font-size:27px;overflow-wrap:anywhere;">
-                      ${amount}
-                    </h2>
+                  <h2 style="margin:0;color:#065f46;font-size:27px;overflow-wrap:anywhere;">
+  ${amount}
+</h2>
+
+${
+  originalOrderTotal
+    ? `
+      <p style="
+        margin:6px 0 0;
+        color:#047857;
+        font-size:12px;
+        font-weight:normal;
+      ">
+        Original order total: ${originalOrderTotal}
+      </p>
+    `
+    : ""
+}
                     <p style="margin:8px 0 0;color:#065f46;font-size:14px;">
                       Your store has received a customer payment.
                     </p>

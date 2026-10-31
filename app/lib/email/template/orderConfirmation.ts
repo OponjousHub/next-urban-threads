@@ -230,14 +230,7 @@ export default function orderConfirmationEmail(
                             : ""
                         }
 
-                        <p style="
-                          margin:0;
-                          font-size:22px;
-                          font-weight:bold;
-                          color:#111827;
-                        ">
-                          ${escapeHtml(formattedPaymentAmount)}
-                        </p>
+                       
                       </div>
 
                       <p style="margin:20px 0;">
