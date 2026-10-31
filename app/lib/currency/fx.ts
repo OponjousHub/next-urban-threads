@@ -80,6 +80,9 @@ export async function getExchangeRate(
       method: "GET",
       headers: {
         Accept: "application/json",
+        ...(process.env.EXCHANGERATE_API_KEY && {
+          Authorization: `Bearer ${process.env.EXCHANGERATE_API_KEY}`,
+        }),
       },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       cache: "no-store",

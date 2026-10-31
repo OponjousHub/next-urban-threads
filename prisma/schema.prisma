@@ -199,6 +199,12 @@ model Order {
   paymentMethod      String
   totalAmount        Decimal
   currency           currencyEnum?
+
+  // Actual amount and currency charged by the payment gateway
+  paymentAmount      Decimal?     @db.Decimal(12, 2)
+  paymentCurrency    currencyEnum?
+  exchangeRate       Decimal?     @db.Decimal(20, 10)
+
   paymentProvider    PaymentProvider
   paymentReference   String               @unique
   shippingAddressId  String
