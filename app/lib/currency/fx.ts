@@ -16,6 +16,7 @@ type ExchangeRateApiResponse = {
   source?: string;
   timestamp?: string;
   data_updated_at?: string;
+  effective_at?: Record<string, string>;
   stale?: Record<string, boolean>;
 };
 
@@ -122,7 +123,9 @@ export async function getExchangeRate(
       );
     }
 
-    const updatedAt = new Date(data.data_updated_at ?? data.timestamp ?? "");
+    const updatedAt = new Date(
+      data.effective_at?.[quote] ?? data.data_updated_at ?? "",
+    );
 
     if (Number.isNaN(updatedAt.getTime())) {
       throw new ExchangeRateError(

@@ -308,6 +308,26 @@ model PaymentFinalization {
   @@index([status, updatedAt])
 }
 
+model FXRate {
+  id           String       @id @default(cuid())
+  baseCurrency currencyEnum
+  quoteCurrency currencyEnum
+
+  rate         Decimal      @db.Decimal(20, 10)
+  source       String
+
+  effectiveAt  DateTime
+  fetchedAt    DateTime     @default(now())
+
+  stale        Boolean      @default(false)
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([baseCurrency, quoteCurrency])
+  @@index([fetchedAt])
+}
+
 model Address {
   id          String   @id @default(cuid())
   userId      String
