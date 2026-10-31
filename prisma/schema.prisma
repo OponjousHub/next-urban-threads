@@ -377,6 +377,7 @@ model Tenant {
   termsOfService     String?
   termsUpdatedAt     DateTime?
   currency           currencyEnum        @default(NGN)
+  fxMarginPercent    Decimal             @default(0) @db.Decimal(5, 2)
   heroCTA            String?
   heroImage          String?
   heroSubtitle       String?
