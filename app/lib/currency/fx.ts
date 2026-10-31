@@ -1,5 +1,8 @@
 // app/lib/currency/fx.ts
 
+import { prisma } from "@/utils/prisma";
+import { currencyEnum } from "@prisma/client";
+
 export type ExchangeRate = {
   baseCurrency: string;
   quoteCurrency: string;
@@ -12,10 +15,8 @@ export type ExchangeRate = {
 type ExchangeRateApiResponse = {
   result: string;
   base: string;
-  rates: Record<string, number>;
   source?: string;
-  timestamp?: string;
-  data_updated_at?: string;
+  rates: Record<string, number>;
   effective_at?: Record<string, string>;
   stale?: Record<string, boolean>;
 };
@@ -27,7 +28,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 const MAX_RATE_AGE_MS = 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 10_000;
 
-const rateCache = new Map<string, ExchangeRate>();
+const supportedCurrencies = new Set<string>(Object.values(currencyEnum));
 
 export class ExchangeRateError extends Error {
   constructor(message: string) {
@@ -36,13 +37,6 @@ export class ExchangeRateError extends Error {
   }
 }
 
-/**
- * Retrieves the latest exchange rate.
- *
- * Rates are cached in memory for five minutes.
- * Cached values are only an optimization; Vercel instances
- * may have separate caches.
- */
 export async function getExchangeRate(
   baseCurrency: string,
   quoteCurrency: string,
@@ -50,8 +44,8 @@ export async function getExchangeRate(
   const base = baseCurrency.toUpperCase();
   const quote = quoteCurrency.toUpperCase();
 
-  if (!/^[A-Z]{3}$/.test(base) || !/^[A-Z]{3}$/.test(quote)) {
-    throw new ExchangeRateError("Invalid currency code.");
+  if (!supportedCurrencies.has(base) || !supportedCurrencies.has(quote)) {
+    throw new ExchangeRateError("Unsupported currency.");
   }
 
   if (base === quote) {
@@ -65,11 +59,38 @@ export async function getExchangeRate(
     };
   }
 
-  const cacheKey = `${base}:${quote}`;
-  const cached = rateCache.get(cacheKey);
+  const cacheWhere = {
+    baseCurrency_quoteCurrency: {
+      baseCurrency: base as currencyEnum,
+      quoteCurrency: quote as currencyEnum,
+    },
+  };
 
-  if (cached && Date.now() - cached.fetchedAt.getTime() < CACHE_TTL_MS) {
-    return cached;
+  // 1. Check shared Neon cache
+  const cached = await prisma.fXRate.findUnique({
+    where: cacheWhere,
+  });
+
+  if (
+    cached &&
+    Date.now() - cached.fetchedAt.getTime() < CACHE_TTL_MS &&
+    !cached.stale
+  ) {
+    return {
+      baseCurrency: base,
+      quoteCurrency: quote,
+      rate: Number(cached.rate),
+      source: cached.source,
+      updatedAt: cached.effectiveAt,
+      fetchedAt: cached.fetchedAt,
+    };
+  }
+
+  // 2. Request a fresh rate
+  const apiKey = process.env.EXCHANGERATE_API_KEY;
+
+  if (!apiKey) {
+    throw new ExchangeRateError("Exchange-rate API key is not configured.");
   }
 
   const url = new URL(`${API_BASE_URL}/latest/${base}`);
@@ -81,9 +102,7 @@ export async function getExchangeRate(
       method: "GET",
       headers: {
         Accept: "application/json",
-        ...(process.env.EXCHANGERATE_API_KEY && {
-          Authorization: `Bearer ${process.env.EXCHANGERATE_API_KEY}`,
-        }),
+        Authorization: `Bearer ${apiKey}`,
       },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       cache: "no-store",
@@ -91,46 +110,39 @@ export async function getExchangeRate(
 
     if (!response.ok) {
       throw new ExchangeRateError(
-        `Exchange-rate provider returned HTTP ${response.status}.`,
+        `Exchange-rate API returned HTTP ${response.status}.`,
       );
     }
 
     const data = (await response.json()) as ExchangeRateApiResponse;
 
-    if (data.result !== "success") {
-      throw new ExchangeRateError(
-        "Exchange-rate provider returned an unsuccessful response.",
-      );
-    }
-
-    if (data.base !== base) {
-      throw new ExchangeRateError(
-        "Exchange-rate provider returned an unexpected base currency.",
-      );
+    if (data.result !== "success" || data.base !== base) {
+      throw new ExchangeRateError("Invalid exchange-rate API response.");
     }
 
     const rate = data.rates?.[quote];
+    const effectiveAt = data.effective_at?.[quote];
 
     if (typeof rate !== "number" || !Number.isFinite(rate) || rate <= 0) {
       throw new ExchangeRateError(
-        `No valid exchange rate available for ${base}/${quote}.`,
+        `No valid ${base}/${quote} rate was returned.`,
       );
     }
 
-    if (data.stale?.[quote] === true) {
+    if (data.stale?.[quote] !== false) {
       throw new ExchangeRateError(
-        `The ${base}/${quote} exchange rate is marked stale.`,
+        `The ${base}/${quote} exchange rate is stale or unverified.`,
       );
     }
 
-    const updatedAt = new Date(
-      data.effective_at?.[quote] ?? data.data_updated_at ?? "",
-    );
+    if (!effectiveAt) {
+      throw new ExchangeRateError("The exchange-rate timestamp is missing.");
+    }
+
+    const updatedAt = new Date(effectiveAt);
 
     if (Number.isNaN(updatedAt.getTime())) {
-      throw new ExchangeRateError(
-        "Exchange-rate provider returned an invalid timestamp.",
-      );
+      throw new ExchangeRateError("Invalid exchange-rate timestamp.");
     }
 
     const age = Date.now() - updatedAt.getTime();
@@ -141,29 +153,45 @@ export async function getExchangeRate(
       );
     }
 
-    const result: ExchangeRate = {
+    // 3. Persist the rate in Neon
+    const saved = await prisma.fXRate.upsert({
+      where: cacheWhere,
+      create: {
+        baseCurrency: base as currencyEnum,
+        quoteCurrency: quote as currencyEnum,
+        rate,
+        source: data.source ?? "EXCHANGERATE_DEV",
+        effectiveAt: updatedAt,
+        fetchedAt: new Date(),
+        stale: false,
+      },
+      update: {
+        rate,
+        source: data.source ?? "EXCHANGERATE_DEV",
+        effectiveAt: updatedAt,
+        fetchedAt: new Date(),
+        stale: false,
+      },
+    });
+
+    return {
       baseCurrency: base,
       quoteCurrency: quote,
-      rate,
-      source: data.source ?? "EXCHANGERATE_DEV",
-      updatedAt,
-      fetchedAt: new Date(),
+      rate: Number(saved.rate),
+      source: saved.source,
+      updatedAt: saved.effectiveAt,
+      fetchedAt: saved.fetchedAt,
     };
-
-    rateCache.set(cacheKey, result);
-
-    return result;
   } catch (error) {
-    if (error instanceof ExchangeRateError) {
-      throw error;
-    }
-
     console.error("[FX_SERVICE_ERROR]", {
       baseCurrency: base,
       quoteCurrency: quote,
-      error:
-        error instanceof Error ? error.message : "Unknown exchange-rate error",
+      error: error instanceof Error ? error.message : "Unknown error",
     });
+
+    if (error instanceof ExchangeRateError) {
+      throw error;
+    }
 
     throw new ExchangeRateError(
       "Unable to retrieve a reliable exchange rate. Please try again.",
@@ -171,10 +199,6 @@ export async function getExchangeRate(
   }
 }
 
-/**
- * Converts an amount using a supplied exchange rate.
- * Merchant margin is expressed as a percentage.
- */
 export function convertCurrency(
   amount: number,
   exchangeRate: number,
