@@ -354,8 +354,14 @@ export async function finalizePayment(
           metadata: {
             orderId: order.id,
             paymentReference: order.paymentReference,
-            amount: Number(order.totalAmount),
-            currency: order.currency,
+
+            // Actual amount charged to the customer
+            amount: Number(order.paymentAmount ?? order.totalAmount),
+            currency: order.paymentCurrency ?? order.currency,
+
+            // Original store order amount
+            originalAmount: Number(order.totalAmount),
+            originalCurrency: order.currency,
           },
         });
       }
@@ -386,8 +392,8 @@ export async function finalizePayment(
         type: "PAYMENT_RECEIVED",
         title: "Payment Received",
         message: `${order.user?.name ?? "A customer"} paid ${
-          order.currency
-        } ${Number(order.totalAmount).toFixed(2)} for order ${order.id
+          order.paymentCurrency ?? order.currency
+        } ${Number(order.paymentAmount ?? order.totalAmount).toFixed(2)} for order ${order.id
           .slice(-8)
           .toUpperCase()}.`,
         link: `/admin/orders/${order.id}`,
@@ -396,8 +402,14 @@ export async function finalizePayment(
           orderId: order.id,
           customerId: order.userId,
           customerName: order.user?.name ?? null,
-          amount: Number(order.totalAmount),
-          currency: order.currency,
+
+          // Actual amount charged to the customer
+          amount: Number(order.paymentAmount ?? order.totalAmount),
+          currency: order.paymentCurrency ?? order.currency,
+
+          // Original store order amount
+          originalAmount: Number(order.totalAmount),
+          originalCurrency: order.currency,
         },
       });
 
@@ -492,9 +504,17 @@ export async function finalizePayment(
 
         const orderReference = order.id.slice(-8).toUpperCase();
 
-        const amount = `${String(order.currency)} ${Number(
-          order.totalAmount,
-        ).toFixed(2)}`;
+        const paymentAmount = Number(order.paymentAmount ?? order.totalAmount);
+
+        const paymentCurrency = String(order.paymentCurrency ?? order.currency);
+
+        const originalAmount = Number(order.totalAmount);
+        const originalCurrency = String(order.currency);
+
+        const amount =
+          paymentCurrency !== originalCurrency
+            ? `${paymentCurrency} ${paymentAmount.toFixed(2)} (Original order total: ${originalCurrency} ${originalAmount.toFixed(2)})`
+            : `${paymentCurrency} ${paymentAmount.toFixed(2)}`;
 
         const email = merchantPaymentReceivedEmail({
           storeName: tenant.name,
