@@ -511,10 +511,18 @@ export async function finalizePayment(
         const originalAmount = Number(order.totalAmount);
         const originalCurrency = String(order.currency);
 
-        const amount =
+        const amount = new Intl.NumberFormat("en-NG", {
+          style: "currency",
+          currency: paymentCurrency,
+        }).format(paymentAmount);
+
+        const originalOrderTotal =
           paymentCurrency !== originalCurrency
-            ? `${paymentCurrency} ${paymentAmount.toFixed(2)} (Original order total: ${originalCurrency} ${originalAmount.toFixed(2)})`
-            : `${paymentCurrency} ${paymentAmount.toFixed(2)}`;
+            ? `${originalCurrency} ${new Intl.NumberFormat("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(originalAmount)}`
+            : undefined;
 
         const email = merchantPaymentReceivedEmail({
           storeName: tenant.name,
@@ -524,6 +532,7 @@ export async function finalizePayment(
           customerName,
           customerEmail,
           amount,
+          originalOrderTotal,
           paymentReference: order.paymentReference || order.id,
           paymentProvider: String(order.paymentProvider || "Online payment"),
           paymentDate: new Date().toLocaleString("en-NG", {

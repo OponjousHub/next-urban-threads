@@ -42,6 +42,9 @@ type Order = {
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   totalAmount: number;
+  currency: string;
+  paymentAmount: number | string | null;
+  paymentCurrency: string | null;
   paymentReference: string | null;
   items: OrderItem[];
   createdAt: string;
@@ -537,18 +540,48 @@ export default function OrderPage() {
                 <hr />
 
                 {/* Final Amount */}
-                <div className="border-t pt-4 flex items-center justify-between gap-4">
-                  <p className="font-bold">
-                    {order.paymentStatus === PaymentStatus.PAID
-                      ? "Total Paid"
-                      : order.paymentStatus === PaymentStatus.FAILED
-                        ? "Order Total"
-                        : "Amount Due"}
-                  </p>
+                <hr />
 
-                  <p className="font-bold">
-                    {formatCurrency(Number(order.totalAmount), tenant.currency)}
-                  </p>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center gap-4">
+                    <p className="font-bold">
+                      {order.paymentStatus === PaymentStatus.PAID
+                        ? "Amount Paid"
+                        : order.paymentStatus === PaymentStatus.FAILED
+                          ? "Order Total"
+                          : "Amount Due"}
+                    </p>
+
+                    <p className="font-bold text-right">
+                      {formatCurrency(
+                        order.paymentStatus === PaymentStatus.PAID
+                          ? Number(order.paymentAmount ?? order.totalAmount)
+                          : Number(order.totalAmount),
+                        (order.paymentStatus === PaymentStatus.PAID
+                          ? (order.paymentCurrency ?? order.currency)
+                          : order.currency) as Parameters<
+                          typeof formatCurrency
+                        >[1],
+                      )}
+                    </p>
+                  </div>
+
+                  {order.paymentStatus === PaymentStatus.PAID &&
+                    order.paymentCurrency &&
+                    order.paymentCurrency !== order.currency && (
+                      <div className="flex justify-between items-center gap-4 text-xs text-gray-500">
+                        <span>Original Order Total</span>
+
+                        <span className="text-right">
+                          {formatCurrency(
+                            Number(order.totalAmount),
+                            order.currency as Parameters<
+                              typeof formatCurrency
+                            >[1],
+                          )}
+                        </span>
+                      </div>
+                    )}
                 </div>
 
                 {/* Payment Explanation */}
