@@ -12,6 +12,9 @@ type OrderConfirmationTenant = {
 type OrderConfirmationOrder = {
   id: string;
   totalAmount: Prisma.Decimal | number;
+  currency?: string | null;
+  paymentAmount?: Prisma.Decimal | number | null;
+  paymentCurrency?: string | null;
 };
 
 function escapeHtml(value: string): string {
@@ -40,7 +43,26 @@ export default function orderConfirmationEmail(
     ? tenant.primaryColor!
     : "#111827";
 
-  const formattedTotal = formatCurrency(Number(order.totalAmount), currency);
+  // Original store pricing
+  const storeCurrency = (order.currency ?? tenant.currency) as Parameters<
+    typeof formatCurrency
+  >[1];
+
+  const formattedStoreTotal = formatCurrency(
+    Number(order.totalAmount),
+    storeCurrency,
+  );
+
+  // Actual amount charged by the payment gateway
+  const paymentCurrency = (order.paymentCurrency ??
+    order.currency ??
+    tenant.currency) as Parameters<typeof formatCurrency>[1];
+
+  const paymentAmount = Number(order.paymentAmount ?? order.totalAmount);
+
+  const formattedPaymentAmount = formatCurrency(paymentAmount, paymentCurrency);
+
+  const currenciesDiffer = paymentCurrency !== storeCurrency;
   const logoHtml = tenant.logo
     ? `
       <img
@@ -177,7 +199,7 @@ export default function orderConfirmationEmail(
                         </p>
 
                         <p style="margin:0 0 8px;color:#6b7280;font-size:13px;">
-                          ORDER TOTAL
+                          AMOUNT PAID
                         </p>
 
                         <p style="
@@ -186,7 +208,35 @@ export default function orderConfirmationEmail(
                           font-weight:bold;
                           color:#111827;
                         ">
-                          ${escapeHtml(formattedTotal)}
+                          ${escapeHtml(formattedPaymentAmount)}
+                        </p>
+
+                        ${
+                          currenciesDiffer
+                            ? `
+                              <p style="margin:16px 0 8px;color:#6b7280;font-size:13px;">
+                                ORIGINAL ORDER TOTAL
+                              </p>
+
+                              <p style="
+                                margin:0;
+                                font-size:15px;
+                                font-weight:bold;
+                                color:#374151;
+                              ">
+                                ${escapeHtml(formattedStoreTotal)}
+                              </p>
+                            `
+                            : ""
+                        }
+
+                        <p style="
+                          margin:0;
+                          font-size:22px;
+                          font-weight:bold;
+                          color:#111827;
+                        ">
+                          ${escapeHtml(formattedPaymentAmount)}
                         </p>
                       </div>
 
