@@ -116,10 +116,16 @@ export async function POST(req: Request) {
     }
 
     // 8. Validate reference, amount and currency
-    const expectedAmount = Number(order.totalAmount);
+    // 8. Validate reference, amount and currency
+    // Use actual gateway payment values, with fallback for older orders.
+    const expectedAmount = Number(order.paymentAmount ?? order.totalAmount);
+
     const verifiedAmount = result.amount;
 
-    const expectedCurrency = String(order.currency ?? "").toUpperCase();
+    const expectedCurrency = String(
+      order.paymentCurrency ?? order.currency ?? "",
+    ).toUpperCase();
+
     const verifiedCurrency = String(result.currency ?? "").toUpperCase();
 
     const referenceMatches = result.txRef === order.paymentReference;

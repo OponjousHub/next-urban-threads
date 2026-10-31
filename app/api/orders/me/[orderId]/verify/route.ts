@@ -392,10 +392,16 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json(order);
     }
 
-    const expectedAmount = Number(order.totalAmount);
+    // Validate against the actual gateway payment values.
+    // Fall back to original order values for older orders.
+    const expectedAmount = Number(order.paymentAmount ?? order.totalAmount);
+
     const verifiedAmount = result.amount;
 
-    const expectedCurrency = String(order.currency ?? "").toUpperCase();
+    const expectedCurrency = String(
+      order.paymentCurrency ?? order.currency ?? "",
+    ).toUpperCase();
+
     const verifiedCurrency = String(result.currency ?? "").toUpperCase();
 
     const referenceMatches = result.txRef === order.paymentReference;
