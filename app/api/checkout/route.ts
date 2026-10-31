@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/utils/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, currencyEnum } from "@prisma/client";
 import crypto from "crypto";
 
 import { detectCountryFromHeaders } from "@/app/lib/payments/geo";
@@ -12,6 +12,7 @@ import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import NotificationService from "@/lib/notifications/notification.service";
 import InventoryService from "@/lib/inventory/inventory.service";
 import { AdminNotificationService } from "@/app/lib/admin/admin-notification-service";
+import { getExchangeRate, convertCurrency } from "@/app/lib/currency/fx";
 import {
   getCouponCartLines,
   validateCouponForCart,
@@ -583,6 +584,32 @@ export async function POST(req: NextRequest) {
     }
 
     // ---------------------------------------------------------
+    // Currency conversion
+    // Preserve store pricing; calculate the amount charged
+    // in the customer's payment currency.
+    // ---------------------------------------------------------
+
+    const storeCurrency = tenant.currency;
+    const paymentCurrency = checkoutCurrency as currencyEnum;
+
+    let exchangeRate = 1;
+    let paymentAmount = totalAmount.toNumber();
+
+    if (storeCurrency !== paymentCurrency) {
+      const fx = await getExchangeRate(storeCurrency, paymentCurrency);
+
+      const marginPercent = Number(tenant.fxMarginPercent);
+
+      exchangeRate = fx.rate * (1 + marginPercent / 100);
+
+      paymentAmount = convertCurrency(
+        totalAmount.toNumber(),
+        fx.rate,
+        marginPercent,
+      );
+    }
+
+    // ---------------------------------------------------------
     // 13. Create order items
     // ---------------------------------------------------------
 
@@ -665,7 +692,14 @@ export async function POST(req: NextRequest) {
 
         totalAmount,
         customerEmail: email,
-        currency: checkoutCurrency,
+
+        // Original store pricing
+        currency: storeCurrency,
+
+        // Actual payment gateway amount and currency
+        paymentAmount: new Prisma.Decimal(paymentAmount),
+        paymentCurrency: paymentCurrency,
+        exchangeRate: new Prisma.Decimal(exchangeRate),
 
         paymentProvider: providerKey,
         paymentMethod,
@@ -769,16 +803,16 @@ export async function POST(req: NextRequest) {
     // 21. Initialize payment
     // ---------------------------------------------------------
 
-    if (!order.currency) {
-      throw new Error("Order currency is not configured");
+    if (!order.paymentAmount || !order.paymentCurrency) {
+      throw new Error("Order payment amount or currency is missing.");
     }
 
     const provider = getPaymentProvider(order.paymentProvider);
 
     const payment = await provider.initializePayment({
       email,
-      amount: order.totalAmount.toNumber(),
-      currency: order.currency,
+      amount: order.paymentAmount.toNumber(),
+      currency: order.paymentCurrency,
       reference: order.paymentReference,
       callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/order/${order.id}`,
     });
