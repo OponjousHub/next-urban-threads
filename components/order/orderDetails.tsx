@@ -66,10 +66,20 @@ export default function OrderDetails({
 
   // Cancellation is only allowed before an order has entered shipment/delivery
   // or reached another terminal state.
-  const canCancelOrder = ["PENDING", "PROCESSING"].includes(orderStatus);
+  const canCancelOrder =
+    paymentStatus !== "PAID" && ["PENDING", "PROCESSING"].includes(orderStatus);
 
   async function updateStatus(newStatus: string) {
     if (!localOrder) return;
+
+    if (newStatus === "CANCELLED" && paymentStatus === "PAID") {
+      appToast.warning(
+        "Refund required",
+        "Paid orders cannot be cancelled directly. Use the cancellation and refund process.",
+      );
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch(`/api/orders/${localOrder.id}`, {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Upload, Loader2, X, RefreshCcw, Video } from "lucide-react";
 import { appToast } from "@/utils/appToast";
 
@@ -28,6 +28,22 @@ export function ProductVideoUploader({ videos, setVideos }: Props) {
   const [queue, setQueue] = useState<UploadItem[]>([]);
 
   const uploadControllers = useRef<Record<string, AbortController>>({});
+
+  /*
+   * Clear the upload queue when the parent resets
+   * the product videos after successful creation.
+   */
+  useEffect(() => {
+    if (videos.length !== 0) return;
+
+    Object.values(uploadControllers.current).forEach((controller) => {
+      controller.abort();
+    });
+
+    uploadControllers.current = {};
+
+    setQueue([]);
+  }, [videos]);
 
   /* -------------------------------- DELETE VIDEO -------------------------------- */
 

@@ -10,7 +10,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   SortableContext,
   rectSortingStrategy,
@@ -39,6 +39,29 @@ export function ProductImageUploader({ images, setImages }: Props) {
 
   const uploadControllers = useRef<Record<string, AbortController>>({});
 
+  /*
+   * Clear the upload queue when the parent resets
+   * the product images after successful creation.
+   */
+  useEffect(() => {
+    if (images.length !== 0) return;
+
+    Object.values(uploadControllers.current).forEach((controller) => {
+      controller.abort();
+    });
+
+    uploadControllers.current = {};
+
+    setQueue((prev) => {
+      prev.forEach((item) => {
+        if (item.preview) {
+          URL.revokeObjectURL(item.preview);
+        }
+      });
+
+      return [];
+    });
+  }, [images]);
   /*
    * ---------------------------------------------------------
    * HELPERS

@@ -143,8 +143,21 @@ export async function PATCH(
        * An order should not be cancelled after shipment or delivery.
        */
       if (status === OrderStatus.CANCELLED) {
+        // Paid orders must go through the refund process.
+        // Never allow a direct cancellation of a paid order.
+        if (existingOrder.paymentStatus === PaymentStatus.PAID) {
+          return NextResponse.json(
+            {
+              error:
+                "Paid orders cannot be cancelled directly. Process the required refund first.",
+            },
+            { status: 400 },
+          );
+        }
+
         if (
           existingOrder.status === OrderStatus.SHIPPED ||
+          existingOrder.status === OrderStatus.OUT_FOR_DELIVERY ||
           existingOrder.status === OrderStatus.DELIVERED
         ) {
           return NextResponse.json(
