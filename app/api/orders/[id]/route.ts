@@ -258,17 +258,15 @@ export async function PATCH(
             id: existingOrder.id,
             tenantId: tenant.id,
             status: existingOrder.status,
+            paymentStatus: existingOrder.paymentStatus,
+            refundStatus: existingOrder.refundStatus,
           },
           data: updateData,
         });
 
-        // Another request already changed the order status.
+        // Another request changed the order, payment, or refund state.
         if (statusUpdate.count === 0) {
-          return tx.order.findUnique({
-            where: {
-              id: existingOrder.id,
-            },
-          });
+          return null;
         }
 
         // This request successfully performed the status transition.
@@ -306,6 +304,16 @@ export async function PATCH(
 
       return updated;
     });
+
+    if (!updatedOrder) {
+      return NextResponse.json(
+        {
+          error:
+            "This order changed while you were updating it. Refresh the order and try again.",
+        },
+        { status: 409 },
+      );
+    }
 
     return NextResponse.json(updatedOrder);
   } catch (error) {
