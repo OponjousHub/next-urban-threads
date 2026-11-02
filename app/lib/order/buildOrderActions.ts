@@ -98,15 +98,12 @@ export function buildOrderActions({
   /* ---------------- PAYMENT ---------------- */
 
   actions.push({
-    label: order.paymentStatus === "PAID" ? "✓ Already Paid" : "Mark as paid",
+    label:
+      order.paymentStatus === "PAID" ? "✓ Already Paid" : "Payment Pending",
 
-    disabled: order.paymentStatus === "PAID",
+    disabled: true,
 
-    action: () => {
-      if (order.paymentStatus === "PAID") return;
-
-      onPaymentUpdate();
-    },
+    action: () => {},
   });
 
   /* ---------------- STATUS ---------------- */

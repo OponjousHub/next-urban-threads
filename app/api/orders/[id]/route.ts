@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
-import { OrderStatus, PaymentStatus, TrackingEventType } from "@prisma/client";
-
+import {
+  OrderStatus,
+  PaymentStatus,
+  TrackingEventType,
+  RefundStatus,
+} from "@prisma/client";
 import { prisma } from "@/utils/prisma";
-import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
+import { requireAdminOrOwner } from "@/lib/server/auth";
 
 function getTrackingDetails(status: OrderStatus) {
   switch (status) {
@@ -54,27 +58,54 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const tenant = await getDefaultTenant();
   const param = await params;
 
-  if (!tenant) {
+  let tenant;
+
+  try {
+    ({ tenant } = await requireAdminOrOwner());
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unauthorized";
+
     return NextResponse.json(
-      { error: "Default tenant not found" },
-      { status: 404 },
+      { error: message },
+      { status: message === "Forbidden" ? 403 : 401 },
     );
   }
 
   try {
-    const body: {
-      status?: OrderStatus;
-      paymentStatus?: PaymentStatus;
-    } = await req.json();
+    const body = await req.json();
 
-    const { status, paymentStatus } = body;
-
-    if (!status && !paymentStatus) {
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json(
-        { error: "No status or paymentStatus provided" },
+        { error: "Invalid request body" },
+        { status: 400 },
+      );
+    }
+
+    // Payment status must only be changed by verified payment processes.
+    if (Object.prototype.hasOwnProperty.call(body, "paymentStatus")) {
+      return NextResponse.json(
+        {
+          error:
+            "Manual payment status updates are not permitted. Payment must be verified by the payment provider.",
+        },
+        { status: 403 },
+      );
+    }
+
+    const status = body.status as OrderStatus | undefined;
+
+    if (!status) {
+      return NextResponse.json(
+        { error: "Order status is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!Object.values(OrderStatus).includes(status)) {
+      return NextResponse.json(
+        { error: "Invalid order status" },
         { status: 400 },
       );
     }
@@ -88,6 +119,7 @@ export async function PATCH(
         id: true,
         status: true,
         paymentStatus: true,
+        refundStatus: true,
       },
     });
 
@@ -102,9 +134,6 @@ export async function PATCH(
      */
 
     if (status && status !== existingOrder.status) {
-      const effectivePaymentStatus =
-        paymentStatus ?? existingOrder.paymentStatus;
-
       /*
        * DELIVERED
        *
@@ -112,7 +141,7 @@ export async function PATCH(
        * It must also already be PROCESSING or SHIPPED.
        */
       if (status === OrderStatus.DELIVERED) {
-        if (effectivePaymentStatus !== PaymentStatus.PAID) {
+        if (existingOrder.paymentStatus !== "PAID") {
           return NextResponse.json(
             {
               error:
@@ -143,13 +172,15 @@ export async function PATCH(
        * An order should not be cancelled after shipment or delivery.
        */
       if (status === OrderStatus.CANCELLED) {
-        // Paid orders must go through the refund process.
-        // Never allow a direct cancellation of a paid order.
-        if (existingOrder.paymentStatus === PaymentStatus.PAID) {
+        // Paid orders can only be cancelled after the refund succeeds.
+        if (
+          existingOrder.paymentStatus === PaymentStatus.PAID &&
+          existingOrder.refundStatus !== RefundStatus.REFUNDED
+        ) {
           return NextResponse.json(
             {
               error:
-                "Paid orders cannot be cancelled directly. Process the required refund first.",
+                "This paid order cannot be cancelled until its refund has been successfully completed.",
             },
             { status: 400 },
           );
@@ -205,17 +236,10 @@ export async function PATCH(
 
     const updatedOrder = await prisma.$transaction(async (tx) => {
       const updateData: {
-        status?: OrderStatus;
-        paymentStatus?: PaymentStatus;
-      } = {};
-
-      if (status) {
-        updateData.status = status;
-      }
-
-      if (paymentStatus) {
-        updateData.paymentStatus = paymentStatus;
-      }
+        status: OrderStatus;
+      } = {
+        status,
+      };
 
       // ---------------------------------------------------------
       // IMPORTANT:
