@@ -364,6 +364,14 @@ export async function processRefund(
     refund.order.paymentProvider === "PAYSTACK" &&
     refund.status === "FAILED"
   ) {
+    console.log("REFUND PROVIDER DIAGNOSTIC:", {
+      provider: refund.order.paymentProvider,
+      orderId: refund.orderId,
+      refundId: refund.id,
+      amount: refund,
+      currency: refund.currency,
+    });
+
     throw new Error(
       "This Paystack refund requires gateway reconciliation before another attempt.",
     );
