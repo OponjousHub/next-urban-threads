@@ -554,9 +554,10 @@ export async function processRefund(
     paymentResult.provider === "paystack" &&
     (paymentResult.success || paymentResult.uncertain)
   ) {
-    const refundStatus = paymentResult.uncertain
-      ? "UNKNOWN"
-      : String(paymentResult.status ?? "pending").toUpperCase();
+    const refundStatus =
+      paymentResult.uncertain || !paymentResult.reference
+        ? "UNKNOWN"
+        : String(paymentResult.status ?? "pending").toUpperCase();
 
     await prisma.$transaction(async (tx) => {
       await tx.refundTransaction.create({
