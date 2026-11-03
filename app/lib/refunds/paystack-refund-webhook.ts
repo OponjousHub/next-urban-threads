@@ -140,8 +140,7 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
       throw new Error("Paystack refund amount mismatch.");
     }
 
-    const shippingIncluded = itemsAndShippingMatches;
-
+    const shippingIncluded = !itemsOnlyMatches && itemsAndShippingMatches;
     const shippingRefunded = shippingIncluded ? shippingCost : 0;
 
     /*

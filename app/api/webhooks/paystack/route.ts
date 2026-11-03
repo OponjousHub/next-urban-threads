@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { PaymentProvider, PaymentStatus, OrderStatus } from "@prisma/client";
-
+import { handlePaystackRefundWebhook } from "@/app/lib/refunds/paystack-refund-webhook";
 import { prisma } from "@/utils/prisma";
 import { PaystackProvider } from "@/app/lib/payments/paystack";
 import { finalizePayment } from "@/app/lib/payments/finalize-payment";
@@ -65,6 +65,26 @@ export async function POST(req: Request) {
     }
 
     // Ignore events other than successful charges
+    const refundEvents = [
+      "refund.pending",
+      "refund.processing",
+      "refund.needs-attention",
+      "refund.failed",
+      "refund.processed",
+    ];
+
+    if (refundEvents.includes(event.event)) {
+      try {
+        await handlePaystackRefundWebhook(event);
+
+        return NextResponse.json({ received: true });
+      } catch (error) {
+        console.error("PAYSTACK REFUND WEBHOOK ERROR:", error);
+
+        // Return 500 so Paystack can retry delivery.
+        return NextResponse.json({ received: false }, { status: 500 });
+      }
+    }
     if (event.event !== "charge.success") {
       return NextResponse.json({ received: true });
     }
