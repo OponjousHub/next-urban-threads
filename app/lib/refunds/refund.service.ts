@@ -439,24 +439,30 @@ export async function processRefund(
    * Mark refund as PROCESSING
    * --------------------------------------------------
    */
-  await prisma.$transaction(async (tx) => {
-    await tx.refundRequest.update({
-      where: {
-        id: refund.id,
-      },
-      data: {
-        status: "PROCESSING",
-      },
-    });
+  const claimedRefund = await prisma.refundRequest.updateMany({
+    where: {
+      id: refund.id,
+      tenantId: tenant.id,
+      status: refund.status,
+    },
+    data: {
+      status: "PROCESSING",
+    },
+  });
 
-    await tx.order.update({
-      where: {
-        id: refund.orderId,
-      },
-      data: {
-        refundStatus: "PROCESSING",
-      },
-    });
+  if (claimedRefund.count !== 1) {
+    throw new Error(
+      "This refund is already being processed or its status has changed. Please refresh and try again.",
+    );
+  }
+
+  await prisma.order.update({
+    where: {
+      id: refund.orderId,
+    },
+    data: {
+      refundStatus: "PROCESSING",
+    },
   });
 
   /*
@@ -531,6 +537,82 @@ export async function processRefund(
    * Gateway explicitly reported failure
    * --------------------------------------------------
    */
+
+  /*
+   * --------------------------------------------------
+   * PAYSTACK: ACCEPTED OR UNCERTAIN REFUND
+   * --------------------------------------------------
+   *
+   * Paystack processes refunds asynchronously.
+   * An accepted request is NOT a completed refund.
+   *
+   * Network errors and missing references are also
+   * uncertain outcomes, not confirmed failures.
+   */
+
+  if (
+    paymentResult.provider === "paystack" &&
+    (paymentResult.success || paymentResult.uncertain)
+  ) {
+    const refundStatus = paymentResult.uncertain
+      ? "UNKNOWN"
+      : String(paymentResult.status ?? "pending").toUpperCase();
+
+    await prisma.$transaction(async (tx) => {
+      await tx.refundTransaction.create({
+        data: {
+          refundRequestId: refund.id,
+          provider: "paystack",
+          transactionRef: paymentResult.reference ?? null,
+          status: refundStatus,
+        },
+      });
+
+      await tx.refundRequest.update({
+        where: { id: refund.id },
+        data: {
+          status: "PROCESSING",
+        },
+      });
+
+      await tx.order.update({
+        where: { id: refund.orderId },
+        data: {
+          refundStatus: "PROCESSING",
+        },
+      });
+    });
+
+    await createRefundTrackingEvent({
+      tenantId: tenant.id,
+      refundRequestId: refund.id,
+      status: "PROCESSING",
+      title: "Refund Submitted",
+      description: paymentResult.uncertain
+        ? "The refund request outcome is being verified with the payment provider. Please do not submit another refund."
+        : "Paystack has accepted the refund request. The refund is awaiting gateway confirmation.",
+      metadata: {
+        provider: "paystack",
+        reference: paymentResult.reference ?? null,
+        gatewayStatus: refundStatus,
+      },
+    });
+
+    return {
+      success: true,
+      refundId: refund.id,
+      orderId: refund.orderId,
+      status: "PROCESSING",
+      provider: "paystack",
+      reference: paymentResult.reference ?? null,
+      refundAmount,
+      itemRefundAmount: approvedAmount,
+      shippingRefunded:
+        refundOption === "ITEMS_PLUS_SHIPPING" ? shippingCost : 0,
+      shippingIncluded: refundOption === "ITEMS_PLUS_SHIPPING",
+    };
+  }
+
   if (!paymentResult.success) {
     await prisma.$transaction(async (tx) => {
       await tx.refundRequest.update({
