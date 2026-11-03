@@ -497,26 +497,71 @@ export async function processRefund(
     console.error("REFUND PAYMENT ERROR:", error);
 
     /*
-     * Gateway threw an exception.
-     * Make sure the refund does not remain stuck at PROCESSING.
+     * PAYSTACK: The outcome is uncertain.
+     * Never mark it FAILED or allow another submission.
      */
-    await prisma.$transaction(async (tx) => {
-      await tx.refundRequest.update({
-        where: {
-          id: refund.id,
-        },
-        data: {
-          status: "FAILED",
+    if (refund.order.paymentProvider === "PAYSTACK") {
+      await prisma.$transaction(async (tx) => {
+        await tx.refundTransaction.create({
+          data: {
+            refundRequestId: refund.id,
+            provider: "paystack",
+            transactionRef: null,
+            status: "UNKNOWN",
+          },
+        });
+
+        await tx.refundRequest.update({
+          where: { id: refund.id },
+          data: { status: "PROCESSING" },
+        });
+
+        await tx.order.update({
+          where: { id: refund.orderId },
+          data: { refundStatus: "PROCESSING" },
+        });
+      });
+
+      await createRefundTrackingEvent({
+        tenantId: tenant.id,
+        refundRequestId: refund.id,
+        status: "PROCESSING",
+        title: "Refund Awaiting Reconciliation",
+        description:
+          "We could not confirm the outcome of your refund request. Please contact support while we verify its status. Do not submit another refund request.",
+        metadata: {
+          provider: "paystack",
+          gatewayStatus: "UNKNOWN",
         },
       });
 
+      return {
+        success: true,
+        refundId: refund.id,
+        orderId: refund.orderId,
+        status: "PROCESSING",
+        provider: "paystack",
+        reference: null,
+        refundAmount,
+        itemRefundAmount: approvedAmount,
+        shippingRefunded:
+          refundOption === "ITEMS_PLUS_SHIPPING" ? shippingCost : 0,
+        shippingIncluded: refundOption === "ITEMS_PLUS_SHIPPING",
+      };
+    }
+
+    /*
+     * Preserve existing Flutterwave failure handling.
+     */
+    await prisma.$transaction(async (tx) => {
+      await tx.refundRequest.update({
+        where: { id: refund.id },
+        data: { status: "FAILED" },
+      });
+
       await tx.order.update({
-        where: {
-          id: refund.orderId,
-        },
-        data: {
-          refundStatus: "FAILED",
-        },
+        where: { id: refund.orderId },
+        data: { refundStatus: "FAILED" },
       });
     });
 
