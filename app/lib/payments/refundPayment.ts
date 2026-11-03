@@ -9,6 +9,8 @@ export type RefundPaymentResult = {
   success: boolean;
   provider: string;
   reference?: string;
+  status?: string;
+  uncertain?: boolean;
 };
 
 /* ==================================================
@@ -103,19 +105,39 @@ async function refundPaystack(
       },
       body: JSON.stringify({
         transaction: reference,
-        amount: amount * 100, // Kobo
+        amount: amount * 100,
       }),
     });
 
-    const data = await res.json();
+    const rawResponse = await res.text();
+
+    let data: any;
+
+    try {
+      data = JSON.parse(rawResponse);
+    } catch {
+      console.error("PAYSTACK REFUND INVALID RESPONSE:", {
+        statusCode: res.status,
+        response: rawResponse,
+      });
+
+      return {
+        success: false,
+        provider: "paystack",
+        uncertain: true,
+      };
+    }
 
     console.log("PAYSTACK REFUND RESPONSE:", {
       statusCode: res.status,
       response: data,
     });
 
-    if (!res.ok || data.status !== true) {
-      console.error("PAYSTACK REFUND FAILED:", {
+    /*
+     * Paystack explicitly rejected the refund.
+     */
+    if (!res.ok || data?.status !== true) {
+      console.error("PAYSTACK REFUND REJECTED:", {
         statusCode: res.status,
         response: data,
       });
@@ -123,21 +145,41 @@ async function refundPaystack(
       return {
         success: false,
         provider: "paystack",
+        status: "failed",
       };
     }
+
+    /*
+     * Paystack accepted the refund.
+     *
+     * The refund ID is data.data.id.
+     * The refund status is data.data.status.
+     *
+     * Do not confuse the original transaction
+     * reference with the refund ID.
+     */
+    const refundId = data?.data?.id;
+    const refundStatus = String(data?.data?.status ?? "pending").toLowerCase();
 
     return {
       success: true,
       provider: "paystack",
-      reference:
-        data?.data?.reference != null ? String(data.data.reference) : undefined,
+      reference: refundId != null ? String(refundId) : undefined,
+      status: refundStatus,
     };
   } catch (error) {
-    console.error("PAYSTACK REFUND ERROR:", error);
+    console.error("PAYSTACK REFUND REQUEST ERROR:", error);
 
+    /*
+     * The request may have reached Paystack even
+     * though RAYNTA did not receive the response.
+     *
+     * Never treat this as a confirmed failure.
+     */
     return {
       success: false,
       provider: "paystack",
+      uncertain: true,
     };
   }
 }

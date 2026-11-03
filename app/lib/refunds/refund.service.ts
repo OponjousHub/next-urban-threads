@@ -353,6 +353,22 @@ export async function processRefund(
     throw new Error("Refund not found");
   }
 
+  /*
+   * Paystack refunds previously marked FAILED must first
+   * be reconciled against Paystack.
+   *
+   * The old implementation could mark an accepted refund
+   * as FAILED when it failed to capture the refund ID.
+   */
+  if (
+    refund.order.paymentProvider === "PAYSTACK" &&
+    refund.status === "FAILED"
+  ) {
+    throw new Error(
+      "This Paystack refund requires gateway reconciliation before another attempt.",
+    );
+  }
+
   if (refund.status === "FAILED") {
     await createRefundTrackingEvent({
       tenantId: refund.tenantId,
