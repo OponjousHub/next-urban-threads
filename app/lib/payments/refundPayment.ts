@@ -142,10 +142,13 @@ async function refundPaystack(
         response: data,
       });
 
+      const uncertain = res.status === 408 || res.status >= 500;
+
       return {
         success: false,
         provider: "paystack",
-        status: "failed",
+        status: uncertain ? undefined : "failed",
+        uncertain,
       };
     }
 
