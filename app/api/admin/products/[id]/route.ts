@@ -66,6 +66,8 @@ export async function PATCH(req: Request, { params }: RouteContext) {
       flash,
       videos,
       variants,
+      stock,
+      hasVariants,
     } = body;
 
     /* ---------------------------------------------------------
@@ -186,39 +188,39 @@ export async function PATCH(req: Request, { params }: RouteContext) {
            → replace existing variants
       ======================================================= */
 
-      if (Array.isArray(variants)) {
-        /* -----------------------------------------------------
-           Delete existing variants
-           ----------------------------------------------------- */
+      /* =======================================================
+   INVENTORY AND VARIANTS
+   ======================================================= */
 
+      // VARIANT PRODUCT
+      if (hasVariants === true) {
+        if (!Array.isArray(variants) || variants.length === 0) {
+          throw new Error(
+            "A product with variants must contain at least one variant.",
+          );
+        }
+
+        // Remove existing variants
         await tx.productVariant.deleteMany({
           where: {
             productId: id,
           },
         });
 
-        /* -----------------------------------------------------
-           Create new variants
-           ----------------------------------------------------- */
+        // Create updated variants
+        await tx.productVariant.createMany({
+          data: variants.map((variant: Variant) => ({
+            productId: id,
+            color: variant.color,
+            colorHex: variant.colorHex,
+            size: variant.size,
+            stock: Number(variant.stock || 0),
+            price: Number(variant.price || 0),
+            image: variant.image || "",
+          })),
+        });
 
-        if (variants.length > 0) {
-          await tx.productVariant.createMany({
-            data: variants.map((variant: Variant) => ({
-              productId: id,
-              color: variant.color,
-              colorHex: variant.colorHex,
-              size: variant.size,
-              stock: Number(variant.stock || 0),
-              price: Number(variant.price || 0),
-              image: variant.image || "",
-            })),
-          });
-        }
-
-        /* -----------------------------------------------------
-           Recalculate total product inventory
-           ----------------------------------------------------- */
-
+        // Calculate total variant inventory
         const totalStock = variants.reduce(
           (sum: number, variant: Variant) => sum + Number(variant.stock || 0),
           0,
@@ -231,6 +233,30 @@ export async function PATCH(req: Request, { params }: RouteContext) {
         });
       }
 
+      // SIMPLE PRODUCT
+      else if (hasVariants === false) {
+        // Remove previous variants when converting
+        // a variant product into a simple product.
+        await tx.productVariant.deleteMany({
+          where: {
+            productId: id,
+          },
+        });
+
+        if (stock !== undefined) {
+          const simpleStock = Number(stock);
+
+          if (!Number.isInteger(simpleStock) || simpleStock < 0) {
+            throw new Error("Product stock must be a non-negative integer.");
+          }
+
+          await InventoryService.adjustStock({
+            tx,
+            productId: id,
+            stock: simpleStock,
+          });
+        }
+      }
       /* -------------------------------------------------------
          Return fresh product including variants
          ------------------------------------------------------- */

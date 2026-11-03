@@ -126,7 +126,7 @@ export function ProductForm({
   /*
    * Stock for products WITHOUT variants.
    */
-  const [productStock, setProductStock] = useState(0);
+  const [productStock, setProductStock] = useState("");
 
   const [videos, setVideos] = useState<{ url: string; public_id: string }[]>(
     [],
@@ -247,8 +247,7 @@ export function ProductForm({
     /*
      * For products without variants, use the product's own stock.
      */
-    setProductStock(Number(initialData.stock ?? 0));
-
+    setProductStock(String(initialData.stock ?? 0));
     /*
      * Hydrate variants exactly as they exist in the database.
      */
@@ -543,7 +542,7 @@ export function ProductForm({
 
         price: Number(form.basePrice),
 
-        stock: totalStock,
+        stock: hasVariants ? totalVariantStock : Number(productStock || 0),
 
         hasVariants,
 
@@ -610,7 +609,7 @@ export function ProductForm({
         setSelectedColours([]);
         setVariants([]);
         setHasVariants(false);
-        setProductStock(0);
+        setProductStock("");
 
         return;
       }
@@ -840,11 +839,13 @@ export function ProductForm({
                         step="1"
                         className="input"
                         value={productStock}
-                        onChange={(e) =>
-                          setProductStock(
-                            Math.max(0, Number(e.target.value) || 0),
-                          )
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+
+                          if (value === "" || /^\d+$/.test(value)) {
+                            setProductStock(value);
+                          }
+                        }}
                       />
 
                       <p className="mt-2 text-xs text-gray-500">
