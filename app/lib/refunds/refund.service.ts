@@ -442,6 +442,62 @@ export async function processRefund(
   if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
     throw new Error("Invalid refund amount.");
   }
+
+  /*
+   * --------------------------------------------------
+   * Calculate payment gateway refund amount
+   * --------------------------------------------------
+   */
+  let gatewayRefundAmount = refundAmount;
+
+  if (refund.order.paymentProvider === "PAYSTACK") {
+    const orderCurrency = String(refund.order.currency ?? "").toUpperCase();
+    const paymentCurrency = String(
+      refund.order.paymentCurrency ?? "",
+    ).toUpperCase();
+
+    if (!orderCurrency || !paymentCurrency) {
+      throw new Error(
+        "Missing order or payment currency. Refund cannot be processed safely.",
+      );
+    }
+
+    if (orderCurrency !== paymentCurrency) {
+      const paymentAmount = Number(refund.order.paymentAmount);
+      const exchangeRate = Number(refund.order.exchangeRate);
+
+      if (
+        !Number.isFinite(paymentAmount) ||
+        paymentAmount <= 0 ||
+        !Number.isFinite(exchangeRate) ||
+        exchangeRate <= 0
+      ) {
+        throw new Error(
+          "Missing or invalid payment conversion details. Refund cannot be processed safely.",
+        );
+      }
+
+      const isFullRefund =
+        Math.round(refundAmount * 100) >= Math.round(orderTotal * 100);
+
+      gatewayRefundAmount = isFullRefund
+        ? paymentAmount
+        : Math.round(refundAmount * exchangeRate * 100) / 100;
+    }
+
+    if (!Number.isFinite(gatewayRefundAmount) || gatewayRefundAmount <= 0) {
+      throw new Error("Invalid payment gateway refund amount.");
+    }
+
+    console.log("REFUND CURRENCY DIAGNOSTIC:", {
+      refundId: refund.id,
+      orderCurrency,
+      paymentCurrency,
+      orderRefundAmount: refundAmount,
+      gatewayRefundAmount,
+    });
+  }
+
   /*
    * --------------------------------------------------
    * Mark refund as PROCESSING
@@ -496,7 +552,7 @@ export async function processRefund(
 
   try {
     paymentResult = await refundPayment({
-      amount: refundAmount,
+      amount: gatewayRefundAmount,
       reference: refund.order.paymentReference!,
       flutterwaveTransactionId: refund.order.flutterwaveTransactionId,
       provider: refund.order.paymentProvider,
