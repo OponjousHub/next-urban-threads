@@ -426,6 +426,10 @@ export async function processRefund(
 
   const orderTotal = Number(refund.order.totalAmount);
 
+  if (!Number.isFinite(orderTotal) || orderTotal <= 0) {
+    throw new Error("Invalid order total. Refund cannot be processed safely.");
+  }
+
   if (refundAmount > orderTotal) {
     throw new Error("Refund amount cannot exceed the order total.");
   }
@@ -436,10 +440,6 @@ export async function processRefund(
 
   if (!Number.isFinite(shippingCost) || shippingCost < 0) {
     throw new Error("Invalid shipping cost.");
-  }
-
-  if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
-    throw new Error("Invalid refund amount.");
   }
 
   if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
@@ -572,7 +572,7 @@ export async function processRefund(
           data: {
             refundRequestId: refund.id,
             provider: "paystack",
-            transactionRef: paymentResult.reference ?? null,
+            transactionRef: null,
             amount: gatewayRefundAmount,
             currency: String(refund.order.paymentCurrency).toUpperCase(),
             status: "UNKNOWN",
@@ -849,7 +849,7 @@ export async function processRefund(
       data: {
         status: "REFUNDED",
 
-        // Actual amount sent to and successfully processed by the gateway
+        // Refund amount recorded in the original order currency
         processedAmount: refundAmount,
 
         // Shipping portion actually refunded
@@ -907,6 +907,19 @@ export async function processRefund(
       reference: paymentResult.reference,
       refundOption,
       refundAmount,
+      refundCurrency: String(
+        refund.order.currency ?? refund.currency,
+      ).toUpperCase(),
+      gatewayRefundAmount:
+        paymentResult.provider === "paystack"
+          ? gatewayRefundAmount
+          : refundAmount,
+      gatewayCurrency:
+        paymentResult.provider === "paystack"
+          ? String(
+              refund.order.paymentCurrency ?? refund.currency,
+            ).toUpperCase()
+          : refund.currency,
       shippingIncluded: refundOption === "ITEMS_PLUS_SHIPPING",
       shippingAmount: shippingCost,
     },
