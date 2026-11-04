@@ -88,17 +88,36 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
   /*
    * Verify currency.
    */
-  if (
-    String(refund.currency).toUpperCase() !==
-    String(data.currency).toUpperCase()
-  ) {
+  /*
+   * Verify payment currency, not original order currency.
+   */
+  const orderCurrency = String(
+    refund.order.currency ?? refund.currency,
+  ).toUpperCase();
+
+  const paymentCurrency = String(
+    refund.order.paymentCurrency ??
+      gatewayTransaction.currency ??
+      refund.currency,
+  ).toUpperCase();
+
+  if (String(data.currency).toUpperCase() !== paymentCurrency) {
     console.error("PAYSTACK REFUND WEBHOOK: CURRENCY MISMATCH", {
       refundId: refund.id,
-      expected: refund.currency,
+      expected: paymentCurrency,
       received: data.currency,
     });
 
     throw new Error("Paystack refund currency mismatch.");
+  }
+
+  if (
+    gatewayTransaction.currency &&
+    String(gatewayTransaction.currency).toUpperCase() !== paymentCurrency
+  ) {
+    throw new Error(
+      "Stored refund transaction currency does not match the order payment currency.",
+    );
   }
 
   const gatewayStatus = String(data.status).toLowerCase();
@@ -113,35 +132,124 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
   if (gatewayStatus === "processed") {
     /*
      * Paystack reports amounts in minor currency units.
-     * NGN uses 100 kobo per naira.
      */
-    const processedAmount = Number(data.amount) / 100;
+    const processedGatewayAmount = Number(data.amount) / 100;
+    const processedGatewayAmountMinor = Math.round(
+      processedGatewayAmount * 100,
+    );
 
     const approvedAmount = Number(
       refund.approvedAmount ?? refund.requestedAmount,
     );
 
     const shippingCost = Number(refund.order.shippingCost ?? 0);
+    const orderTotal = Number(refund.order.totalAmount);
 
-    const itemsOnlyMatches = Math.abs(processedAmount - approvedAmount) < 0.01;
+    const paymentAmount = Number(refund.order.paymentAmount);
+    const exchangeRate = Number(refund.order.exchangeRate);
+
+    if (
+      !Number.isFinite(processedGatewayAmount) ||
+      processedGatewayAmount <= 0 ||
+      !Number.isFinite(approvedAmount) ||
+      approvedAmount <= 0 ||
+      !Number.isFinite(shippingCost) ||
+      shippingCost < 0
+    ) {
+      throw new Error("Invalid Paystack refund amount data.");
+    }
+
+    /*
+     * Convert order-currency amounts into gateway minor units.
+     * Full cross-currency refunds use the exact recorded
+     * payment amount instead of recalculating the conversion.
+     */
+    const toGatewayMinorUnits = (amount: number): number => {
+      const isFullOrderRefund =
+        Math.round(amount * 100) >= Math.round(orderTotal * 100);
+
+      if (orderCurrency !== paymentCurrency && isFullOrderRefund) {
+        if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+          throw new Error(
+            "Missing payment amount for full Paystack refund reconciliation.",
+          );
+        }
+
+        return Math.round(paymentAmount * 100);
+      }
+
+      if (orderCurrency === paymentCurrency) {
+        return Math.round(amount * 100);
+      }
+
+      if (!Number.isFinite(exchangeRate) || exchangeRate <= 0) {
+        throw new Error(
+          "Missing exchange rate for Paystack refund reconciliation.",
+        );
+      }
+
+      return Math.round(amount * exchangeRate * 100);
+    };
+
+    const expectedItemsOnlyMinor = toGatewayMinorUnits(approvedAmount);
+
+    const expectedItemsAndShippingMinor = toGatewayMinorUnits(
+      approvedAmount + shippingCost,
+    );
+
+    /*
+     * Compare against the exact gateway amount saved when
+     * the refund was submitted.
+     */
+    const recordedGatewayAmountMinor =
+      gatewayTransaction.amount !== null
+        ? Math.round(Number(gatewayTransaction.amount) * 100)
+        : null;
+
+    if (recordedGatewayAmountMinor !== null) {
+      if (processedGatewayAmountMinor !== recordedGatewayAmountMinor) {
+        console.error("PAYSTACK REFUND WEBHOOK: AMOUNT MISMATCH", {
+          refundId: refund.id,
+          refundGatewayId,
+          processedGatewayAmount,
+          expectedGatewayAmount: recordedGatewayAmountMinor / 100,
+          paymentCurrency,
+        });
+
+        throw new Error("Paystack refund amount mismatch.");
+      }
+    } else if (
+      processedGatewayAmountMinor !== expectedItemsOnlyMinor &&
+      processedGatewayAmountMinor !== expectedItemsAndShippingMinor
+    ) {
+      throw new Error(
+        "Paystack refund does not match the approved order-currency amount.",
+      );
+    }
+
+    const itemsOnlyMatches =
+      processedGatewayAmountMinor === expectedItemsOnlyMinor;
 
     const itemsAndShippingMatches =
-      Math.abs(processedAmount - (approvedAmount + shippingCost)) < 0.01;
+      processedGatewayAmountMinor === expectedItemsAndShippingMinor;
 
     if (!itemsOnlyMatches && !itemsAndShippingMatches) {
-      console.error("PAYSTACK REFUND WEBHOOK: AMOUNT MISMATCH", {
-        refundId: refund.id,
-        refundGatewayId,
-        processedAmount,
-        approvedAmount,
-        shippingCost,
-      });
-
-      throw new Error("Paystack refund amount mismatch.");
+      throw new Error(
+        "Paystack refund does not match the approved order-currency amount.",
+      );
     }
 
     const shippingIncluded = !itemsOnlyMatches && itemsAndShippingMatches;
+
     const shippingRefunded = shippingIncluded ? shippingCost : 0;
+
+    /*
+     * Keep processedAmount in the original order currency.
+     * The gateway amount is stored separately in RefundTransaction.
+     */
+    const processedAmount = shippingIncluded
+      ? approvedAmount + shippingCost
+      : approvedAmount;
 
     /*
      * Atomic completion.
@@ -175,6 +283,8 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
         },
         data: {
           status: "SUCCESS",
+          amount: processedGatewayAmount,
+          currency: paymentCurrency,
         },
       });
 
@@ -225,6 +335,9 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
         provider: "paystack",
         reference: refundGatewayId,
         refundAmount: processedAmount,
+        refundCurrency: orderCurrency,
+        gatewayRefundAmount: processedGatewayAmount,
+        gatewayCurrency: paymentCurrency,
         shippingIncluded,
         shippingAmount: shippingRefunded,
       },
@@ -245,7 +358,7 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
           refundId: refund.id,
           orderId: refund.orderId,
           amount: processedAmount,
-          currency: refund.currency,
+          currency: orderCurrency,
         },
       });
     }
@@ -264,7 +377,7 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
         customerId: refund.userId,
         customerName: refund.user.name,
         amount: processedAmount,
-        currency: refund.currency,
+        currency: orderCurrency,
       },
     });
 
@@ -355,7 +468,7 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
     where: {
       id: gatewayTransaction.id,
       status: {
-        not: "SUCCESS",
+        notIn: ["SUCCESS", "FAILED"],
       },
     },
     data: {
