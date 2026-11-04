@@ -48,8 +48,16 @@ export async function refundPayment({
   /*
    * Flutterwave v3 expects an integer amount.
    */
-  if (!Number.isInteger(numericAmount)) {
-    console.error("REFUND AMOUNT MUST BE AN INTEGER:", {
+  /*
+   * Paystack accepts amounts with up to two decimal places.
+   * Flutterwave v3 expects an integer amount.
+   */
+  if (
+    (provider === "PAYSTACK" &&
+      Math.round(numericAmount * 100) / 100 !== numericAmount) ||
+    (provider === "FLUTTERWAVE" && !Number.isInteger(numericAmount))
+  ) {
+    console.error("INVALID REFUND AMOUNT PRECISION:", {
       amount,
       numericAmount,
       reference,
