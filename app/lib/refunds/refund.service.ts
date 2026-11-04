@@ -1,6 +1,9 @@
 import { prisma } from "@/utils/prisma";
 
-import { refundPayment } from "../payments/refundPayment";
+import {
+  refundPayment,
+  type RefundPaymentResult,
+} from "../payments/refundPayment";
 import InventoryService from "@/lib/inventory/inventory.service";
 
 import NotificationService from "@/lib/notifications/notification.service";
@@ -548,8 +551,7 @@ export async function processRefund(
    * Call payment gateway
    * --------------------------------------------------
    */
-  let paymentResult;
-
+  let paymentResult: RefundPaymentResult;
   try {
     paymentResult = await refundPayment({
       amount: gatewayRefundAmount,
@@ -570,7 +572,9 @@ export async function processRefund(
           data: {
             refundRequestId: refund.id,
             provider: "paystack",
-            transactionRef: null,
+            transactionRef: paymentResult.reference ?? null,
+            amount: gatewayRefundAmount,
+            currency: String(refund.order.paymentCurrency).toUpperCase(),
             status: "UNKNOWN",
           },
         });
@@ -674,6 +678,8 @@ export async function processRefund(
           refundRequestId: refund.id,
           provider: "paystack",
           transactionRef: paymentResult.reference ?? null,
+          amount: gatewayRefundAmount,
+          currency: String(refund.order.paymentCurrency).toUpperCase(),
           status: refundStatus,
         },
       });
@@ -819,6 +825,16 @@ export async function processRefund(
         refundRequestId: refund.id,
         provider: paymentResult.provider,
         transactionRef: paymentResult.reference,
+        amount:
+          paymentResult.provider === "paystack"
+            ? gatewayRefundAmount
+            : refundAmount,
+        currency:
+          paymentResult.provider === "paystack"
+            ? String(
+                refund.order.paymentCurrency ?? refund.currency,
+              ).toUpperCase()
+            : refund.currency,
         status: "SUCCESS",
       },
     });
