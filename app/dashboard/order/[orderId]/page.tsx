@@ -54,6 +54,17 @@ type Order = {
   shippingMethod: ShippingMethod;
   discountAmount: number;
   refundStatus: RefundStatus;
+
+  cancellationRequest: {
+    id: string;
+    reason: string;
+    status:
+      | "AWAITING_CUSTOMER"
+      | "REFUND_IN_PROGRESS"
+      | "COMPLETED"
+      | "WITHDRAWN";
+    createdAt: string;
+  } | null;
 };
 
 export default function OrderPage() {
