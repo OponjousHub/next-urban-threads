@@ -21,8 +21,10 @@ const ORDER_STEPS = [
 
 export default function CustomerTrackingTimeline({
   orderId,
+  isCancellationCompleted = false,
 }: {
   orderId: string;
+  isCancellationCompleted?: boolean;
 }) {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,6 +140,37 @@ export default function CustomerTrackingTimeline({
     return (
       <div className="bg-white border rounded-xl p-4">
         <p className="text-gray-400">No tracking updates yet</p>
+      </div>
+    );
+  }
+
+  if (isCancellationCompleted) {
+    return (
+      <div className="bg-white border rounded-xl p-6 space-y-6">
+        <h2 className="text-xl font-semibold">Order Tracking</h2>
+
+        <div className="space-y-6">
+          <div className="flex items-start gap-3">
+            <div className="mt-1 h-3 w-3 rounded-full bg-black shrink-0" />
+            <div>
+              <p className="font-semibold">Order Placed</p>
+              <p className="mt-1 text-sm text-gray-600">
+                Your order was successfully placed and payment was received.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="mt-1 h-3 w-3 rounded-full bg-green-600 shrink-0" />
+            <div>
+              <p className="font-semibold text-green-700">Order Cancelled</p>
+              <p className="mt-1 text-sm text-gray-600">
+                Your cancellation was completed after your refund was
+                successfully processed.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

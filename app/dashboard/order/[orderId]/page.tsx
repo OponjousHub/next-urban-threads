@@ -633,6 +633,61 @@ export default function OrderPage() {
             <div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-lg font-semibold">Refund Status</h2>
 
+              {/* ADMIN CANCELLATION REQUEST */}
+              {order.cancellationRequest?.status === "AWAITING_CUSTOMER" && (
+                <div className="mb-5 rounded-xl border border-orange-200 bg-orange-50 p-4">
+                  <p className="font-semibold text-orange-800">
+                    Cancellation Requested by Store
+                  </p>
+
+                  <p className="mt-2 text-sm leading-6 text-orange-700">
+                    The store administrator has requested cancellation of this
+                    order before shipment.
+                  </p>
+
+                  <div className="mt-3 rounded-lg border border-orange-200 bg-white p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Reason provided by the store
+                    </p>
+
+                    <p className="mt-1 text-sm text-gray-700">
+                      {order.cancellationRequest.reason}
+                    </p>
+                  </div>
+
+                  <p className="mt-3 text-sm font-medium text-orange-800">
+                    To recover your payment, please submit a refund request
+                    using the Request Refund button below. Your order has not
+                    yet been cancelled.
+                  </p>
+                </div>
+              )}
+
+              {order.cancellationRequest?.status === "REFUND_IN_PROGRESS" && (
+                <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4">
+                  <p className="font-semibold text-blue-800">
+                    Cancellation Awaiting Refund
+                  </p>
+                  <p className="mt-1 text-sm text-blue-700">
+                    Your refund request has been submitted. Your order will be
+                    marked as cancelled once your payment provider confirms the
+                    refund.
+                  </p>
+                </div>
+              )}
+
+              {order.cancellationRequest?.status === "COMPLETED" && (
+                <div className="mb-5 rounded-xl border border-green-200 bg-green-50 p-4">
+                  <p className="font-semibold text-green-800">
+                    Order Cancellation Completed
+                  </p>
+                  <p className="mt-1 text-sm text-green-700">
+                    Your refund was successfully processed and your order has
+                    been cancelled.
+                  </p>
+                </div>
+              )}
+
               {/* NONE */}
               {order.refundStatus === "NONE" &&
                 order.paymentStatus === PaymentStatus.PAID &&
@@ -646,8 +701,10 @@ export default function OrderPage() {
                       </p>
 
                       <p className="mt-1 text-sm text-gray-500">
-                        Your order has been delivered. If there's an issue, you
-                        may request a refund.
+                        {order.cancellationRequest?.status ===
+                        "AWAITING_CUSTOMER"
+                          ? "The store has requested cancellation. Submit a refund request to recover your payment."
+                          : "Your order has been delivered. If there's an issue, you may request a refund."}
                       </p>
                     </div>
 
