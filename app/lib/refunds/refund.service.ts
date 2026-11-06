@@ -99,53 +99,93 @@ export async function submitRefundRequest(data: RefundRequestInput) {
   const requestedAmount = calculateRefundAmount(data.items);
 
   // Create refund request + items
-  const refund = await prisma.refundRequest.create({
-    data: {
-      tenantId: tenant.id,
+  const refund = await prisma.$transaction(async (tx) => {
+    const cancellationRequestId = hasActiveCancellationRequest
+      ? order.cancellationRequest!.id
+      : null;
 
-      order: {
-        connect: {
-          id: order.id,
+    // Securely claim the cancellation request before creating the refund.
+    if (cancellationRequestId) {
+      const claimed = await tx.cancellationRequest.updateMany({
+        where: {
+          id: cancellationRequestId,
+          orderId: order.id,
+          status: "AWAITING_CUSTOMER",
+        },
+        data: {
+          status: "REFUND_IN_PROGRESS",
+        },
+      });
+
+      if (claimed.count !== 1) {
+        throw new Error(
+          "This cancellation request is no longer available for a refund.",
+        );
+      }
+    }
+
+    const createdRefund = await tx.refundRequest.create({
+      data: {
+        tenantId: tenant.id,
+
+        order: {
+          connect: {
+            id: order.id,
+          },
+        },
+
+        user: {
+          connect: {
+            id: order.userId,
+          },
+        },
+
+        vendorId: order.vendorId,
+
+        ...(cancellationRequestId
+          ? {
+              cancellationRequest: {
+                connect: {
+                  id: cancellationRequestId,
+                },
+              },
+            }
+          : {}),
+
+        status: "REQUESTED",
+
+        reason: data.reason,
+        description: data.description,
+
+        requestedAmount,
+        currency: order.currency!,
+        storeMode: order.storeMode,
+
+        items: {
+          create: data.items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId ?? null,
+            quantity: item.quantity,
+            priceAtPurchase: Number(item.priceAtPurchase),
+          })),
         },
       },
-      user: {
-        connect: {
-          id: order.userId,
-        },
+
+      include: {
+        items: true,
       },
-      vendorId: order.vendorId,
+    });
 
-      status: "REQUESTED",
-
-      reason: data.reason,
-      description: data.description,
-
-      requestedAmount,
-      currency: order.currency!,
-      storeMode: order.storeMode,
-
-      items: {
-        create: data.items.map((item) => ({
-          productId: item.productId,
-          variantId: item.variantId ?? null,
-          quantity: item.quantity,
-          priceAtPurchase: Number(item.priceAtPurchase),
-        })),
+    await tx.order.update({
+      where: {
+        id: order.id,
       },
-    },
+      data: {
+        refundStatus: "REQUESTED",
+      },
+    });
 
-    include: {
-      items: true,
-    },
-  });
-
-  await prisma.order.update({
-    where: {
-      id: order.id,
-    },
-    data: {
-      refundStatus: "REQUESTED",
-    },
+    return createdRefund;
   });
 
   // Timeline
