@@ -627,14 +627,18 @@ export default function OrderPage() {
           </div>
 
           {/* Refund Status card */}
-          {(order.status === "DELIVERED" || order.refundStatus !== "NONE") && (
+          {(order.status === "DELIVERED" ||
+            order.refundStatus !== "NONE" ||
+            !!order.cancellationRequest) && (
             <div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-lg font-semibold">Refund Status</h2>
 
               {/* NONE */}
               {order.refundStatus === "NONE" &&
                 order.paymentStatus === PaymentStatus.PAID &&
-                order.status === "DELIVERED" && (
+                (order.status === "DELIVERED" ||
+                  (order.cancellationRequest?.status === "AWAITING_CUSTOMER" &&
+                    ["PENDING", "PROCESSING"].includes(order.status))) && (
                   <div className="flex justify-between gap-4">
                     <div>
                       <p className="font-medium text-green-600">

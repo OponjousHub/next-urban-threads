@@ -59,6 +59,7 @@ export async function submitRefundRequest(data: RefundRequestInput) {
         },
       },
       items: true,
+      cancellationRequest: true,
     },
   });
 
@@ -67,8 +68,17 @@ export async function submitRefundRequest(data: RefundRequestInput) {
   }
 
   // Only delivered orders can be refunded
-  if (order.status !== "DELIVERED") {
-    throw new Error("Refunds can only be requested after delivery.");
+  const isDeliveredOrder = order.status === "DELIVERED";
+
+  const hasActiveCancellationRequest =
+    ["PENDING", "PROCESSING"].includes(order.status) &&
+    order.paymentStatus === "PAID" &&
+    order.cancellationRequest?.status === "AWAITING_CUSTOMER";
+
+  if (!isDeliveredOrder && !hasActiveCancellationRequest) {
+    throw new Error(
+      "Refunds can only be requested after delivery or through an active admin cancellation request.",
+    );
   }
 
   // Prevent duplicate requests
