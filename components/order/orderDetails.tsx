@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import InvoiceTemplate from "./invoice-template";
@@ -50,6 +50,10 @@ export default function OrderDetails({
 }) {
   const [localOrder, setLocalOrder] = useState(order);
   const [loading, setLoading] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState("");
+  const [showCancellationModal, setShowCancellationModal] = useState(false);
+  const [cancellationSubmitting, setCancellationSubmitting] = useState(false);
+  const [cancellationRequested, setCancellationRequested] = useState(false);
   const router = useRouter();
   const { tenant } = useTenant();
 
@@ -63,6 +67,12 @@ export default function OrderDetails({
 
   {
   }
+
+  const canRequestCancellation =
+    basePath === "/admin/orders" &&
+    paymentStatus === "PAID" &&
+    ["PENDING", "PROCESSING"].includes(orderStatus) &&
+    !cancellationRequested;
 
   // Cancellation is only allowed before an order has entered shipment/delivery
   // or reached another terminal state.
@@ -94,6 +104,57 @@ export default function OrderDetails({
       appToast.error("Update failed", "Could not update order status");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function submitCancellationRequest() {
+    const reason = cancellationReason.trim();
+
+    if (reason.length < 5 || reason.length > 1000) {
+      appToast.warning(
+        "Reason required",
+        "Enter a reason between 5 and 1000 characters.",
+      );
+      return;
+    }
+
+    setCancellationSubmitting(true);
+
+    try {
+      const res = await fetch(
+        `/api/orders/${localOrder.id}/cancellation-request`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reason }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Could not submit cancellation request.");
+      }
+
+      setCancellationRequested(true);
+      setShowCancellationModal(false);
+      setCancellationReason("");
+
+      appToast.success(
+        "Request submitted",
+        data.message || "The customer has been notified.",
+      );
+
+      router.refresh();
+    } catch (error) {
+      appToast.error(
+        "Request failed",
+        error instanceof Error
+          ? error.message
+          : "Could not submit cancellation request.",
+      );
+    } finally {
+      setCancellationSubmitting(false);
     }
   }
 
@@ -339,7 +400,7 @@ export default function OrderDetails({
                   className="group rounded-2xl border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-gray-300 hover:shadow-md"
                 >
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 transition group-hover:bg-black group-hover:text-white">
-                    📋
+                    ðŸ“‹
                   </div>
 
                   <p className="font-semibold text-gray-900">Copy Order ID</p>
@@ -355,7 +416,7 @@ export default function OrderDetails({
                   className="group rounded-2xl border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-gray-300 hover:shadow-md"
                 >
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 transition group-hover:bg-black group-hover:text-white">
-                    ✉️
+                    âœ‰ï¸
                   </div>
 
                   <p className="font-semibold text-gray-900">
@@ -373,7 +434,7 @@ export default function OrderDetails({
                   className="group rounded-2xl border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-gray-300 hover:shadow-md"
                 >
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 transition group-hover:bg-black group-hover:text-white">
-                    🖨️
+                    ðŸ–¨ï¸
                   </div>
 
                   <p className="font-semibold text-gray-900">Print Invoice</p>
@@ -391,7 +452,7 @@ export default function OrderDetails({
                   className="group rounded-2xl border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
                 >
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                    🚚
+                    ðŸšš
                   </div>
 
                   <p className="font-semibold text-gray-900">Track Order</p>
@@ -461,6 +522,16 @@ export default function OrderDetails({
                   {loading ? "Updating..." : "Mark as Delivered"}
                 </button>
               )}
+              {canRequestCancellation && (
+                <button
+                  onClick={() => setShowCancellationModal(true)}
+                  disabled={loading || cancellationSubmitting}
+                  className="w-full rounded-2xl border border-red-300 bg-white px-4 py-3 text-sm font-semibold text-red-700 shadow-sm transition hover:bg-red-50 disabled:opacity-50"
+                >
+                  Request Cancellation
+                </button>
+              )}
+
               {canCancelOrder && (
                 <button
                   onClick={() => updateStatus("CANCELLED")}
@@ -469,6 +540,66 @@ export default function OrderDetails({
                 >
                   Cancel Order
                 </button>
+              )}
+              {showCancellationModal && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Request Order Cancellation
+                  </h3>
+
+                  <p className="mt-2 text-sm text-gray-700">
+                    This will notify the customer that the store wants to
+                    cancel this order. The order will not be cancelled now.
+                    The customer must submit a refund request to recover
+                    their payment. Cancellation will only be completed
+                    after the refund succeeds.
+                  </p>
+
+                  <label
+                    htmlFor="cancellation-reason"
+                    className="mt-4 block text-sm font-medium text-gray-800"
+                  >
+                    Reason for cancellation
+                  </label>
+
+                  <textarea
+                    id="cancellation-reason"
+                    value={cancellationReason}
+                    onChange={(event) =>
+                      setCancellationReason(event.target.value)
+                    }
+                    maxLength={1000}
+                    rows={4}
+                    placeholder="Explain why the store is requesting cancellation..."
+                    className="mt-2 w-full rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                  />
+
+                  <p className="mt-1 text-right text-xs text-gray-500">
+                    {cancellationReason.length}/1000
+                  </p>
+
+                  <div className="mt-4 flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowCancellationModal(false)}
+                      disabled={cancellationSubmitting}
+                      className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                    >
+                      Go Back
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={submitCancellationRequest}
+                      disabled={cancellationSubmitting}
+                      className="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {cancellationSubmitting
+                        ? "Submitting..."
+                        : "Notify Customer"}
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -560,3 +691,4 @@ export default function OrderDetails({
     </div>
   );
 }
+
