@@ -59,6 +59,12 @@ export default async function OrderDetailsPage({
             },
           },
         },
+        cancellationRequest: {
+          select: {
+            id: true,
+            status: true,
+          },
+        },
       },
     }),
 
@@ -98,6 +104,12 @@ export default async function OrderDetailsPage({
       variantColor: item.variantColor,
       variantSize: item.variantSize,
     })),
+    cancellationRequest: order.cancellationRequest
+      ? {
+          id: order.cancellationRequest.id,
+          status: order.cancellationRequest.status,
+        }
+      : null,
   };
 
   const admin = {

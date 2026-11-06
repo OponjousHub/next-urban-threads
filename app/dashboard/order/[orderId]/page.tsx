@@ -912,8 +912,13 @@ export default function OrderPage() {
               refund={order.refundRequest && order.refundRequest[0]}
             />
           )}
-          <CustomerTrackingTimeline orderId={order.id} />
-
+          <CustomerTrackingTimeline
+            orderId={order.id}
+            isCancellationCompleted={
+              order.status === "CANCELLED" &&
+              order.cancellationRequest?.status === "COMPLETED"
+            }
+          />
           <h2 className="text-2xl font-semibold mb-3 mt-6">Items</h2>
 
           <ul className="border rounded-lg p-4 space-y-4">
