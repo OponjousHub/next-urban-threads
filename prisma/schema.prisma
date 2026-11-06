@@ -216,6 +216,7 @@ model Order {
   paymentTxRef             String?
   flutterwaveTransactionId String?
   storeMode                StoreMode       @default(SINGLE_VENDOR)
+  cancellationRequest      CancellationRequest?
 
   shippingCost     Decimal @default(0)
   discountAmount   Decimal @default(0)
@@ -606,11 +607,14 @@ model RefundRequest {
   createdAt        DateTime              @default(now())
   updatedAt        DateTime              @updatedAt
   storeMode        StoreMode
-  items            RefundItem[]
-  order            Order                 @relation(fields: [orderId], references: [id])
-  user             User                  @relation(fields: [userId], references: [id])
-  transactions     RefundTransaction[]
-  trackingEvents   RefundTrackingEvent[]
+  items                RefundItem[]
+  order                Order                  @relation(fields: [orderId], references: [id])
+  user                 User                   @relation(fields: [userId], references: [id])
+  transactions         RefundTransaction[]
+  trackingEvents       RefundTrackingEvent[]
+
+  cancellationRequestId String?                @unique
+  cancellationRequest   CancellationRequest?   @relation(fields: [cancellationRequestId], references: [id])
 }
 
 model RefundTrackingEvent {
@@ -922,6 +926,22 @@ model ShippingRate {
   method ShippingMethod @relation(fields: [methodId], references: [id], onDelete: Cascade)
 }
 
+model CancellationRequest {
+  id                 String                  @id @default(cuid())
+  orderId            String                  @unique
+  tenantId           String
+  requestedByAdminId String
+  reason             String
+  status             AdminCancellationStatus @default(AWAITING_CUSTOMER)
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+
+  order        Order         @relation(fields: [orderId], references: [id])
+  refundRequest RefundRequest?
+
+  @@index([tenantId, status])
+}
+
 enum Priority {
   LOW
   NORMAL
@@ -1093,4 +1113,11 @@ enum AdminNotificationType {
   SYSTEM
   PAYMENT_RECEIVED
   REFUNDED
+}
+
+enum AdminCancellationStatus {
+  AWAITING_CUSTOMER
+  REFUND_IN_PROGRESS
+  COMPLETED
+  WITHDRAWN
 }
