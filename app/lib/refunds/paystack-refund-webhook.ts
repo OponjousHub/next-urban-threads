@@ -288,12 +288,32 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
         },
       });
 
+      if (refund.cancellationRequestId) {
+        const cancellationCompleted = await tx.cancellationRequest.updateMany({
+          where: {
+            id: refund.cancellationRequestId,
+            orderId: refund.orderId,
+            status: "REFUND_IN_PROGRESS",
+          },
+          data: {
+            status: "COMPLETED",
+          },
+        });
+
+        if (cancellationCompleted.count !== 1) {
+          throw new Error(
+            "Unable to complete the linked cancellation request.",
+          );
+        }
+      }
+
       await tx.order.update({
         where: {
           id: refund.orderId,
         },
         data: {
           refundStatus: "REFUNDED",
+          ...(refund.cancellationRequestId ? { status: "CANCELLED" } : {}),
         },
       });
 
