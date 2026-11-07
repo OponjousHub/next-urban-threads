@@ -491,7 +491,7 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
           "Paystack has reported that the refund could not be processed. Please contact support if you need assistance.",
         metadata: {
           provider: "paystack",
-          reference: refundGatewayId,
+          reference: matchedRefundReference,
         },
       });
     }
@@ -542,7 +542,7 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
           : "Your refund is being processed by Paystack.",
       metadata: {
         provider: "paystack",
-        reference: refundGatewayId,
+        reference: matchedRefundReference,
         gatewayStatus,
       },
     });
