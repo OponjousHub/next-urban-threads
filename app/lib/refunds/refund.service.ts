@@ -625,6 +625,7 @@ export async function processRefund(
     paymentResult = await refundPayment({
       amount: gatewayRefundAmount,
       reference: refund.order.paymentReference!,
+      refundReference: paystackRefundReference,
       flutterwaveTransactionId: refund.order.flutterwaveTransactionId,
       provider: refund.order.paymentProvider,
     });
@@ -641,7 +642,7 @@ export async function processRefund(
           data: {
             refundRequestId: refund.id,
             provider: "paystack",
-            transactionRef: null,
+            transactionRef: paystackRefundReference ?? null,
             amount: gatewayRefundAmount,
             currency: String(refund.order.paymentCurrency).toUpperCase(),
             status: "UNKNOWN",
