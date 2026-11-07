@@ -140,6 +140,31 @@ export async function PATCH(
 
     if (status && status !== existingOrder.status) {
       /*
+       * FULFILLMENT PAYMENT PROTECTION
+       *
+       * No unpaid order may enter the fulfillment process.
+       */
+      const fulfillmentStatuses: OrderStatus[] = [
+        OrderStatus.PROCESSING,
+        OrderStatus.SHIPPED,
+        OrderStatus.OUT_FOR_DELIVERY,
+        OrderStatus.DELIVERED,
+      ];
+
+      if (
+        fulfillmentStatuses.includes(status) &&
+        existingOrder.paymentStatus !== PaymentStatus.PAID
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "This order cannot enter fulfillment until payment has been successfully confirmed.",
+          },
+          { status: 400 },
+        );
+      }
+
+      /*
        * DELIVERED
        *
        * Only a paid order can be delivered.
