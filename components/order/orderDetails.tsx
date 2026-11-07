@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from "next/navigation";
 import InvoiceTemplate from "./invoice-template";
@@ -406,7 +406,7 @@ export default function OrderDetails({
                   className="group rounded-2xl border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-gray-300 hover:shadow-md"
                 >
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 transition group-hover:bg-black group-hover:text-white">
-                    ðŸ“‹
+                    {"\u{1F4CB}"}
                   </div>
 
                   <p className="font-semibold text-gray-900">Copy Order ID</p>
@@ -422,7 +422,7 @@ export default function OrderDetails({
                   className="group rounded-2xl border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-gray-300 hover:shadow-md"
                 >
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 transition group-hover:bg-black group-hover:text-white">
-                    âœ‰ï¸
+                    {"\u{2709}\u{FE0F}"}
                   </div>
 
                   <p className="font-semibold text-gray-900">
@@ -440,7 +440,7 @@ export default function OrderDetails({
                   className="group rounded-2xl border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-gray-300 hover:shadow-md"
                 >
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 transition group-hover:bg-black group-hover:text-white">
-                    ðŸ–¨ï¸
+                    {"\u{1F5A8}\u{FE0F}"}
                   </div>
 
                   <p className="font-semibold text-gray-900">Print Invoice</p>
@@ -458,7 +458,7 @@ export default function OrderDetails({
                   className="group rounded-2xl border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
                 >
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                    ðŸšš
+                    {"\u{1F69A}"}
                   </div>
 
                   <p className="font-semibold text-gray-900">Track Order</p>
