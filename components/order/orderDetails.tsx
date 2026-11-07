@@ -76,7 +76,8 @@ export default function OrderDetails({
     basePath === "/admin/orders" &&
     paymentStatus === "PAID" &&
     ["PENDING", "PROCESSING"].includes(orderStatus) &&
-    !localOrder.cancellationRequest &&
+    (!localOrder.cancellationRequest ||
+      localOrder.cancellationRequest.status === "WITHDRAWN") &&
     !cancellationRequested;
 
   // Cancellation is only allowed before an order has entered shipment/delivery
