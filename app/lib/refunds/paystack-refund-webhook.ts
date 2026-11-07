@@ -7,11 +7,11 @@ import { createRefundTrackingEvent } from "./refund-tracking.service";
 type PaystackRefundEvent = {
   event: string;
   data: {
-    id: string | number;
+    id?: string | number | null;
     status: string;
     transaction_reference: string;
     refund_reference?: string | null;
-    amount: number;
+    amount: number | string;
     currency: string;
   };
 };
@@ -19,56 +19,87 @@ type PaystackRefundEvent = {
 export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
   const data = event.data;
 
-  if (
-    data.id === undefined ||
-    data.id === null ||
-    !data.transaction_reference ||
-    !Number.isFinite(Number(data.amount))
-  ) {
+  if (!data.transaction_reference || !Number.isFinite(Number(data.amount))) {
     throw new Error("Invalid Paystack refund webhook payload.");
   }
 
-  const refundGatewayId = String(data.id);
+  const refundReference =
+    data.refund_reference != null ? String(data.refund_reference) : null;
+
+  const refundGatewayId = data.id != null ? String(data.id) : null;
 
   /*
-   * Match the exact Paystack refund ID.
-   *
-   * Never match using only the original payment reference.
+   * Match the RAYNTA refund reference first.
+   * Fall back to the numeric Paystack refund ID
+   * for older refund records.
    */
-  const gatewayTransaction = await prisma.refundTransaction.findFirst({
-    where: {
-      provider: "paystack",
-      transactionRef: refundGatewayId,
-    },
-    include: {
-      refundRequest: {
-        include: {
-          order: true,
-          user: true,
-          items: true,
+  const lookupReferences = [refundReference, refundGatewayId].filter(
+    (value): value is string => Boolean(value),
+  );
+
+  let gatewayTransaction = lookupReferences.length
+    ? await prisma.refundTransaction.findFirst({
+        where: {
+          provider: "paystack",
+          transactionRef: {
+            in: lookupReferences,
+          },
         },
-      },
-    },
-  });
+        include: {
+          refundRequest: {
+            include: {
+              order: true,
+              user: true,
+              items: true,
+            },
+          },
+        },
+      })
+    : null;
 
   /*
-   * No matching transaction means the webhook may have
-   * arrived before the API response was saved.
+   * Paystack may send pending events before
+   * refund_reference becomes available.
    *
-   * Throwing allows Paystack to retry delivery.
+   * Ignore these non-terminal events. The final
+   * processed/failed event must identify the refund.
+   */
+  if (!gatewayTransaction && !lookupReferences.length) {
+    const status = String(data.status).toLowerCase();
+
+    if (status === "pending" || status === "processing") {
+      console.warn(
+        "PAYSTACK REFUND WEBHOOK: Reference not yet available for non-terminal event.",
+        {
+          event: event.event,
+          transactionReference: data.transaction_reference,
+        },
+      );
+
+      return;
+    }
+  }
+
+  /*
+   * An unidentified terminal event must be retried
+   * rather than silently marking a refund complete.
    */
   if (!gatewayTransaction) {
-    console.error("PAYSTACK REFUND WEBHOOK: UNKNOWN REFUND ID", {
+    console.error("PAYSTACK REFUND WEBHOOK: UNKNOWN REFUND", {
+      refundReference,
       refundGatewayId,
       transactionReference: data.transaction_reference,
     });
 
     throw new Error(
-      `No RAYNTA refund transaction found for Paystack refund ${refundGatewayId}.`,
+      `No RAYNTA refund transaction found for Paystack refund reference ${refundReference ?? refundGatewayId ?? "unavailable"}.`,
     );
   }
 
   const refund = gatewayTransaction.refundRequest;
+
+  const matchedRefundReference =
+    gatewayTransaction.transactionRef ?? refundReference ?? refundGatewayId;
 
   /*
    * Verify the original payment reference.
@@ -353,7 +384,7 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
         "Your refund has been processed successfully. Funds should appear shortly depending on your payment provider.",
       metadata: {
         provider: "paystack",
-        reference: refundGatewayId,
+        reference: matchedRefundReference,
         refundAmount: processedAmount,
         refundCurrency: orderCurrency,
         gatewayRefundAmount: processedGatewayAmount,
