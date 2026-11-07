@@ -120,6 +120,11 @@ export async function PATCH(
         status: true,
         paymentStatus: true,
         refundStatus: true,
+        cancellationRequest: {
+          select: {
+            status: true,
+          },
+        },
       },
     });
 
@@ -175,7 +180,8 @@ export async function PATCH(
         // Paid orders can only be cancelled after the refund succeeds.
         if (
           existingOrder.paymentStatus === PaymentStatus.PAID &&
-          existingOrder.refundStatus !== RefundStatus.REFUNDED
+          (existingOrder.refundStatus !== RefundStatus.REFUNDED ||
+            existingOrder.cancellationRequest?.status !== "COMPLETED")
         ) {
           return NextResponse.json(
             {

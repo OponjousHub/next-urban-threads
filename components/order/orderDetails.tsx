@@ -39,6 +39,10 @@ interface Order {
   totalAmount: number;
   items: OrderItem[];
   customer: Customer | null;
+  cancellationRequest?: {
+    id: string;
+    status: string;
+  } | null;
 }
 
 export default function OrderDetails({
@@ -72,6 +76,7 @@ export default function OrderDetails({
     basePath === "/admin/orders" &&
     paymentStatus === "PAID" &&
     ["PENDING", "PROCESSING"].includes(orderStatus) &&
+    !localOrder.cancellationRequest &&
     !cancellationRequested;
 
   // Cancellation is only allowed before an order has entered shipment/delivery
@@ -548,11 +553,11 @@ export default function OrderDetails({
                   </h3>
 
                   <p className="mt-2 text-sm text-gray-700">
-                    This will notify the customer that the store wants to
-                    cancel this order. The order will not be cancelled now.
-                    The customer must submit a refund request to recover
-                    their payment. Cancellation will only be completed
-                    after the refund succeeds.
+                    This will notify the customer that the store wants to cancel
+                    this order. The order will not be cancelled now. The
+                    customer must submit a refund request to recover their
+                    payment. Cancellation will only be completed after the
+                    refund succeeds.
                   </p>
 
                   <label
@@ -691,4 +696,3 @@ export default function OrderDetails({
     </div>
   );
 }
-

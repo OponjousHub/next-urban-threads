@@ -1,9 +1,5 @@
 ﻿import { NextResponse } from "next/server";
-import {
-  OrderStatus,
-  PaymentStatus,
-  RefundStatus,
-} from "@prisma/client";
+import { OrderStatus, PaymentStatus, RefundStatus } from "@prisma/client";
 
 import { prisma } from "@/utils/prisma";
 import { requireAdminOrOwner } from "@/lib/server/auth";
@@ -39,8 +35,7 @@ export async function POST(
       );
     }
 
-    const reason =
-      typeof body.reason === "string" ? body.reason.trim() : "";
+    const reason = typeof body.reason === "string" ? body.reason.trim() : "";
 
     if (!reason || reason.length < 5 || reason.length > 1000) {
       return NextResponse.json(
@@ -79,17 +74,53 @@ export async function POST(
         throw new Error("ORDER_NOT_ELIGIBLE");
       }
 
-      if (order.refundStatus !== RefundStatus.NONE) {
-        throw new Error("REFUND_ALREADY_EXISTS");
-      }
-
       const existingRequest = await tx.cancellationRequest.findUnique({
         where: { orderId: order.id },
-        select: { id: true },
       });
 
       if (existingRequest) {
-        throw new Error("CANCELLATION_REQUEST_EXISTS");
+        if (existingRequest.status !== "WITHDRAWN") {
+          throw new Error("CANCELLATION_REQUEST_EXISTS");
+        }
+
+        if (
+          order.refundStatus !== RefundStatus.NONE &&
+          order.refundStatus !== RefundStatus.REJECTED &&
+          order.refundStatus !== RefundStatus.CANCELLED
+        ) {
+          throw new Error("REFUND_ALREADY_EXISTS");
+        }
+
+        // Preserve the previous refund record, but release its
+        // association so a fresh refund can use this invitation.
+        await tx.refundRequest.updateMany({
+          where: {
+            cancellationRequestId: existingRequest.id,
+          },
+          data: {
+            cancellationRequestId: null,
+          },
+        });
+
+        const cancellationRequest = await tx.cancellationRequest.update({
+          where: {
+            id: existingRequest.id,
+          },
+          data: {
+            requestedByAdminId: user.id,
+            reason,
+            status: "AWAITING_CUSTOMER",
+          },
+        });
+
+        return {
+          order,
+          cancellationRequest,
+        };
+      }
+
+      if (order.refundStatus !== RefundStatus.NONE) {
+        throw new Error("REFUND_ALREADY_EXISTS");
       }
 
       const cancellationRequest = await tx.cancellationRequest.create({
