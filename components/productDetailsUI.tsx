@@ -111,8 +111,10 @@ export function ProductDetailUI({
     }
   }, [selectedVariant?.image]);
 
-  const isOutOfStock =
-    selectedVariant?.stock !== undefined && selectedVariant.stock <= 0;
+  const availableStock =
+    variants.length > 0 ? (selectedVariant?.stock ?? 0) : product.stock;
+
+  const isOutOfStock = availableStock <= 0;
 
   const displayPrice = selectedVariant
     ? safePrice(selectedVariant.price)
@@ -157,8 +159,8 @@ export function ProductDetailUI({
     }
 
     // ✅ STOCK SAFETY
-    if (selectedVariant && quantity > selectedVariant.stock) {
-      appToast.warning("Warning", `Only ${selectedVariant.stock} available`);
+    if (quantity > availableStock) {
+      appToast.warning("Warning", `Only ${availableStock} available`);
       return;
     }
     addToCart({
@@ -172,7 +174,7 @@ export function ProductDetailUI({
       image: mainImage || product.images[0],
       quantity,
 
-      stock: selectedVariant?.stock || product.stock,
+      stock: selectedVariant?.stock ?? product.stock,
 
       variantColor: selectedColor || undefined,
       variantSize: selectedSize || undefined,
@@ -240,7 +242,7 @@ export function ProductDetailUI({
 
       quantity,
 
-      stock: selectedVariant?.stock || product.stock,
+      stock: selectedVariant?.stock ?? product.stock,
 
       variantColor: selectedColor || undefined,
 
@@ -318,13 +320,13 @@ export function ProductDetailUI({
             {formatCurrency(displayPrice, tenant.currency)}
           </p>
 
-          {selectedVariant && (
+          {(variants.length === 0 || selectedVariant) && (
             <div>
-              {selectedVariant.stock > 5 ? (
+              {availableStock > 5 ? (
                 <p className="text-sm text-green-600 font-medium">In stock</p>
-              ) : selectedVariant.stock > 0 ? (
+              ) : availableStock > 0 ? (
                 <p className="text-sm text-red-500 font-medium">
-                  Only {selectedVariant.stock} left in stock
+                  Only {availableStock} left in stock
                 </p>
               ) : (
                 <p className="text-sm text-gray-400 font-medium">
@@ -422,11 +424,12 @@ export function ProductDetailUI({
               <span>{quantity}</span>
               <button
                 onClick={() => {
-                  if (!selectedVariant) return;
-
-                  setQuantity((q) => Math.min(selectedVariant.stock, q + 1));
+                  setQuantity((q) => Math.min(availableStock, q + 1));
                 }}
-                disabled={!selectedVariant || quantity >= selectedVariant.stock}
+                disabled={
+                  (variants.length > 0 && !selectedVariant) ||
+                  quantity >= availableStock
+                }
                 className="px-3 py-1 border rounded"
               >
                 +
@@ -460,8 +463,8 @@ export function ProductDetailUI({
                 className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg"
                 disabled={
                   isOutOfStock ||
-                  !selectedVariant ||
-                  quantity > selectedVariant.stock
+                  (variants.length > 0 && !selectedVariant) ||
+                  quantity > availableStock
                 }
               >
                 Buy Now
@@ -471,7 +474,7 @@ export function ProductDetailUI({
             <button
               onClick={() => router.push("/login")}
               className="w-full bg-black text-white py-3 rounded-lg"
-              disabled={!selectedVariant || quantity >= selectedVariant.stock}
+              disabled={isOutOfStock || (variants.length > 0 && !selectedVariant) || quantity > availableStock}
             >
               Login to purchase
             </button>
@@ -598,7 +601,7 @@ export function ProductDetailUI({
           <button
             onClick={handleAddToCart}
             className="bg-black text-white px-5 py-2 rounded-lg"
-            disabled={!selectedVariant || quantity >= selectedVariant.stock}
+            disabled={isOutOfStock || (variants.length > 0 && !selectedVariant) || quantity > availableStock}
           >
             Add to Cart
           </button>
