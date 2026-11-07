@@ -1,6 +1,7 @@
 type RefundInput = {
   amount: number;
   reference: string;
+  refundReference?: string;
   provider: "PAYSTACK" | "FLUTTERWAVE";
   flutterwaveTransactionId?: string | null;
 };
@@ -20,6 +21,7 @@ export type RefundPaymentResult = {
 export async function refundPayment({
   amount,
   reference,
+  refundReference,
   provider,
   flutterwaveTransactionId,
 }: RefundInput): Promise<RefundPaymentResult> {
@@ -71,7 +73,15 @@ export async function refundPayment({
   }
 
   if (provider === "PAYSTACK") {
-    return refundPaystack(numericAmount, reference);
+    if (!refundReference) {
+      console.error("Missing RAYNTA refund reference.");
+      return {
+        success: false,
+        provider: "paystack",
+      };
+    }
+
+    return refundPaystack(numericAmount, reference, refundReference);
   }
 
   if (provider === "FLUTTERWAVE") {
@@ -103,6 +113,7 @@ export async function refundPayment({
 async function refundPaystack(
   amount: number,
   reference: string,
+  refundReference: string,
 ): Promise<RefundPaymentResult> {
   try {
     const res = await fetch("https://api.paystack.co/refund", {
@@ -114,6 +125,7 @@ async function refundPaystack(
       body: JSON.stringify({
         transaction: reference,
         amount: amount * 100,
+        reference: refundReference,
       }),
     });
 
@@ -169,13 +181,14 @@ async function refundPaystack(
      * Do not confuse the original transaction
      * reference with the refund ID.
      */
-    const refundId = data?.data?.id;
+    const returnedReference = data?.data?.reference;
     const refundStatus = String(data?.data?.status ?? "pending").toLowerCase();
 
     return {
       success: true,
       provider: "paystack",
-      reference: refundId != null ? String(refundId) : undefined,
+      reference:
+        returnedReference != null ? String(returnedReference) : refundReference,
       status: refundStatus,
     };
   } catch (error) {

@@ -614,6 +614,12 @@ export async function processRefund(
    * Call payment gateway
    * --------------------------------------------------
    */
+
+  const paystackRefundReference =
+    String(refund.order.paymentProvider).toUpperCase() === "PAYSTACK"
+      ? `RAYNTA_${refund.id}`
+      : undefined;
+
   let paymentResult: RefundPaymentResult;
   try {
     paymentResult = await refundPayment({
