@@ -113,6 +113,15 @@ export async function POST(
           },
         });
 
+        await tx.order.update({
+          where: {
+            id: order.id,
+          },
+          data: {
+            refundStatus: RefundStatus.NONE,
+          },
+        });
+
         return {
           order,
           cancellationRequest,
@@ -166,7 +175,7 @@ export async function POST(
         to: result.order.customerEmail,
         subject: `Action required: Cancellation request for order ${result.order.id}`,
         category: "orders",
-        idempotencyKey: `admin-cancellation-request:${result.cancellationRequest.id}`,
+        idempotencyKey: `admin-cancellation-request:${result.cancellationRequest.id}:${result.cancellationRequest.updatedAt.getTime()}`,
         html: `
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#222;line-height:1.6">
             <h2>Cancellation request for your order</h2>
