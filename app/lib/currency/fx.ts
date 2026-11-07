@@ -25,7 +25,6 @@ const API_BASE_URL =
   process.env.FX_API_BASE_URL ?? "https://api.exchangerate.dev/v1";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
-const MAX_RATE_AGE_MS = 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 10_000;
 
 const supportedCurrencies = new Set<string>(Object.values(currencyEnum));
@@ -145,11 +144,11 @@ export async function getExchangeRate(
       throw new ExchangeRateError("Invalid exchange-rate timestamp.");
     }
 
-    const age = Date.now() - updatedAt.getTime();
-
-    if (age < -60_000 || age > MAX_RATE_AGE_MS) {
+    // Reject timestamps that are invalid or unexpectedly in the future.
+    // The provider's stale flag is the authority for rate freshness.
+    if (updatedAt.getTime() > Date.now() + 60_000) {
       throw new ExchangeRateError(
-        "The exchange rate is outside the permitted freshness window.",
+        "The exchange-rate timestamp is unexpectedly in the future.",
       );
     }
 
