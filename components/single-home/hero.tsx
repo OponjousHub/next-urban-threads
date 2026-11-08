@@ -8,17 +8,16 @@ export default function Hero() {
   const { tenant } = useTenant();
 
   return (
-    <section className="relative h-[85vh] overflow-hidden">
+    <section className="relative h-[85vh] overflow-hidden bg-black">
+      {" "}
       <Image
         src={tenant.heroImage || "/img/default-hero-image.jpg"}
         alt=""
         fill
         priority
-        className="object-cover scale-105"
+        className="object-contain md:object-cover md:scale-105"
       />
-
       <div className="absolute inset-0 bg-black/40" />
-
       <div className="relative z-10 h-full max-w-7xl mx-auto px-6 flex items-center">
         <div className="max-w-xl text-white space-y-6">
           <p className="uppercase tracking-[4px] text-sm opacity-80">
