@@ -1,20 +1,22 @@
-import UserController from "@/modules/users/user.controller";
+﻿import UserController from "@/modules/users/user.controller";
 import { prisma } from "@/utils/prisma";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getLoggedInUserId } from "@/lib/auth";
+import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
 // Get User profile
 export async function GET() {
   try {
     const userId = await getLoggedInUserId();
+    const tenant = await getDefaultTenant();
 
-    if (!userId) {
+    if (!userId || !tenant) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
+    const user = await prisma.user.findFirst({
+      where: { id: userId, tenantId: tenant.id },
       select: {
         id: true,
         name: true,
@@ -23,6 +25,16 @@ export async function GET() {
         city: true,
         country: true,
         createdAt: true,
+        addresses: {
+          where: {
+            tenantId: tenant.id,
+            isDeleted: false,
+            isTemporary: false,
+          },
+          orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
+          take: 1,
+          select: { phone: true },
+        },
       },
     });
 
@@ -30,11 +42,19 @@ export async function GET() {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    const { addresses, ...profile } = user;
+
+    return NextResponse.json({
+      ...profile,
+      phone: addresses[0]?.phone ?? "",
+    });
   } catch (error) {
     console.error("USER PROFILE ERROR:", error);
 
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { message: "Failed to load profile" },
+      { status: 500 },
+    );
   }
 }
 
@@ -49,7 +69,6 @@ export async function DELETE() {
 
     const result = await UserController.deleteUserAccount(token);
 
-    // Clear the authentication cookie after deletion
     cookieStore.set("token", "", {
       httpOnly: true,
       expires: new Date(0),
