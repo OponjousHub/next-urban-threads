@@ -60,13 +60,15 @@ export function ProfileSection() {
 
       const res = await fetch("/api/admin/profile", {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) throw new Error();
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.error || result?.message || "Profile update failed");
       appToast.success("Update profile", "Profile updated successfully");
-    } catch {
-      appToast.error("Profile update failed", "Network error. Try again.");
+    } catch (error) {
+      appToast.error("Profile update failed", error instanceof Error ? error.message : "Network error. Try again.");
     } finally {
       setLoading(false);
     }
@@ -104,7 +106,7 @@ export function ProfileSection() {
           </button>
           <Input
             label="Phone number"
-            type="Phone"
+            type="tel"
             {...register("phone")}
             error={errors.phone?.message}
           />
