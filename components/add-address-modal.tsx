@@ -108,6 +108,16 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
   };
 
   const handleSubmit = async () => {
+    if (!form.country.trim()) {
+      appToast.error("Required field", "Please select a country.");
+      return;
+    }
+
+    if (form.state.trim().length < 2) {
+      appToast.error("Required field", "Please enter or select a state/region.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -196,22 +206,33 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <select
-              value={form.state}
-              onChange={(e) => handleChange("state", e.target.value)}
-              className="w-full rounded-lg border p-3"
-              disabled={!form.country}
-            >
-              <option value="">Select State (optional)</option>
+            {states.length > 0 ? (
+              <select
+                required
+                value={form.state}
+                onChange={(e) => handleChange("state", e.target.value)}
+                className="w-full rounded-lg border p-3"
+                disabled={!form.country}
+              >
+                <option value="">Select State/Region *</option>
+                {states.map((state) => (
+                  <option key={state.isoCode} value={state.name}>
+                    {state.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <Input
+                required
+                placeholder="State/Region *"
+                value={form.state}
+                onChange={(e) => handleChange("state", e.target.value)}
+                disabled={!form.country}
+              />
+            )}
 
-              {states.map((state) => (
-                <option key={state.isoCode} value={state.name}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
-
             <select
+              required
               value={form.country}
               onChange={(e) => {
                 const country = e.target.value;
@@ -224,7 +245,7 @@ export default function AddAddressModal({ open, onClose, address }: Props) {
               }}
               className="w-full rounded-lg border p-3"
             >
-              <option value="">Select Country</option>
+              <option value="">Select Country *</option>
 
               {countries.map((country) => (
                 <option key={country.isoCode} value={country.isoCode}>
