@@ -9,13 +9,22 @@ export default function Hero() {
 
   return (
     <section className="relative h-[85vh] overflow-hidden bg-black">
-      {" "}
+      {/* Blurred background fills the space around the full image on mobile */}
       <Image
         src={tenant.heroImage || "/img/default-hero-image.jpg"}
         alt=""
         fill
         priority
-        className="object-cover object-center"
+        className="object-cover scale-110 blur-xl opacity-60 md:hidden"
+      />
+
+      {/* Main image preserves the complete photograph on mobile */}
+      <Image
+        src={tenant.heroImage || "/img/default-hero-image.jpg"}
+        alt=""
+        fill
+        priority
+        className="object-contain md:object-cover md:scale-105"
       />
       <div className="absolute inset-0 bg-black/40" />
       <div className="relative z-10 h-full max-w-7xl mx-auto px-6 flex items-center">
