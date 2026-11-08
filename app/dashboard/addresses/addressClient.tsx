@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import AddAddressModal from "../../../components/add-address-modal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import toast from "react-hot-toast";
 
 type Address = {
@@ -59,6 +60,14 @@ export default function AddressClient({ initialAddresses }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition-colors hover:text-black"
+      >
+        <span aria-hidden="true">←</span>
+        Back to Dashboard
+      </Link>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">My Addresses</h1>
