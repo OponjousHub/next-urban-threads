@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 import { getLoggedInUserId } from "@/lib/auth";
@@ -87,6 +87,17 @@ export async function PATCH(req: NextRequest) {
         });
       }
 
+      if (name !== undefined) {
+        await tx.address.updateMany({
+          where: {
+            userId,
+            tenantId: tenant.id,
+            isDeleted: false,
+            isTemporary: false,
+          },
+          data: { fullName: name },
+        });
+      }
       if (phone !== undefined && address) {
         await tx.address.update({
           where: { id: address.id },
