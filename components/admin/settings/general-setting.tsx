@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageUpload } from "./tenant-images";
 import { z } from "zod";
 import { appToast } from "@/utils/appToast";
+import { useTenant } from "@/store/tenant-provider-context";
 import { Country } from "country-state-city";
 
 /* ---------------- Schema ---------------- */
@@ -27,6 +28,7 @@ export const settingSchema = z.object({
 type FormData = z.infer<typeof settingSchema>;
 
 export default function GeneralSettings() {
+  const { updatePrimaryColor } = useTenant();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -142,6 +144,7 @@ export default function GeneralSettings() {
         throw new Error("Failed to update settings");
       }
 
+      updatePrimaryColor(data.primaryColor || "#6366f1");
       appToast.success("Update settings", "Settings updated successfully");
 
       /*
