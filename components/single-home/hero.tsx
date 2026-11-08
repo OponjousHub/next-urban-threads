@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { useTenant } from "@/store/tenant-provider-context";
@@ -8,32 +6,33 @@ export default function Hero() {
   const { tenant } = useTenant();
 
   return (
-    <section className="relative h-[85vh] overflow-hidden bg-black">
-      {/* Blurred background fills the space around the full image on mobile */}
-      <Image
-        src={tenant.heroImage || "/img/default-hero-image.jpg"}
-        alt=""
-        fill
-        priority
-        className="object-cover scale-110 blur-xl opacity-60 md:hidden"
-      />
+    <section className="relative overflow-hidden bg-white md:h-[85vh] md:min-h-[600px] md:bg-black">
+      {/* Hero image */}
+      <div className="relative aspect-video w-full md:absolute md:inset-0 md:h-full md:aspect-auto">
+        {" "}
+        <Image
+          src={tenant.heroImage || "/img/default-hero-image.jpg"}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-contain md:object-cover md:scale-105"
+        />
+        {/* Gradual image-to-content transition on mobile */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent via-white/70 to-white md:hidden" />
+      </div>
 
-      {/* Main image preserves the complete photograph on mobile */}
-      <Image
-        src={tenant.heroImage || "/img/default-hero-image.jpg"}
-        alt=""
-        fill
-        priority
-        className="object-contain md:object-cover md:scale-105"
-      />
-      <div className="absolute inset-0 bg-black/40" />
-      <div className="relative z-10 h-full max-w-7xl mx-auto px-6 flex items-center">
-        <div className="max-w-xl text-white space-y-6">
+      {/* Desktop image overlay */}
+      <div className="absolute inset-0 hidden bg-black/40 md:block" />
+
+      {/* Hero content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-10 text-gray-900 md:absolute md:inset-0 md:flex md:items-center md:py-0 md:text-white">
+        <div className="max-w-xl space-y-6">
           <p className="uppercase tracking-[4px] text-sm opacity-80">
             NEW COLLECTION
           </p>
 
-          <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight">
             {tenant.heroTitle || "Build your online store"}
           </h1>
 
@@ -42,15 +41,15 @@ export default function Hero() {
               "Sell products from one or multiple vendors in one place"}
           </p>
 
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <Link href="/products">
-              <button className="bg-[var(--color-primary)] px-8 py-4 rounded-full font-semibold hover:scale-105 transition">
+              <button className="bg-[var(--color-primary)] text-white px-8 py-4 rounded-full font-semibold hover:scale-105 transition">
                 {tenant.heroCTA || "Shop Now"}
               </button>
             </Link>
 
             <Link href="/products?featured=true">
-              <button className="border border-white px-8 py-4 rounded-full hover:bg-white hover:text-black transition">
+              <button className="border border-gray-900 px-8 py-4 rounded-full hover:bg-gray-900 hover:text-white transition md:border-white md:hover:bg-white md:hover:text-black">
                 Explore
               </button>
             </Link>
