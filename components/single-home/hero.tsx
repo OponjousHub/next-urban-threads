@@ -15,7 +15,7 @@ export default function Hero() {
         alt=""
         fill
         priority
-        className="object-contain md:object-cover md:scale-105"
+        className="object-cover object-center"
       />
       <div className="absolute inset-0 bg-black/40" />
       <div className="relative z-10 h-full max-w-7xl mx-auto px-6 flex items-center">
