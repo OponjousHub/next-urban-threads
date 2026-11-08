@@ -72,12 +72,6 @@ export async function PATCH(req: NextRequest) {
       select: { id: true },
     });
 
-    if (phone !== undefined && !address) {
-      return NextResponse.json(
-        { error: "Add a delivery address before updating your phone number." },
-        { status: 400 },
-      );
-    }
 
     await prisma.$transaction(async (tx) => {
       if (name !== undefined) {
