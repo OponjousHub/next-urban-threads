@@ -126,7 +126,7 @@ export default function FeaturedProducts() {
                         src={cloudinaryImage(product.images[0])}
                         alt={product.name}
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
-                        className="object-cover transition duration-500 group-hover:scale-105"
+                        className="object-contain p-2 transition duration-500 group-hover:scale-105"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-sm text-gray-400">
