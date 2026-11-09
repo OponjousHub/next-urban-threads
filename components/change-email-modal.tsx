@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   Dialog,
@@ -5,52 +7,74 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useTenant } from "@/store/tenant-provider-context";
 import { appToast } from "@/utils/appToast";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  address?: any; // present = edit mode
+  address?: any;
 };
 
-export default function ChangEmailModal({ open, onClose, address }: Props) {
+export default function ChangEmailModal({ open, onClose }: Props) {
   const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { tenant } = useTenant();
 
   const handleChangeEmail = async () => {
+    if (!newEmail.trim() || !password) {
+      appToast.error(
+        "Missing information",
+        "Enter your new email and current password.",
+      );
+      return;
+    }
+
     try {
       setLoading(true);
+
       const res = await fetch("/api/profile/change-email", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          newEmail,
+          newEmail: newEmail.trim(),
           password,
         }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get("content-type") || "";
+
+      const data = contentType.includes("application/json")
+        ? await res.json().catch(() => null)
+        : null;
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed");
+        throw new Error(
+          data?.error ||
+            "We couldn't process your request. Please check your details and try again.",
+        );
       }
+
+      if (!data) {
+        throw new Error(
+          "The server returned an unexpected response. Please try again.",
+        );
+      }
+
       appToast.success(
-        "Check your Email",
-        `${`We just sent a token to ${newEmail}`}`,
+        "Check your email",
+        `We sent a verification link to ${newEmail.trim()}.`,
       );
 
       onClose();
-
       setNewEmail("");
       setPassword("");
-    } catch (err: any) {
-      appToast.error(
-        "Error",
-        `${err.message || "Could not change email! Please try again."}`,
-      );
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Could not change email. Please try again.";
+
+      appToast.error("Email change failed", message);
     } finally {
       setLoading(false);
     }
@@ -69,32 +93,31 @@ export default function ChangEmailModal({ open, onClose, address }: Props) {
           We will send a verification link to your new email.
         </p>
 
-        {/* Form */}
         <div className="mt-4 space-y-4">
-          {/* New Email */}
           <input
             type="email"
             placeholder="New Email Address"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
+            autoComplete="email"
             className="w-full rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
 
-          {/* Password */}
           <input
             type="password"
             placeholder="Confirm Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
             className="w-full rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
 
-        {/* Buttons */}
         <div className="mt-6 flex justify-end gap-3">
           <button
-            onClick={() => onClose()}
-            className="rounded-md border px-4 py-2 text-sm"
+            onClick={onClose}
+            disabled={loading}
+            className="rounded-md border px-4 py-2 text-sm disabled:opacity-50"
           >
             Cancel
           </button>
