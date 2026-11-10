@@ -12,6 +12,7 @@ export default async function SupportPage({
   searchParams: Promise<{
     status?: string;
     priority?: string;
+    page?: string;
   }>;
 }) {
   const tenant = await getDefaultTenant();
@@ -32,6 +33,12 @@ export default async function SupportPage({
 
   const statusParam = params.status?.toUpperCase();
   const priorityParam = params.priority?.toUpperCase();
+  const requestedPage = Math.max(
+    1,
+    Number.parseInt(params.page || "1", 10) || 1,
+  );
+
+  const pageSize = 10;
 
   const [unreadCount, urgentCount, allCount, resolvedCount, user] =
     await Promise.all([
@@ -88,9 +95,20 @@ export default async function SupportPage({
     whereClause.priority = priorityParam;
   }
 
+  const totalMessages = await prisma.contact.count({
+    where: whereClause,
+  });
+
+  const totalPages = Math.ceil(totalMessages / pageSize);
+
+  const currentPage =
+    totalPages === 0 ? 1 : Math.min(requestedPage, totalPages);
+
   const messages = await prisma.contact.findMany({
     where: whereClause,
     orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
+    skip: (currentPage - 1) * pageSize,
+    take: pageSize,
   });
 
   const admin = {
@@ -113,6 +131,10 @@ export default async function SupportPage({
         urgentCount={urgentCount}
         priorityParam={priorityParam}
         unreadCount={unreadCount}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalMessages={totalMessages}
+        pageSize={pageSize}
       />
     </>
   );
