@@ -4,10 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
+import AdminPagination from "@/components/admin/tables/AdminPagination";
 
 export default function VendorProductsPage({ vendorId }: { vendorId: string }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
+  const totalPages = Math.ceil(products.length / PAGE_SIZE);
+  const paginatedProducts = products.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   useEffect(() => {
     fetchProducts();
@@ -54,7 +59,7 @@ export default function VendorProductsPage({ vendorId }: { vendorId: string }) {
           </thead>
 
           <tbody>
-            {products.map((product: any) => (
+            {paginatedProducts.map((product: any) => (
               <tr key={product.id} className="border-t">
                 <td className="p-4">{product.name}</td>
 
@@ -77,6 +82,13 @@ export default function VendorProductsPage({ vendorId }: { vendorId: string }) {
             ))}
           </tbody>
         </table>
+        <AdminPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={products.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );
