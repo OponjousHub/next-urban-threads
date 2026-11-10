@@ -3,6 +3,7 @@ import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 import { redirect } from "next/navigation";
+import AdminPagination from "@/components/admin/tables/AdminPagination";
 
 export default async function AdminCouponsPage() {
   const { tenant, userId, role } = await getAuthPayload();
@@ -252,6 +253,13 @@ export default async function AdminCouponsPage() {
               </tbody>
             </table>
           </div>
+
+          <AdminPagination
+            currentPage={1}
+            totalPages={1}
+            totalItems={coupons.length}
+            onPageChange={() => {}}
+          />
         </div>
       </div>
     </>
