@@ -355,7 +355,7 @@ export default async function ProductsPage({
             PAGINATION
         ===================================================== */}
 
-        <Pagination totalPages={totalPages} />
+        <Pagination totalPages={totalPages} totalItems={totalProducts} pageSize={pageSize} />
       </div>
     </>
   );

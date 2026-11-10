@@ -194,7 +194,7 @@ export default async function VendorProductsPage({
         query={query}
         basePath="/vendor/products"
       />
-      <Pagination totalPages={totalPages} />
+      <Pagination totalPages={totalPages} totalItems={totalProducts} pageSize={pageSize} />
     </div>
   );
 }
