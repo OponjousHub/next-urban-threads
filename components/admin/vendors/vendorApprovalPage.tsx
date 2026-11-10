@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { StatusBadge } from "@/lib/status-badge";
-import { FaSearch } from "react-icons/fa";
+import { FaChevronRight, FaSearch } from "react-icons/fa";
 import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
 import { useRouter } from "next/navigation";
 import { appToast } from "@/utils/appToast";
