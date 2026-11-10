@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Globe, MapPin, Plus, Search, Settings, Truck } from "lucide-react";
+import AdminPagination from "@/components/admin/tables/AdminPagination";
 
 type ShippingZone = {
   id: string;
@@ -20,6 +21,8 @@ type Props = {
 
 export default function ShippingZonesPageClient({ zones }: Props) {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   const filteredZones = useMemo(() => {
     if (!search.trim()) return zones;
@@ -34,6 +37,13 @@ export default function ShippingZonesPageClient({ zones }: Props) {
     });
   }, [search, zones]);
 
+  const totalPages = Math.ceil(filteredZones.length / PAGE_SIZE);
+
+  const visibleZones = filteredZones.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -44,7 +54,10 @@ export default function ShippingZonesPageClient({ zones }: Props) {
 
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="Search shipping zones..."
             className="w-full rounded-xl border pl-10 pr-4 py-2 outline-none focus:ring-2 focus:ring-black"
           />
@@ -102,7 +115,7 @@ export default function ShippingZonesPageClient({ zones }: Props) {
             </thead>
 
             <tbody>
-              {filteredZones.map((zone) => (
+              {visibleZones.map((zone) => (
                 <tr key={zone.id} className="border-t hover:bg-gray-50">
                   <td className="px-6 py-5">
                     <div className="flex items-start gap-3">
@@ -160,6 +173,13 @@ export default function ShippingZonesPageClient({ zones }: Props) {
               ))}
             </tbody>
           </table>
+          <AdminPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredZones.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </div>
