@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Truck, Search, Plus, Settings, Clock, MapPin } from "lucide-react";
+import AdminPagination from "@/components/admin/tables/AdminPagination";
 
 type ShippingMethod = {
   id: string;
@@ -26,6 +27,8 @@ type Props = {
 
 export default function ShippingMethodsPageClient({ methods }: Props) {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   const filteredMethods = useMemo(() => {
     if (!search.trim()) return methods;
@@ -40,6 +43,13 @@ export default function ShippingMethodsPageClient({ methods }: Props) {
     );
   }, [methods, search]);
 
+  const totalPages = Math.ceil(filteredMethods.length / PAGE_SIZE);
+
+  const visibleMethods = filteredMethods.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -51,7 +61,10 @@ export default function ShippingMethodsPageClient({ methods }: Props) {
           <input
             placeholder="Search methods..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full rounded-xl border py-2 pl-10 pr-4 outline-none focus:ring-2 focus:ring-black"
           />
         </div>
@@ -108,7 +121,7 @@ export default function ShippingMethodsPageClient({ methods }: Props) {
             </thead>
 
             <tbody>
-              {filteredMethods.map((method) => (
+              {visibleMethods.map((method) => (
                 <tr key={method.id} className="border-t hover:bg-gray-50">
                   <td className="px-6 py-5">
                     <div className="flex items-start gap-3">
@@ -173,6 +186,13 @@ export default function ShippingMethodsPageClient({ methods }: Props) {
               ))}
             </tbody>
           </table>
+          <AdminPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredMethods.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </div>
