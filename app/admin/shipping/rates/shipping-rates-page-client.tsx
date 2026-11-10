@@ -8,6 +8,7 @@ import ConfirmationModal from "@/components/modals/ConfirmationModal";
 import { appToast } from "@/utils/appToast";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useRouter } from "next/navigation";
+import AdminPagination from "@/components/admin/tables/AdminPagination";
 
 type ShippingRate = {
   id: string;
@@ -43,10 +44,11 @@ export default function ShippingRatesPageClient({ rates }: Props) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [rateId, setRateId] = useState("");
-  const [loading, setLoading] = useState(false);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
   const { tenant } = useTenant();
   const router = useRouter();
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
 
@@ -58,6 +60,13 @@ export default function ShippingRatesPageClient({ rates }: Props) {
       );
     });
   }, [rates, search]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+
+  const visibleRates = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   async function deleteRate(id: string) {
     try {
@@ -103,7 +112,10 @@ export default function ShippingRatesPageClient({ rates }: Props) {
 
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="Search rates..."
             className="w-full rounded-xl border py-3 pl-11 pr-4"
           />
@@ -167,7 +179,7 @@ export default function ShippingRatesPageClient({ rates }: Props) {
             </thead>
 
             <tbody>
-              {filtered.map((rate) => (
+              {visibleRates.map((rate) => (
                 <tr key={rate.id} className="border-t">
                   <td className="px-5 py-4">
                     <div className="font-medium">{rate.name}</div>
@@ -253,6 +265,13 @@ export default function ShippingRatesPageClient({ rates }: Props) {
               ))}
             </tbody>
           </table>
+          <AdminPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
       <ConfirmationModal
