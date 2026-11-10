@@ -4,6 +4,7 @@ import { getAuthPayload } from "@/lib/server/auth";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 import { redirect } from "next/navigation";
 import AdminPagination from "@/components/admin/tables/AdminPagination";
+import CouponsTable from "@/components/admin/coupons/CouponsTable";
 
 export default async function AdminCouponsPage() {
   const { tenant, userId, role } = await getAuthPayload();
@@ -64,6 +65,18 @@ export default async function AdminCouponsPage() {
       },
     }),
   ]);
+
+  const couponRows = coupons.map((coupon) => ({
+    id: coupon.id,
+    code: coupon.code,
+    vendorName: coupon.vendor?.name ?? null,
+    type: coupon.type,
+    value: Number(coupon.value),
+    usedCount: coupon.usedCount,
+    usageLimit: coupon.usageLimit,
+    active: coupon.active,
+    expiresAt: coupon.expiresAt?.toISOString() ?? null,
+  }));
 
   const admin = {
     name: user?.name,
@@ -136,7 +149,7 @@ export default async function AdminCouponsPage() {
         {/* Table */}
 
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-          <div className="overflow-x-auto">
+          {/* <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
                 <tr>
@@ -252,7 +265,8 @@ export default async function AdminCouponsPage() {
                 )}
               </tbody>
             </table>
-          </div>
+          </div> */}
+          <CouponsTable coupons={couponRows} isMultiVendor={isMultiVendor} />
 
           <AdminPagination
             currentPage={1}
