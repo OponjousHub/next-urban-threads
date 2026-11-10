@@ -224,7 +224,7 @@ export default async function VendorCustomersPage({
             </table>
           </div>
         </div>
-        <Pagination totalPages={totalPages} />
+        <Pagination totalPages={totalPages} totalItems={allCustomersCount} pageSize={pageSize} />
       </div>
     </>
   );
