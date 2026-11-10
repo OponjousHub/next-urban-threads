@@ -3,6 +3,8 @@
 import { UpdateButtons } from "@/components/admin/support/update-buttons";
 import { appToast } from "@/utils/appToast";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import AdminPagination from "@/components/admin/tables/AdminPagination";
 import { useState, useEffect } from "react";
 
 type Message = {
@@ -22,6 +24,10 @@ export default function SupportPageClient({
   urgentCount,
   priorityParam,
   unreadCount,
+  currentPage,
+  totalPages,
+  totalMessages,
+  pageSize,
 }: {
   messages: Message[];
   allCount: number;
@@ -38,6 +44,18 @@ export default function SupportPageClient({
   const [localMessages, setLocalMessages] = useState(messages);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
+  const router = useRouter();
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams();
+
+    if (statusParam) params.set("status", statusParam);
+    if (priorityParam) params.set("priority", priorityParam);
+
+    params.set("page", String(page));
+
+    router.push(`/admin/support?${params.toString()}`);
+  };
 
   useEffect(() => {
     setLocalMessages(messages);
@@ -201,6 +219,14 @@ export default function SupportPageClient({
             ))
           )}
         </div>
+
+        <AdminPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalMessages}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+        />
       </div>
 
       {/* RIGHT: PREVIEW PANEL */}
