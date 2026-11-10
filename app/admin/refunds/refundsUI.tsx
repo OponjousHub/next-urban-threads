@@ -7,6 +7,7 @@ import RefundReviewModal from "@/components/refunds/refundReviewModal";
 import { useTenant } from "@/store/tenant-provider-context";
 import RefundKpis from "@/components/admin/refunds/RefundKpis";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
+import AdminPagination from "@/components/admin/tables/AdminPagination";
 
 type Refund = {
   id: string;
@@ -25,6 +26,9 @@ type RefundResponse = {
   processingRefunds: number;
   refundedRefunds: number;
   failedRefunds: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
 };
 
 type RefundKpisState = {
@@ -48,6 +52,9 @@ export default function RefundsPageUI({ admin }: AdminProps) {
   const [refunds, setRefunds] = useState<Refund[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRefund, setSelectedRefund] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const [kpis, setKpis] = useState<RefundKpisState>({
     total: 0,
@@ -64,11 +71,11 @@ export default function RefundsPageUI({ admin }: AdminProps) {
     fetchRefunds();
   }, []);
 
-  async function fetchRefunds() {
+  async function fetchRefunds(page = currentPage) {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/admin/refunds", {
+      const res = await fetch(`/api/admin/refunds?page=${page}`, {
         cache: "no-store",
       });
 
@@ -79,6 +86,10 @@ export default function RefundsPageUI({ admin }: AdminProps) {
       const data: RefundResponse = await res.json();
 
       setRefunds(data.refunds);
+
+      setCurrentPage(data.currentPage);
+      setTotalPages(data.totalPages);
+      setPageSize(data.pageSize);
 
       setKpis({
         total: data.totalRefunds,
@@ -167,6 +178,14 @@ export default function RefundsPageUI({ admin }: AdminProps) {
               )}
             </tbody>
           </table>
+
+          <AdminPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={kpis.total}
+            pageSize={pageSize}
+            onPageChange={fetchRefunds}
+          />
 
           {/* Refund Review Modal */}
           <Dialog
