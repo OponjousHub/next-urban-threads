@@ -29,6 +29,10 @@ export default function SupportPageClient({
   urgentCount: number;
   priorityParam?: string;
   unreadCount: number;
+  currentPage: number;
+  totalPages: number;
+  totalMessages: number;
+  pageSize: number;
 }) {
   const [selected, setSelected] = useState<Message | null>(null);
   const [localMessages, setLocalMessages] = useState(messages);
