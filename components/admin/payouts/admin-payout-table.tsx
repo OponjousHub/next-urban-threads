@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTenant } from "@/store/tenant-provider-context";
 import ConfirmationModal from "@/components/modals/ConfirmationModal";
+import AdminPagination from "@/components/admin/tables/AdminPagination";
 import { appToast } from "@/utils/appToast";
 import { useState } from "react";
 
@@ -35,7 +36,8 @@ export default function AdminPayoutTable({ payouts }: Props) {
   >(null);
   const [rejectReason, setRejectReason] = useState("");
   const [selectedPayoutId, setSelectedPayoutId] = useState<string | null>(null);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
   const router = useRouter();
   const { tenant } = useTenant();
 
@@ -162,6 +164,13 @@ export default function AdminPayoutTable({ payouts }: Props) {
     return matchesStatus && matchesSearch;
   });
 
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+
+  const visiblePayouts = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   return (
     <>
       <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
@@ -175,7 +184,10 @@ export default function AdminPayoutTable({ payouts }: Props) {
               <input
                 placeholder="Vendor name or email..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -227,7 +239,7 @@ export default function AdminPayoutTable({ payouts }: Props) {
             </thead>
 
             <tbody>
-              {filtered.map((payout) => (
+              {visiblePayouts.map((payout) => (
                 <tr key={payout.id} className="border-t">
                   <td className="px-6 py-4">
                     <div className="font-medium">{payout.vendor.name}</div>
@@ -313,6 +325,13 @@ export default function AdminPayoutTable({ payouts }: Props) {
             </tbody>
           </table>
         )}
+        <AdminPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filtered.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setCurrentPage}
+        />
       </div>
       <ConfirmationModal
         open={modalType === "approve"}
