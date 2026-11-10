@@ -6,11 +6,16 @@ import { FaArrowLeft } from "react-icons/fa";
 import { StatusBadge } from "@/lib/status-badge";
 import { FiCopy, FiCheck } from "react-icons/fi";
 import { VendorDetailSkeleton } from "@/utils/adminSkeleton";
+import AdminPagination from "@/components/admin/tables/AdminPagination";
 
 export default function VendorOrdersPage({ vendorId }: { vendorId: string }) {
   const [orders, setOrders] = useState([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
+  const totalPages = Math.ceil(orders.length / PAGE_SIZE);
+  const paginatedOrders = orders.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   useEffect(() => {
     fetchOrders();
@@ -67,7 +72,7 @@ export default function VendorOrdersPage({ vendorId }: { vendorId: string }) {
           </thead>
 
           <tbody>
-            {orders.map((order: any) => (
+            {paginatedOrders.map((order: any) => (
               <tr key={order.id} className="border-t">
                 <td className="p-4">
                   <div className="flex items-center gap-2">
@@ -119,6 +124,13 @@ export default function VendorOrdersPage({ vendorId }: { vendorId: string }) {
             ))}
           </tbody>
         </table>
+        <AdminPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={orders.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );
