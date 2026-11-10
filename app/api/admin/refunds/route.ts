@@ -2,15 +2,58 @@ import { prisma } from "@/utils/prisma";
 import { NextResponse } from "next/server";
 import { getDefaultTenant } from "@/app/lib/getDefaultTenant";
 
-export async function GET() {
+const PAGE_SIZE = 10;
+
+export async function GET(req: Request) {
   const tenant = await getDefaultTenant();
+
   if (!tenant) {
     throw new Error("Default tenant not found");
   }
 
+  const { searchParams } = new URL(req.url);
+  const requestedPage = Math.max(1, Number(searchParams.get("page")) || 1);
+
+  const where = {
+    tenantId: tenant.id,
+    storeMode: tenant.storeMode,
+  };
+
+  const [
+    totalRefunds,
+    requestedRefunds,
+    approvedRefunds,
+    processingRefunds,
+    refundedRefunds,
+    failedRefunds,
+  ] = await Promise.all([
+    prisma.refundRequest.count({ where }),
+    prisma.refundRequest.count({
+      where: { ...where, status: "REQUESTED" },
+    }),
+    prisma.refundRequest.count({
+      where: { ...where, status: "APPROVED" },
+    }),
+    prisma.refundRequest.count({
+      where: { ...where, status: "PROCESSING" },
+    }),
+    prisma.refundRequest.count({
+      where: { ...where, status: "REFUNDED" },
+    }),
+    prisma.refundRequest.count({
+      where: { ...where, status: "FAILED" },
+    }),
+  ]);
+
+  const totalPages = Math.ceil(totalRefunds / PAGE_SIZE);
+  const currentPage =
+    totalPages === 0 ? 1 : Math.min(requestedPage, totalPages);
+
   const refunds = await prisma.refundRequest.findMany({
-    where: { tenantId: tenant.id, storeMode: tenant.storeMode },
+    where,
     orderBy: { createdAt: "desc" },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
     select: {
       id: true,
       orderId: true,
@@ -21,62 +64,6 @@ export async function GET() {
     },
   });
 
-  const [
-    totalRefunds,
-    requestedRefunds,
-    approvedRefunds,
-    processingRefunds,
-    refundedRefunds,
-    failedRefunds,
-  ] = await Promise.all([
-    prisma.refundRequest.count({
-      where: {
-        tenantId: tenant.id,
-        storeMode: tenant.storeMode,
-      },
-    }),
-
-    prisma.refundRequest.count({
-      where: {
-        tenantId: tenant.id,
-        storeMode: tenant.storeMode,
-        status: "REQUESTED",
-      },
-    }),
-
-    prisma.refundRequest.count({
-      where: {
-        tenantId: tenant.id,
-        status: "APPROVED",
-        storeMode: tenant.storeMode,
-      },
-    }),
-
-    prisma.refundRequest.count({
-      where: {
-        tenantId: tenant.id,
-        status: "PROCESSING",
-        storeMode: tenant.storeMode,
-      },
-    }),
-
-    prisma.refundRequest.count({
-      where: {
-        tenantId: tenant.id,
-        status: "REFUNDED",
-        storeMode: tenant.storeMode,
-      },
-    }),
-
-    prisma.refundRequest.count({
-      where: {
-        tenantId: tenant.id,
-        status: "FAILED",
-        storeMode: tenant.storeMode,
-      },
-    }),
-  ]);
-
   return NextResponse.json({
     refunds,
     totalRefunds,
@@ -85,5 +72,8 @@ export async function GET() {
     processingRefunds,
     refundedRefunds,
     failedRefunds,
+    currentPage,
+    totalPages,
+    pageSize: PAGE_SIZE,
   });
 }
