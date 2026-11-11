@@ -38,7 +38,7 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
   };
 
   return (
-    <div ref={dropdownRef} className="relative left-5">
+    <div ref={dropdownRef} className="relative left-5 md:left-0">
       {/* Avatar */}
       <button
         type="button"
@@ -53,7 +53,6 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
           className="h-9 w-9 rounded-full border object-cover hover:ring-2 hover:ring-[var(--color-primary)] transition"
         />
       </button>
-
       {/* Dropdown */}
       {open && (
         <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-xl overflow-hidden z-50">

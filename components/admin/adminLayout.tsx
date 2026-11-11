@@ -3,6 +3,7 @@
 import { useState } from "react";
 import AdminSidebar from "@/components/admin/adminSidebar";
 import { useAdminSidebar } from "@/store/admin-sidebar-context";
+import { usePathname } from "next/navigation";
 
 export default function AdminLayout({
   children,
@@ -11,6 +12,14 @@ export default function AdminLayout({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const { open, setOpen } = useAdminSidebar();
+  const pathname = usePathname();
+
+  const useWiderContent = [
+    "/admin/orders",
+    "/admin/customers",
+    "/admin/support",
+    "/admin/refunds",
+  ].includes(pathname);
 
   return (
     <div className="flex min-h-screen w-full items-stretch bg-gradient-to-br from-gray-50 to-gray-100">

@@ -103,14 +103,13 @@ export default function SupportPageClient({
             <span className="text-gray-400">({allCount})</span>
           </h1>
 
-          <div className="flex gap-3 flex-wrap">
+          <div className="grid grid-cols-2 gap-3">
             <FilterButton
               href="/admin/support"
               label="All"
               icon="📬"
               active={!statusParam && !priorityParam}
             />
-
             <FilterButton
               href="/admin/support?status=UNREAD"
               label="Unread"
@@ -118,14 +117,12 @@ export default function SupportPageClient({
               badge={unreadCount}
               active={statusParam === "UNREAD"}
             />
-
             <FilterButton
               href="/admin/support?status=RESOLVED"
               label="Resolved"
               icon="✅"
               active={statusParam === "RESOLVED"}
             />
-
             <FilterButton
               href="/admin/support?priority=HIGH"
               label="Urgent"
@@ -287,7 +284,7 @@ function FilterButton({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm border
+      className={`flex items-center justify-center gap-2 w-full min-h-12 px-4 py-3 rounded-xl text-base border
         transition-all duration-200 transform hover:scale-105 hover:shadow-sm
         ${
           active
