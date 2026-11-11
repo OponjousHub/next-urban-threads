@@ -27,54 +27,63 @@ export function MobileDrawer({
   user,
   isMultiVendor,
 }: MobileDrawerProps) {
+  const closeMenu = () => setMenuOpen(false);
+
   return (
     <>
-      {/* 🔥 OVERLAY */}
-      {menuOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998]"
-          onClick={() => setMenuOpen(false)}
-        />
-      )}
-
-      {/* 🔥 DRAWER */}
+      {/* OVERLAY */}
       <div
-        className={`fixed top-0 left-0 h-full w-[280px] bg-white shadow-2xl z-[9999] transform transition-transform duration-300 ${
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998] transition-opacity duration-300 ${
+          menuOpen
+            ? "opacity-100 visible"
+            : "opacity-0 invisible pointer-events-none"
+        }`}
+        onClick={closeMenu}
+        aria-hidden="true"
+      />
+
+      {/* DRAWER */}
+      <div
+        aria-hidden={!menuOpen}
+        className={`fixed top-0 left-0 h-[100dvh] w-[88vw] max-w-[360px] bg-white shadow-2xl z-[9999] transform transition-transform duration-300 ease-in-out ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
-          {/* 🔥 HEADER */}
-          <div className="flex items-center justify-between px-5 py-4 border-b">
-            <h2 className="text-lg font-semibold">Menu</h2>
+          {/* HEADER */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900">Menu</h2>
+
             <button
-              onClick={() => setMenuOpen(false)}
-              className="text-gray-500 hover:text-black text-xl"
+              onClick={closeMenu}
+              aria-label="Close menu"
+              className="w-11 h-11 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition"
             >
-              ✕
+              <span className="text-2xl font-light">×</span>
             </button>
           </div>
 
-          {/* 🔥 USER / AUTH SECTION */}
-          <div className="px-5 py-4 border-b">
+          {/* USER / AUTH SECTION */}
+          <div className="px-6 py-5 border-b border-gray-200">
             {user ? (
-              <p className="text-sm text-gray-700">
-                Hi, <span className="font-semibold">{user.name}</span>
+              <p className="text-base text-gray-700">
+                Hi,{" "}
+                <span className="font-semibold text-gray-900">{user.name}</span>
               </p>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 <Link
                   href="/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="w-full text-center py-2 rounded-lg border text-sm font-medium hover:bg-gray-50 transition"
+                  onClick={closeMenu}
+                  className="w-full min-h-[48px] flex items-center justify-center rounded-lg border border-gray-300 text-base font-medium text-gray-800 hover:bg-gray-50 transition"
                 >
                   Login
                 </Link>
 
                 <Link
                   href="/signup"
-                  onClick={() => setMenuOpen(false)}
-                  className="w-full text-center py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm font-medium hover:opacity-90 transition"
+                  onClick={closeMenu}
+                  className="w-full min-h-[48px] flex items-center justify-center rounded-lg bg-[var(--color-primary)] text-white text-base font-medium hover:opacity-90 transition"
                 >
                   Create account
                 </Link>
@@ -82,72 +91,82 @@ export function MobileDrawer({
             )}
           </div>
 
-          {/* 🔥 NAV LINKS */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
+          {/* NAVIGATION LINKS */}
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+            {/* HOME */}
             <Link
               href="/"
-              onClick={() => setMenuOpen(false)}
-              className="block py-2 text-base hover:text-[var(--color-primary)] transition"
+              onClick={closeMenu}
+              className="flex items-center min-h-[52px] text-[17px] text-gray-900 font-medium hover:text-[var(--color-primary)] transition"
             >
               Home
             </Link>
 
+            {/* MULTI VENDOR */}
             {isMultiVendor && (
               <Link
-                href="/vendors"
-                onClick={() => setMenuOpen(false)}
-                className="block py-2 text-base hover:text-[var(--color-primary)] transition"
+                href="/stores"
+                onClick={closeMenu}
+                className="flex items-center min-h-[52px] text-[17px] text-gray-900 font-medium hover:text-[var(--color-primary)] transition"
               >
-                Vendors
+                Stores
               </Link>
             )}
 
-            <div className="mt-4 text-xs uppercase text-gray-400 tracking-wide">
-              Shop
+            {/* SHOP HEADING */}
+            <div className="pt-5 pb-3">
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                Shop
+              </span>
             </div>
 
+            {/* ALL PRODUCTS */}
             <Link
               href="/products"
-              onClick={() => setMenuOpen(false)}
-              className="block py-2 text-base font-semibold hover:text-[var(--color-primary)]"
+              onClick={closeMenu}
+              className="flex items-center min-h-[52px] text-[17px] font-semibold text-gray-900 hover:text-[var(--color-primary)] transition"
             >
               All
             </Link>
 
+            {/* CATEGORIES */}
             {categories.map((cat) => (
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.slug}`}
-                onClick={() => setMenuOpen(false)}
-                className="block py-2 text-base hover:text-[var(--color-primary)] transition"
+                onClick={closeMenu}
+                className="flex items-center min-h-[52px] text-[17px] text-gray-800 hover:text-[var(--color-primary)] transition"
               >
                 {cat.name}
               </Link>
             ))}
+
+            {/* BECOME SELLER */}
             {isMultiVendor && (
               <Link
                 href="/seller/register"
-                onClick={() => setMenuOpen(false)}
-                className="block py-2 font-medium text-[var(--color-primary)]"
+                onClick={closeMenu}
+                className="flex items-center min-h-[52px] mt-3 text-[17px] font-semibold text-[var(--color-primary)]"
               >
                 Become Seller
               </Link>
             )}
           </div>
 
-          {/* 🔥 FOOTER (optional but premium feel) */}
-          <div className="px-5 py-4 border-t text-sm text-gray-500">
+          {/* FOOTER */}
+          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
             <Link
               href="/contact"
-              onClick={() => setMenuOpen(false)}
-              className="block py-1 hover:text-black"
+              onClick={closeMenu}
+              className="flex items-center min-h-[44px] text-[15px] text-gray-600 hover:text-black transition"
             >
               Contact
             </Link>
+
             <Link
               href="/returns"
-              onClick={() => setMenuOpen(false)}
-              className="block py-1 hover:text-black"
+              onClick={closeMenu}
+              className="flex items-center min-h-[44px] text-[15px] text-gray-600 hover:text-black transition"
             >
               Returns
             </Link>
