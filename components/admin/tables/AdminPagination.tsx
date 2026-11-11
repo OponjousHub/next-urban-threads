@@ -30,7 +30,7 @@ export default function AdminPagination({
     "flex h-9 min-w-9 items-center justify-center rounded-lg border px-3 text-sm transition disabled:cursor-not-allowed disabled:opacity-40";
 
   return (
-    <div className="flex flex-col gap-3 border-t bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col items-center justify-center gap-3 border-t bg-gray-50 px-4 py-3 sm:flex-row sm:gap-6">
       <p className="text-sm text-gray-600">
         Showing <span className="font-medium">{start}</span>–
         <span className="font-medium">{end}</span> of{" "}
