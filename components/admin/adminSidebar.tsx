@@ -39,7 +39,11 @@ export default function AdminSidebar({
   const { tenant, storeMode } = useTenant();
 
   // On mobile, always full width
-  const width = isMobile ? "w-72" : collapsed ? "w-20" : "w-72";
+  const width = isMobile
+    ? "w-[320px] max-w-[88vw] shrink-0"
+    : collapsed
+      ? "w-20"
+      : "w-72";
   return (
     <aside
       className={`

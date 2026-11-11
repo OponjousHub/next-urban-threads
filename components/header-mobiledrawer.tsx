@@ -45,7 +45,7 @@ export function MobileDrawer({
       {/* DRAWER */}
       <div
         aria-hidden={!menuOpen}
-        className={`fixed top-0 left-0 h-[100dvh] w-[88vw] max-w-[360px] bg-white shadow-2xl z-[9999] transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-[100dvh] w-[320px] max-w-[88vw] bg-white shadow-2xl z-[9999] transform transition-transform duration-300 ease-in-out ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
