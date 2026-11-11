@@ -45,7 +45,7 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
         onClick={() => setOpen((prev) => !prev)}
         aria-label="Open account menu"
         aria-expanded={open}
-        className="h-11 w-11 shrink-0 flex items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+        className="h-11 w-11 md:h-9 md:w-9 shrink-0 flex items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] mr-1 md:mr-0"
       >
         <img
           src={avatarUrl}

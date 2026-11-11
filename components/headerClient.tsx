@@ -287,7 +287,7 @@ const HeaderClient = ({
           </div>
 
           {/* RIGHT SIDE */}
-          <div className="flex items-center gap-2 md:gap-6">
+          <div className="flex items-center gap-4 md:gap-6">
             {/* SEARCH ICON */}
             <button
               type="button"
