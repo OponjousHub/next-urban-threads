@@ -117,7 +117,7 @@ export default function RefundsPageUI({ admin }: AdminProps) {
         subtitle="Manage Refund request"
         admin={admin}
       />
-      <main className="p-6">
+      <main className="px-3 py-6">
         {/* Refund KPIs */}
         <RefundKpis
           total={kpis.total}
