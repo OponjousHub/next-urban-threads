@@ -141,7 +141,8 @@ export default async function ShippingDashboardPage() {
 
         {/* KPI Cards */}
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {" "}
           <div className="rounded-2xl border bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -153,7 +154,6 @@ export default async function ShippingDashboardPage() {
               <MapPinned className="h-10 w-10 text-blue-600" />
             </div>
           </div>
-
           <div className="rounded-2xl border bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -165,7 +165,6 @@ export default async function ShippingDashboardPage() {
               <Truck className="h-10 w-10 text-green-600" />
             </div>
           </div>
-
           <div className="rounded-2xl border bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -177,7 +176,6 @@ export default async function ShippingDashboardPage() {
               <BadgeDollarSign className="h-10 w-10 text-orange-600" />
             </div>
           </div>
-
           <div className="rounded-2xl border bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
