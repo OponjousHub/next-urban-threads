@@ -93,9 +93,9 @@ export default function SupportPageClient({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
       {/* LEFT: inbox */}
-      <div className="p-6 border-r">
+      <div className="px-3 py-4 md:px-4 md:py-5 border-r">
         {/* HEADER */}
         <div className="sticky top-0 z-10 bg-white pb-4 mb-6">
           <h1 className="text-2xl font-bold mb-4 flex items-center gap-2">
@@ -135,7 +135,6 @@ export default function SupportPageClient({
             />
           </div>
         </div>
-
         {/* MESSAGE LIST */}
         <div className="space-y-3">
           {localMessages.length === 0 ? (
@@ -219,7 +218,6 @@ export default function SupportPageClient({
             ))
           )}
         </div>
-
         <AdminPagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -228,9 +226,8 @@ export default function SupportPageClient({
           onPageChange={handlePageChange}
         />
       </div>
-
       {/* RIGHT: PREVIEW PANEL */}
-      <div className="md:col-span-2 p-6">
+      <div className="md:col-span-2 px-3 py-4 md:px-4 md:py-5">
         {!selected ? (
           <div className="text-gray-400 text-center mt-20">
             Select a message 👈
