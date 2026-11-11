@@ -41,10 +41,17 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
     <div ref={dropdownRef} className="relative left-5">
       {/* Avatar */}
       <button
+        type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="h-9 w-9 rounded-full overflow-hidden border hover:ring-2 hover:ring-[var(--color-primary)] transition"
+        aria-label="Open account menu"
+        aria-expanded={open}
+        className="h-11 w-11 shrink-0 flex items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
       >
-        <img src={avatarUrl} alt={user.name} className="w-full h-full" />
+        <img
+          src={avatarUrl}
+          alt={user.name}
+          className="h-9 w-9 rounded-full border object-cover hover:ring-2 hover:ring-[var(--color-primary)] transition"
+        />
       </button>
 
       {/* Dropdown */}
