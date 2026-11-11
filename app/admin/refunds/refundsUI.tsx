@@ -129,55 +129,57 @@ export default function RefundsPageUI({ admin }: AdminProps) {
         />
         <div className="overflow-hidden rounded-xl border bg-white">
           {/* Refund Table */}
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-500">
-              <tr>
-                <th className="p-3 text-left">Order</th>
-                <th className="p-3 text-left">Reason</th>
-                <th className="p-3 text-left">Amount</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3 text-left">Date</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {refunds.length === 0 ? (
+          <div className="w-full overflow-x-auto overscroll-x-contain">
+            <table className="min-w-[700px] w-full text-sm">
+              <thead className="bg-gray-50 text-xs uppercase text-gray-500">
                 <tr>
-                  <td
-                    colSpan={5}
-                    className="p-8 text-center text-sm text-gray-500"
-                  >
-                    No refund requests found.
-                  </td>
+                  <th className="p-3 text-left">Order</th>
+                  <th className="p-3 text-left">Reason</th>
+                  <th className="p-3 text-left">Amount</th>
+                  <th className="p-3 text-left">Status</th>
+                  <th className="p-3 text-left">Date</th>
                 </tr>
-              ) : (
-                refunds.map((r) => (
-                  <tr
-                    key={r.id}
-                    onClick={() => setSelectedRefund(r.id)}
-                    className="cursor-pointer border-t hover:bg-gray-50"
-                  >
-                    <td className="p-3">{r.orderId}</td>
+              </thead>
 
-                    <td className="p-3">{r.reason}</td>
-
-                    <td className="p-3 font-medium">
-                      {tenant.currency}
-                      {Number(r.requestedAmount).toFixed(2)}
-                    </td>
-
-                    <td className="p-3">
-                      <StatusBadge status={r.status} />
-                    </td>
-
-                    <td className="p-3">
-                      {new Date(r.createdAt).toLocaleDateString()}
+              <tbody>
+                {refunds.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="p-8 text-center text-sm text-gray-500"
+                    >
+                      No refund requests found.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  refunds.map((r) => (
+                    <tr
+                      key={r.id}
+                      onClick={() => setSelectedRefund(r.id)}
+                      className="cursor-pointer border-t hover:bg-gray-50"
+                    >
+                      <td className="p-3">{r.orderId}</td>
+
+                      <td className="p-3">{r.reason}</td>
+
+                      <td className="p-3 font-medium">
+                        {tenant.currency}
+                        {Number(r.requestedAmount).toFixed(2)}
+                      </td>
+
+                      <td className="p-3">
+                        <StatusBadge status={r.status} />
+                      </td>
+
+                      <td className="p-3">
+                        {new Date(r.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
           <AdminPagination
             currentPage={currentPage}
