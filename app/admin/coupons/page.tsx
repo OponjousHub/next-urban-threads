@@ -3,7 +3,6 @@ import { prisma } from "@/utils/prisma";
 import { getAuthPayload } from "@/lib/server/auth";
 import AdminHeaderUI from "@/components/admin/adminHeaderUI";
 import { redirect } from "next/navigation";
-import AdminPagination from "@/components/admin/tables/AdminPagination";
 import CouponsTable from "@/components/admin/coupons/CouponsTable";
 
 export default async function AdminCouponsPage() {
@@ -267,13 +266,6 @@ export default async function AdminCouponsPage() {
             </table>
           </div> */}
           <CouponsTable coupons={couponRows} isMultiVendor={isMultiVendor} />
-
-          <AdminPagination
-            currentPage={1}
-            totalPages={1}
-            totalItems={coupons.length}
-            onPageChange={() => {}}
-          />
         </div>
       </div>
     </>
