@@ -108,25 +108,23 @@ export default async function AdminCouponsPage() {
       <div className="space-y-6">
         {/* KPI */}
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+          {" "}
           <div className="rounded-2xl border bg-white p-5 shadow-sm">
             <p className="text-sm text-gray-500">Total Coupons</p>
 
             <h2 className="mt-2 text-3xl font-bold">{totalCoupons}</h2>
           </div>
-
           <div className="rounded-2xl border bg-white p-5 shadow-sm">
             <p className="text-sm text-gray-500">Active Coupons</p>
 
             <h2 className="mt-2 text-3xl font-bold">{activeCoupons}</h2>
           </div>
-
           <div className="rounded-2xl border bg-white p-5 shadow-sm">
             <p className="text-sm text-gray-500">Expired Coupons</p>
 
             <h2 className="mt-2 text-3xl font-bold">{expiredCoupons}</h2>
           </div>
-
           <div className="rounded-2xl border bg-white p-5 shadow-sm">
             <p className="text-sm text-gray-500">Total Uses</p>
 
