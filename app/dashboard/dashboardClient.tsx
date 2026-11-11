@@ -65,7 +65,8 @@ function DashboardClient({
   const previewItems = stats.recentOrders.slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 mx-24">
+    <div className="min-h-screen w-full bg-gray-50 mx-0 px-4 py-5 sm:px-6 sm:py-6 lg:mx-24 lg:p-6">
+      {" "}
       {recoveryNotice && (
         <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg mb-4">
           ⚠️ You logged in using a recovery code. You have{" "}
@@ -74,63 +75,72 @@ function DashboardClient({
         </div>
       )}
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
-        <p className="text-gray-600"> {`Welcome back to ${tenant.name} 👋`}</p>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+          My Dashboard
+        </h1>
+
+        <p className="text-sm md:text-base text-gray-600 mt-1">
+          {`Welcome back to ${tenant.name} 👋`}
+        </p>
       </div>
-
       {/* Stats */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 md:gap-6">
+        {" "}
         <Card>
-          <CardContent className="flex items-center gap-4 p-6">
-            <ShoppingBag className="h-8 w-8 text-black" />
+          <CardContent className="flex items-center gap-3 p-4 md:gap-4 md:p-6">
+            <ShoppingBag className="h-6 w-6 shrink-0 text-black md:h-8 md:w-8" />
             <div>
-              <p className="text-sm text-gray-500">Total Orders</p>
-              <p className="text-2xl font-bold">{stats.totalOrders}</p>
+              <p className="text-xs md:text-sm text-gray-500">Total Orders</p>
+              <p className="text-xl md:text-2xl font-bold break-words">
+                {stats.totalOrders}
+              </p>
             </div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardContent className="flex items-center gap-4 p-6">
-            <Package className="h-8 w-8 text-black" />
+          <CardContent className="flex items-center gap-3 p-4 md:gap-4 md:p-6">
+            <Package className="h-6 w-6 shrink-0 text-black md:h-8 md:w-8" />
             <div>
-              <p className="text-sm text-gray-500">Pending Orders</p>
-              <p className="text-2xl font-bold">{stats.pendingOrders}</p>
+              <p className="text-xs md:text-sm text-gray-500">Pending Orders</p>
+              <p className="text-xl md:text-2xl font-bold break-words">
+                {stats.pendingOrders}
+              </p>
             </div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardContent className="flex items-center gap-4 p-6">
-            <CreditCard className="h-8 w-8 text-black" />
+          <CardContent className="flex items-center gap-3 p-4 md:gap-4 md:p-6">
+            <CreditCard className="h-6 w-6 shrink-0 text-black md:h-8 md:w-8" />
             <div>
-              <p className="text-sm text-gray-500">Total Spent</p>
-              <p className="text-2xl font-bold">
+              <p className="text-xs md:text-sm text-gray-500">Total Spent</p>
+              <p className="text-xl md:text-2xl font-bold break-words">
                 {formatCurrency(+stats.totalSpent, tenant.currency)}
               </p>
             </div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardContent className="flex items-center gap-4 p-6">
-            <User className="h-8 w-8 text-black" />
+          <CardContent className="flex items-center gap-3 p-4 md:gap-4 md:p-6">
+            <User className="h-6 w-6 shrink-0 text-black md:h-8 md:w-8" />
             <div>
-              <p className="text-sm text-gray-500">Account</p>
-              <p className="text-2xl font-bold">{user?.status}</p>
+              <p className="text-xs md:text-sm text-gray-500">Account</p>
+              <p className="text-xl md:text-2xl font-bold break-words">
+                {user?.status}
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
-
       {/* Main Section */}
-      <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="mt-7 md:mt-10 grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-3">
+        {" "}
         {/* Recent Orders */}
         <div className="lg:col-span-2">
           <div className="space-y-4">
             {!hasOrders ? (
-              <div className="rounded-lg border border-dashed p-8 text-center text-gray-500">
+              <div className="rounded-xl border border-dashed p-6 md:p-8 text-center text-gray-500">
+                {" "}
                 <Package className="mx-auto mb-2 h-8 w-8" />
                 <p className="font-medium">No orders yet</p>
                 <p className="text-sm">
@@ -218,12 +228,11 @@ function DashboardClient({
             )}
           </div>
         </div>
-
         {/* Profile & Address */}
         <div className="space-y-6">
           <Card>
-            <CardContent className="p-6">
-              <h2 className="mb-4 text-xl font-semibold">Profile</h2>
+            <CardContent className="p-4 sm:p-6">
+              <h2 className="mb-4 text-lg md:text-xl font-semibold">Profile</h2>
 
               {stats.user ? (
                 <>
@@ -250,12 +259,14 @@ function DashboardClient({
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
+              {" "}
               <div className="mb-4 flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                <h2 className="text-xl font-semibold">Shipping Address</h2>
+                <h2 className="mb-4 text-lg md:text-xl font-semibold">
+                  Shipping Address
+                </h2>
               </div>
-
               {shippingAddress ? (
                 <>
                   <p className="text-sm font-medium">
@@ -280,7 +291,6 @@ function DashboardClient({
               ) : (
                 <p className="text-sm text-gray-500">No default address set.</p>
               )}
-
               <Link href="/dashboard/addresses">
                 <Button className="mt-4 w-full" variant="outline">
                   Manage Address
