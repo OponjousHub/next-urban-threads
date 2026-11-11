@@ -165,7 +165,8 @@ export default async function OrdersPage({ searchParams }: Props) {
         admin={admin}
       />
 
-      <div className="bg-white border-b px-4 py-4 mb-6 rounded-xl shadow-sm">
+      <div className="bg-white border-b px-2 py-4 mb-6 rounded-xl shadow-sm">
+        {" "}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
           <div className="flex items-center gap-3 flex-wrap">
             <OrderFilters basePath={"/admin/orders"} />
