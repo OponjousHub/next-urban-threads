@@ -287,24 +287,42 @@ const HeaderClient = ({
           </div>
 
           {/* RIGHT SIDE */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 md:gap-6">
             {/* SEARCH ICON */}
             <button
+              type="button"
               onClick={() => setSearchOpen(true)}
-              className="md:hidden text-gray-700"
+              aria-label="Search products"
+              className="md:hidden h-10 w-10 shrink-0 flex items-center justify-center text-gray-700"
             >
-              <FiSearch size={20} />
+              <FiSearch size={21} />
             </button>
 
             {/* CART */}
-            <Link href="/cart" className="relative">
+            <Link
+              href="/cart"
+              aria-label="Shopping cart"
+              className="relative h-10 w-10 shrink-0 flex items-center justify-center"
+            >
               <FiShoppingCart size={24} />
+
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[var(--color-primary)] text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                <span className="absolute top-0 right-0 bg-[var(--color-primary)] text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}
             </Link>
+
+            {/* MOBILE MENU BUTTON */}
+            <button
+              type="button"
+              aria-label="Open menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(true)}
+              className="md:hidden h-10 w-10 shrink-0 flex items-center justify-center text-gray-700"
+            >
+              <FiMenu size={27} />
+            </button>
 
             {/* USER */}
             {loading ? (
@@ -335,14 +353,6 @@ const HeaderClient = ({
                 </Link>
               </div>
             )}
-
-            {/* MOBILE MENU BUTTON */}
-            <button
-              className="md:hidden text-gray-700 ml-6"
-              onClick={() => setMenuOpen(true)}
-            >
-              <FiMenu size={26} />
-            </button>
           </div>
         </div>
       </header>
