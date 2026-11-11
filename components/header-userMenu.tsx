@@ -49,76 +49,80 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-52 rounded-xl border bg-white shadow-xl overflow-hidden">
-          {" "}
-          <div className="px-4 py-3 border-b">
-            <p className="text-sm font-medium">{user.name}</p>
-            <p className="text-xs text-gray-500">{role}</p>
+        <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-xl overflow-hidden z-50">
+          {/* USER INFORMATION */}
+          <div className="px-4 py-4 border-b border-gray-100">
+            <p className="text-sm font-semibold text-gray-900">{user.name}</p>
+            <p className="text-xs text-gray-500 mt-1">{role}</p>
           </div>
-          <Link
-            href="/dashboard"
-            className="block px-4 py-2 text-sm hover:bg-gray-100"
-            onClick={handleCloseUserMenu}
-          >
-            My Account
-          </Link>
-          <Link
-            href="/dashboard/order"
-            className="block px-4 py-2 text-sm hover:bg-gray-100"
-            onClick={handleCloseUserMenu}
-          >
-            My Orders
-          </Link>
-          {(role === "ADMIN" && (
+
+          {/* ACCOUNT LINKS */}
+          <div className="p-2">
             <Link
-              href="/admin"
-              className="block px-4 py-2 text-sm hover:bg-gray-100"
+              href="/dashboard"
+              className="flex items-center min-h-[46px] px-3 rounded-lg text-[15px] text-gray-700 hover:bg-gray-100 transition"
               onClick={handleCloseUserMenu}
             >
-              Admin Panel
+              My Account
             </Link>
-          )) ||
-            (role === "OWNER" && (
+
+            <Link
+              href="/dashboard/order"
+              className="flex items-center min-h-[46px] px-3 rounded-lg text-[15px] text-gray-700 hover:bg-gray-100 transition"
+              onClick={handleCloseUserMenu}
+            >
+              My Orders
+            </Link>
+
+            {(role === "ADMIN" || role === "OWNER") && (
               <Link
                 href="/admin"
-                className="block px-4 py-2 text-sm hover:bg-gray-100"
+                className="flex items-center min-h-[46px] px-3 rounded-lg text-[15px] text-gray-700 hover:bg-gray-100 transition"
                 onClick={handleCloseUserMenu}
               >
                 Admin Panel
               </Link>
-            ))}
-          {role === "Vendor" && (
-            <Link
-              href="/vendor"
-              className="block px-4 py-2 text-sm hover:bg-gray-100"
-              onClick={handleCloseUserMenu}
-            >
-              Vendor Center
-            </Link>
-          )}
-          {isMultiVendor && role === "USER" && (
-            <Link
-              href="/account/vendor-application"
-              className="block px-4 py-2 text-sm hover:bg-gray-100"
-              onClick={handleCloseUserMenu}
-            >
-              Become Seller
-            </Link>
-          )}
-          <button
-            className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
-            onClick={async () => {
-              await fetch("/api/auth/logout", {
-                method: "POST",
-                credentials: "include",
-              });
-              router.refresh();
-              router.replace("/");
-              onRemoveAvater();
-            }}
-          >
-            Logout
-          </button>
+            )}
+
+            {role === "Vendor" && (
+              <Link
+                href="/vendor"
+                className="flex items-center min-h-[46px] px-3 rounded-lg text-[15px] text-gray-700 hover:bg-gray-100 transition"
+                onClick={handleCloseUserMenu}
+              >
+                Vendor Center
+              </Link>
+            )}
+
+            {isMultiVendor && role === "USER" && (
+              <Link
+                href="/account/vendor-application"
+                className="flex items-center min-h-[46px] px-3 rounded-lg text-[15px] text-gray-700 hover:bg-gray-100 transition"
+                onClick={handleCloseUserMenu}
+              >
+                Become Seller
+              </Link>
+            )}
+
+            {/* LOGOUT */}
+            <div className="border-t border-gray-100 mt-2 pt-2">
+              <button
+                className="flex items-center w-full min-h-[46px] px-3 rounded-lg text-left text-[15px] text-red-600 hover:bg-red-50 transition"
+                onClick={async () => {
+                  await fetch("/api/auth/logout", {
+                    method: "POST",
+                    credentials: "include",
+                  });
+
+                  router.refresh();
+                  router.replace("/");
+                  onRemoveAvater();
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
