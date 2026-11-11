@@ -44,12 +44,14 @@ export default function AdminSidebar({
   return (
     <aside
       className={`
-        ${isMobile ? "flex" : "hidden lg:flex"}
-        ${width} flex-col bg-white shadow-lg border-r border-gray-200 h-full transition-all duration-300 z-50
-      `}
+  ${isMobile ? "flex" : "hidden lg:flex"}
+  ${width} h-dvh min-h-0 flex-col overflow-hidden
+  border-r border-gray-200 bg-white shadow-sm
+  transition-all duration-300 z-50
+`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b px-4 py-5 mt-14 md:mt-0">
+      <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-4 py-5 mt-14 md:mt-0">
         {!collapsed && (
           <h1 className="text-xl font-bold tracking-tight">
             {tenant.name.split(" ")[0]} Admin
@@ -84,7 +86,7 @@ export default function AdminSidebar({
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-2 px-3">
+      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4">
         <SidebarItem
           href="/admin"
           icon={<FiHome size={20} />}
@@ -231,16 +233,18 @@ function SidebarItem({
     <Link
       href={href}
       onClick={onNavigate}
-      className={`flex items-center gap-3 px-3 py-3 rounded-xl duration-200
-        ${
-          active
-            ? "bg-[var(--color-primary-lighter)] text-[var(--color-primary-dark)]"
-            : "hover:bg-[var(--color-primary-lightest)] hover:text-indigo-600hover:bg-[var(--color-primary)]"
-        }
-      `}
+      className={`group flex items-center gap-3 rounded-xl px-3 py-3.5
+  text-[15px] font-medium tracking-[-0.01em] transition-all duration-200
+  ${
+    active
+      ? "bg-[var(--color-primary-lighter)] text-[var(--color-primary-dark)]"
+      : "text-gray-600 hover:bg-gray-50 hover:text-gray-950"
+  }
+`}
     >
-      {icon}
-      {!collapsed && <span className="text-sm font-medium">{label}</span>}
+      <span className="flex shrink-0 items-center justify-center">{icon}</span>
+
+      {!collapsed && <span className="truncate">{label}</span>}
     </Link>
   );
 }
