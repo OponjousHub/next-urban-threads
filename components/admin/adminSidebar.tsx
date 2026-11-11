@@ -39,8 +39,7 @@ export default function AdminSidebar({
   const { tenant, storeMode } = useTenant();
 
   // On mobile, always full width
-  const width = isMobile ? "w-64" : collapsed ? "w-20" : "w-64";
-
+  const width = isMobile ? "w-72" : collapsed ? "w-20" : "w-72";
   return (
     <aside
       className={`
@@ -234,7 +233,7 @@ function SidebarItem({
       href={href}
       onClick={onNavigate}
       className={`group flex items-center gap-3 rounded-xl px-3 py-3.5
-  text-[15px] font-medium tracking-[-0.01em] transition-all duration-200
+  text-[15px] font-normal tracking-[-0.01em] transition-all duration-200
   ${
     active
       ? "bg-[var(--color-primary-lighter)] text-[var(--color-primary-dark)]"
@@ -244,7 +243,7 @@ function SidebarItem({
     >
       <span className="flex shrink-0 items-center justify-center">{icon}</span>
 
-      {!collapsed && <span className="truncate">{label}</span>}
+      {!collapsed && <span className="truncate font-normal">{label}</span>}
     </Link>
   );
 }
