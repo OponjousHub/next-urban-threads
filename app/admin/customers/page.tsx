@@ -130,7 +130,7 @@ export default async function VendorCustomersPage({
 
       <div className="space-y-6">
         {/* Stats */}
-        <div className="grid gap-4  grid-cols-3 mx-4">
+        <div className="grid gap-4  grid-cols-3 mx-0">
           <div className="rounded-2xl border bg-white p-5 shadow-sm">
             <p className="text-sm text-gray-500">Total Customers</p>
             <h2 className="mt-2 text-3xl font-bold">{totalCustomers}</h2>
@@ -148,7 +148,7 @@ export default async function VendorCustomersPage({
         </div>
 
         {/* Customers Table */}
-        <div className="overflow-hidden rounded-2xl border bg-white shadow-sm mx-4">
+        <div className="overflow-hidden rounded-2xl border bg-white shadow-sm mx-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
@@ -224,7 +224,11 @@ export default async function VendorCustomersPage({
             </table>
           </div>
         </div>
-        <Pagination totalPages={totalPages} totalItems={allCustomersCount} pageSize={pageSize} />
+        <Pagination
+          totalPages={totalPages}
+          totalItems={allCustomersCount}
+          pageSize={pageSize}
+        />
       </div>
     </>
   );
