@@ -97,82 +97,84 @@ export default function ShippingZonesPageClient({ zones }: Props) {
 
       {filteredZones.length > 0 && (
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-          <table className="w-full">
-            <thead className="bg-gray-50 text-left text-sm">
-              <tr>
-                <th className="px-6 py-4">Zone</th>
+          <div className="w-full overflow-x-auto overscroll-x-contain">
+            <table className="min-w-[850px] w-full">
+              <thead className="bg-gray-50 text-left text-sm">
+                <tr>
+                  <th className="px-6 py-4">Zone</th>
 
-                <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Status</th>
 
-                <th className="px-6 py-4">Methods</th>
+                  <th className="px-6 py-4">Methods</th>
 
-                <th className="px-6 py-4">Rates</th>
+                  <th className="px-6 py-4">Rates</th>
 
-                <th className="px-6 py-4">Created</th>
+                  <th className="px-6 py-4">Created</th>
 
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {visibleZones.map((zone) => (
-                <tr key={zone.id} className="border-t hover:bg-gray-50">
-                  <td className="px-6 py-5">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-lg bg-blue-100 p-2">
-                        <MapPin className="h-5 w-5 text-blue-600" />
-                      </div>
-
-                      <div>
-                        <p className="font-medium">{zone.name}</p>
-
-                        {zone.description && (
-                          <p className="mt-1 text-sm text-gray-500">
-                            {zone.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-5">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        zone.active
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {zone.active ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-2">
-                      <Truck className="h-4 w-4 text-gray-500" />
-                      {zone.methodCount}
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-5">{zone.rateCount}</td>
-
-                  <td className="px-6 py-5 text-sm text-gray-500">
-                    {new Date(zone.createdAt).toLocaleDateString()}
-                  </td>
-
-                  <td className="px-6 py-5 text-right">
-                    <Link
-                      href={`/admin/shipping/zones/${zone.id}/edit`}
-                      className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                      <Settings className="h-4 w-4" />
-                      Edit
-                    </Link>
-                  </td>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {visibleZones.map((zone) => (
+                  <tr key={zone.id} className="border-t hover:bg-gray-50">
+                    <td className="px-6 py-5">
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-lg bg-blue-100 p-2">
+                          <MapPin className="h-5 w-5 text-blue-600" />
+                        </div>
+
+                        <div>
+                          <p className="font-medium">{zone.name}</p>
+
+                          {zone.description && (
+                            <p className="mt-1 text-sm text-gray-500">
+                              {zone.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          zone.active
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {zone.active ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4 text-gray-500" />
+                        {zone.methodCount}
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-5">{zone.rateCount}</td>
+
+                    <td className="px-6 py-5 text-sm text-gray-500">
+                      {new Date(zone.createdAt).toLocaleDateString()}
+                    </td>
+
+                    <td className="px-6 py-5 text-right">
+                      <Link
+                        href={`/admin/shipping/zones/${zone.id}/edit`}
+                        className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Edit
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <AdminPagination
             currentPage={currentPage}
             totalPages={totalPages}
