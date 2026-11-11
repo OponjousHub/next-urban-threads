@@ -103,89 +103,91 @@ export default function ShippingMethodsPageClient({ methods }: Props) {
 
       {filteredMethods.length > 0 && (
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-          <table className="w-full">
-            <thead className="bg-gray-50 text-left text-sm">
-              <tr>
-                <th className="px-6 py-4">Method</th>
+          <div className="w-full overflow-x-auto overscroll-x-contain">
+            <table className="min-w-[900px] w-full">
+              <thead className="bg-gray-50 text-left text-sm">
+                <tr>
+                  <th className="px-6 py-4">Method</th>
 
-                <th className="px-6 py-4">Zone</th>
+                  <th className="px-6 py-4">Zone</th>
 
-                <th className="px-6 py-4">Delivery Time</th>
+                  <th className="px-6 py-4">Delivery Time</th>
 
-                <th className="px-6 py-4">Rates</th>
+                  <th className="px-6 py-4">Rates</th>
 
-                <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Status</th>
 
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {visibleMethods.map((method) => (
-                <tr key={method.id} className="border-t hover:bg-gray-50">
-                  <td className="px-6 py-5">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-lg bg-blue-100 p-2">
-                        <Truck className="h-5 w-5 text-blue-600" />
-                      </div>
-
-                      <div>
-                        <p className="font-medium">{method.name}</p>
-
-                        {method.description && (
-                          <p className="mt-1 text-sm text-gray-500">
-                            {method.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-gray-500" />
-
-                      {method.zone.name}
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-gray-500" />
-
-                      {method.estimatedMinDays && method.estimatedMaxDays
-                        ? `${method.estimatedMinDays} - ${method.estimatedMaxDays} days`
-                        : "Not set"}
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-5">{method.rateCount}</td>
-
-                  <td className="px-6 py-5">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        method.active
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {method.active ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-
-                  <td className="px-6 py-5 text-right">
-                    <Link
-                      href={`/admin/shipping/methods/${method.id}/edit`}
-                      className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                      <Settings className="h-4 w-4" />
-                      Edit
-                    </Link>
-                  </td>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {visibleMethods.map((method) => (
+                  <tr key={method.id} className="border-t hover:bg-gray-50">
+                    <td className="px-6 py-5">
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-lg bg-blue-100 p-2">
+                          <Truck className="h-5 w-5 text-blue-600" />
+                        </div>
+
+                        <div>
+                          <p className="font-medium">{method.name}</p>
+
+                          {method.description && (
+                            <p className="mt-1 text-sm text-gray-500">
+                              {method.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-gray-500" />
+
+                        {method.zone.name}
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-500" />
+
+                        {method.estimatedMinDays && method.estimatedMaxDays
+                          ? `${method.estimatedMinDays} - ${method.estimatedMaxDays} days`
+                          : "Not set"}
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-5">{method.rateCount}</td>
+
+                    <td className="px-6 py-5">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          method.active
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {method.active ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-5 text-right">
+                      <Link
+                        href={`/admin/shipping/methods/${method.id}/edit`}
+                        className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Edit
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <AdminPagination
             currentPage={currentPage}
             totalPages={totalPages}
