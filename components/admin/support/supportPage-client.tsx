@@ -93,7 +93,7 @@ export default function SupportPageClient({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(340px,0.9fr)_minmax(0,2fr)]">
       {/* LEFT: inbox */}
       <div className="px-3 py-4 md:px-4 md:py-5 border-r">
         {/* HEADER */}

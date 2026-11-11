@@ -30,7 +30,11 @@ export default function AdminLayout({
       />
 
       {/* Dashboard Content */}
-      <div className="flex min-w-0 flex-1 flex-col pl-6 pr-8">
+      <div
+        className={`flex min-w-0 flex-1 flex-col ${
+          useWiderContent ? "pl-2 pr-2 md:pl-3 md:pr-4" : "pl-6 pr-8"
+        }`}
+      >
         <main className="min-w-0 flex-1 bg-gray-50">{children}</main>
       </div>
 
