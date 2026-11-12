@@ -48,7 +48,8 @@ export default function SettingsPageUI({ admin }: AdminProps) {
         admin={admin}
       />
 
-      <div className="flex w-full max-w-6xl flex-col lg:flex-row items-start gap-4 lg:gap-8 mx-auto px-3 py-4 sm:p-6 min-h-0">
+      <div className="flex w-full max-w-6xl flex-col lg:flex-row items-start gap-4 lg:gap-6 mx-auto px-2 py-3 sm:px-4 sm:py-4 min-h-0">
+        {" "}
         {/* Mobile Settings Menu */}
         <div className="w-full lg:hidden">
           <button
@@ -88,7 +89,6 @@ export default function SettingsPageUI({ admin }: AdminProps) {
             </div>
           )}
         </div>
-
         {/* Desktop Sidebar — preserve existing design */}
         <aside className="hidden lg:block w-56 shrink-0">
           <div className="bg-white border rounded-2xl p-3 shadow-sm">
@@ -109,7 +109,6 @@ export default function SettingsPageUI({ admin }: AdminProps) {
             </nav>
           </div>
         </aside>
-
         {/* Settings Content */}
         <main className="w-full flex-1 min-w-0 min-h-0 space-y-6">
           {/* Header */}

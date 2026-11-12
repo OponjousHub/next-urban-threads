@@ -89,7 +89,7 @@ export default function NewsletterAdminPage() {
     progress.total > 0 ? Math.round((progress.sent / progress.total) * 100) : 0;
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="w-full min-w-0 max-w-5xl p-2 sm:p-4 lg:p-6">
       {/* SEND FORM */}
       <div className="bg-white p-6 rounded-xl border mb-8">
         <input
@@ -137,7 +137,6 @@ export default function NewsletterAdminPage() {
           </div>
         )}
       </div>
-
       {/* SUBSCRIBERS LIST */}
       <div className="bg-white p-6 rounded-xl border">
         <h2 className="font-semibold mb-4">

@@ -151,7 +151,7 @@ export default function AdminNotificationBell() {
         <FaBell className="text-gray-700" />
 
         {unreadCount > 0 && (
-          <span className="absolute -right-2 -top-1 z-50 flex h-4 min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white">
+          <span className="absolute -right-2 -top-1 z-50 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
