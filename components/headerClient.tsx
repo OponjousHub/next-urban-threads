@@ -307,7 +307,7 @@ const HeaderClient = ({
               <FiShoppingCart size={24} />
 
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-[var(--color-primary)] text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                <span className="absolute -top-2 -right-2 bg-[var(--color-primary)] text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}
