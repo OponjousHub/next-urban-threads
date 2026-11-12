@@ -150,16 +150,17 @@ export default function ChangePasswordAdmin() {
       {/* Actions */}
       <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
         <button
+          type="button"
+          className="w-full sm:w-auto px-4 py-2 border rounded-lg"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
           onClick={handleSubmit}
           disabled={hasErrors || loading}
           className="w-full sm:w-auto px-4 py-2 bg-black text-white rounded-lg disabled:opacity-50"
-        >
-          {loading ? "Updating..." : "Update Password"}
-        </button>{" "}
-        <button
-          onClick={handleSubmit}
-          disabled={hasErrors || loading}
-          className="px-4 py-2 bg-black text-white rounded-lg disabled:opacity-50"
         >
           {loading ? "Updating..." : "Update Password"}
         </button>
