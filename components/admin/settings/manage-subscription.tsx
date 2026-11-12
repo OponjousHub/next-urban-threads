@@ -91,7 +91,7 @@ export default function NewsletterAdminPage() {
   return (
     <div className="w-full min-w-0 max-w-5xl p-2 sm:p-4 lg:p-6">
       {/* SEND FORM */}
-      <div className="bg-white p-6 rounded-xl border mb-8">
+      <div className="w-full min-w-0 bg-white p-3 sm:p-5 lg:p-6 rounded-xl border mb-5 sm:mb-8">
         <input
           type="text"
           placeholder="Subject"
@@ -99,14 +99,12 @@ export default function NewsletterAdminPage() {
           onChange={(e) => setSubject(e.target.value)}
           className="w-full border p-3 rounded mb-4"
         />
-
         <textarea
           placeholder="Write your message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           className="w-full border p-3 rounded mb-4 h-40"
         />
-
         <button
           onClick={sendNewsletter}
           disabled={loading}
@@ -114,7 +112,6 @@ export default function NewsletterAdminPage() {
         >
           {loading ? "Sending..." : "Send Newsletter"}
         </button>
-
         {/* 🔥 PROGRESS UI */}
         {progress.status !== "idle" && (
           <div className="mt-6">
@@ -138,11 +135,10 @@ export default function NewsletterAdminPage() {
         )}
       </div>
       {/* SUBSCRIBERS LIST */}
-      <div className="bg-white p-6 rounded-xl border">
+      <div className="w-full min-w-0 bg-white p-3 sm:p-5 lg:p-6 rounded-xl border">
         <h2 className="font-semibold mb-4">
           Subscribers ({subscribers.length})
         </h2>
-
         {subscribers.length === 0 ? (
           <p className="text-gray-500">No subscribers yet</p>
         ) : (
