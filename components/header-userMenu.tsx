@@ -66,7 +66,7 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
           <div className="p-2 md:p-1">
             <Link
               href="/dashboard"
-              className="flex items-center min-h-[46px] px-3 rounded-lg text-[15px] text-gray-700 hover:bg-gray-100 transition"
+              className="flex items-center min-h-[46px] md:min-h-0 px-3 py-3 md:py-2 rounded-lg text-[15px] md:text-sm text-gray-700 hover:bg-gray-100 transition"
               onClick={handleCloseUserMenu}
             >
               My Account
