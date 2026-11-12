@@ -98,7 +98,7 @@ export default function ChangePasswordAdmin() {
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 w-[420px] space-y-4">
+    <div className="w-full min-w-0 max-w-[420px] bg-white rounded-xl p-3 sm:p-5 lg:p-6 space-y-4">
       {/* Current Password */}
       <PasswordInput
         label="Current Password"
@@ -111,7 +111,6 @@ export default function ChangePasswordAdmin() {
         error={errors.currentPassword}
         touched={touched.currentPassword}
       />
-
       {/* New Password */}
       <PasswordInput
         label="New Password"
@@ -124,7 +123,6 @@ export default function ChangePasswordAdmin() {
         error={errors.newPassword}
         touched={touched.newPassword}
       />
-
       {/* Strength */}
       <p
         className={`text-sm ${
@@ -137,7 +135,6 @@ export default function ChangePasswordAdmin() {
       >
         Password Strength: {strength}
       </p>
-
       {/* Confirm */}
       <PasswordInput
         label="Confirm Password"
@@ -150,11 +147,15 @@ export default function ChangePasswordAdmin() {
         error={errors.confirmPassword}
         touched={touched.confirmPassword}
       />
-
       {/* Actions */}
-      <div className="flex justify-end gap-3 pt-2">
-        <button className="px-4 py-2 border rounded-lg">Cancel</button>
-
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+        <button
+          onClick={handleSubmit}
+          disabled={hasErrors || loading}
+          className="w-full sm:w-auto px-4 py-2 bg-black text-white rounded-lg disabled:opacity-50"
+        >
+          {loading ? "Updating..." : "Update Password"}
+        </button>{" "}
         <button
           onClick={handleSubmit}
           disabled={hasErrors || loading}
