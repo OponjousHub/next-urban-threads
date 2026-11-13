@@ -148,10 +148,29 @@ export default function ChangePasswordAdmin() {
         touched={touched.confirmPassword}
       />
       {/* Actions */}
-      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+      <div className="relative z-10 flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4 pt-4">
         <button
           type="button"
-          className="w-full sm:w-auto px-4 py-2 border rounded-lg"
+          onClick={() => {
+            setForm({
+              currentPassword: "",
+              newPassword: "",
+              confirmPassword: "",
+            });
+
+            setTouched({
+              currentPassword: false,
+              newPassword: false,
+              confirmPassword: false,
+            });
+
+            setShow({
+              current: false,
+              new: false,
+              confirm: false,
+            });
+          }}
+          className="w-full sm:w-auto px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
         >
           Cancel
         </button>
@@ -160,7 +179,7 @@ export default function ChangePasswordAdmin() {
           type="button"
           onClick={handleSubmit}
           disabled={hasErrors || loading}
-          className="w-full sm:w-auto px-4 py-2 bg-black text-white rounded-lg disabled:opacity-50"
+          className="w-full sm:w-auto px-5 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Updating..." : "Update Password"}
         </button>
