@@ -22,7 +22,7 @@ export default function AdminHeaderUI({
 }: AdminHeaderProps) {
   const { toggle } = useAdminSidebar();
   return (
-    <header className="sticky top-0 z-30 border-b bg-white mb-10">
+    <header className="sticky top-16 z-30 border-b bg-white mb-10">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
         {/* LEFT */}
         <div className="flex items-center gap-3">
