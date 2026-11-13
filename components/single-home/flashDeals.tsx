@@ -71,9 +71,9 @@ export default function FlashDeals() {
               Limited Time
             </p>
 
-            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div className="flex flex-row items-center justify-between gap-3">
               <div>
-                <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
                   ⚡ Flash Deals
                 </h2>
 
@@ -81,11 +81,10 @@ export default function FlashDeals() {
                   Grab these special offers before they are gone.
                 </p>
               </div>
-
               {!loading && products.length > 0 && (
                 <Link
                   href="/products?flash=true"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-white transition hover:text-white/70"
+                  className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-medium text-white transition hover:text-white/70"
                 >
                   {hasMoreDeals ? "View more deals" : "View all deals"} →
                 </Link>
@@ -146,12 +145,12 @@ export default function FlashDeals() {
                     </div>
 
                     {/* Details */}
-                    <div className="p-6">
-                      <h3 className="line-clamp-2 min-h-[48px] font-medium text-gray-900">
+                    <div className="p-4 sm:p-5">
+                      <h3 className="line-clamp-2 font-medium text-gray-900">
                         {product.name}
                       </h3>
 
-                      <p className="mt-2 text-xl font-bold text-red-500">
+                      <p className="mt-1 text-xl font-bold text-red-500">
                         {formatCurrency(
                           Number(product.price),
                           tenant?.currency ?? "NGN",
