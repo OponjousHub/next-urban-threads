@@ -123,7 +123,7 @@ export default function AdminOrderTrackingPage() {
   return (
     <>
       <AdminHeaderUI title="Orders " subtitle="View customer order tracking" />
-      <div className="grid grid-cols-2 gap-10 p-6">
+      <div className="grid grid-cols-1 gap-6 p-3 sm:p-4 lg:grid-cols-2 lg:gap-10">
         {/* LEFT: QUICK ACTIONS */}
         <div className="space-y-4 border p-4 rounded-xl">
           <h2 className="font-semibold text-lg">Update Tracking</h2>
@@ -173,7 +173,6 @@ export default function AdminOrderTrackingPage() {
             })}
           </div>
         </div>
-
         {/* RIGHT: TIMELINE */}
         <div className="border p-4 rounded-xl">
           <h2 className="font-semibold text-lg mb-4">Tracking Timeline</h2>
