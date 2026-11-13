@@ -136,12 +136,12 @@ export default function FeaturedProducts() {
                   </div>
 
                   {/* Details */}
-                  <div className="p-5 lg:p-6">
-                    <h3 className="line-clamp-2 min-h-[48px] font-medium text-gray-900">
+                  <div className="p-3 sm:p-4 lg:p-5">
+                    <h3 className="line-clamp-2 font-medium text-gray-900">
                       {product.name}
                     </h3>
 
-                    <p className="mt-2 text-lg font-bold text-[var(--color-primary)] lg:text-xl">
+                    <p className="mt-1 text-lg font-bold text-[var(--color-primary)] lg:text-xl">
                       {formatCurrency(
                         Number(product.price),
                         tenant?.currency ?? "NGN",
