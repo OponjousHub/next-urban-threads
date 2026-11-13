@@ -283,17 +283,16 @@ export default function OrderDetails({
   if (!localOrder) return <p className="p-6 text-gray-500">Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-5">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* HEADER */}
-        <div className="flex flex-col-2 gap-4 lg:flex-row lg:items-start justify-between">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           {/* LEFT */}
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="hidden md:block text-3xl font-bold tracking-tight text-gray-900">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <h1 className="text-xl font-bold tracking-tight text-gray-900 sm:text-3xl">
                 Order
               </h1>
-
               <span className="rounded-full bg-gray-900 px-3 py-1 text-xs font-medium text-white">
                 #{localOrder.id.slice(0, 10)}
               </span>
@@ -307,9 +306,8 @@ export default function OrderDetails({
               })}
             </p>
           </div>
-
           {/* STATUS + TOTAL */}
-          <div className="flex flex-wrap gap-3">
+          <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-3">
             <div className="rounded-2xl border bg-white px-5 py-4 shadow-sm">
               <p className="text-xs uppercase tracking-wide text-gray-500">
                 Payment
@@ -328,12 +326,10 @@ export default function OrderDetails({
                 </span>
               </div>
             </div>
-
-            <div className="rounded-2xl border bg-white px-5 py-4 shadow-sm">
+            <div className="min-w-0 rounded-2xl border bg-white px-2 py-3 shadow-sm sm:px-5 sm:py-4">
               <p className="text-xs uppercase tracking-wide text-gray-500">
                 Status
               </p>
-
               <div className="mt-2">
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold
@@ -343,13 +339,12 @@ export default function OrderDetails({
                 </span>
               </div>
             </div>
-
             <div className="rounded-2xl border bg-white px-5 py-4 shadow-sm">
               <p className="text-xs uppercase tracking-wide text-gray-500">
                 Total
               </p>
 
-              <p className="mt-1 text-2xl font-bold text-gray-900">
+              <p className="mt-1 break-words text-base font-bold text-gray-900 sm:text-2xl">
                 {formatCurrency(localOrder.totalAmount, tenant.currency)}
               </p>
             </div>
