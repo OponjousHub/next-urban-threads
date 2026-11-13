@@ -284,12 +284,12 @@ export default function OrdersTable({
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
             onClick={() => setShowActionsSheet(false)}
           />
 
           {/* Sheet */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+          <div className="fixed bottom-0 left-0 right-0 z-[110] md:hidden">
             <div className="rounded-t-3xl bg-white shadow-2xl">
               {/* Handle */}
               <div className="flex justify-center py-3">

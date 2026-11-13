@@ -185,7 +185,10 @@ export function OrderRow({
 
       {/* ACTIONS */}
       <td className="py-3 px-4 text-right">
-        <div ref={ref} className="relative inline-block text-left z-[9999]">
+        <div
+          ref={ref}
+          className={`relative inline-block text-left ${open ? "z-[60]" : "z-0"}`}
+        >
           <button
             onClick={handleOpenMenu}
             className="hidden md:block p-2 rounded-full hover:bg-gray-200"
@@ -199,10 +202,9 @@ export function OrderRow({
           >
             <FiMoreVertical size={16} />
           </button>
-
           {open && (
             <div
-              className={`fixed z-[9999] w-56 rounded-xl border bg-white shadow-xl ${
+              className={`fixed z-[70] w-56 rounded-xl border bg-white shadow-xl ${
                 openUpward ? "-translate-y-full" : ""
               }`}
               style={{
