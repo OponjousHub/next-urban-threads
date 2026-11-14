@@ -38,7 +38,10 @@ export default function UserMenu({ user, onRemoveAvater, role }: Props) {
   };
 
   return (
-    <div ref={dropdownRef} className="relative left-5 md:left-0">
+    <div
+      ref={dropdownRef}
+      className="relative left-5 md:left-0 right-4 md:right-0"
+    >
       {/* Avatar */}
       <button
         type="button"

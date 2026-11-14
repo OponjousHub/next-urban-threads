@@ -86,22 +86,22 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-gray-950 text-gray-300 pt-16 pb-8 px-6">
+    <footer className="bg-gray-950 text-gray-300 pt-12 pb-8 px-4 sm:px-6 md:pt-16">
       <div className="max-w-7xl mx-auto">
         {/* TOP GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-gray-800">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10 md:gap-10 pb-12 border-b border-gray-800">
           {/* BRAND */}
-          <div>
+          <div className="col-span-2 order-1 text-center md:col-span-1 md:order-none md:text-left">
             <h2 className="text-white text-xl font-semibold mb-4">
               {brandName}
             </h2>
-            <p className="text-sm leading-relaxed text-gray-400">
+            <p className="mx-auto max-w-md text-sm leading-relaxed text-gray-400 md:mx-0">
               Premium shopping experience with curated products, fast delivery,
               and secure checkout. Built for modern commerce.
             </p>
 
             {/* SOCIAL */}
-            <div className="flex gap-4 mt-5">
+            <div className="flex justify-center gap-5 mt-5 md:justify-start">
               <a href="#" className="hover:text-white transition">
                 <FaFacebookF />
               </a>
@@ -119,39 +119,37 @@ export default function Footer() {
               </a>
             </div>
           </div>
-
           {/* SHOP */}
-          <div>
+          <div className="order-2 md:order-none">
             <h3 className="text-white font-semibold mb-4">Shop</h3>
-            <ul className=" text-sm flex flex-col justify-self-start">
+            <ul className="flex flex-col gap-2 text-sm">
               {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => router.push(`/products?category=${cat.slug}`)}
-                  className={`py-1 rounded-full font-medium transition text-left`}
+                  className="w-full py-1.5 text-left text-sm leading-6 text-gray-400 transition hover:text-white"
                 >
                   {cat.name}
                 </button>
               ))}
             </ul>
           </div>
-
           {/* SUPPORT */}
-          <div>
+          <div className="col-span-2 order-4 md:col-span-1 md:order-none">
             <h3 className="text-white font-semibold mb-4">Support</h3>
 
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-2.5 text-sm">
               {[
                 { label: "Contact Us", href: "/contact", icon: "📩" },
                 { label: "Shipping", href: "/shipping", icon: "🚚" },
-                { label: "Returns", href: "/return-policy  ", icon: "🚚" },
+                { label: "Returns", href: "/return-policy", icon: "🚚" },
                 { label: "FAQs", href: "/faqs", icon: "❓" },
                 { label: "Track Order", href: "/track-order", icon: "📦" },
               ].map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="flex items-center gap-2 hover:text-white transition"
+                    className="inline-flex min-h-9 items-center gap-3 py-1 text-gray-400 transition hover:text-white"
                   >
                     <span>{item.icon}</span>
                     {item.label}
@@ -160,21 +158,19 @@ export default function Footer() {
               ))}
             </ul>
           </div>
-
           {/* COMPANY / LEGAL */}
-          <div>
+          <div className="order-3 md:order-none">
             <h3 className="text-white font-semibold mb-4">Company</h3>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2.5 text-sm">
               {[
                 { label: "About Us", href: "/about" },
-                // { label: "Careers", href: "/careers" },
                 { label: "Privacy Policy", href: "/privacy" },
                 { label: "Terms of Service", href: "/terms" },
               ].map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="hover:text-white transition"
+                    className="inline-flex min-h-9 items-center py-1 text-gray-400 transition hover:text-white"
                   >
                     {item.label}
                   </Link>
