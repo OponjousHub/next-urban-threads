@@ -302,18 +302,6 @@ export async function approveRefund(refundId: string) {
     },
   });
 
-  if (refund.cancellationRequestId) {
-    await prisma.cancellationRequest.updateMany({
-      where: {
-        id: refund.cancellationRequestId,
-        orderId: refund.orderId,
-        status: "REFUND_IN_PROGRESS",
-      },
-      data: {
-        status: "WITHDRAWN",
-      },
-    });
-  }
 
   // ----------------------------
   // Customer Timeline
