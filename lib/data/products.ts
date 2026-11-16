@@ -1,16 +1,47 @@
-import { prisma } from "@/utils/prisma";
+﻿import { prisma } from "@/utils/prisma";
 
 export async function getLowStockProducts(tenantId: string) {
-  return prisma.product.findMany({
+  const products = await prisma.product.findMany({
     where: {
       tenantId,
-      stock: { lt: 5 },
+      OR: [
+        {
+          stock: { lt: 5 },
+          variants: { none: {} },
+        },
+        {
+          variants: { some: {} },
+        },
+      ],
     },
-    take: 5,
     select: {
       id: true,
       name: true,
       stock: true,
+      variants: {
+        select: {
+          stock: true,
+        },
+      },
     },
   });
+
+  return products
+    .map((product) => {
+      const effectiveStock =
+        product.variants.length > 0
+          ? product.variants.reduce(
+              (total, variant) => total + variant.stock,
+              0,
+            )
+          : product.stock;
+
+      return {
+        id: product.id,
+        name: product.name,
+        stock: effectiveStock,
+      };
+    })
+    .filter((product) => product.stock < 5)
+    .slice(0, 5);
 }
