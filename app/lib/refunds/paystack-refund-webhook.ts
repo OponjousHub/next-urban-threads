@@ -58,6 +58,85 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
     : null;
 
   /*
+   * Fallback for newer RAYNTA refund references.
+   *
+   * Paystack may send its numeric refund ID while
+   * transactionRef contains our RAYNTA-generated reference.
+   *
+   * Identify the order using the original payment reference,
+   * then match the recorded gateway amount and currency.
+   *
+   * Only accept exactly one matching transaction.
+   */
+  if (!gatewayTransaction) {
+    const fallbackCandidates = await prisma.refundTransaction.findMany({
+      where: {
+        provider: "paystack",
+        refundRequest: {
+          is: {
+            order: {
+              is: {
+                OR: [
+                  { paymentReference: data.transaction_reference },
+                  { paymentTxRef: data.transaction_reference },
+                ],
+              },
+            },
+          },
+        },
+      },
+      include: {
+        refundRequest: {
+          include: {
+            order: true,
+            user: true,
+            items: true,
+          },
+        },
+      },
+    });
+
+    const webhookAmountMinor = Math.round(Number(data.amount));
+    const webhookCurrency = String(data.currency).toUpperCase();
+
+    const matchingCandidates = fallbackCandidates.filter((candidate) => {
+      if (candidate.amount === null) return false;
+
+      const recordedAmountMinor = Math.round(Number(candidate.amount) * 100);
+
+      const recordedCurrency = String(
+        candidate.currency ??
+          candidate.refundRequest.order.paymentCurrency ??
+          "",
+      ).toUpperCase();
+
+      return (
+        recordedAmountMinor === webhookAmountMinor &&
+        recordedCurrency === webhookCurrency
+      );
+    });
+
+    if (matchingCandidates.length === 1) {
+      gatewayTransaction = matchingCandidates[0];
+
+      console.warn(
+        "PAYSTACK REFUND WEBHOOK: Matched using original payment reference.",
+        {
+          refundRequestId: gatewayTransaction.refundRequestId,
+          transactionRef: gatewayTransaction.transactionRef,
+          refundGatewayId,
+        },
+      );
+    } else if (matchingCandidates.length > 1) {
+      console.error("PAYSTACK REFUND WEBHOOK: Ambiguous fallback match.", {
+        transactionReference: data.transaction_reference,
+        refundGatewayId,
+        matchingCount: matchingCandidates.length,
+      });
+    }
+  }
+
+  /*
    * Paystack may send pending events before
    * refund_reference becomes available.
    *
