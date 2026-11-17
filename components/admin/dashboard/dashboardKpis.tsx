@@ -77,7 +77,7 @@ export default function DashboardAnalytics() {
       />
 
       <KpiCard
-        title="Customers"
+        title="Purchasing Customers"
         value={kpiData?.customers ?? NaN}
         icon={<FiUsers />}
         change={kpiData?.customersChange}
