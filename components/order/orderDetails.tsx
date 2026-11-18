@@ -286,7 +286,7 @@ export default function OrderDetails({
     <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-5">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* HEADER */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start md:justify-between">
           {/* LEFT */}
           <div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
