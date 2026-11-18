@@ -223,7 +223,6 @@ async function refundFlutterwave(
 
     const requestBody = {
       amount,
-      comments: "Urban Threads customer refund",
     };
 
     console.log("========== FLUTTERWAVE REFUND REQUEST ==========");
