@@ -30,7 +30,7 @@ export async function GET() {
 
   const secret = speakeasy.generateSecret({
     length: 20,
-    name: "UrbanThreads",
+    name: tenant.name,
   });
 
   // Encrypt before saving (optional but recommended)

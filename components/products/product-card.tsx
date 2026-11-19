@@ -32,7 +32,7 @@ export default function ProductCard({
       className="group bg-white rounded-2xl overflow-hidden border hover:shadow-xl transition-all duration-300"
     >
       {/* IMAGE */}
-      <div className="relative w-full h-[360px] md:h-56 overflow-hidden">
+      <div className="relative w-full h-[330px] md:h-56 overflow-hidden">
         <Image
           src={imageUrl}
           alt={product.name}

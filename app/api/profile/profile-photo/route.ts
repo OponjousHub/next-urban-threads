@@ -8,10 +8,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "No file" }, { status: 400 });
   }
 
-  const result = await uploadImageToCloudinary(
-    file,
-    "urban-threads/avatars"
-  );
+  const result = await uploadImageToCloudinary(file, "urban-threads/avatars");
 
   return Response.json({
     url: result.secure_url,

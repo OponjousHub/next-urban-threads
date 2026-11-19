@@ -45,3 +45,8 @@ next-env.d.ts
 /app/generated/prisma
 
 .vercel
+
+backup.sql
+products.ts.bak
+paystack-refund-webhook.ts.backup
+refund.service.ts.backup

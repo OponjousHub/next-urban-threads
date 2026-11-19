@@ -280,7 +280,7 @@ async function refundFlutterwave(
      * Some Flutterwave responses indicate that the
      * transaction has already been completely refunded.
      *
-     * Treat that as successful from Urban Threads'
+     * Treat that as successful from Raynta'
      * perspective because the customer's money has
      * already been returned.
      */

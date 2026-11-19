@@ -21,10 +21,15 @@ import {
 
 import "./globals.css";
 
-export const metadata = {
-  title: "Urban Threads store",
-  description: "Selling trendy streetwear and accessories for men and women",
-};
+export async function generateMetadata() {
+  const storeInfo = await getDefaultTenant();
+
+  return {
+    title: storeInfo?.name || "Online Store",
+    description:
+      "Discover quality products and enjoy a seamless shopping experience.",
+  };
+}
 
 export default async function RootLayout({
   children,

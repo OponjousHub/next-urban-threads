@@ -68,7 +68,7 @@ export default async function StoresPage() {
         <h1 className="text-4xl font-bold">Browse Stores</h1>
 
         <p className="mt-3 text-gray-500">
-          Discover trusted vendors on Urban Threads.
+          Discover trusted vendors on Raynta.
         </p>
       </div>
 
