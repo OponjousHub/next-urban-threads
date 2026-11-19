@@ -815,6 +815,7 @@ export async function POST(req: NextRequest) {
       currency: order.paymentCurrency,
       reference: order.paymentReference,
       callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/order/${order.id}`,
+      storeName: tenant.name,
     });
 
     if (
