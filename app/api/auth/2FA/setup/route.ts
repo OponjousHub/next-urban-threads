@@ -60,7 +60,7 @@ export async function GET() {
   } else {
     const secret2 = speakeasy.generateSecret({
       length: 20,
-      name: "UrbanThreads",
+      name: tenant.name,
     });
 
     qrCode = await QRCode.toDataURL(secret2.otpauth_url!);

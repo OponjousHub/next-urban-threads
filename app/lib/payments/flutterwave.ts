@@ -21,12 +21,14 @@ export class FlutterwaveProvider implements PaymentProvider {
     currency,
     reference,
     callbackUrl,
+    storeName,
   }: {
     email: string;
     amount: number;
     currency: string;
     reference: string;
     callbackUrl: string;
+    storeName?: string;
   }) {
     const res = await axios.post(
       `${this.baseUrl}/payments`,
@@ -38,7 +40,7 @@ export class FlutterwaveProvider implements PaymentProvider {
         customer: { email },
         payment_options: "card,banktransfer",
         customizations: {
-          title: "Urban Threads",
+          title: storeName || "Online Store",
           description: "Order payment",
         },
       },
