@@ -34,6 +34,8 @@ yarn-error.log*
 .env*
 .env.local
 .env.*.local
+!.env.example
+"@ | Add-Content .gitignor
 
 # vercel
 .vercel
@@ -46,7 +48,14 @@ next-env.d.ts
 
 .vercel
 
+
+# Private database and code backups
+*.bak
+*.backup
 backup.sql
 products.ts.bak
 paystack-refund-webhook.ts.backup
 refund.service.ts.backup
+urban-threads-audit.txt
+
+backups/
