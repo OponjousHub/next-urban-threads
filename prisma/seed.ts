@@ -1,15 +1,19 @@
 import { prisma } from "@/utils/prisma";
 
 async function main() {
-  await prisma.tenant.create({
-    data: {
+  await prisma.tenant.upsert({
+    where: {
+      slug: "your-store",
+    },
+    update: {},
+    create: {
       slug: "your-store",
       isDefault: true,
       country: "NG",
     },
   });
 
-  console.log("Default tenant created successfully.");
+  console.log("Default tenant created or already exists.");
 }
 
 main()
