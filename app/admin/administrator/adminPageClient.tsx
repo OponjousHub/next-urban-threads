@@ -746,7 +746,10 @@ export default function AdministratorsPageClient() {
         {/* ----------------------------------------------------- */}
 
         {deleteModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4 py-6">
+          <div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4 py-6"
+            onClick={closeDeleteModal}
+          >
             <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
               {/* Delete modal header */}
 
