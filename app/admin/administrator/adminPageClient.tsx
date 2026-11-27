@@ -270,7 +270,45 @@ export default function AdministratorsPageClient() {
       return;
     }
 
-    // existing delete logic...
+    try {
+      setDeleting(true);
+
+      const res = await fetch(`/api/admin/administrators/${deleteModal.id}`, {
+        method: "DELETE",
+        credentials: "include",
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        appToast.error(
+          "Administrator deletion failed",
+          data?.message || "Unable to remove administrator.",
+        );
+        return;
+      }
+
+      appToast.success(
+        "Administrator removed",
+        "The administrator has been removed successfully.",
+      );
+
+      setAdministrators((prev) =>
+        prev.filter((admin) => admin.id !== deleteModal.id),
+      );
+
+      setDeleteModal(null);
+    } catch (error) {
+      console.error("DELETE ADMINISTRATOR ERROR:", error);
+
+      appToast.error(
+        "Administrator deletion failed",
+        "Something went wrong while removing the administrator.",
+      );
+    } finally {
+      setDeleting(false);
+    }
   }
 
   // ---------------------------------------------------------
