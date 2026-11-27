@@ -41,7 +41,7 @@ const initialForm: AdminForm = {
   email: "",
   password: "",
   phone: "",
-  country: "Nigeria",
+  country: "NG",
 };
 
 export default function AdministratorsPageClient() {
@@ -70,7 +70,6 @@ export default function AdministratorsPageClient() {
   // ---------------------------------------------------------
 
   async function loadAdministrators() {
-    
     try {
       setLoading(true);
 
@@ -664,7 +663,7 @@ export default function AdministratorsPageClient() {
                         className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-10 py-3 pr-10 text-sm text-gray-800 outline-none transition focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]/20 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
                       >
                         {countries.map((country) => (
-                          <option key={country.isoCode} value={country.name}>
+                          <option key={country.isoCode} value={country.isoCode}>
                             {country.name}
                           </option>
                         ))}
