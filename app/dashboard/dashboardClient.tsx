@@ -65,7 +65,7 @@ function DashboardClient({
   const previewItems = stats.recentOrders.slice(0, 2);
 
   return (
-    <div className="min-h-screen w-full max-w-7xl mx-auto bg-gray-50 px-4 py-5 sm:px-6 sm:py-6 lg:p-6">
+    <div className="min-h-screen w-full lg:w-[calc(100%-1rem)] bg-gray-50 mx-0 px-4 py-5 sm:px-6 sm:py-6 lg:ml-0 lg:mr-6 lg:p-6">
       {recoveryNotice && (
         <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg mb-4">
           ⚠️ You logged in using a recovery code. You have{" "}
