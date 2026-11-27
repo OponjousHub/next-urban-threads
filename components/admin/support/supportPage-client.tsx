@@ -224,7 +224,7 @@ export default function SupportPageClient({
         />
       </div>
       {/* RIGHT: PREVIEW PANEL */}
-      <div className="md:col-span-2 px-3 py-4 md:px-4 md:py-5">
+      <div className="px-3 py-4 md:px-4 md:py-5 lg:col-span-1">
         {!selected ? (
           <div className="text-gray-400 text-center mt-20">
             Select a message 👈
