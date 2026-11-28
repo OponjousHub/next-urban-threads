@@ -869,25 +869,6 @@ export async function processRefund(
     });
   }
 
-  if (
-    refund.order.paymentProvider === "PAYSTACK" &&
-    refund.order.paymentAmount != null
-  ) {
-    const paymentAmountCents = toCents(refund.order.paymentAmount);
-
-    if (
-      gatewayRefundAmount * 100 >
-      paymentAmountCents -
-        previouslyRefundedTotalCents *
-          100 *
-          (refund.order.exchangeRate ? Number(refund.order.exchangeRate) : 1)
-    ) {
-      throw new Error(
-        "Refund exceeds the remaining amount paid through Paystack.",
-      );
-    }
-  }
-
   /*
    * --------------------------------------------------
    * Mark refund as PROCESSING
@@ -901,6 +882,7 @@ export async function processRefund(
     },
     data: {
       status: "PROCESSING",
+      shippingIncluded: includeShipping,
     },
   });
 
