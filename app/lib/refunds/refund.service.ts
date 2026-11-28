@@ -30,11 +30,103 @@ export type RefundRequestInput = {
   }[];
 };
 
-function calculateRefundAmount(items: RefundRequestInput["items"]) {
-  return items.reduce(
-    (sum, item) => sum + item.priceAtPurchase * item.quantity,
-    0,
+function toCents(value: unknown): number {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount)) {
+    throw new Error("Invalid monetary amount.");
+  }
+
+  return Math.round(amount * 100);
+}
+
+function fromCents(value: number): number {
+  return value / 100;
+}
+
+function getRefundItemKey(productId: string, variantId?: string | null) {
+  return `${productId}:${variantId ?? ""}`;
+}
+
+function calculateNetRefundAmount(
+  orderItems: {
+    productId: string;
+    variantId: string | null;
+    quantity: number;
+    price: unknown;
+  }[],
+  selectedItems: RefundRequestInput["items"],
+  discountAmount: unknown,
+) {
+  if (!selectedItems.length) {
+    throw new Error("Select at least one item to refund.");
+  }
+
+  const orderItemMap = new Map(
+    orderItems.map((item) => [
+      getRefundItemKey(item.productId, item.variantId),
+      item,
+    ]),
   );
+
+  const selectedKeys = new Set<string>();
+
+  let merchandiseSubtotalCents = 0;
+  let selectedGrossCents = 0;
+
+  for (const item of orderItems) {
+    merchandiseSubtotalCents += toCents(item.price) * item.quantity;
+  }
+
+  if (merchandiseSubtotalCents <= 0) {
+    throw new Error("Invalid order merchandise subtotal.");
+  }
+
+  for (const selected of selectedItems) {
+    if (!Number.isInteger(selected.quantity) || selected.quantity <= 0) {
+      throw new Error("Invalid refund quantity.");
+    }
+
+    const key = getRefundItemKey(selected.productId, selected.variantId);
+
+    if (selectedKeys.has(key)) {
+      throw new Error("Duplicate refund items are not allowed.");
+    }
+
+    selectedKeys.add(key);
+
+    const orderItem = orderItemMap.get(key);
+
+    if (!orderItem) {
+      throw new Error(
+        "One or more selected products do not belong to this order.",
+      );
+    }
+
+    if (selected.quantity > orderItem.quantity) {
+      throw new Error("Refund quantity cannot exceed the quantity purchased.");
+    }
+
+    selectedGrossCents += toCents(orderItem.price) * selected.quantity;
+  }
+
+  const discountCents = toCents(discountAmount);
+
+  if (discountCents < 0 || discountCents > merchandiseSubtotalCents) {
+    throw new Error("Invalid order discount.");
+  }
+
+  const allocatedDiscountCents = Math.round(
+    (selectedGrossCents * discountCents) / merchandiseSubtotalCents,
+  );
+
+  const netRefundCents = selectedGrossCents - allocatedDiscountCents;
+
+  if (netRefundCents <= 0) {
+    throw new Error("The selected items have no refundable value.");
+  }
+
+  return fromCents(netRefundCents);
 }
 
 export async function submitRefundRequest(data: RefundRequestInput) {
@@ -96,10 +188,60 @@ export async function submitRefundRequest(data: RefundRequestInput) {
     throw new Error("A refund request already exists for this order.");
   }
 
-  const requestedAmount = calculateRefundAmount(data.items);
+  const requestedAmount = calculateNetRefundAmount(
+    order.items,
+    data.items,
+    order.discountAmount,
+  );
 
   // Create refund request + items
   const refund = await prisma.$transaction(async (tx) => {
+    // Check quantities already refunded successfully.
+    const previousRefunds = await tx.refundRequest.findMany({
+      where: {
+        orderId: order.id,
+        tenantId: tenant.id,
+        status: "REFUNDED",
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    const refundedQuantities = new Map<string, number>();
+
+    for (const previousRefund of previousRefunds) {
+      for (const item of previousRefund.items) {
+        const key = getRefundItemKey(item.productId, item.variantId);
+
+        refundedQuantities.set(
+          key,
+          (refundedQuantities.get(key) ?? 0) + item.quantity,
+        );
+      }
+    }
+
+    for (const selected of data.items) {
+      const key = getRefundItemKey(selected.productId, selected.variantId);
+
+      const alreadyRefunded = refundedQuantities.get(key) ?? 0;
+
+      const orderedItem = order.items.find(
+        (item) =>
+          item.productId === selected.productId &&
+          (item.variantId ?? null) === (selected.variantId ?? null),
+      );
+
+      if (
+        !orderedItem ||
+        alreadyRefunded + selected.quantity > orderedItem.quantity
+      ) {
+        throw new Error(
+          "The requested quantity includes items that have already been refunded.",
+        );
+      }
+    }
+
     const cancellationRequestId = hasActiveCancellationRequest
       ? order.cancellationRequest!.id
       : null;
@@ -162,12 +304,24 @@ export async function submitRefundRequest(data: RefundRequestInput) {
         storeMode: order.storeMode,
 
         items: {
-          create: data.items.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId ?? null,
-            quantity: item.quantity,
-            priceAtPurchase: Number(item.priceAtPurchase),
-          })),
+          create: data.items.map((item) => {
+            const orderItem = order.items.find(
+              (orderedItem) =>
+                orderedItem.productId === item.productId &&
+                (orderedItem.variantId ?? null) === (item.variantId ?? null),
+            );
+
+            if (!orderItem) {
+              throw new Error("Selected product was not found in the order.");
+            }
+
+            return {
+              productId: item.productId,
+              variantId: item.variantId ?? null,
+              quantity: item.quantity,
+              priceAtPurchase: Number(orderItem.price),
+            };
+          }),
         },
       },
 
@@ -301,7 +455,6 @@ export async function approveRefund(refundId: string) {
       refundStatus: "APPROVED",
     },
   });
-
 
   // ----------------------------
   // Customer Timeline
@@ -469,13 +622,141 @@ export async function processRefund(
   );
 
   const shippingCost = Number(refund.order.shippingCost ?? 0);
-
-  const refundAmount =
-    refundOption === "ITEMS_PLUS_SHIPPING"
-      ? approvedAmount + shippingCost
-      : approvedAmount;
-
   const orderTotal = Number(refund.order.totalAmount);
+  const merchandiseSubtotal = refund.order.items.reduce(
+    (sum, item) => sum + toCents(item.price) * item.quantity,
+    0,
+  );
+
+  const discountCents = toCents(refund.order.discountAmount ?? 0);
+
+  if (!Number.isFinite(approvedAmount) || approvedAmount <= 0) {
+    throw new Error("Invalid approved refund amount.");
+  }
+
+  if (
+    !Number.isFinite(shippingCost) ||
+    shippingCost < 0 ||
+    !Number.isFinite(orderTotal) ||
+    orderTotal <= 0
+  ) {
+    throw new Error(
+      "Invalid order amounts. Refund cannot be processed safely.",
+    );
+  }
+
+  if (discountCents < 0 || discountCents > merchandiseSubtotal) {
+    throw new Error("Invalid order discount.");
+  }
+
+  // Recalculate the requested refund using database prices.
+  const calculatedItemRefund = calculateNetRefundAmount(
+    refund.order.items,
+    refund.items.map((item) => ({
+      productId: item.productId,
+      variantId: item.variantId,
+      quantity: item.quantity,
+      priceAtPurchase: item.priceAtPurchase,
+    })),
+    refund.order.discountAmount,
+  );
+
+  if (toCents(approvedAmount) !== toCents(calculatedItemRefund)) {
+    throw new Error(
+      "The approved refund amount does not match the verified item refund amount.",
+    );
+  }
+
+  // Retrieve previously completed refunds.
+  const previousRefunds = await prisma.refundRequest.findMany({
+    where: {
+      orderId: refund.orderId,
+      tenantId: tenant.id,
+      status: "REFUNDED",
+      id: { not: refund.id },
+    },
+    include: {
+      items: true,
+    },
+  });
+
+  let previouslyRefundedItemsCents = 0;
+  let previouslyRefundedShippingCents = 0;
+
+  const previouslyRefundedQuantities = new Map<string, number>();
+
+  for (const previous of previousRefunds) {
+    const processedCents = toCents(previous.processedAmount ?? 0);
+    const shippingCents = toCents(previous.shippingRefunded ?? 0);
+
+    previouslyRefundedShippingCents += shippingCents;
+    previouslyRefundedItemsCents += Math.max(0, processedCents - shippingCents);
+
+    for (const item of previous.items) {
+      const key = getRefundItemKey(item.productId, item.variantId);
+
+      previouslyRefundedQuantities.set(
+        key,
+        (previouslyRefundedQuantities.get(key) ?? 0) + item.quantity,
+      );
+    }
+  }
+
+  // Ensure previously refunded quantities are not refunded again.
+  for (const item of refund.items) {
+    const key = getRefundItemKey(item.productId, item.variantId);
+
+    const alreadyRefunded = previouslyRefundedQuantities.get(key) ?? 0;
+
+    const orderedItem = refund.order.items.find(
+      (orderedItem) =>
+        orderedItem.productId === item.productId &&
+        (orderedItem.variantId ?? null) === (item.variantId ?? null),
+    );
+
+    if (
+      !orderedItem ||
+      alreadyRefunded + item.quantity > orderedItem.quantity
+    ) {
+      throw new Error(
+        "This refund includes quantities that have already been refunded.",
+      );
+    }
+  }
+
+  const currentItemRefundCents = toCents(approvedAmount);
+  const shippingCostCents = toCents(shippingCost);
+  const orderTotalCents = toCents(orderTotal);
+
+  const remainingMerchandiseCents =
+    merchandiseSubtotal - discountCents - previouslyRefundedItemsCents;
+
+  if (currentItemRefundCents > remainingMerchandiseCents) {
+    throw new Error(
+      "The approved refund exceeds the remaining refundable merchandise amount.",
+    );
+  }
+
+  const includeShipping = refundOption === "ITEMS_PLUS_SHIPPING";
+
+  if (includeShipping && previouslyRefundedShippingCents > 0) {
+    throw new Error("Shipping has already been refunded for this order.");
+  }
+
+  const shippingRefundCents = includeShipping ? shippingCostCents : 0;
+
+  const previouslyRefundedTotalCents =
+    previouslyRefundedItemsCents + previouslyRefundedShippingCents;
+
+  const refundAmountCents = currentItemRefundCents + shippingRefundCents;
+
+  if (previouslyRefundedTotalCents + refundAmountCents > orderTotalCents) {
+    throw new Error(
+      "The cumulative refund cannot exceed the amount charged for the order.",
+    );
+  }
+
+  const refundAmount = fromCents(refundAmountCents);
 
   if (!Number.isFinite(orderTotal) || orderTotal <= 0) {
     throw new Error("Invalid order total. Refund cannot be processed safely.");
@@ -504,8 +785,10 @@ export async function processRefund(
    */
   let gatewayRefundAmount = refundAmount;
 
+  // Paystack currency conversion and validation
   if (refund.order.paymentProvider === "PAYSTACK") {
     const orderCurrency = String(refund.order.currency ?? "").toUpperCase();
+
     const paymentCurrency = String(
       refund.order.paymentCurrency ?? "",
     ).toUpperCase();
@@ -516,40 +799,93 @@ export async function processRefund(
       );
     }
 
-    if (orderCurrency !== paymentCurrency) {
-      const paymentAmount = Number(refund.order.paymentAmount);
-      const exchangeRate = Number(refund.order.exchangeRate);
+    const paymentAmount = Number(refund.order.paymentAmount);
 
-      if (
-        !Number.isFinite(paymentAmount) ||
-        paymentAmount <= 0 ||
-        !Number.isFinite(exchangeRate) ||
-        exchangeRate <= 0
-      ) {
-        throw new Error(
-          "Missing or invalid payment conversion details. Refund cannot be processed safely.",
-        );
-      }
-
-      const isFullRefund =
-        Math.round(refundAmount * 100) >= Math.round(orderTotal * 100);
-
-      gatewayRefundAmount = isFullRefund
-        ? paymentAmount
-        : Math.round(refundAmount * exchangeRate * 100) / 100;
+    if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+      throw new Error(
+        "Missing or invalid payment amount. Refund cannot be processed safely.",
+      );
     }
 
-    if (!Number.isFinite(gatewayRefundAmount) || gatewayRefundAmount <= 0) {
-      throw new Error("Invalid payment gateway refund amount.");
+    let exchangeRate = 1;
+
+    if (orderCurrency !== paymentCurrency) {
+      exchangeRate = Number(refund.order.exchangeRate);
+
+      if (!Number.isFinite(exchangeRate) || exchangeRate <= 0) {
+        throw new Error(
+          "Missing or invalid exchange rate. Refund cannot be processed safely.",
+        );
+      }
+    }
+
+    const paymentAmountCents = toCents(paymentAmount);
+
+    // Convert previous refunds from order currency
+    // into the payment currency.
+    const previouslyRefundedPaymentCents = Math.round(
+      previouslyRefundedTotalCents * exchangeRate,
+    );
+
+    const remainingPaymentCents =
+      paymentAmountCents - previouslyRefundedPaymentCents;
+
+    if (remainingPaymentCents <= 0) {
+      throw new Error("The payment has already been fully refunded.");
+    }
+
+    // Determine whether this refund completes the order refund.
+    const isFullRefund =
+      previouslyRefundedTotalCents + refundAmountCents === orderTotalCents;
+
+    // For a final refund, use the exact remaining gateway balance
+    // to avoid rounding discrepancies.
+    gatewayRefundAmount = isFullRefund
+      ? fromCents(remainingPaymentCents)
+      : fromCents(Math.round(refundAmountCents * exchangeRate));
+
+    const gatewayRefundCents = toCents(gatewayRefundAmount);
+
+    if (
+      !Number.isFinite(gatewayRefundAmount) ||
+      gatewayRefundCents <= 0 ||
+      gatewayRefundCents > remainingPaymentCents
+    ) {
+      throw new Error(
+        "Refund exceeds the remaining amount paid through Paystack.",
+      );
     }
 
     console.log("REFUND CURRENCY DIAGNOSTIC:", {
       refundId: refund.id,
       orderCurrency,
       paymentCurrency,
+      exchangeRate,
+      paymentAmount,
+      previouslyRefundedPaymentCents,
+      remainingPaymentCents,
       orderRefundAmount: refundAmount,
       gatewayRefundAmount,
     });
+  }
+
+  if (
+    refund.order.paymentProvider === "PAYSTACK" &&
+    refund.order.paymentAmount != null
+  ) {
+    const paymentAmountCents = toCents(refund.order.paymentAmount);
+
+    if (
+      gatewayRefundAmount * 100 >
+      paymentAmountCents -
+        previouslyRefundedTotalCents *
+          100 *
+          (refund.order.exchangeRate ? Number(refund.order.exchangeRate) : 1)
+    ) {
+      throw new Error(
+        "Refund exceeds the remaining amount paid through Paystack.",
+      );
+    }
   }
 
   /*
