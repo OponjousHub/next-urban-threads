@@ -19,7 +19,11 @@ type PaystackRefundEvent = {
 export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
   const data = event.data;
 
-  if (!data.transaction_reference || !Number.isFinite(Number(data.amount))) {
+  if (
+    !data.transaction_reference ||
+    !Number.isSafeInteger(Number(data.amount)) ||
+    Number(data.amount) <= 0
+  ) {
     throw new Error("Invalid Paystack refund webhook payload.");
   }
 
@@ -243,20 +247,14 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
     /*
      * Paystack reports amounts in minor currency units.
      */
-    const processedGatewayAmount = Number(data.amount) / 100;
-    const processedGatewayAmountMinor = Math.round(
-      processedGatewayAmount * 100,
-    );
+    const processedGatewayAmountMinor = Number(data.amount);
+    const processedGatewayAmount = processedGatewayAmountMinor / 100;
 
     const approvedAmount = Number(
       refund.approvedAmount ?? refund.requestedAmount,
     );
 
     const shippingCost = Number(refund.order.shippingCost ?? 0);
-    const orderTotal = Number(refund.order.totalAmount);
-
-    const paymentAmount = Number(refund.order.paymentAmount);
-    const exchangeRate = Number(refund.order.exchangeRate);
 
     if (
       !Number.isFinite(processedGatewayAmount) ||
@@ -270,93 +268,41 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
     }
 
     /*
-     * Convert order-currency amounts into gateway minor units.
-     * Full cross-currency refunds use the exact recorded
-     * payment amount instead of recalculating the conversion.
-     */
-    const toGatewayMinorUnits = (amount: number): number => {
-      const isFullOrderRefund =
-        Math.round(amount * 100) >= Math.round(orderTotal * 100);
-
-      if (orderCurrency !== paymentCurrency && isFullOrderRefund) {
-        if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
-          throw new Error(
-            "Missing payment amount for full Paystack refund reconciliation.",
-          );
-        }
-
-        return Math.round(paymentAmount * 100);
-      }
-
-      if (orderCurrency === paymentCurrency) {
-        return Math.round(amount * 100);
-      }
-
-      if (!Number.isFinite(exchangeRate) || exchangeRate <= 0) {
-        throw new Error(
-          "Missing exchange rate for Paystack refund reconciliation.",
-        );
-      }
-
-      return Math.round(amount * exchangeRate * 100);
-    };
-
-    const expectedItemsOnlyMinor = toGatewayMinorUnits(approvedAmount);
-
-    const expectedItemsAndShippingMinor = toGatewayMinorUnits(
-      approvedAmount + shippingCost,
-    );
-
-    /*
-     * Compare against the exact gateway amount saved when
-     * the refund was submitted.
+     * Verify against the exact gateway amount recorded
+     * when processRefund submitted this refund.
      */
     const recordedGatewayAmountMinor =
       gatewayTransaction.amount !== null
         ? Math.round(Number(gatewayTransaction.amount) * 100)
         : null;
 
-    if (recordedGatewayAmountMinor !== null) {
-      if (processedGatewayAmountMinor !== recordedGatewayAmountMinor) {
-        console.error("PAYSTACK REFUND WEBHOOK: AMOUNT MISMATCH", {
-          refundId: refund.id,
-          refundGatewayId,
-          processedGatewayAmount,
-          expectedGatewayAmount: recordedGatewayAmountMinor / 100,
-          paymentCurrency,
-        });
-
-        throw new Error("Paystack refund amount mismatch.");
-      }
-    } else if (
-      processedGatewayAmountMinor !== expectedItemsOnlyMinor &&
-      processedGatewayAmountMinor !== expectedItemsAndShippingMinor
+    if (
+      recordedGatewayAmountMinor === null ||
+      !Number.isFinite(recordedGatewayAmountMinor) ||
+      recordedGatewayAmountMinor <= 0
     ) {
       throw new Error(
-        "Paystack refund does not match the approved order-currency amount.",
+        "Missing or invalid recorded Paystack refund amount. Manual reconciliation is required.",
       );
     }
 
-    const shippingIncluded = refund.shippingIncluded;
-
-    const expectedGatewayAmountMinor = toGatewayMinorUnits(
-      approvedAmount + (shippingIncluded ? shippingCost : 0),
-    );
-
-    if (processedGatewayAmountMinor !== expectedGatewayAmountMinor) {
+    if (processedGatewayAmountMinor !== recordedGatewayAmountMinor) {
       console.error("PAYSTACK REFUND WEBHOOK: AMOUNT MISMATCH", {
         refundId: refund.id,
         refundGatewayId,
         processedGatewayAmountMinor,
-        expectedGatewayAmountMinor,
-        shippingIncluded,
+        recordedGatewayAmountMinor,
         paymentCurrency,
       });
 
-      throw new Error(
-        "Paystack refund does not match the recorded refund decision.",
-      );
+      throw new Error("Paystack refund amount mismatch.");
     }
+
+    /*
+     * Use the shipping decision saved when the refund
+     * was submitted for processing.
+     */
+    const shippingIncluded = refund.shippingIncluded;
 
     const shippingRefunded = shippingIncluded ? shippingCost : 0;
 
