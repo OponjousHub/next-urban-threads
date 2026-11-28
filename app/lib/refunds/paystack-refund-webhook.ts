@@ -337,19 +337,26 @@ export async function handlePaystackRefundWebhook(event: PaystackRefundEvent) {
       );
     }
 
-    const itemsOnlyMatches =
-      processedGatewayAmountMinor === expectedItemsOnlyMinor;
+    const shippingIncluded = refund.shippingIncluded;
 
-    const itemsAndShippingMatches =
-      processedGatewayAmountMinor === expectedItemsAndShippingMinor;
+    const expectedGatewayAmountMinor = toGatewayMinorUnits(
+      approvedAmount + (shippingIncluded ? shippingCost : 0),
+    );
 
-    if (!itemsOnlyMatches && !itemsAndShippingMatches) {
+    if (processedGatewayAmountMinor !== expectedGatewayAmountMinor) {
+      console.error("PAYSTACK REFUND WEBHOOK: AMOUNT MISMATCH", {
+        refundId: refund.id,
+        refundGatewayId,
+        processedGatewayAmountMinor,
+        expectedGatewayAmountMinor,
+        shippingIncluded,
+        paymentCurrency,
+      });
+
       throw new Error(
-        "Paystack refund does not match the approved order-currency amount.",
+        "Paystack refund does not match the recorded refund decision.",
       );
     }
-
-    const shippingIncluded = !itemsOnlyMatches && itemsAndShippingMatches;
 
     const shippingRefunded = shippingIncluded ? shippingCost : 0;
 
