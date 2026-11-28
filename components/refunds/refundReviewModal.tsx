@@ -162,6 +162,20 @@ export default function RefundReviewModal({
 
   const shippingCost = Number(refund?.order?.shippingCost ?? 0);
 
+  const actualShippingRefund = Number(refund?.shippingRefunded ?? 0);
+
+  const actualProcessedAmount = Number(
+    refund?.processedAmount ??
+      refund?.approvedAmount ??
+      refund?.requestedAmount ??
+      0,
+  );
+
+  const actualItemRefund = Math.max(
+    0,
+    actualProcessedAmount - actualShippingRefund,
+  );
+
   const totalRefundAmount =
     refundOption === "ITEMS_PLUS_SHIPPING"
       ? itemRefundAmount + shippingCost

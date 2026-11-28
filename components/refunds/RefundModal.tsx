@@ -56,10 +56,29 @@ export default function RefundModal({ order, onClose, onSuccess }: Props) {
     }));
   }
 
-  const totalRefund = Object.values(selectedItems).reduce(
-    (sum: number, item: any) => sum + item.priceAtPurchase * item.quantity,
+  const merchandiseSubtotalCents = order.items.reduce(
+    (sum: number, item: any) =>
+      sum + Math.round(Number(item.price) * 100) * item.quantity,
     0,
   );
+
+  const selectedGrossCents = Object.values(selectedItems).reduce(
+    (sum: number, item: any) =>
+      sum + Math.round(Number(item.priceAtPurchase) * 100) * item.quantity,
+    0,
+  );
+
+  const discountCents = Math.round(Number(order.discountAmount ?? 0) * 100);
+
+  const allocatedDiscountCents =
+    merchandiseSubtotalCents > 0
+      ? Math.round(
+          (selectedGrossCents * discountCents) / merchandiseSubtotalCents,
+        )
+      : 0;
+
+  const totalRefund =
+    Math.max(0, selectedGrossCents - allocatedDiscountCents) / 100;
 
   async function handleSubmit() {
     if (!reason) {
